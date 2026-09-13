@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="fa-IR" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مدار | پیش‌نمایش ۳۱ صفحه اپلیکیشن</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ===================== توکن‌ها ===================== */
+:root{
+  --ink:#070B1A; --ink2:#131A3B; --text:#16203C; --muted:#6B7695; --soft:#98A1BD;
+  --line:#E7EAF3; --bg:#F4F6FB; --card:#FFFFFF;
+  --brand:#5B5BF6; --brand2:#4340D8; --brand05:#EEEEFE;
+  --cyan:#22D3EE; --amber:#F9A825; --green:#10B981; --pink:#F0509A; --violet:#8B5CF6; --red:#EF4444;
+  --g-brand:linear-gradient(135deg,#5B5BF6,#22D3EE);
+  --g-warm:linear-gradient(135deg,#F9A825,#F0509A);
+  --g-night:radial-gradient(120% 120% at 80% 0%,#2A2F80,#131A3B 45%,#070B1A);
+  --sh:0 1px 2px rgba(12,20,45,.05),0 10px 26px rgba(12,20,45,.07);
+  --sh2:0 18px 44px rgba(12,20,45,.14);
+  --r:18px; --r2:24px; --rf:999px;
+  --font:"Vazirmatn","IRANSansX",Tahoma,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:var(--font);background:#0C1124;color:var(--text);direction:rtl}
+img{max-width:100%;display:block}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+
+/* ===================== چیدمان صفحه میزبان ===================== */
+.host{min-height:100vh;padding:22px 16px 60px}
+.host-head{max-width:1240px;margin:0 auto 22px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;color:#fff}
+.host-brand{display:flex;align-items:center;gap:11px;margin-inline-end:auto}
+.host-brand b{font-size:1.18rem;font-weight:900;letter-spacing:-.02em;display:block;line-height:1.3}
+.host-brand small{color:#9AA4CE;font-size:.78rem}
+.seg{display:flex;gap:4px;padding:4px;background:rgba(255,255,255,.08);border-radius:var(--rf)}
+.seg button{padding:9px 18px;border-radius:var(--rf);font-size:.88rem;font-weight:700;color:#B9C1E6}
+.seg button.on{background:var(--g-brand);color:#fff;box-shadow:0 10px 24px rgba(91,91,246,.4)}
+.host-note{max-width:1240px;margin:0 auto 18px;color:#8F99C4;font-size:.85rem;line-height:1.9}
+
+/* ===================== قاب موبایل ===================== */
+.stage{display:flex;justify-content:center;padding-block:10px}
+.device{
+  width:390px;height:844px;padding:12px;border-radius:52px;flex:0 0 auto;
+  background:linear-gradient(165deg,#333C6E,#0C1229);
+  box-shadow:0 50px 90px rgba(0,0,0,.55),inset 0 0 0 1.5px rgba(255,255,255,.14);
+  position:relative;
+}
+.device::after{content:"";position:absolute;bottom:20px;inset-inline:0;margin-inline:auto;width:126px;height:5px;border-radius:var(--rf);background:rgba(255,255,255,.5);z-index:9}
+.app{position:relative;width:100%;height:100%;border-radius:42px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column}
+
+/* نوار وضعیت */
+.status{display:flex;align-items:center;justify-content:space-between;padding:14px 26px 6px;font-size:.76rem;font-weight:700;color:var(--ink);flex:0 0 auto;z-index:5}
+.status.on-dark{color:#fff}
+.status span{letter-spacing:.02em}
+
+/* نوار عنوان */
+.appbar{display:flex;align-items:center;gap:10px;padding:6px 18px 12px;flex:0 0 auto;z-index:4}
+.appbar h1{margin:0;font-size:1.05rem;font-weight:800;flex:1;line-height:1.5}
+.appbar .ic{width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:var(--card);box-shadow:var(--sh);font-size:1rem}
+.appbar.on-dark h1{color:#fff}
+.appbar.on-dark .ic{background:rgba(255,255,255,.12);color:#fff;box-shadow:none}
+
+/* بدنه اسکرول */
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 18px 20px;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+.scroll.flush{padding-inline:0}
+.scroll.dark{background:var(--g-night)}
+
+/* تب‌بار */
+.tabbar{flex:0 0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:8px 10px 24px;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+.tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;border-radius:14px;font-size:.64rem;font-weight:700;color:var(--soft)}
+.tabbar button i{font-size:1.18rem;font-style:normal;line-height:1}
+.tabbar button.on{color:var(--brand2)}
+.tabbar button.on i{filter:drop-shadow(0 4px 8px rgba(91,91,246,.45))}
+
+/* ===================== اجزای رابط ===================== */
+.h2{font-size:1rem;font-weight:800;margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+.h2 .more{margin-inline-start:auto;font-size:.74rem;font-weight:700;color:var(--brand2)}
+.muted{color:var(--muted);font-size:.82rem;line-height:1.9;margin:0}
+.tiny{font-size:.72rem;color:var(--soft)}
+.card{background:var(--card);border-radius:var(--r2);padding:16px;box-shadow:var(--sh)}
+.card+.card{margin-top:12px}
+.card h3{margin:0 0 5px;font-size:.95rem;font-weight:800;line-height:1.6}
+.card p{margin:0;font-size:.8rem;color:var(--muted);line-height:1.85}
+.row{display:flex;align-items:center;gap:10px}
+.row.between{justify-content:space-between}
+.grid{display:grid;gap:10px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.stack>*+*{margin-top:12px}
+
+.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:var(--rf);background:var(--brand05);color:var(--brand2);font-size:.7rem;font-weight:700;white-space:nowrap}
+.chip.amber{background:#FFF4DC;color:#A96C00}
+.chip.green{background:#E2FAF0;color:#067A54}
+.chip.pink{background:#FEE9F2;color:#C23271}
+.chip.cyan{background:#E0F8FD;color:#0B7C93}
+.chip.gray{background:#F0F2F8;color:var(--muted)}
+.chip.red{background:#FEECEC;color:#C02626}
+.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips .chip{padding:8px 14px;font-size:.76rem;background:var(--card);color:var(--muted);box-shadow:var(--sh)}
+.chips .chip.on{background:var(--g-brand);color:#fff;box-shadow:0 8px 18px rgba(91,91,246,.35)}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px;border-radius:var(--rf);font-weight:800;font-size:.92rem;background:var(--g-brand);color:#fff;box-shadow:0 12px 26px rgba(91,91,246,.35)}
+.btn.sec{background:var(--card);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn.ghost{background:rgba(255,255,255,.12);color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.3)}
+.btn.warm{background:var(--g-warm);color:#3A1D00;box-shadow:0 12px 26px rgba(249,168,37,.35)}
+.btn.sm{padding:10px 16px;width:auto;font-size:.78rem;box-shadow:none}
+.btn.block+.btn{margin-top:10px}
+
+.ico{width:44px;height:44px;flex:0 0 44px;border-radius:15px;display:grid;place-items:center;background:var(--brand05);color:var(--brand2);font-size:1.25rem}
+.ico.amber{background:#FFF4DC}.ico.green{background:#E2FAF0}.ico.pink{background:#FEE9F2}
+.ico.cyan{background:#E0F8FD}.ico.violet{background:#F1EBFE}.ico.gray{background:#F0F2F8}
+
+.bar{height:8px;border-radius:var(--rf);background:#EDEFF7;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:var(--rf);background:var(--g-brand)}
+.bar.warm i{background:var(--g-warm)}
+.bar.dark{background:rgba(255,255,255,.18)}
+
+.list{background:var(--card);border-radius:var(--r2);box-shadow:var(--sh);overflow:hidden}
+.li{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.li:last-child{border-bottom:0}
+.li b{font-size:.87rem;font-weight:700;display:block;line-height:1.6}
+.li small{font-size:.73rem;color:var(--muted);display:block;line-height:1.7}
+.li .end{margin-inline-start:auto;font-size:.78rem;color:var(--soft);font-weight:700;text-align:end}
+
+.field{margin-bottom:12px}
+.field label{display:block;font-size:.76rem;font-weight:700;color:var(--muted);margin-bottom:6px}
+.input{display:flex;align-items:center;gap:9px;padding:13px 15px;border-radius:16px;background:var(--card);box-shadow:inset 0 0 0 1.5px var(--line);font-size:.85rem;color:var(--ink)}
+.input.ph{color:var(--soft)}
+.input .end{margin-inline-start:auto;color:var(--soft);font-size:.9rem}
+.toggle{width:44px;height:26px;border-radius:var(--rf);background:#DFE3EE;position:relative;flex:0 0 44px}
+.toggle::after{content:"";position:absolute;top:3px;inset-inline-end:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.2)}
+.toggle.on{background:var(--brand)}
+.toggle.on::after{inset-inline-end:21px}
+
+.hero-card{border-radius:var(--r2);padding:18px;background:var(--g-night);color:#fff;box-shadow:var(--sh2)}
+.hero-card .lbl{font-size:.72rem;color:#A6B0DC}
+.note{display:flex;gap:9px;padding:12px 14px;border-radius:16px;background:#EAF7F1;color:#0B6B4C;font-size:.75rem;line-height:1.85}
+.note.warn{background:#FFF6E6;color:#8A5A00}
+.note.info{background:var(--brand05);color:var(--brand2)}
+
+.ring{width:112px;height:112px;border-radius:50%;display:grid;place-items:center;margin-inline:auto;
+  background:conic-gradient(var(--cyan) 0 68%,rgba(255,255,255,.18) 68% 100%);position:relative}
+.ring::before{content:"";position:absolute;inset:9px;border-radius:50%;background:var(--ink2)}
+.ring div{position:relative;text-align:center;line-height:1.3}
+.ring b{display:block;font-size:1.5rem;font-weight:900;color:#fff}
+.ring small{font-size:.68rem;color:#A6B0DC}
+
+.avatar{width:52px;height:52px;flex:0 0 52px;border-radius:18px;background:var(--g-brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:1rem}
+.avatar.lg{width:78px;height:78px;flex:0 0 78px;border-radius:26px;font-size:1.5rem}
+
+.badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center}
+.badge{background:var(--card);border-radius:18px;padding:12px 6px;box-shadow:var(--sh);font-size:.62rem;font-weight:700;color:var(--muted)}
+.badge span{display:block;font-size:1.45rem;margin-bottom:4px}
+.badge.off{opacity:.42;filter:grayscale(1)}
+
+.thumb{aspect-ratio:1;border-radius:18px;display:grid;place-items:center;font-size:2rem;color:#fff;background:var(--g-brand);position:relative;overflow:hidden}
+.thumb.b{background:linear-gradient(135deg,#F9A825,#F0509A)}
+.thumb.c{background:linear-gradient(135deg,#10B981,#22D3EE)}
+.thumb.d{background:linear-gradient(135deg,#8B5CF6,#5B5BF6)}
+.thumb .cap{position:absolute;inset-inline:0;bottom:0;padding:18px 10px 8px;background:linear-gradient(to top,rgba(7,11,26,.9),transparent);font-size:.66rem;font-weight:700;text-align:start}
+.thumb .cap small{display:block;font-weight:500;opacity:.8;font-size:.6rem}
+
+.cover{height:150px;border-radius:var(--r2);background:var(--g-brand);display:grid;place-items:center;font-size:3rem;color:#fff;margin-bottom:14px}
+.cover.night{background:var(--g-night)}
+
+.step{display:grid;grid-template-columns:36px 1fr;gap:12px;position:relative;padding-bottom:16px}
+.step::before{content:"";position:absolute;top:38px;bottom:0;inset-inline-start:17px;width:2px;background:var(--line)}
+.step:last-child{padding-bottom:0}
+.step:last-child::before{display:none}
+.step .n{width:36px;height:36px;border-radius:13px;display:grid;place-items:center;font-weight:800;font-size:.82rem;background:#EDEFF7;color:var(--soft);z-index:1}
+.step.done .n{background:var(--green);color:#fff}
+.step.now .n{background:var(--g-brand);color:#fff;box-shadow:0 8px 18px rgba(91,91,246,.4)}
+.step b{font-size:.87rem;display:block;line-height:1.6}
+.step p{margin:3px 0 0;font-size:.74rem;color:var(--muted);line-height:1.8}
+
+.bubble{max-width:78%;padding:11px 14px;border-radius:18px;font-size:.8rem;line-height:1.9;box-shadow:var(--sh)}
+.bubble.me{margin-inline-start:auto;background:var(--g-brand);color:#fff;border-end-end-radius:6px}
+.bubble.them{background:var(--card);border-end-start-radius:6px}
+.bubble time{display:block;font-size:.62rem;opacity:.65;margin-top:4px}
+
+.qr{width:168px;height:168px;margin:0 auto;padding:10px;background:#fff;border-radius:20px;box-shadow:var(--sh);display:grid;grid-template-columns:repeat(21,1fr);grid-template-rows:repeat(21,1fr)}
+.qr i{background:var(--ink);border-radius:1px}
+
+.dots{display:flex;gap:6px;justify-content:center;margin-top:16px}
+.dots i{width:7px;height:7px;border-radius:var(--rf);background:#D5DAE8}
+.dots i.on{width:20px;background:var(--brand)}
+
+.splash{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px 28px;background:var(--g-night);color:#fff;text-align:center;position:relative;overflow:hidden}
+.splash::before,.splash::after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(155,231,245,.18)}
+.splash::before{width:520px;height:520px;top:-190px;inset-inline-start:-160px}
+.splash::after{width:680px;height:680px;bottom:-430px;inset-inline-end:-200px;border-color:rgba(91,91,246,.3)}
+.splash>*{position:relative;z-index:2}
+.splash h1{font-size:2.3rem;margin:0;font-weight:900;letter-spacing:-.02em}
+.splash p{margin:0;color:#AEB8E4;font-size:.88rem;line-height:2}
+
+/* ===================== گالری پیش‌نمایش ===================== */
+.gallery{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:26px}
+.frame{display:flex;flex-direction:column;align-items:center;gap:10px}
+.frame .holder{width:254px;height:556px;position:relative}
+.frame .device{position:absolute;top:0;inset-inline-start:0;transform:scale(.65);transform-origin:top right}
+.frame .lbl{color:#C3CAEB;font-size:.8rem;font-weight:700;text-align:center;line-height:1.7}
+.frame .lbl small{display:block;color:#7E88B4;font-weight:500;font-size:.72rem}
+[dir=rtl] .frame .device{inset-inline-start:auto;inset-inline-end:0}
+
+@media(max-width:460px){
+  .device{width:340px;height:740px;border-radius:46px}
+  .host{padding:14px 8px 40px}
+}
+</style>
+</head>
+<body>
+
+<div class="host">
+  <div class="host-head">
+    <div class="host-brand">
+      <svg width="44" height="44" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <rect width="48" height="48" rx="14" fill="url(#lg)"/>
+        <ellipse cx="24" cy="24" rx="15" ry="7.5" transform="rotate(-28 24 24)" stroke="#fff" stroke-opacity=".85" stroke-width="2"/>
+        <circle cx="24" cy="24" r="5" fill="#fff"/><circle cx="37" cy="15" r="3.2" fill="#F9A825"/>
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#5B5BF6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs>
+      </svg>
+      <span><b>مدار</b><small>پروتوتایپ اپلیکیشن باشگاه رشد دانش‌آموزان</small></span>
+    </div>
+    <div class="seg">
+      <button id="mode-app" class="on">اپ کلیک‌شدنی</button>
+      <button id="mode-gallery">همه صفحه‌ها (پیش‌نمایش)</button>
+    </div>
+  </div>
+
+  <p class="host-note" id="hostNote">روی کارت‌ها، تب‌ها و دکمه‌ها بزنید — همه صفحه‌ها به هم وصل‌اند. برای دیدن ۳۱ صفحه کنار هم، «همه صفحه‌ها» را انتخاب کنید.</p>
+
+  <div class="stage" id="stage">
+    <div class="device"><div class="app" id="app"></div></div>
+  </div>
+
+  <div class="gallery" id="gallery" style="display:none"></div>
+</div>
+
+<script>
+/* =====================================================================
+   مدار — پروتوتایپ اپ دانش‌آموزی
+   ۳۱ صفحه، هم‌راستا با سند محصول: مسابقه، مهارت، مسیر رشد، پرونده رشد،
+   باشگاه امتیازات، رویداد و QR، مشاوره کنترل‌شده، ایمنی نوجوان.
+   ===================================================================== */
+
+/* ---------- ابزارهای کوچک ---------- */
+const go = id => `data-go="${id}"`;
+const bar = (p, cls = '') => `<div class="bar ${cls}"><i style="width:${p}%"></i></div>`;
+const chips = (arr, onIdx = 0) => `<div class="chips">${arr.map((c, i) =>
+  `<span class="chip ${i === onIdx ? 'on' : ''}">${c}</span>`).join('')}</div>`;
+const field = (label, value, ph = false, end = '') =>
+  `<div class="field"><label>${label}</label><div class="input ${ph ? 'ph' : ''}">${value}${end ? `<span class="end">${end}</span>` : ''}</div></div>`;
+
+function qr() {
+  let cells = '';
+  for (let i = 0; i < 441; i++) {
+    const r = Math.floor(i / 21), c = i % 21;
+    const finder = (r < 7 && c < 7) || (r < 7 && c > 13) || (r > 13 && c < 7);
+    const edge = finder && (r % 6 === 0 || c % 6 === 0 || (r > 1 && r < 5 && c > 1 && c < 5) || (r > 15 && r < 19 && c > 1 && c < 5) || (r > 1 && r < 5 && c > 15 && c < 19));
+    const on = finder ? edge : ((r * 7 + c * 13 + (r * c) % 5) % 3 === 0);
+    cells += on ? '<i></i>' : '<i style="background:transparent"></i>';
+  }
+  return `<div class="qr">${cells}</div>`;
+}
+
+/* ---------- داده‌های مشترک ---------- */
+const TABS = [
+  { id: 'home', icon: '🏠', label: 'خانه' },
+  { id: 'contests', icon: '🏆', label: 'مسابقه' },
+  { id: 'path', icon: '🧭', label: 'مسیر' },
+  { id: 'rewards', icon: '🎁', label: 'جوایز' },
+  { id: 'dossier', icon: '👤', label: 'پرونده' }
+];
+
+/* =====================================================================
+   تعریف صفحه‌ها
+   هر صفحه: { n: شماره, title: نام, chrome: 'full'|'bar'|'none',
+   dark: bool, tab: تب فعال, bar: {back, title, action}, body: html }
+   ===================================================================== */
+const S = {};
+
+/* ---------- ۱. اسپلش ---------- */
+S.splash = {
+  n: 1, title: 'اسپلش / خوش‌آمدگویی', chrome: 'none', dark: true,
+  body: `<div class="splash">
+    <svg width="96" height="96" viewBox="0 0 48 48" fill="none">
+      <rect width="48" height="48" rx="14" fill="url(#lg2)"/>
+      <ellipse cx="24" cy="24" rx="15" ry="7.5" transform="rotate(-28 24 24)" stroke="#fff" stroke-opacity=".9" stroke-width="2"/>
+      <circle cx="24" cy="24" r="5" fill="#fff"/><circle cx="37" cy="15" r="3.2" fill="#F9A825"/>
+      <defs><linearGradient id="lg2" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop stop-color="#5B5BF6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs>
+    </svg>
+    <h1>مدار</h1>
+    <p>باشگاه رشد دانش‌آموزان<br>مسابقه · مهارت · مسیر رشد · مشاوره</p>
+    <div style="width:100%;margin-top:26px">
+      <button class="btn" ${go('onboarding')}>ورود به باشگاه رشد</button>
+      <button class="btn ghost" style="margin-top:10px" ${go('signup')}>حساب دارم، وارد می‌شوم</button>
+    </div>
+    <p class="tiny" style="color:#7F8AB8;margin-top:8px">فاز اول: دانش‌آموزان پسر متوسطه اول آبادان و خرمشهر</p>
+  </div>`
+};
+
+/* ---------- ۲. آنبوردینگ ---------- */
+S.onboarding = {
+  n: 2, title: 'معرفی کوتاه / آنبوردینگ', chrome: 'bar', dark: true,
+  bar: { back: 'splash', title: '', action: 'رد کردن' },
+  body: `<div class="scroll dark" style="padding-top:10px">
+    <div style="text-align:center;padding:14px 6px 22px">
+      <div style="font-size:4rem">🚀</div>
+      <h2 style="color:#fff;font-size:1.35rem;margin:10px 0 6px">هر هفته یک قدم جلوتر</h2>
+      <p class="muted" style="color:#A8B2DE">مدار جای مسابقه، یادگیری مهارت و ساختن پرونده رشد توست.</p>
+    </div>
+    ${[['🏆', 'مسابقه هفتگی', 'علمی، هوش، رسانه، قرآن، ورزشی و فناوری — با امتیاز و جایزه واقعی'],
+      ['🎓', 'آکادمی مهارت', 'تدوین موبایلی، عکاسی، هوش مصنوعی، فن بیان و برنامه‌نویسی'],
+      ['🧭', 'مسیر رشد', 'سطح ۱ ← سطح ۲ ← پروژه ← عضویت در تیم'],
+      ['🗣️', 'مشاوره امن', 'تحصیلی، فرهنگی، خانواده و شغلی — خصوصی و کنترل‌شده'],
+      ['📁', 'پرونده رشد', 'هرچه انجام می‌دهی، در کارنامه واقعی‌ات ثبت می‌شود']]
+      .map(([i, t, d]) => `<div class="card" style="background:rgba(255,255,255,.07);box-shadow:none">
+        <div class="row"><div class="ico" style="background:rgba(255,255,255,.12);color:#fff">${i}</div>
+        <div><h3 style="color:#fff">${t}</h3><p style="color:#A8B2DE">${d}</p></div></div></div>`).join('')}
+    <div class="dots" style="margin:20px 0"><i></i><i class="on"></i><i></i></div>
+    <button class="btn" ${go('signup')}>شروع ثبت‌نام</button>
+  </div>`
+};
+
+/* ---------- ۳. ثبت‌نام اولیه ---------- */
+S.signup = {
+  n: 3, title: 'ثبت‌نام اولیه', chrome: 'bar',
+  bar: { back: 'onboarding', title: 'ساخت حساب' },
+  body: `<div class="scroll">
+    <p class="muted" style="margin-bottom:14px">اطلاعات پایه‌ای که برای عضویت در باشگاه لازم است. نشانی دقیق منزل از تو پرسیده نمی‌شود.</p>
+    <div class="grid g2">
+      ${field('نام', 'محمدرضا')}${field('نام خانوادگی', 'رضایی')}
+    </div>
+    <div class="grid g2">
+      ${field('تاریخ تولد', '۱۳۸۹/۰۴/۱۲', false, '📅')}${field('پایه', 'هشتم', false, '▾')}
+    </div>
+    ${field('مدرسه', 'دبیرستان نمونه شهید بهشتی', false, '▾')}
+    <div class="grid g2">
+      ${field('کلاس', '۸/۳')}${field('شهر', 'آبادان', false, '▾')}
+    </div>
+    ${field('محدوده / محله', 'ناحیه ۱ — نزدیک مدرسه', false, '▾')}
+    ${field('شماره موبایل', '۰۹۱۲۰۰۰۰۰۰۰', false, '📱')}
+    ${field('کد ملی', '۱۸۹۰۰۰۰۰۰۰', false, '🔒')}
+    <div class="note info" style="margin:6px 0 14px">🛡️ کد ملی فقط برای احراز هویت استفاده می‌شود، رمزگذاری می‌شود و دسترسی به آن محدود و ثبت‌شده است.</div>
+    <button class="btn" ${go('verify')}>ادامه و دریافت کد تأیید</button>
+  </div>`
+};
+
+/* ---------- ۴. احراز هویت و رضایت والد ---------- */
+S.verify = {
+  n: 4, title: 'احراز هویت و رضایت والد', chrome: 'bar',
+  bar: { back: 'signup', title: 'تأیید و رضایت والد' },
+  body: `<div class="scroll">
+    <div class="card">
+      <h3>کد تأیید را وارد کن</h3>
+      <p>کد ۵ رقمی به شماره ۰۹۱۲۰۰۰۰۰۰۰ ارسال شد.</p>
+      <div class="grid g4" style="grid-template-columns:repeat(5,1fr);margin-top:14px">
+        ${['۴', '۸', '۲', '', ''].map(d => `<div class="input" style="justify-content:center;font-weight:800;font-size:1.1rem;padding:14px 0">${d || '·'}</div>`).join('')}
+      </div>
+      <p class="tiny" style="text-align:center;margin-top:10px">ارسال دوباره کد تا ۰۱:۲۴ دیگر</p>
+    </div>
+
+    <div class="card">
+      <h3>شماره والد / سرپرست</h3>
+      <p>برای فعال‌شدن حساب، تأیید والد لازم است.</p>
+      <div style="margin-top:10px">${field('شماره موبایل والد', '۰۹۱۶۰۰۰۰۰۰۰', false, '👨‍👦')}</div>
+      <div class="row" style="gap:10px;align-items:flex-start">
+        <div style="width:22px;height:22px;border-radius:7px;background:var(--green);color:#fff;display:grid;place-items:center;font-size:.7rem;flex:0 0 22px">✓</div>
+        <p>رضایت‌نامه اولیه را خوانده‌ام و با عضویت فرزندم در باشگاه مدار موافقم.</p>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:12px">🛡️ حساب تو ایمن‌سازی شده است: هیچ کاربری نمی‌تواند تو را جست‌وجو کند یا پیام خصوصی بفرستد. ارتباط فقط با مربی و مشاور تأییدشده و قابل نظارت سازمانی است.</div>
+    <button class="btn" style="margin-top:14px" ${go('interests')}>تأیید و ادامه</button>
+  </div>`
+};
+
+/* ---------- ۵. تکمیل پروفایل و علایق ---------- */
+S.interests = {
+  n: 5, title: 'تکمیل پروفایل و علایق', chrome: 'bar',
+  bar: { back: 'verify', title: 'علایق و مهارت‌ها' },
+  body: `<div class="scroll">
+    <p class="muted">هرچه دقیق‌تر انتخاب کنی، مسابقه‌ها، دوره‌ها و فراخوان‌های متناسب‌تری می‌بینی.</p>
+    <div class="h2">به چه چیزهایی علاقه داری؟</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      ${[['🎬 رسانه', 1], ['💻 فناوری', 1], ['⚽ ورزش', 0], ['🎨 هنر', 0], ['📚 کتاب', 1], ['🎤 سخنوری', 0], ['🔬 علمی', 0], ['🤝 کار داوطلبانه', 0], ['📖 قرآن', 0], ['🛠️ برق و مکانیک', 0]]
+        .map(([t, on]) => `<span class="chip ${on ? '' : 'gray'}" style="padding:9px 14px;font-size:.78rem">${t}</span>`).join('')}
+    </div>
+    <div class="h2">چه مهارتی داری؟</div>
+    <div class="list">
+      ${[['تدوین ویدئو', 'سطح ۲'], ['عکاسی با موبایل', 'سطح ۱'], ['کار با کامپیوتر', 'سطح ۱']]
+        .map(([t, l]) => `<div class="li"><div class="ico cyan">🎯</div><div><b>${t}</b><small>خوداظهاری — بعداً با دوره تأیید می‌شود</small></div><span class="end">${l}</span></div>`).join('')}
+    </div>
+    <div class="h2">دوست داری چه چیزی یاد بگیری؟</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      ${['هوش مصنوعی', 'طراحی پوستر', 'خبرنگاری', 'برنامه‌نویسی', 'فن بیان', 'مهارت زندگی']
+        .map(t => `<span class="chip gray" style="padding:9px 14px;font-size:.78rem">${t}</span>`).join('')}
+    </div>
+    <div class="h2">مسیر پیشنهادی برای تو</div>
+    <div class="card" style="background:var(--g-night);color:#fff">
+      <div class="row"><div class="ico" style="background:rgba(255,255,255,.14);color:#fff">🎬</div>
+      <div><h3 style="color:#fff">مسیر رسانه</h3><p style="color:#A8B2DE">با علاقه‌های تو بیشترین همخوانی را دارد</p></div></div>
+    </div>
+    <button class="btn" style="margin-top:14px" ${go('home')}>ورود به باشگاه</button>
+  </div>`
+};
+
+/* ---------- ۶. خانه دانش‌آموز ---------- */
+S.home = {
+  n: 6, title: 'خانه دانش‌آموز', chrome: 'full', tab: 'home',
+  bar: { custom: `<div class="row" style="width:100%">
+    <div class="avatar">م ر</div>
+    <div style="flex:1"><small class="tiny">سلام، خوش آمدی</small><h1 style="font-size:.98rem;margin:0">محمدرضا · پایه هشتم</h1></div>
+    <button class="ic" ${go('notifications')}>🔔</button>
+  </div>` },
+  body: `<div class="scroll">
+    <div class="hero-card">
+      <div class="row between"><span class="lbl">سطح ۴ — فعال</span><b style="font-size:1.05rem">۲٬۴۵۰ XP</b></div>
+      <div style="margin:12px 0 8px">${bar(68, 'warm dark')}</div>
+      <div class="row between" style="font-size:.7rem;color:#A6B0DC">
+        <span>۳۰۰ XP تا سطح «ماهر»</span><span>🏅 ۷ نشان · 🏫 رتبه ۳ مدرسه</span>
+      </div>
+    </div>
+
+    <div class="grid g4" style="margin-top:12px">
+      ${[['🏆', 'مسابقه', 'contests'], ['🎓', 'مهارت', 'academy'], ['🎁', 'جوایز', 'rewards'], ['🗣️', 'مشاوره', 'counseling']]
+        .map(([i, t, d]) => `<button class="card" style="padding:12px 4px;text-align:center" ${go(d)}>
+          <div style="font-size:1.5rem">${i}</div><small class="tiny" style="font-weight:700">${t}</small></button>`).join('')}
+    </div>
+
+    <div class="h2">مأموریت این هفته <span class="more" ${go('missions')}>همه مأموریت‌ها</span></div>
+    <button class="card" style="width:100%;text-align:start" ${go('missions')}>
+      <div class="row between" style="margin-bottom:8px">
+        <span class="chip amber">۵۰۰ XP</span><span class="tiny">۳ روز مانده</span>
+      </div>
+      <h3>یک کلیپ ۶۰ ثانیه‌ای از محله‌ات بساز</h3>
+      <p style="margin-bottom:10px">موضوع این هفته: «محله من». با موبایل ضبط و ارسال کن.</p>
+      ${bar(45)}
+      <p class="tiny" style="margin-top:6px">پیشرفت ۴۵٪ — فیلم‌برداری انجام شده، تدوین مانده</p>
+    </button>
+
+    <div class="h2">مسابقه فعال <span class="more" ${go('contests')}>همه مسابقات</span></div>
+    <button class="card" style="width:100%;text-align:start" ${go('contest')}>
+      <div class="row"><div class="ico">🧠</div>
+        <div style="flex:1"><h3>مسابقه هوش و ریاضی هفته</h3><p>۱۵ سؤال · ۲۰ دقیقه · ۴۸۲ شرکت‌کننده</p></div>
+        <span class="chip cyan">۲۵۰ XP</span></div>
+    </button>
+
+    <div class="h2">دوره پیشنهادی برای مسیر تو</div>
+    <button class="card" style="width:100%;text-align:start" ${go('course')}>
+      <div class="row"><div class="ico pink">🎥</div>
+        <div style="flex:1"><h3>تدوین موبایلی — سطح ۲</h3><p>۴ جلسه · ۹۰ دقیقه · مربی تیم رسانه</p></div>
+        <span class="chip">۳۵۰ XP</span></div>
+    </button>
+
+    <div class="h2">رویداد نزدیک <span class="more" ${go('events')}>تقویم</span></div>
+    <button class="card" style="width:100%;text-align:start" ${go('event')}>
+      <div class="row">
+        <div class="ico green" style="flex-direction:column;font-size:.72rem;line-height:1.2;font-weight:800">۲۲<span style="font-size:.6rem">مهر</span></div>
+        <div style="flex:1"><h3>جشن بزرگ ۱۰۰۰ دانش‌آموز آبادان</h3><p>سالن اجتماعات مرکزی · ۵۰۰ XP حضور</p></div>
+      </div>
+    </button>
+
+    <div class="note info" style="margin:14px 0 6px">📣 ۳۰۰ امتیاز تا جایزه بعدی‌ات مانده — یک مسابقه هفتگی کافی است.</div>
+  </div>`
+};
+
+/* ---------- ۷. باشگاه امتیازات ---------- */
+S.rewards = {
+  n: 7, title: 'باشگاه امتیازات', chrome: 'full', tab: 'rewards',
+  bar: { title: 'باشگاه امتیازات', action: '🎫' },
+  body: `<div class="scroll">
+    <div class="hero-card">
+      <span class="lbl">مجموع امتیاز تو</span>
+      <div class="row between" style="margin-top:4px"><b style="font-size:1.9rem">۲٬۷۰۰</b><span class="chip amber">🔥 ۵ هفته فعال</span></div>
+      <div style="margin:12px 0 8px">${bar(78, 'warm dark')}</div>
+      <p class="tiny" style="color:#A6B0DC;margin:0">۳۰۰ امتیاز تا «سهمیه اردوی یک‌روزه»</p>
+    </div>
+
+    ${chips(['همه جوایز', 'کتاب', 'اردو و بلیت', 'تجهیزات', 'اعتبار'], 0)}
+
+    <div class="grid g2" style="margin-top:12px">
+      ${[['📚', 'بن کتاب', '۱٬۲۰۰', 1], ['🎟️', 'بلیت جشن مدار', '۸۰۰', 1], ['⛺', 'اردوی یک‌روزه', '۳٬۰۰۰', 0], ['🎒', 'بسته لوازم‌التحریر', '۱٬۵۰۰', 0], ['🎧', 'تجهیزات تولید محتوا', '۵٬۰۰۰', 0], ['💳', 'اعتبار خرید', '۴٬۰۰۰', 0]]
+        .map(([i, t, c, can]) => `<div class="card" style="text-align:center;padding:14px 10px">
+          <div style="font-size:1.9rem">${i}</div>
+          <h3 style="margin:6px 0 4px;font-size:.85rem">${t}</h3>
+          <span class="chip ${can ? 'amber' : 'gray'}">${c} امتیاز</span>
+          <button class="btn ${can ? '' : 'sec'} sm" style="width:100%;margin-top:10px">${can ? 'دریافت جایزه' : 'امتیاز کافی نیست'}</button>
+        </div>`).join('')}
+    </div>
+
+    <div class="note warn" style="margin-top:14px">👨‍👦 جوایز نقدی و اعتبار خرید با تأیید والد یا سرپرست و از طریق حساب ایشان پرداخت می‌شود.</div>
+
+    <div class="h2">امتیازها از کجا آمد؟</div>
+    <div class="list">
+      ${[['مسابقه رسانه هفته گذشته', '+۵۰۰', 'green'], ['دوره عکاسی سطح ۱', '+۲۰۰', 'green'], ['حضور در کارگاه تدوین', '+۳۰۰', 'green'], ['دریافت بن کتاب', '−۱٬۲۰۰', 'red']]
+        .map(([t, v, c]) => `<div class="li"><div class="ico gray">🪙</div><div><b>${t}</b><small>هفته گذشته</small></div><span class="end" style="color:${c === 'red' ? 'var(--red)' : 'var(--green)'}">${v}</span></div>`).join('')}
+    </div>
+  </div>`
+};
+
+/* ---------- ۸. پروفایل سطح و نشان‌ها ---------- */
+S.level = {
+  n: 8, title: 'سطح و نشان‌ها', chrome: 'bar',
+  bar: { back: 'dossier', title: 'سطح و نشان‌ها' },
+  body: `<div class="scroll">
+    <div class="hero-card" style="text-align:center">
+      <div class="ring"><div><b>۴</b><small>سطح فعلی</small></div></div>
+      <h3 style="color:#fff;margin:12px 0 2px">فعال</h3>
+      <p class="tiny" style="color:#A6B0DC">۲٬۴۵۰ XP · ۳۰۰ XP تا «ماهر»</p>
+    </div>
+
+    <div class="h2">مسیر سطح‌ها</div>
+    <div class="card">
+      ${[['تازه‌وارد', '۰ XP', 'done'], ['فعال', '۲٬۰۰۰ XP', 'now'], ['ماهر', '۲٬۷۵۰ XP', ''], ['برگزیده', '۵٬۰۰۰ XP', ''], ['نخبه', '۸٬۰۰۰ XP', ''], ['همیار مدار', 'دعوت مربی', '']]
+        .map(([t, x, st]) => `<div class="step ${st}">
+          <div class="n">${st === 'done' ? '✓' : st === 'now' ? '★' : '🔒'}</div>
+          <div><b>${t}</b><p>${x}${st === 'now' ? ' — سطح فعلی تو' : ''}</p></div></div>`).join('')}
+    </div>
+
+    <div class="h2">نشان‌های من</div>
+    <div class="badge-grid">
+      ${[['🏅', 'خبرنگار', 1], ['🎬', 'تدوینگر ۲', 1], ['📚', 'کتاب‌خوان', 1], ['🤝', 'داوطلب', 1], ['⚡', 'سریع‌ترین', 1], ['🔥', '۵ هفته فعال', 1], ['🎯', 'دقیق', 1], ['🏆', 'قهرمان ماه', 0], ['🛰️', 'نخبه', 0], ['🎤', 'مجری', 0], ['💻', 'برنامه‌نویس', 0], ['⭐', 'همیار', 0]]
+        .map(([i, t, on]) => `<div class="badge ${on ? '' : 'off'}"><span>${i}</span>${t}</div>`).join('')}
+    </div>
+
+    <div class="h2">رتبه‌ها</div>
+    <div class="list">
+      <div class="li"><div class="ico amber">🥉</div><div><b>رتبه ۳ در مدرسه</b><small>از ۲۴۷ دانش‌آموز فعال</small></div><span class="end">۲٬۴۵۰ XP</span></div>
+      <div class="li"><div class="ico cyan">🏙️</div><div><b>رتبه ۴۱ در آبادان</b><small>هفته گذشته: ۵۸</small></div><span class="end">▲ ۱۷</span></div>
+      <div class="li"><div class="ico green">⭐</div><div><b>وضعیت همیار شدن</b><small>۲ شرط باقی مانده: سطح ۶ و ۲ پروژه تأییدشده</small></div><span class="end">۵۰٪</span></div>
+    </div>
+  </div>`
+};
+
+/* ---------- ۹. لیست مسابقات ---------- */
+S.contests = {
+  n: 9, title: 'مسابقات هفتگی', chrome: 'full', tab: 'contests',
+  bar: { title: 'مسابقات هفتگی', action: '🔍' },
+  body: `<div class="scroll">
+    ${chips(['همه', 'علمی', 'هوش', 'عمومی', 'فرهنگی', 'ورزشی', 'رسانه', 'قرآن', 'فناوری', 'مناسبتی'], 0)}
+    <div class="note info" style="margin:12px 0">⏳ مسابقات این هفته تا پایان پنجشنبه باز است. هر شرکت، امتیاز دارد.</div>
+    ${[['🧠', 'مسابقه هوش و ریاضی هفته', 'هوش', '۱۵ سؤال · ۲۰ دقیقه', '۲۵۰ XP', '۴۸۲ نفر', 'تا پنجشنبه'],
+      ['📖', 'مسابقه قرآن و مفاهیم', 'قرآن', 'حفظ، مفاهیم و روان‌خوانی', '۳۰۰ XP', '۳۱۰ نفر', 'تا جمعه'],
+      ['🎬', 'چالش کلیپ ۶۰ ثانیه‌ای', 'رسانه', 'موضوع: محله من', '۵۰۰ XP + جایزه', '۱۹۶ نفر', 'تا شنبه'],
+      ['🌍', 'اطلاعات عمومی', 'عمومی', 'جغرافیا، تاریخ، خوزستان', '۲۰۰ XP', '۵۲۷ نفر', 'تا چهارشنبه'],
+      ['⚽', 'دانش ورزشی', 'ورزشی', 'سؤال + پیش‌بینی لیگ مدارس', '۲۰۰ XP', '۳۹۸ نفر', 'تا دوشنبه'],
+      ['🤖', 'مسابقه فناوری و AI', 'فناوری', 'کاربردهای درست هوش مصنوعی', '۳۵۰ XP', '۱۴۷ نفر', 'تا پنجشنبه']]
+      .map(([i, t, c, d, xp, n, dl]) => `<button class="card" style="width:100%;text-align:start" ${go('contest')}>
+        <div class="row"><div class="ico">${i}</div>
+          <div style="flex:1"><div class="row" style="gap:6px;margin-bottom:3px"><span class="chip cyan">${c}</span><span class="tiny">${dl}</span></div>
+          <h3>${t}</h3><p>${d}</p></div></div>
+        <div class="row between" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)">
+          <span class="tiny">👥 ${n}</span><span class="chip amber">⚡ ${xp}</span></div>
+      </button>`).join('')}
+  </div>`
+};
+
+/* ---------- ۱۰. جزئیات مسابقه ---------- */
+S.contest = {
+  n: 10, title: 'جزئیات مسابقه', chrome: 'bar',
+  bar: { back: 'contests', title: 'مسابقه هوش و ریاضی', action: '↗' },
+  body: `<div class="scroll">
+    <div class="cover night">🧠</div>
+    <div class="row" style="gap:6px;margin-bottom:8px"><span class="chip cyan">هوش</span><span class="chip gray">پایه هفتم تا نهم</span></div>
+    <h2 style="margin:0 0 8px;font-size:1.15rem">مسابقه هوش و ریاضی هفته</h2>
+    <p class="muted">۱۵ سؤال چهارگزینه‌ای در سه سطح سختی. هر سؤال زمان جداگانه دارد و پاسخ اشتباه امتیاز منفی ندارد. نتیجه بلافاصله بعد از پایان نمایش داده می‌شود.</p>
+
+    <div class="grid g2" style="margin-top:14px">
+      ${[['⏱️', 'زمان', '۲۰ دقیقه'], ['📅', 'مهلت', 'تا پنجشنبه ۲۲'], ['👥', 'شرکت‌کننده', '۴۸۲ نفر'], ['⚡', 'امتیاز', '۲۵۰ XP + ۱۵۰ امتیاز']]
+        .map(([i, t, v]) => `<div class="card" style="padding:13px"><div class="tiny">${i} ${t}</div><b style="font-size:.9rem">${v}</b></div>`).join('')}
+    </div>
+
+    <div class="h2">جایزه</div>
+    <div class="card"><div class="row"><div class="ico amber">🎁</div>
+      <div><h3>سه نفر اول: بن کتاب + نشان «دقیق»</h3><p>همه شرکت‌کنندگان ۲۵۰ XP می‌گیرند.</p></div></div></div>
+
+    <div class="h2">قوانین</div>
+    <div class="list">
+      ${['هر دانش‌آموز فقط یک بار می‌تواند شرکت کند', 'در حین مسابقه امکان خروج و بازگشت نیست', 'نتیجه در پرونده رشد تو ثبت می‌شود']
+        .map(t => `<div class="li"><div class="ico gray">•</div><div><b style="font-weight:600;font-size:.82rem">${t}</b></div></div>`).join('')}
+    </div>
+    <button class="btn" style="margin-top:16px" ${go('result')}>شروع مسابقه</button>
+  </div>`
+};
+
+/* ---------- ۱۱. مأموریت‌ها و چالش‌ها ---------- */
+S.missions = {
+  n: 11, title: 'مأموریت‌ها و چالش‌ها', chrome: 'bar',
+  bar: { back: 'home', title: 'مأموریت‌ها' },
+  body: `<div class="scroll">
+    ${chips(['هفتگی', 'روزانه', 'گروهی', 'انجام‌شده'], 0)}
+    <div class="h2">مأموریت اصلی هفته</div>
+    <div class="card" style="background:var(--g-night);color:#fff">
+      <div class="row between"><span class="chip amber">۵۰۰ XP</span><span class="tiny" style="color:#A6B0DC">۳ روز مانده</span></div>
+      <h3 style="color:#fff;margin:10px 0 6px">یک کلیپ ۶۰ ثانیه‌ای از محله‌ات بساز</h3>
+      <p style="color:#A6B0DC">موضوع: «محله من». کلیپ را در بخش نمایشگاه ارسال کن تا بعد از تأیید مدیر منتشر شود.</p>
+      <div style="margin:12px 0 8px">${bar(45, 'dark')}</div>
+      <div class="row between tiny" style="color:#A6B0DC"><span>۲ گام از ۴ گام</span><span>۴۵٪</span></div>
+      <button class="btn" style="margin-top:12px" ${go('submitwork')}>ارسال اثر</button>
+    </div>
+
+    <div class="h2">مأموریت‌های دیگر</div>
+    ${[['📚', 'کتاب‌خوانی', 'یک کتاب ۱۰۰ صفحه‌ای این ماه + گزارش کوتاه', 60, '۳۰۰ XP'],
+      ['🤝', 'کار داوطلبانه', 'یک کار خیر گروهی با سه هم‌کلاسی', 20, '۴۰۰ XP'],
+      ['🧩', 'حل مسئله روزانه', 'یک معمای ریاضی در روز، ۷ روز پشت‌سرهم', 85, '۱۵۰ XP'],
+      ['🏃', 'چالش حرکت', '۱۴ روز فعالیت بدنی روزانه', 35, '۲۰۰ XP']]
+      .map(([i, t, d, p, xp]) => `<div class="card">
+        <div class="row"><div class="ico green">${i}</div>
+          <div style="flex:1"><h3>${t}</h3><p>${d}</p></div><span class="chip">${xp}</span></div>
+        <div style="margin-top:10px">${bar(p)}</div>
+        <p class="tiny" style="margin-top:5px">پیشرفت ${p}٪</p>
+      </div>`).join('')}
+  </div>`
+};
+
+/* ---------- ۱۲. نتیجه مسابقه ---------- */
+S.result = {
+  n: 12, title: 'نتیجه مسابقه و پاداش', chrome: 'bar', dark: true,
+  bar: { back: 'contests', title: '', action: '✕' },
+  body: `<div class="scroll dark" style="text-align:center">
+    <div style="font-size:3.6rem;margin-top:10px">🎉</div>
+    <h2 style="color:#fff;margin:6px 0">آفرین محمدرضا!</h2>
+    <p class="muted" style="color:#A8B2DE">۱۳ پاسخ درست از ۱۵ سؤال — عملکرد عالی</p>
+
+    <div class="ring" style="margin:20px auto;background:conic-gradient(#F9A825 0 87%,rgba(255,255,255,.18) 87% 100%)">
+      <div><b>۸۷٪</b><small>دقت پاسخ</small></div>
+    </div>
+
+    <div class="grid g3" style="margin-top:6px">
+      ${[['⚡', '۲۵۰', 'XP'], ['🪙', '۱۵۰', 'امتیاز'], ['🏅', '۱', 'نشان جدید']]
+        .map(([i, v, t]) => `<div class="card" style="background:rgba(255,255,255,.08);box-shadow:none;padding:14px 6px">
+          <div style="font-size:1.4rem">${i}</div><b style="color:#fff;font-size:1.1rem;display:block">${v}</b><small class="tiny" style="color:#A6B0DC">${t}</small></div>`).join('')}
+    </div>
+
+    <div class="card" style="background:rgba(255,255,255,.08);box-shadow:none;margin-top:12px;text-align:start">
+      <div class="row"><div class="ico amber">🥉</div>
+        <div><h3 style="color:#fff">رتبه ۸ از ۴۸۲ شرکت‌کننده</h3><p style="color:#A8B2DE">۲ پله بالاتر از مسابقه قبلی — در پرونده رشدت ثبت شد.</p></div></div>
+    </div>
+
+    <div class="note info" style="margin-top:14px;text-align:start">🎯 با ۳۰۰ XP دیگر به سطح «ماهر» می‌رسی و مسیر رسانه سطح ۳ برایت باز می‌شود.</div>
+    <button class="btn" style="margin-top:14px" ${go('path')}>ادامه مسیر رشد</button>
+    <button class="btn ghost" style="margin-top:10px" ${go('contests')}>مسابقه بعدی</button>
+  </div>`
+};
+
+/* ---------- ۱۳. آکادمی مهارت ---------- */
+S.academy = {
+  n: 13, title: 'آکادمی مهارت', chrome: 'bar',
+  bar: { back: 'home', title: 'آکادمی مهارت', action: '🔍' },
+  body: `<div class="scroll">
+    ${chips(['همه', 'رسانه', 'فناوری', 'هنر', 'سخنوری', 'مهارت زندگی'], 0)}
+    <div class="h2">ادامه بده</div>
+    <button class="card" style="width:100%;text-align:start" ${go('course')}>
+      <div class="row"><div class="ico pink">🎥</div>
+        <div style="flex:1"><h3>تدوین موبایلی — جلسه ۳ از ۴</h3><div style="margin-top:8px">${bar(72)}</div></div></div>
+    </button>
+
+    <div class="h2">دوره‌های کوتاه</div>
+    <div class="grid g2">
+      ${[['🎥', 'تدوین موبایلی', 'سطح ۱ تا ۳', '۴ جلسه', '۳۵۰ XP'],
+        ['📷', 'عکاسی با موبایل', 'سطح ۱', '۳ جلسه', '۲۰۰ XP'],
+        ['🖌️', 'طراحی پوستر', 'سطح ۱ و ۲', '۴ جلسه', '۳۰۰ XP'],
+        ['🤖', 'هوش مصنوعی', 'سطح ۱', '۵ جلسه', '۴۰۰ XP'],
+        ['💻', 'برنامه‌نویسی', 'سطح ۱ تا ۲', '۶ جلسه', '۴۵۰ XP'],
+        ['🎙️', 'فن بیان و اجرا', 'سطح ۱', '۴ جلسه', '۳۰۰ XP'],
+        ['📰', 'خبرنگاری', 'سطح ۲', '۳ جلسه', '۳۰۰ XP'],
+        ['🧰', 'مهارت زندگی', 'سطح ۱', '۵ جلسه', '۲۵۰ XP']]
+        .map(([i, t, l, d, xp]) => `<button class="card" style="text-align:start;padding:0;overflow:hidden" ${go('course')}>
+          <div style="height:74px;display:grid;place-items:center;font-size:1.9rem;background:var(--g-brand);color:#fff">${i}</div>
+          <div style="padding:12px">
+            <h3 style="font-size:.85rem">${t}</h3>
+            <p class="tiny" style="margin:2px 0 8px">${l} · ${d}</p>
+            <span class="chip amber">⚡ ${xp}</span>
+          </div></button>`).join('')}
+    </div>
+  </div>`
+};
+
+/* ---------- ۱۴. جزئیات دوره ---------- */
+S.course = {
+  n: 14, title: 'جزئیات دوره', chrome: 'bar',
+  bar: { back: 'academy', title: 'تدوین موبایلی', action: '♡' },
+  body: `<div class="scroll">
+    <div class="cover">🎥</div>
+    <div class="row" style="gap:6px;margin-bottom:8px"><span class="chip">مسیر رسانه</span><span class="chip gray">سطح ۲</span></div>
+    <h2 style="margin:0 0 8px;font-size:1.15rem">تدوین موبایلی — ساخت کلیپ ۶۰ ثانیه‌ای</h2>
+    <p class="muted">در این دوره یاد می‌گیری با موبایل خودت یک کلیپ کوتاه حرفه‌ای بسازی: انتخاب پلان، برش، ریتم، زیرنویس و موسیقی. خروجی دوره یک کلیپ واقعی از برنامه مدرسه‌ات است.</p>
+
+    <div class="grid g3" style="margin-top:14px">
+      ${[['⏱️', '۹۰ دقیقه'], ['📚', '۴ جلسه'], ['⚡', '۳۵۰ XP']]
+        .map(([i, v]) => `<div class="card" style="text-align:center;padding:12px 6px"><div style="font-size:1.2rem">${i}</div><b style="font-size:.8rem">${v}</b></div>`).join('')}
+    </div>
+
+    <div class="card" style="margin-top:12px"><div class="row">
+      <div class="avatar">ر م</div>
+      <div><h3>مربی: تیم رسانه مدار</h3><p>دپارتمان رسانه و فناوری · آبادان</p></div></div></div>
+
+    <div class="h2">سرفصل‌ها</div>
+    <div class="card">
+      ${[['آشنایی با اپ تدوین و رابط کاربری', 'done'], ['برش، ریتم و انتخاب پلان درست', 'done'], ['زیرنویس، موسیقی و رنگ', 'now'], ['پروژه پایانی: کلیپ ۶۰ ثانیه‌ای', '']]
+        .map(([t, st], i) => `<div class="step ${st}">
+          <div class="n">${st === 'done' ? '✓' : i + 1}</div>
+          <div><b>جلسه ${i + 1} — ${t}</b><p>${st === 'done' ? 'تکمیل شده' : st === 'now' ? 'در حال انجام' : 'قفل — بعد از جلسه قبل باز می‌شود'}</p></div></div>`).join('')}
+    </div>
+    <button class="btn" style="margin-top:16px" ${go('path')}>ادامه دوره</button>
+  </div>`
+};
+
+/* ---------- ۱۵. مسیر رشد ---------- */
+S.path = {
+  n: 15, title: 'مسیر رشد', chrome: 'full', tab: 'path',
+  bar: { title: 'مسیر رشد من', action: '⚙️' },
+  body: `<div class="scroll">
+    ${chips(['🎬 رسانه', '💻 فناوری', '🎨 هنر', '⚽ ورزش', '🎤 سخنوری', '🤝 اجتماعی'], 0)}
+    <div class="hero-card" style="margin-top:12px">
+      <div class="row"><div class="ico" style="background:rgba(255,255,255,.14);color:#fff">🎬</div>
+        <div style="flex:1"><h3 style="color:#fff">مسیر رسانه</h3><p class="tiny" style="color:#A6B0DC">۲ مرحله از ۴ مرحله</p></div>
+        <b style="font-size:1.1rem">۵۰٪</b></div>
+      <div style="margin-top:12px">${bar(50, 'dark')}</div>
+    </div>
+
+    <div class="h2">مراحل مسیر</div>
+    <div class="card">
+      <div class="step done"><div class="n">✓</div><div><b>سطح ۱ — عکاسی با موبایل</b><p>۵ تمرین عملی · ۲۰۰ XP گرفته شد</p></div></div>
+      <div class="step now"><div class="n">۲</div><div><b>سطح ۲ — تدوین موبایلی</b>
+        <p>جلسه ۳ از ۴ — ۳۵۰ XP</p><div style="margin-top:8px">${bar(72)}</div></div></div>
+      <div class="step"><div class="n">🔒</div><div><b>پروژه — گزارش تصویری از یک رویداد</b><p>بعد از پایان سطح ۲ باز می‌شود · ۵۰۰ XP</p></div></div>
+      <div class="step"><div class="n">★</div><div><b>عضویت در تیم رسانه مدار</b><p>دعوت به تست تیم و مسئولیت در برنامه‌های واقعی شهر</p></div></div>
+    </div>
+
+    <div class="note info" style="margin-top:14px">🎯 با تمام‌کردن سطح ۲، برای «تست ورودی تیم رسانه» در ۱۸ آبان دعوت می‌شوی.</div>
+
+    <div class="h2">قدم بعدی تو</div>
+    <button class="card" style="width:100%;text-align:start" ${go('course')}>
+      <div class="row"><div class="ico pink">🎥</div><div style="flex:1"><h3>جلسه ۳: زیرنویس، موسیقی و رنگ</h3><p>۲۵ دقیقه · مسیر رسانه</p></div><span class="chip">ادامه ←</span></div>
+    </button>
+    <button class="card" style="width:100%;text-align:start;margin-top:12px" ${go('assessment')}>
+      <div class="row"><div class="ico violet">🧩</div><div style="flex:1"><h3>مطمئن نیستی مسیرت درست است؟</h3><p>استعدادسنجی کوتاه مدار را انجام بده</p></div><span class="chip gray">۵ دقیقه</span></div>
+    </button>
+  </div>`
+};
+
+/* ---------- ۱۶. پرونده رشد ---------- */
+S.dossier = {
+  n: 16, title: 'پرونده رشد دیجیتال', chrome: 'full', tab: 'dossier',
+  bar: { title: 'پرونده رشد من', action: '⬇️' },
+  body: `<div class="scroll">
+    <div class="card" style="text-align:center">
+      <div class="avatar lg" style="margin:0 auto 10px">م ر</div>
+      <h3 style="font-size:1.05rem;margin-bottom:2px">محمدرضا رضایی</h3>
+      <p class="tiny">پایه هشتم · دبیرستان نمونه شهید بهشتی · آبادان</p>
+      <div class="row" style="justify-content:center;gap:6px;margin-top:10px">
+        <span class="chip">سطح ۴ — فعال</span><span class="chip cyan">مسیر رسانه</span>
+      </div>
+      <button class="btn sec sm" style="width:100%;margin-top:12px" ${go('level')}>سطح و نشان‌ها</button>
+    </div>
+
+    <div class="h2">خلاصه فعالیت</div>
+    <div class="grid g4">
+      ${[['۳', 'دوره'], ['۵', 'مسابقه'], ['۲', 'مقام'], ['۳', 'داوطلبی']]
+        .map(([v, t]) => `<div class="card" style="text-align:center;padding:14px 4px"><b style="font-size:1.2rem;display:block">${v}</b><small class="tiny">${t}</small></div>`).join('')}
+    </div>
+
+    <div class="h2">مهارت‌ها</div>
+    <div class="card">
+      ${[['تدوین ویدئو', 72, 'سطح ۲'], ['عکاسی', 58, 'سطح ۱'], ['فن بیان', 38, 'سطح ۱'], ['کار با کامپیوتر', 65, 'سطح ۱']]
+        .map(([t, p, l]) => `<div style="margin-bottom:12px">
+          <div class="row between" style="margin-bottom:6px"><b style="font-size:.84rem">${t}</b><span class="tiny">${l}</span></div>${bar(p)}</div>`).join('')}
+    </div>
+
+    <div class="h2">علایق و نقاط قوت</div>
+    <div class="card">
+      <div style="display:flex;flex-wrap:wrap;gap:7px">
+        ${['🎬 رسانه', '💻 فناوری', '📚 کتاب', '🤝 کار تیمی', '🎯 پشتکار'].map(t => `<span class="chip gray">${t}</span>`).join('')}
+      </div>
+      <div class="row between" style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)">
+        <span class="tiny">علاقه شغلی</span><b style="font-size:.85rem">معماری</b></div>
+    </div>
+
+    <div class="h2">تاریخچه رشد</div>
+    <div class="card">
+      ${[['مهر ۱۴۰۴', 'رتبه ۸ مسابقه هوش و ریاضی', 'done'],
+        ['شهریور ۱۴۰۴', 'پایان دوره عکاسی سطح ۱ — نشان عکاس', 'done'],
+        ['مرداد ۱۴۰۴', 'داوطلب جشن مدرسه — ۳۰۰ XP', 'done'],
+        ['تیر ۱۴۰۴', 'شروع مسیر رسانه', 'done'],
+        ['خرداد ۱۴۰۴', 'عضویت در باشگاه مدار', 'done']]
+        .map(([d, t]) => `<div class="step done"><div class="n">✓</div><div><b>${t}</b><p>${d}</p></div></div>`).join('')}
+    </div>
+
+    <div class="note" style="margin-top:12px">🔐 پرونده رشد فقط برای تو و والدت قابل مشاهده است. دسترسی مربی محدود، نقش‌محور و ثبت‌شده است.</div>
+  </div>`
+};
+
+/* ---------- ۱۷. استعدادسنجی ---------- */
+S.assessment = {
+  n: 17, title: 'استعدادسنجی', chrome: 'bar',
+  bar: { back: 'path', title: 'استعدادسنجی' },
+  body: `<div class="scroll">
+    <div class="row between" style="margin-bottom:8px"><span class="tiny">سؤال ۴ از ۱۲</span><span class="tiny">۳۳٪</span></div>
+    ${bar(33)}
+    <div class="card" style="margin-top:16px">
+      <span class="chip cyan">علاقه</span>
+      <h3 style="margin:10px 0 14px;font-size:1rem;line-height:1.8">اگر یک روز تعطیل کامل داشته باشی، کدام کار برایت جذاب‌تر است؟</h3>
+      ${[['🎬', 'ساخت یک ویدئو یا عکاسی', 1], ['💻', 'کار با کامپیوتر و ساخت یک برنامه', 0], ['⚽', 'ورزش و بازی گروهی', 0], ['📚', 'خواندن کتاب و نوشتن', 0]]
+        .map(([i, t, on]) => `<div class="li" style="border:1.5px solid ${on ? 'var(--brand)' : 'var(--line)'};border-radius:16px;margin-bottom:9px;background:${on ? 'var(--brand05)' : '#fff'}">
+          <div class="ico ${on ? '' : 'gray'}">${i}</div><div><b>${t}</b></div>
+          <span class="end">${on ? '●' : '○'}</span></div>`).join('')}
+    </div>
+
+    <div class="h2">نتیجه اولیه تا اینجا</div>
+    <div class="card">
+      ${[['رسانه و تولید محتوا', 78], ['فناوری', 54], ['سخنوری', 41], ['ورزش', 22]]
+        .map(([t, p]) => `<div style="margin-bottom:12px">
+          <div class="row between" style="margin-bottom:6px"><b style="font-size:.84rem">${t}</b><span class="tiny">${p}٪</span></div>${bar(p)}</div>`).join('')}
+      <p class="tiny" style="margin:0">نتیجه نهایی بعد از پاسخ به همه سؤال‌ها و با احتساب فعالیت واقعی‌ات در باشگاه محاسبه می‌شود.</p>
+    </div>
+    <button class="btn" style="margin-top:14px" ${go('path')}>سؤال بعدی</button>
+  </div>`
+};
+
+/* ---------- ۱۸. نمایشگاه استعدادها ---------- */
+S.exhibit = {
+  n: 18, title: 'نمایشگاه استعدادها', chrome: 'bar',
+  bar: { back: 'home', title: 'نمایشگاه استعدادها', action: '＋' },
+  body: `<div class="scroll">
+    ${chips(['همه آثار', 'عکس', 'ویدئو', 'نقاشی', 'پروژه علمی', 'دست‌سازه'], 0)}
+    <div class="grid g2" style="margin-top:12px">
+      ${[['📷', 'قاب‌های محله من', 'محمدرضا · هشتم', ''],
+        ['🎬', 'کلیپ ۶۰ ثانیه‌ای مدرسه', 'علی · نهم', 'b'],
+        ['🎨', 'نقاشی اروندکنار', 'امیرحسین · هفتم', 'c'],
+        ['🔬', 'پروژه انرژی خورشیدی', 'تیم علمی · نهم', 'd'],
+        ['🛠️', 'دست‌سازه رباتیک', 'یاسین · هشتم', 'c'],
+        ['🖌️', 'پوستر هفته کتاب', 'مهدی · هفتم', ''],
+        ['📰', 'گزارش جشن مدرسه', 'حسین · نهم', 'b'],
+        ['🏅', 'مستند تیم والیبال', 'تیم رسانه · هشتم', 'd']]
+        .map(([i, t, s, c]) => `<div class="thumb ${c}"><span>${i}</span><span class="cap">${t}<small>${s}</small></span></div>`).join('')}
+    </div>
+    <div class="note" style="margin-top:14px">🛡️ همه آثار پیش از انتشار توسط مدیر بررسی می‌شوند و هیچ اطلاعات تماس یا هویتی همراه اثر منتشر نمی‌شود.</div>
+    <button class="btn" style="margin-top:14px" ${go('submitwork')}>ارسال اثر من</button>
+  </div>`
+};
+
+/* ---------- ۱۹. ارسال اثر ---------- */
+S.submitwork = {
+  n: 19, title: 'ارسال اثر', chrome: 'bar',
+  bar: { back: 'exhibit', title: 'ارسال اثر' },
+  body: `<div class="scroll">
+    <div class="card" style="text-align:center;padding:26px 16px;box-shadow:inset 0 0 0 2px var(--line);background:#FBFCFF">
+      <div style="font-size:2.4rem">⬆️</div>
+      <h3 style="margin:8px 0 4px">فایل اثرت را بارگذاری کن</h3>
+      <p class="tiny">عکس، ویدئو (حداکثر ۶۰ ثانیه) یا تصویر پروژه — تا ۵۰ مگابایت</p>
+      <button class="btn sm sec" style="margin:12px auto 0">انتخاب فایل</button>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="row"><div class="ico green">🎬</div>
+        <div style="flex:1"><b style="font-size:.86rem">clip-mahalle-man.mp4</b><small class="tiny">۵۸ ثانیه · ۲۴ مگابایت</small>
+        <div style="margin-top:8px">${bar(100, 'warm')}</div></div></div>
+    </div>
+
+    <div style="margin-top:16px">
+      ${field('عنوان اثر', 'قاب‌های محله من')}
+      ${field('توضیح کوتاه', 'روایت یک روز در محله‌مان با موبایل')}
+      ${field('دسته‌بندی', 'ویدئو — مسیر رسانه', false, '▾')}
+      ${field('مربوط به مأموریت', 'مأموریت هفته: کلیپ ۶۰ ثانیه‌ای', false, '▾')}
+    </div>
+
+    <div class="note warn">⏳ وضعیت: در انتظار بررسی مدیر. آثار معمولاً تا ۲۴ ساعت بررسی می‌شوند و بعد از تأیید در نمایشگاه منتشر می‌شوند.</div>
+    <button class="btn" style="margin-top:14px" ${go('exhibit')}>ارسال برای بررسی</button>
+  </div>`
+};
+
+/* ---------- ۲۰. تیم‌ها و انجمن‌ها ---------- */
+S.teams = {
+  n: 20, title: 'تیم‌ها و انجمن‌ها', chrome: 'bar',
+  bar: { back: 'home', title: 'تیم‌ها و انجمن‌ها' },
+  body: `<div class="scroll">
+    <p class="muted">با رسیدن به سطح لازم می‌توانی درخواست عضویت بدهی. تیم‌ها در برنامه‌های واقعی شهر فعال‌اند.</p>
+    <div class="grid g2" style="margin-top:12px">
+      ${[['🎬', 'تیم رسانه', 'سطح ۲ به بالا', 1], ['💻', 'تیم فناوری', 'سطح ۱ به بالا', 1],
+        ['🏐', 'تیم ورزش', 'همه سطوح', 1], ['📚', 'انجمن کتاب', 'همه سطوح', 1],
+        ['🎵', 'گروه سرود', 'سطح ۱ به بالا', 1], ['🎭', 'گروه تئاتر', 'سطح ۲ به بالا', 0],
+        ['🔬', 'انجمن علمی', 'سطح ۲ به بالا', 0], ['🤲', 'گروه خادمی', 'همه سطوح', 1],
+        ['🤝', 'کار داوطلبانه', 'همه سطوح', 1]]
+        .map(([i, t, l, open]) => `<button class="card" style="text-align:start" ${go('team')}>
+          <div class="ico ${open ? 'cyan' : 'gray'}">${i}</div>
+          <h3 style="margin-top:10px;font-size:.88rem">${t}</h3>
+          <p class="tiny" style="margin-top:2px">${l}</p>
+          <span class="chip ${open ? 'green' : 'gray'}" style="margin-top:8px">${open ? 'عضوگیری باز' : 'فعلاً بسته'}</span>
+        </button>`).join('')}
+    </div>
+  </div>`
+};
+
+/* ---------- ۲۱. جزئیات تیم ---------- */
+S.team = {
+  n: 21, title: 'جزئیات تیم', chrome: 'bar',
+  bar: { back: 'teams', title: 'تیم رسانه مدار' },
+  body: `<div class="scroll">
+    <div class="cover night">🎬</div>
+    <h2 style="margin:0 0 6px;font-size:1.15rem">تیم رسانه مدار — آبادان</h2>
+    <div class="row" style="gap:6px;margin-bottom:10px"><span class="chip green">عضوگیری باز</span><span class="chip gray">۲۴ عضو فعال</span></div>
+    <p class="muted">تیم رسانه، برنامه‌ها و رویدادهای مدار را پوشش می‌دهد: عکاسی، فیلم‌برداری، تدوین، تولید محتوا و خبرنگاری. اعضای تیم در جشن‌ها و اردوها مسئولیت واقعی دارند.</p>
+
+    <div class="h2">فعالیت‌های تیم</div>
+    <div class="list">
+      ${[['📸', 'پوشش تصویری برنامه‌های شهری'], ['🎞️', 'ساخت کلیپ و مستند کوتاه'], ['📰', 'تهیه گزارش و خبر برای کانال مدار'], ['🎤', 'مصاحبه با دانش‌آموزان و مربیان']]
+        .map(([i, t]) => `<div class="li"><div class="ico">${i}</div><div><b style="font-weight:600">${t}</b></div></div>`).join('')}
+    </div>
+
+    <div class="h2">شرایط عضویت</div>
+    <div class="card">
+      <div class="step done"><div class="n">✓</div><div><b>سطح ۲ مسیر رسانه</b><p>تو این شرط را داری</p></div></div>
+      <div class="step now"><div class="n">۲</div><div><b>یک پروژه تأییدشده در نمایشگاه</b><p>کلیپ «محله من» در حال بررسی است</p></div></div>
+      <div class="step"><div class="n">۳</div><div><b>حضور در تست ورودی</b><p>۱۸ آبان · کارگاه رسانه مدار</p></div></div>
+    </div>
+
+    <div class="note info" style="margin-top:12px">👨‍👦 برای فعالیت‌های حضوری تیم، رضایت والد یا سرپرست لازم است.</div>
+    <button class="btn" style="margin-top:14px" ${go('invites')}>درخواست عضویت</button>
+  </div>`
+};
+
+/* ---------- ۲۲. تقویم رویداد ---------- */
+S.events = {
+  n: 22, title: 'تقویم رویدادها', chrome: 'bar',
+  bar: { back: 'home', title: 'تقویم رویدادها', action: '📅' },
+  body: `<div class="scroll">
+    ${chips(['همه', 'اردو', 'جشن', 'کلاس', 'مسابقه', 'برنامه مدرسه'], 0)}
+    <div class="row" style="gap:6px;margin:14px 0;overflow-x:auto">
+      ${[['ش', '۱۸'], ['ی', '۱۹'], ['د', '۲۰'], ['س', '۲۱'], ['چ', '۲۲'], ['پ', '۲۳'], ['ج', '۲۴']]
+        .map(([d, n], i) => `<div class="card" style="flex:0 0 46px;text-align:center;padding:10px 0;${i === 4 ? 'background:var(--g-brand);color:#fff' : ''}">
+          <small class="tiny" style="${i === 4 ? 'color:rgba(255,255,255,.8)' : ''}">${d}</small><b style="display:block;font-size:.95rem">${n}</b></div>`).join('')}
+    </div>
+
+    <div class="h2">مهر ۱۴۰۴</div>
+    ${[['۲۲', 'مهر', 'جشن بزرگ ۱۰۰۰ دانش‌آموز آبادان', 'سالن اجتماعات مرکزی', '۵۰۰ XP', 'جشن', 'ثبت‌نام شده'],
+      ['۲۸', 'مهر', 'کلاس تدوین موبایلی — جلسه ۳', 'کارگاه رسانه مدار', '۱۵۰ XP', 'کلاس', 'ظرفیت باقی: ۸']]
+      .map(([d, m, t, p, xp, c, st]) => `<button class="card" style="width:100%;text-align:start" ${go('event')}>
+        <div class="row"><div class="ico green" style="flex-direction:column;font-size:.78rem;line-height:1.15;font-weight:800">${d}<span style="font-size:.58rem">${m}</span></div>
+        <div style="flex:1"><div class="row" style="gap:6px;margin-bottom:3px"><span class="chip cyan">${c}</span><span class="tiny">${st}</span></div>
+        <h3>${t}</h3><p>📍 ${p} · ⚡ ${xp}</p></div></div></button>`).join('')}
+
+    <div class="h2">آبان ۱۴۰۴</div>
+    ${[['۰۴', 'آبان', 'اردوی یک‌روزه خرمشهر', 'مبدأ: مدارس منطقه', '۴۰۰ XP', 'اردو', 'ظرفیت باقی: ۳۲'],
+      ['۱۱', 'آبان', 'کارگاه عکاسی پیشرفته', 'کارگاه رسانه مدار', '۳۰۰ XP', 'کلاس', 'ظرفیت باقی: ۱۵'],
+      ['۱۸', 'آبان', 'تست ورودی تیم رسانه', 'مخصوص مسیر رسانه سطح ۳', '۲۵۰ XP', 'مسابقه', 'دعوت‌نامه لازم']]
+      .map(([d, m, t, p, xp, c, st]) => `<button class="card" style="width:100%;text-align:start" ${go('event')}>
+        <div class="row"><div class="ico amber" style="flex-direction:column;font-size:.78rem;line-height:1.15;font-weight:800">${d}<span style="font-size:.58rem">${m}</span></div>
+        <div style="flex:1"><div class="row" style="gap:6px;margin-bottom:3px"><span class="chip gray">${c}</span><span class="tiny">${st}</span></div>
+        <h3>${t}</h3><p>📍 ${p} · ⚡ ${xp}</p></div></div></button>`).join('')}
+  </div>`
+};
+
+/* ---------- ۲۳. جزئیات رویداد ---------- */
+S.event = {
+  n: 23, title: 'جزئیات رویداد', chrome: 'bar',
+  bar: { back: 'events', title: 'جشن بزرگ آبادان', action: '↗' },
+  body: `<div class="scroll">
+    <div class="cover night">🎉</div>
+    <div class="row" style="gap:6px;margin-bottom:8px"><span class="chip cyan">جشن</span><span class="chip green">ثبت‌نام تو ثبت شد</span></div>
+    <h2 style="margin:0 0 8px;font-size:1.15rem">جشن بزرگ ۱۰۰۰ دانش‌آموز آبادان</h2>
+    <p class="muted">بزرگ‌ترین گردهمایی دانش‌آموزی امسال: اجرای گروه سرود، معرفی برگزیدگان مسیرهای رشد، نمایشگاه آثار و اهدای جوایز باشگاه امتیازات.</p>
+
+    <div class="list" style="margin-top:14px">
+      <div class="li"><div class="ico">📅</div><div><b>پنجشنبه ۲۲ مهر</b><small>ساعت ۱۶:۰۰ تا ۱۹:۰۰</small></div></div>
+      <div class="li"><div class="ico green">📍</div><div><b>سالن اجتماعات مرکزی آبادان</b><small>ورود از درب شماره ۲</small></div></div>
+      <div class="li"><div class="ico amber">👥</div><div><b>ظرفیت ۱۰۰۰ نفر</b><small>۸۴۷ نفر ثبت‌نام کرده‌اند</small></div></div>
+      <div class="li"><div class="ico cyan">⚡</div><div><b>۵۰۰ XP بعد از ثبت حضور</b><small>با اسکن QR در ورودی</small></div></div>
+    </div>
+
+    <div class="h2">شرایط شرکت</div>
+    <div class="card">
+      <p style="line-height:2">• ویژه دانش‌آموزان پسر متوسطه اول آبادان و خرمشهر<br>• همراه‌داشتن کارت دانش‌آموزی الزامی است<br>• رضایت والد در حساب شما ثبت شده است ✓</p>
+    </div>
+    <button class="btn" style="margin-top:16px" ${go('ticket')}>نمایش بلیت و QR من</button>
+  </div>`
+};
+
+/* ---------- ۲۴. بلیت و QR ---------- */
+S.ticket = {
+  n: 24, title: 'بلیت / QR حضور', chrome: 'bar', dark: true,
+  bar: { back: 'event', title: 'بلیت من', action: '⬇️' },
+  body: `<div class="scroll dark">
+    <div class="card" style="text-align:center;padding:22px 18px">
+      <span class="chip green">بلیت معتبر</span>
+      <h3 style="margin:12px 0 4px;font-size:1rem">جشن بزرگ ۱۰۰۰ دانش‌آموز آبادان</h3>
+      <p class="tiny">پنجشنبه ۲۲ مهر · ۱۶:۰۰ · سالن اجتماعات مرکزی</p>
+      <div style="margin:18px 0">${qr()}</div>
+      <p class="tiny">کد بلیت: MDR-۴۸۲-۰۹۱۷</p>
+      <div style="border-top:1px dashed var(--line);margin:16px -18px 0;padding:16px 18px 0">
+        <div class="row between"><span class="tiny">نام</span><b style="font-size:.85rem">محمدرضا رضایی</b></div>
+        <div class="row between" style="margin-top:8px"><span class="tiny">مدرسه</span><b style="font-size:.85rem">نمونه شهید بهشتی</b></div>
+        <div class="row between" style="margin-top:8px"><span class="tiny">وضعیت حضور</span><span class="chip amber">هنوز ثبت نشده</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="background:rgba(255,255,255,.08);box-shadow:none;margin-top:12px">
+      <div class="row"><div class="ico" style="background:rgba(255,255,255,.14);color:#fff">⚡</div>
+        <div><h3 style="color:#fff">۵۰۰ XP بعد از حضور</h3><p style="color:#A8B2DE">بعد از اسکن QR در ورودی، امتیاز به‌صورت خودکار به حساب تو اضافه می‌شود.</p></div></div>
+    </div>
+
+    <div class="note warn" style="margin-top:12px">📵 این QR فقط برای توست؛ آن را برای کسی نفرست. در صورت گم‌شدن، از همین صفحه دوباره ساخته می‌شود.</div>
+    <button class="btn ghost" style="margin-top:14px" ${go('events')}>بازگشت به تقویم</button>
+  </div>`
+};
+
+/* ---------- ۲۵. مرکز مشاوره ---------- */
+S.counseling = {
+  n: 25, title: 'مرکز مشاوره', chrome: 'bar',
+  bar: { back: 'home', title: 'مرکز مشاوره' },
+  body: `<div class="scroll">
+    <div class="note" style="margin-bottom:14px">🔒 گفت‌وگوی تو خصوصی است. هویت تو برای دانش‌آموزان دیگر نمایش داده نمی‌شود و پاسخ‌ها فقط از مشاور تأییدشده می‌آید.</div>
+    <div class="h2">موضوع مشاوره‌ات چیست؟</div>
+    <div class="grid g2">
+      ${[['📘', 'تحصیلی', 'انتخاب رشته، برنامه‌ریزی، روش مطالعه', ''],
+        ['🕌', 'فرهنگی و اعتقادی', 'پرسش خصوصی با پاسخ مشاور تأییدشده', 'cyan'],
+        ['🏠', 'خانواده', 'ارتباط با والدین و مسائل خانه', 'green'],
+        ['🎯', 'مهارت', 'انتخاب مسیر و دوره مناسب', 'amber'],
+        ['💼', 'شغلی و آینده', 'آشنایی با مشاغل و مسیر آینده', 'pink']]
+        .map(([i, t, d, c]) => `<button class="card" style="text-align:start" ${go('ticket-new')}>
+          <div class="ico ${c}">${i}</div>
+          <h3 style="margin-top:10px;font-size:.88rem">${t}</h3>
+          <p class="tiny" style="margin-top:3px;line-height:1.8">${d}</p></button>`).join('')}
+    </div>
+
+    <div class="h2">گفت‌وگوهای من</div>
+    <div class="list">
+      <button class="li" style="width:100%;text-align:start" ${go('chat')}>
+        <div class="ico">📘</div><div style="flex:1"><b>برنامه‌ریزی درسی نیم‌سال</b><small>مشاور تحصیلی · ۲ پیام جدید</small></div>
+        <span class="end" style="color:var(--green)">●</span></button>
+      <div class="li"><div class="ico gray">🎯</div><div style="flex:1"><b>انتخاب بین مسیر رسانه و فناوری</b><small>بسته‌شده · ۱۲ مهر</small></div><span class="end">✓</span></div>
+    </div>
+
+    <div class="h2">پرسش‌های پرتکرار</div>
+    <div class="list">
+      ${['چطور برای امتحان‌های نیم‌سال برنامه بریزم؟', 'اگر از درسی عقب افتادم چه کار کنم؟', 'چطور مسیر رشد مناسب خودم را انتخاب کنم؟']
+        .map(t => `<div class="li"><div class="ico gray">❓</div><div><b style="font-weight:600;font-size:.82rem">${t}</b></div><span class="end">›</span></div>`).join('')}
+    </div>
+    <button class="btn" style="margin-top:14px" ${go('ticket-new')}>ثبت درخواست مشاوره</button>
+  </div>`
+};
+
+/* ---------- ۲۶. ثبت تیکت ---------- */
+S['ticket-new'] = {
+  n: 26, title: 'ثبت درخواست مشاوره', chrome: 'bar',
+  bar: { back: 'counseling', title: 'درخواست مشاوره' },
+  body: `<div class="scroll">
+    ${field('حوزه مشاوره', 'تحصیلی', false, '▾')}
+    ${field('موضوع', 'برنامه‌ریزی برای امتحان‌های نیم‌سال')}
+    <div class="field"><label>توضیح</label>
+      <div class="input" style="align-items:flex-start;min-height:120px;line-height:2">می‌خواهم برای امتحان‌های نیم‌سال برنامه بریزم ولی نمی‌دانم از کجا شروع کنم. بیشتر وقتم صرف درس‌هایی می‌شود که راحت‌ترند.</div>
+    </div>
+    <div class="field"><label>اولویت</label>
+      <div class="row" style="gap:8px">
+        <span class="chip gray" style="padding:9px 16px">عادی</span>
+        <span class="chip amber" style="padding:9px 16px">مهم ●</span>
+        <span class="chip gray" style="padding:9px 16px">فوری</span>
+      </div>
+    </div>
+
+    <div class="list" style="margin-top:14px">
+      <div class="li"><div class="ico green">🔒</div><div style="flex:1"><b>ارسال خصوصی</b><small>فقط مشاور همین حوزه پیام تو را می‌بیند</small></div><span class="toggle on"></span></div>
+      <div class="li"><div class="ico gray">👨‍👦</div><div style="flex:1"><b>اطلاع به والد</b><small>خلاصه‌ی موضوع (نه متن گفت‌وگو) به والد اطلاع داده شود</small></div><span class="toggle"></span></div>
+    </div>
+
+    <div class="note info" style="margin-top:12px">⏱️ معمولاً تا ۲۴ ساعت پاسخ داده می‌شود. در ساعات مدرسه پاسخ‌دهی سریع‌تر است.</div>
+    <button class="btn" style="margin-top:14px" ${go('chat')}>ارسال درخواست</button>
+  </div>`
+};
+
+/* ---------- ۲۷. چت با مشاور ---------- */
+S.chat = {
+  n: 27, title: 'چت با مشاور', chrome: 'bar',
+  bar: { back: 'counseling', title: 'مشاور تحصیلی', action: 'ⓘ' },
+  body: `<div class="scroll" style="display:flex;flex-direction:column">
+    <div class="note info" style="margin-bottom:14px">🛡️ این گفت‌وگو در سطح سازمان قابل نظارت است. مشاور به شماره تماس و نشانی تو دسترسی ندارد و ارتباط خارج از مدار مجاز نیست.</div>
+
+    <div class="stack" style="flex:1">
+      <div class="bubble them">سلام محمدرضا 👋 موضوع برنامه‌ریزی نیم‌سال را دیدم. الان بیشتر روی کدام درس‌ها وقت می‌گذاری؟<time>۱۰:۲۴</time></div>
+      <div class="bubble me">سلام استاد. بیشتر ریاضی و علوم. عربی و ادبیات را معمولاً شب امتحان می‌خوانم.<time>۱۰:۳۱</time></div>
+      <div class="bubble them">خیلی خوب. پیشنهادم این است: یک جدول هفتگی بساز و برای عربی و ادبیات هر روز فقط ۲۰ دقیقه بگذار. کوتاه ولی هر روز، از یک شب طولانی بهتر است.<time>۱۰:۳۵</time></div>
+      <div class="bubble them">یک قالب برنامه‌ریزی هم برایت گذاشتم، از بخش پیوست بردار و پرش کن. هفته بعد با هم مرور می‌کنیم ✅<time>۱۰:۳۶</time></div>
+      <div class="bubble me">ممنون، امشب پرش می‌کنم.<time>۱۰:۴۰</time></div>
+      <div class="row" style="gap:6px"><span class="chip gray">مشاور در حال نوشتن…</span></div>
+    </div>
+
+    <div class="row" style="gap:8px;margin-top:14px;position:sticky;bottom:0;background:var(--bg);padding-top:8px">
+      <div class="input ph" style="flex:1">پیامت را بنویس…</div>
+      <button class="ico" style="background:var(--g-brand);color:#fff">↑</button>
+    </div>
+  </div>`
+};
+
+/* ---------- ۲۸. نوتیفیکیشن‌ها ---------- */
+S.notifications = {
+  n: 28, title: 'اعلان‌ها', chrome: 'bar',
+  bar: { back: 'home', title: 'اعلان‌ها', action: '✓' },
+  body: `<div class="scroll">
+    ${chips(['همه', 'مسابقه', 'امتیاز', 'رویداد', 'مشاوره'], 0)}
+    <div class="h2">امروز</div>
+    <div class="list">
+      ${[['🏆', 'مسابقه این هفته شروع شد', 'مسابقه هوش و ریاضی تا پنجشنبه باز است', '۲ ساعت پیش', 1],
+        ['🎁', '۳۰۰ امتیاز تا جایزه بعدی', 'با یک مسابقه هفتگی به «اردوی یک‌روزه» می‌رسی', '۵ ساعت پیش', 1],
+        ['💬', 'مشاور تحصیلی پاسخ داد', '۲ پیام جدید در گفت‌وگوی برنامه‌ریزی نیم‌سال', '۶ ساعت پیش', 1]]
+        .map(([i, t, d, w, unread]) => `<div class="li" style="${unread ? 'background:var(--brand05)' : ''}">
+          <div class="ico">${i}</div><div style="flex:1"><b>${t}</b><small>${d}</small></div>
+          <span class="end tiny">${w}</span></div>`).join('')}
+    </div>
+
+    <div class="h2">این هفته</div>
+    <div class="list">
+      ${[['⛺', 'فراخوان اردوی دانش‌آموزی', 'اردوی یک‌روزه خرمشهر — ۴ آبان', 'دیروز'],
+        ['🎥', 'کلاس تدوین پنجشنبه', 'جلسه ۳ دوره تدوین موبایلی ساعت ۱۷', '۲ روز پیش'],
+        ['🏅', 'نشان جدید گرفتی', 'نشان «دقیق» بعد از مسابقه هوش', '۳ روز پیش'],
+        ['🖼️', 'اثرت تأیید شد', '«قاب‌های محله من» در نمایشگاه منتشر شد', '۴ روز پیش']]
+        .map(([i, t, d, w]) => `<div class="li"><div class="ico gray">${i}</div>
+          <div style="flex:1"><b>${t}</b><small>${d}</small></div><span class="end tiny">${w}</span></div>`).join('')}
+    </div>
+  </div>`
+};
+
+/* ---------- ۲۹. دعوت‌ها و فراخوان‌ها ---------- */
+S.invites = {
+  n: 29, title: 'دعوت‌ها و فراخوان‌ها', chrome: 'bar',
+  bar: { back: 'notifications', title: 'دعوت‌ها و فراخوان‌ها' },
+  body: `<div class="scroll">
+    <p class="muted">این فراخوان‌ها بر اساس پایه، شهر، مدرسه و علاقه‌های تو انتخاب شده‌اند.</p>
+
+    <div class="card" style="margin-top:12px;box-shadow:inset 0 0 0 2px var(--brand);background:var(--brand05)">
+      <div class="row between"><span class="chip">ویژه تو</span><span class="tiny">تا ۲ روز دیگر</span></div>
+      <h3 style="margin:10px 0 6px">دعوت به تست ورودی تیم رسانه</h3>
+      <p>چون مسیر رسانه سطح ۲ را تمام کرده‌ای، برای تست تیم رسانه در ۱۸ آبان دعوت شده‌ای.</p>
+      <div class="row" style="gap:8px;margin-top:12px">
+        <button class="btn sm" style="flex:1" ${go('event')}>می‌پذیرم</button>
+        <button class="btn sm sec" style="flex:1">فعلاً نه</button>
+      </div>
+    </div>
+
+    ${[['⛺', 'اردوی یک‌روزه خرمشهر', 'پسران پایه هفتم تا نهم — مدارس منطقه', '۴ آبان'],
+      ['📚', 'فراخوان انجمن کتاب', 'علاقه‌مندان کتاب‌خوانی — همه سطوح', '۲۹ مهر'],
+      ['🤝', 'داوطلبان جشن بزرگ آبادان', '۴۰ همیار برای روز برنامه', '۲۲ مهر']]
+      .map(([i, t, d, w]) => `<div class="card">
+        <div class="row"><div class="ico gray">${i}</div>
+          <div style="flex:1"><h3>${t}</h3><p>${d}</p></div><span class="tiny">${w}</span></div>
+        <div class="row" style="gap:8px;margin-top:12px">
+          <button class="btn sm" style="flex:1">شرکت می‌کنم</button>
+          <button class="btn sm sec" style="flex:1">رد کردن</button></div>
+      </div>`).join('')}
+  </div>`
+};
+
+/* ---------- ۳۰. پروفایل کاربر ---------- */
+S.profile = {
+  n: 30, title: 'پروفایل کاربر', chrome: 'bar',
+  bar: { back: 'dossier', title: 'پروفایل من', action: '✏️' },
+  body: `<div class="scroll">
+    <div class="card" style="text-align:center">
+      <div class="avatar lg" style="margin:0 auto 10px">م ر</div>
+      <h3 style="font-size:1.05rem">محمدرضا رضایی</h3>
+      <p class="tiny">عضو باشگاه از خرداد ۱۴۰۴</p>
+      <div class="row" style="justify-content:center;gap:6px;margin-top:10px">
+        <span class="chip green">حساب فعال و تأییدشده</span></div>
+    </div>
+
+    <div class="h2">اطلاعات فردی</div>
+    <div class="list">
+      ${[['نام و نام خانوادگی', 'محمدرضا رضایی'], ['تاریخ تولد', '۱۳۸۹/۰۴/۱۲'], ['شماره موبایل', '۰۹۱۲•••••۰۰'], ['کد ملی', '۱۸۹•••••۰۰ 🔒']]
+        .map(([t, v]) => `<div class="li"><div><b style="font-weight:600;font-size:.82rem">${t}</b></div><span class="end">${v}</span></div>`).join('')}
+    </div>
+
+    <div class="h2">تحصیلی</div>
+    <div class="list">
+      ${[['پایه', 'هشتم'], ['مدرسه', 'نمونه شهید بهشتی'], ['کلاس', '۸/۳'], ['شهر و محدوده', 'آبادان — ناحیه ۱']]
+        .map(([t, v]) => `<div class="li"><div><b style="font-weight:600;font-size:.82rem">${t}</b></div><span class="end">${v}</span></div>`).join('')}
+    </div>
+
+    <div class="h2">علاقه‌ها و مسیر</div>
+    <div class="card">
+      <div style="display:flex;flex-wrap:wrap;gap:7px">
+        ${['🎬 رسانه', '💻 فناوری', '📚 کتاب'].map(t => `<span class="chip gray">${t}</span>`).join('')}
+      </div>
+      <div class="row between" style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)">
+        <span class="tiny">مسیر منتخب</span><b style="font-size:.85rem">🎬 رسانه — سطح ۲</b></div>
+    </div>
+
+    <button class="btn sec" style="margin-top:14px" ${go('settings')}>تنظیمات و حریم خصوصی</button>
+  </div>`
+};
+
+/* ---------- ۳۱. تنظیمات و حریم خصوصی ---------- */
+S.settings = {
+  n: 31, title: 'تنظیمات و حریم خصوصی', chrome: 'bar',
+  bar: { back: 'profile', title: 'تنظیمات' },
+  body: `<div class="scroll">
+    <div class="h2">اعلان‌ها</div>
+    <div class="list">
+      ${[['مسابقه‌های جدید', 1], ['یادآوری مأموریت هفتگی', 1], ['رویدادها و فراخوان‌ها', 1], ['پاسخ مشاور', 1], ['خبرهای باشگاه', 0]]
+        .map(([t, on]) => `<div class="li"><div style="flex:1"><b style="font-weight:600;font-size:.84rem">${t}</b></div><span class="toggle ${on ? 'on' : ''}"></span></div>`).join('')}
+    </div>
+
+    <div class="h2">والد و سرپرست</div>
+    <div class="list">
+      <div class="li"><div class="ico green">✓</div><div style="flex:1"><b>رضایت والد ثبت شده</b><small>۰۹۱۶•••••۰۰ — خرداد ۱۴۰۴</small></div><span class="end">تغییر</span></div>
+      <div class="li"><div class="ico gray">📊</div><div style="flex:1"><b>گزارش ماهانه برای والد</b><small>خلاصه فعالیت، بدون متن گفت‌وگوی مشاوره</small></div><span class="toggle on"></span></div>
+      <div class="li"><div class="ico amber">💳</div><div style="flex:1"><b>تأیید مالی جوایز</b><small>پرداخت جوایز نقدی از طریق حساب والد</small></div><span class="end">فعال</span></div>
+    </div>
+
+    <div class="h2">حریم خصوصی و امنیت</div>
+    <div class="list">
+      ${[['🔒', 'نمایش نام من در نمایشگاه', 'فقط نام کوچک و پایه', 'toggle-on'],
+        ['🙈', 'جست‌وجوی من توسط دیگران', 'همیشه غیرفعال است', 'locked'],
+        ['🛡️', 'داده‌های هویتی من', 'رمزگذاری‌شده · دسترسی محدود و ثبت‌شده', 'view'],
+        ['📱', 'دستگاه‌های فعال', 'یک دستگاه', 'view'],
+        ['🔑', 'تغییر رمز ورود', '', 'view']]
+        .map(([i, t, d, kind]) => `<div class="li"><div class="ico gray">${i}</div>
+          <div style="flex:1"><b style="font-weight:600;font-size:.84rem">${t}</b>${d ? `<small>${d}</small>` : ''}</div>
+          ${kind === 'toggle-on' ? '<span class="toggle on"></span>' : kind === 'locked' ? '<span class="chip green">قفل ایمنی</span>' : '<span class="end">›</span>'}</div>`).join('')}
+    </div>
+
+    <div class="h2">پشتیبانی</div>
+    <div class="list">
+      ${[['📜', 'قوانین و شرایط استفاده'], ['🛟', 'تماس با پشتیبانی مدار'], ['🚩', 'گزارش محتوای نامناسب'], ['ℹ️', 'درباره مدار — نسخه ۱٫۰']]
+        .map(([i, t]) => `<div class="li"><div class="ico gray">${i}</div><div style="flex:1"><b style="font-weight:600;font-size:.84rem">${t}</b></div><span class="end">›</span></div>`).join('')}
+    </div>
+
+    <button class="btn sec" style="margin-top:14px;color:var(--red)" ${go('splash')}>خروج از حساب</button>
+  </div>`
+};
+
+/* =====================================================================
+   موتور رندر
+   ===================================================================== */
+const ORDER = ['splash', 'onboarding', 'signup', 'verify', 'interests', 'home', 'rewards', 'level',
+  'contests', 'contest', 'missions', 'result', 'academy', 'course', 'path', 'dossier', 'assessment',
+  'exhibit', 'submitwork', 'teams', 'team', 'events', 'event', 'ticket', 'counseling', 'ticket-new',
+  'chat', 'notifications', 'invites', 'profile', 'settings'];
+
+function statusBar(dark) {
+  return `<div class="status ${dark ? 'on-dark' : ''}">
+    <span>۹:۴۱</span><span>▁▃▅ &nbsp;◔ &nbsp;█</span></div>`;
+}
+
+function appBar(s) {
+  if (!s.bar) return '';
+  if (s.bar.custom) return `<div class="appbar ${s.dark ? 'on-dark' : ''}">${s.bar.custom}</div>`;
+  const back = s.bar.back ? `<button class="ic" ${go(s.bar.back)}>→</button>` : '<span style="width:38px"></span>';
+  const action = s.bar.action ? `<button class="ic">${s.bar.action}</button>` : '<span style="width:38px"></span>';
+  return `<div class="appbar ${s.dark ? 'on-dark' : ''}">${back}<h1 style="text-align:center">${s.bar.title || ''}</h1>${action}</div>`;
+}
+
+function tabBar(active) {
+  return `<div class="tabbar">${TABS.map(t =>
+    `<button class="${t.id === active ? 'on' : ''}" data-go="${t.id}"><i>${t.icon}</i>${t.label}</button>`).join('')}</div>`;
+}
+
+function renderScreen(id) {
+  const s = S[id];
+  if (!s) return '';
+  return statusBar(s.dark) + appBar(s) + s.body + (s.chrome === 'full' ? tabBar(s.tab) : '');
+}
+
+/* ---------- حالت اپ ---------- */
+let current = 'home';
+const appEl = document.getElementById('app');
+
+function show(id) {
+  if (!S[id]) return;
+  current = id;
+  appEl.innerHTML = renderScreen(id);
+  const sc = appEl.querySelector('.scroll');
+  if (sc) sc.scrollTop = 0;
+}
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-go]');
+  if (!t) return;
+  const id = t.getAttribute('data-go');
+  if (S[id]) show(id);
+});
+
+/* ---------- حالت گالری ---------- */
+function buildGallery() {
+  const g = document.getElementById('gallery');
+  if (g.dataset.built) return;
+  g.innerHTML = ORDER.map(id => {
+    const s = S[id];
+    return `<div class="frame">
+      <div class="holder"><div class="device"><div class="app">${renderScreen(id)}</div></div></div>
+      <span class="lbl">صفحه ${s.n} — ${s.title}<small>${id}</small></span>
+    </div>`;
+  }).join('');
+  g.dataset.built = '1';
+}
+
+const btnApp = document.getElementById('mode-app');
+const btnGal = document.getElementById('mode-gallery');
+const stage = document.getElementById('stage');
+const gal = document.getElementById('gallery');
+const note = document.getElementById('hostNote');
+
+btnApp.addEventListener('click', () => {
+  btnApp.classList.add('on'); btnGal.classList.remove('on');
+  stage.style.display = 'flex'; gal.style.display = 'none';
+  note.textContent = 'روی کارت‌ها، تب‌ها و دکمه‌ها بزنید — همه صفحه‌ها به هم وصل‌اند. برای دیدن ۳۱ صفحه کنار هم، «همه صفحه‌ها» را انتخاب کنید.';
+});
+
+btnGal.addEventListener('click', () => {
+  btnGal.classList.add('on'); btnApp.classList.remove('on');
+  buildGallery();
+  stage.style.display = 'none'; gal.style.display = 'grid';
+  note.textContent = 'پیش‌نمایش کامل: ۳۱ صفحه اپ مدار به ترتیب سناریوی محصول — از اسپلش و ثبت‌نام تا پرونده رشد، مشاوره و تنظیمات حریم خصوصی.';
+});
+
+show('home');
+btnGal.click();
+</script>
+</body>
+</html>
