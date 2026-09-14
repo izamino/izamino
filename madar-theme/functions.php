@@ -7,7 +7,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MADAR_VERSION', '1.0.0' );
+define( 'MADAR_VERSION', '2.0.0' );
 
 /**
  * پشتیبانی‌های قالب.

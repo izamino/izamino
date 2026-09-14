@@ -30,6 +30,99 @@
 		});
 	}
 
+	// سوییچ پیش‌نمایش موبایل / دسکتاپ.
+	document.querySelectorAll('.showcase__switch button').forEach(function (button) {
+		button.addEventListener('click', function () {
+			var group = button.closest('.showcase');
+			if (!group) return;
+
+			group.querySelectorAll('.showcase__switch button').forEach(function (other) {
+				other.setAttribute('aria-selected', other === button ? 'true' : 'false');
+			});
+			group.querySelectorAll('.showcase__pane').forEach(function (pane) {
+				pane.classList.toggle('is-active', pane.id === 'pane-' + button.dataset.pane);
+			});
+		});
+	});
+
+	// بصری مداری هیرو: هزاران قوس مداری چرخان.
+	var canvas = document.getElementById('madar-orbit');
+	if (canvas && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+		drawOrbit(canvas);
+	}
+
+	function drawOrbit(cv) {
+		var ctx = cv.getContext('2d');
+		var rings = [];
+		var w = 0;
+		var h = 0;
+		var t = 0;
+
+		for (var i = 0; i < 230; i++) {
+			rings.push({
+				r: 0.12 + Math.random() * 0.42,
+				squash: 0.12 + Math.random() * 0.55,
+				tilt: Math.random() * Math.PI,
+				drift: (Math.random() - 0.5) * 0.0016,
+				warm: Math.random() > 0.35,
+				alpha: 0.06 + Math.random() * 0.22
+			});
+		}
+
+		function resize() {
+			var dpr = Math.min(window.devicePixelRatio || 1, 2);
+			w = cv.clientWidth;
+			h = cv.clientHeight;
+			cv.width = w * dpr;
+			cv.height = h * dpr;
+			ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+		}
+
+		function frame() {
+			t += 1;
+			ctx.clearRect(0, 0, w, h);
+
+			var cx = w / 2;
+			var cy = h * 0.42;
+			var base = Math.min(w, h) * 1.05;
+
+			var glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, base * 0.42);
+			glow.addColorStop(0, 'rgba(242,161,92,.16)');
+			glow.addColorStop(0.5, 'rgba(226,112,58,.05)');
+			glow.addColorStop(1, 'rgba(8,9,11,0)');
+			ctx.fillStyle = glow;
+			ctx.fillRect(0, 0, w, h);
+
+			ctx.lineWidth = 0.7;
+			rings.forEach(function (ring, i) {
+				var angle = ring.tilt + t * ring.drift;
+				var rx = base * ring.r;
+				var ry = rx * ring.squash;
+				var pulse = 0.82 + 0.18 * Math.sin((t + i * 9) * 0.006);
+
+				ctx.strokeStyle = ring.warm
+					? 'rgba(242,181,120,' + ring.alpha * pulse + ')'
+					: 'rgba(150,190,235,' + ring.alpha * pulse * 0.7 + ')';
+
+				ctx.beginPath();
+				ctx.ellipse(cx, cy, rx, ry, angle, 0, Math.PI * 2);
+				ctx.stroke();
+			});
+
+			ctx.beginPath();
+			ctx.arc(cx, cy, base * 0.115, 0, Math.PI * 2);
+			ctx.strokeStyle = 'rgba(255,214,166,.5)';
+			ctx.lineWidth = 1.4;
+			ctx.stroke();
+
+			requestAnimationFrame(frame);
+		}
+
+		resize();
+		window.addEventListener('resize', resize);
+		requestAnimationFrame(frame);
+	}
+
 	// تب‌های مسیر رشد.
 	var tabs = document.querySelectorAll('.track-tab');
 	Array.prototype.forEach.call(tabs, function (tab) {
