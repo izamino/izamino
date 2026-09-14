@@ -8,7 +8,7 @@
 ?>
 <section class="section" id="join">
 	<div class="wrap">
-		<div class="cta reveal">
+		<div class="cta" data-anim="scale">
 			<span class="eyebrow"><i></i><?php esc_html_e( 'به مدار بپیوند', 'madar' ); ?></span>
 			<h2><?php esc_html_e( 'مسیر رشدت را همین هفته شروع کن', 'madar' ); ?></h2>
 			<p><?php esc_html_e( 'ثبت‌نام با تأیید والد یا سرپرست انجام می‌شود. فاز اول مخصوص دانش‌آموزان پسر متوسطه اول آبادان و خرمشهر است.', 'madar' ); ?></p>

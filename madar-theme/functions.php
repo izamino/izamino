@@ -7,7 +7,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MADAR_VERSION', '2.0.0' );
+define( 'MADAR_VERSION', '4.0.0' );
 
 /**
  * پشتیبانی‌های قالب.
@@ -55,14 +55,7 @@ add_action( 'after_setup_theme', 'madar_content_width', 0 );
  * استایل و اسکریپت.
  */
 function madar_assets() {
-	wp_enqueue_style(
-		'madar-fonts',
-		'https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap',
-		array(),
-		null
-	);
-
-	wp_enqueue_style( 'madar-style', get_stylesheet_uri(), array( 'madar-fonts' ), MADAR_VERSION );
+	wp_enqueue_style( 'madar-style', get_stylesheet_uri(), array(), MADAR_VERSION );
 
 	wp_enqueue_script( 'madar-script', get_template_directory_uri() . '/assets/js/madar.js', array(), MADAR_VERSION, true );
 
@@ -71,6 +64,17 @@ function madar_assets() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'madar_assets' );
+
+/**
+ * پیش‌بارگذاری فونت متغیر ابر تا متن با وزن درست و بدون پرش نمایش داده شود.
+ */
+function madar_preload_font() {
+	printf(
+		'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n",
+		esc_url( get_template_directory_uri() . '/assets/fonts/Abar-VF.woff2' )
+	);
+}
+add_action( 'wp_head', 'madar_preload_font', 1 );
 
 /**
  * ابزارک‌ها.

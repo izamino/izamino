@@ -41,11 +41,11 @@ function madar_logo_mark( $size = 42 ) {
 		<rect width="48" height="48" rx="14" fill="url(#madar-g)"/>
 		<ellipse cx="24" cy="24" rx="15" ry="7.5" transform="rotate(-28 24 24)" stroke="#fff" stroke-opacity=".85" stroke-width="2"/>
 		<circle cx="24" cy="24" r="5" fill="#fff"/>
-		<circle cx="37" cy="15" r="3.2" fill="#F9A825"/>
+		<circle cx="37" cy="15" r="3.2" fill="#E8A75C"/>
 		<defs>
 			<linearGradient id="madar-g" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-				<stop stop-color="#5B5BF6"/>
-				<stop offset="1" stop-color="#22D3EE"/>
+				<stop stop-color="#2A34CE"/>
+				<stop offset="1" stop-color="#5560F0"/>
 			</linearGradient>
 		</defs>
 	</svg>
@@ -163,4 +163,36 @@ function madar_pagination() {
 		return;
 	}
 	echo '<nav class="pagination">' . implode( '', $links ) . '</nav>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+}
+
+/**
+ * کد QR تزئینی (الگوی ثابت، فقط برای نمایش در ماکت‌ها).
+ *
+ * @param int $size اندازه به پیکسل.
+ */
+function madar_qr( $size = 130 ) {
+	$cells = '';
+
+	for ( $i = 0; $i < 441; $i++ ) {
+		$row    = intdiv( $i, 21 );
+		$col    = $i % 21;
+		$finder = ( $row < 7 && $col < 7 ) || ( $row < 7 && $col > 13 ) || ( $row > 13 && $col < 7 );
+
+		if ( $finder ) {
+			$on = ( 0 === $row % 6 || 0 === $col % 6
+				|| ( $row > 1 && $row < 5 && $col > 1 && $col < 5 )
+				|| ( $row > 15 && $row < 19 && $col > 1 && $col < 5 )
+				|| ( $row > 1 && $row < 5 && $col > 15 && $col < 19 ) );
+		} else {
+			$on = ( 0 === ( $row * 7 + $col * 13 + ( $row * $col ) % 5 ) % 3 );
+		}
+
+		$cells .= $on ? '<i style="background:#0C0F16"></i>' : '<i></i>';
+	}
+
+	printf(
+		'<div class="qr" style="width:%1$dpx;height:%1$dpx" aria-hidden="true">%2$s</div>',
+		absint( $size ),
+		$cells // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	);
 }

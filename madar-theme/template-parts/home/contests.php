@@ -7,18 +7,21 @@
 
 $madar_items = madar_posts( 'madar_contest', 6 );
 ?>
-<section class="section section--alt" id="contests">
+<section class="section" id="contests">
 	<div class="wrap">
-		<div class="s-head reveal">
-			<span class="eyebrow"><i></i><?php esc_html_e( 'مسابقات این هفته', 'madar' ); ?></span>
-			<h2><?php esc_html_e( 'هر هفته، یک میدان تازه', 'madar' ); ?></h2>
-			<p><?php esc_html_e( 'علمی، هوش، اطلاعات عمومی، فرهنگی، ورزشی، رسانه، قرآن، فناوری و مسابقات مناسبتی. هر شرکت امتیاز دارد و مسابقات مهم جایزه واقعی.', 'madar' ); ?></p>
+		<div class="s-head s-head--split" data-anim="up">
+			<div>
+				<span class="eyebrow"><i></i><?php esc_html_e( 'مسابقات این هفته', 'madar' ); ?></span>
+				<h2><?php esc_html_e( 'هر هفته، یک میدان تازه', 'madar' ); ?></h2>
+				<p><?php esc_html_e( 'مسابقه‌ها شنبه باز می‌شوند و پنجشنبه بسته. هر شرکت امتیاز دارد، سه نفر اول جایزه می‌گیرند و نتیجه در پرونده رشد ثبت می‌شود.', 'madar' ); ?></p>
+			</div>
+			<span class="chip chip--dot chip--green"><?php esc_html_e( 'هفته جاری فعال است', 'madar' ); ?></span>
 		</div>
 
-		<div class="grid grid-3">
+		<div class="grid grid-3" data-stagger="80">
 			<?php if ( $madar_items ) : ?>
 				<?php foreach ( $madar_items as $madar_item ) : ?>
-					<article class="card reveal">
+					<article class="card" data-anim="up">
 						<div class="card__ico" aria-hidden="true"><?php echo esc_html( madar_meta( $madar_item->ID, 'madar_icon', '🏆' ) ); ?></div>
 						<?php if ( madar_track_name( $madar_item->ID ) ) : ?>
 							<span class="chip chip--cyan"><?php echo esc_html( madar_track_name( $madar_item->ID ) ); ?></span>
@@ -33,18 +36,20 @@ $madar_items = madar_posts( 'madar_contest', 6 );
 				<?php endforeach; ?>
 			<?php else : ?>
 				<?php foreach ( madar_demo( 'contests' ) as $madar_demo_item ) : ?>
-					<article class="card reveal">
-						<div class="card__ico" aria-hidden="true"><?php echo esc_html( $madar_demo_item[0] ); ?></div>
-						<span class="chip chip--cyan"><?php echo esc_html( $madar_demo_item[2] ); ?></span>
-						<h3 style="margin-top:10px"><?php echo esc_html( $madar_demo_item[1] ); ?></h3>
+					<article class="card" data-anim="up">
+						<div class="row" style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+							<div class="card__ico" style="margin:0" aria-hidden="true"><?php echo esc_html( $madar_demo_item[0] ); ?></div>
+							<span class="chip chip--cyan"><?php echo esc_html( $madar_demo_item[2] ); ?></span>
+						</div>
+						<h3><?php echo esc_html( $madar_demo_item[1] ); ?></h3>
 						<p><?php echo esc_html( $madar_demo_item[3] ); ?></p>
 						<div class="card__foot">
 							<span>⚡ <?php echo esc_html( $madar_demo_item[4] ); ?></span>
-							<span>⏳ <?php echo esc_html( $madar_demo_item[5] ); ?></span>
+							<span>⏱ <?php echo esc_html( $madar_demo_item[7] ); ?></span>
 						</div>
-						<div class="card__foot" style="border-top:0;padding-top:6px;margin-top:0">
+						<div class="card__foot" style="border-top:0;padding-top:8px;margin-top:0">
 							<span>👥 <?php echo esc_html( $madar_demo_item[6] ); ?></span>
-							<a class="btn btn--primary btn--sm" href="<?php echo esc_url( madar_opt( 'madar_dl_android' ) ); ?>"><?php esc_html_e( 'شرکت در مسابقه', 'madar' ); ?></a>
+							<span>⏳ <?php echo esc_html( $madar_demo_item[5] ); ?></span>
 						</div>
 					</article>
 				<?php endforeach; ?>

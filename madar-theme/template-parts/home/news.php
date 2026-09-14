@@ -13,14 +13,14 @@ if ( ! $madar_news ) {
 ?>
 <section class="section" id="news">
 	<div class="wrap">
-		<div class="s-head reveal">
+		<div class="s-head" data-anim="up">
 			<span class="eyebrow"><i></i><?php esc_html_e( 'خبرها و اطلاعیه‌ها', 'madar' ); ?></span>
 			<h2><?php esc_html_e( 'آخرین خبرهای مدار', 'madar' ); ?></h2>
 		</div>
 
-		<div class="grid grid-3">
+		<div class="grid grid-3" data-stagger="80">
 			<?php foreach ( $madar_news as $madar_post ) : ?>
-				<article class="card card--media post-card reveal">
+				<article class="card card--media post-card" data-anim="up">
 					<?php madar_thumb( $madar_post->ID, '📣' ); ?>
 					<div class="card__body">
 						<h3><a href="<?php echo esc_url( get_permalink( $madar_post ) ); ?>"><?php echo esc_html( get_the_title( $madar_post ) ); ?></a></h3>

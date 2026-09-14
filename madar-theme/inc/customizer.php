@@ -127,8 +127,11 @@ add_action( 'customize_register', 'madar_customize_register' );
  */
 function madar_home_sections() {
 	return array(
+		'ticker'   => __( 'نوار فعالیت زنده', 'madar' ),
 		'loop'     => __( 'حلقه رشد', 'madar' ),
 		'features' => __( 'امکانات اپ', 'madar' ),
+		'how'      => __( 'چطور شروع می‌کنی', 'madar' ),
+		'screens'  => __( 'اسکرین‌های اپ', 'madar' ),
 		'tracks'   => __( 'مسیر رشد', 'madar' ),
 		'dossier'  => __( 'پرونده رشد', 'madar' ),
 		'contests' => __( 'مسابقات هفتگی', 'madar' ),
@@ -137,11 +140,15 @@ function madar_home_sections() {
 		'events'   => __( 'رویدادها', 'madar' ),
 		'gallery'  => __( 'نمایشگاه استعدادها', 'madar' ),
 		'teams'    => __( 'تیم‌ها و انجمن‌ها', 'madar' ),
+		'voices'   => __( 'روایت‌ها', 'madar' ),
+		'numbers'  => __( 'اعداد کلیدی', 'madar' ),
 		'schools'  => __( 'باشگاه مدارس', 'madar' ),
 		'safety'   => __( 'ایمنی نوجوان', 'madar' ),
 		'panels'   => __( 'پنل‌های مدیریتی', 'madar' ),
+		'roadmap'  => __( 'نقشه راه', 'madar' ),
 		'news'     => __( 'آخرین اخبار', 'madar' ),
 		'faq'      => __( 'سؤالات پرتکرار', 'madar' ),
+		'download' => __( 'دانلود اپلیکیشن', 'madar' ),
 		'cta'      => __( 'فراخوان پایانی', 'madar' ),
 	);
 }

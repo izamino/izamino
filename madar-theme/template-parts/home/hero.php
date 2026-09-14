@@ -36,7 +36,7 @@
 			<span><?php esc_html_e( 'آبادان و خرمشهر', 'madar' ); ?></span>
 		</div>
 
-		<div class="showcase">
+		<div class="showcase" data-anim="scale">
 			<div style="text-align:center">
 				<div class="showcase__switch" role="tablist" aria-label="<?php esc_attr_e( 'حالت پیش‌نمایش', 'madar' ); ?>">
 					<button type="button" role="tab" aria-selected="true" data-pane="mobile"><?php esc_html_e( 'MOBILE', 'madar' ); ?></button>
@@ -139,10 +139,10 @@
 			</div>
 		</div>
 
-		<div class="hero__stats">
+		<div class="hero__stats" data-stagger="90">
 			<?php for ( $i = 1; $i <= 4; $i++ ) : ?>
-				<div class="stat">
-					<b><?php echo esc_html( madar_opt( 'madar_stat' . $i . '_num' ) ); ?></b>
+				<div class="stat" data-anim="up">
+					<b data-count><?php echo esc_html( madar_opt( 'madar_stat' . $i . '_num' ) ); ?></b>
 					<span><?php echo esc_html( madar_opt( 'madar_stat' . $i . '_lbl' ) ); ?></span>
 				</div>
 			<?php endfor; ?>

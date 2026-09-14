@@ -8,7 +8,7 @@
 ?>
 <section class="section" id="dossier">
 	<div class="wrap split">
-		<div class="reveal">
+		<div data-anim="up">
 			<span class="eyebrow"><i></i><?php esc_html_e( 'قوی‌ترین قابلیت مدار', 'madar' ); ?></span>
 			<h2><?php esc_html_e( 'پرونده رشد دیجیتال، از پایه هفتم', 'madar' ); ?></h2>
 			<p style="color:var(--muted)">
@@ -25,7 +25,7 @@
 			</ul>
 		</div>
 
-		<div class="dossier reveal">
+		<div class="dossier" data-anim="scale">
 			<div class="dossier__head">
 				<div class="dossier__avatar" aria-hidden="true">م ر</div>
 				<div>
@@ -36,7 +36,7 @@
 
 			<ul class="dossier__rows">
 				<li><span><?php esc_html_e( 'سطح باشگاه', 'madar' ); ?></span><b><?php esc_html_e( 'سطح ۴ — فعال', 'madar' ); ?></b></li>
-				<li><span><?php esc_html_e( 'دوره‌های گذرانده', 'madar' ); ?></span><b><?php esc_html_e( '۳ دوره رسانه', 'madar' ); ?></b></li>
+				<li><span><?php esc_html_e( 'دوره‌های گذرانده', 'madar' ); ?></span><b data-count><?php esc_html_e( '۳ دوره رسانه', 'madar' ); ?></b></li>
 				<li><span><?php esc_html_e( 'مسابقات', 'madar' ); ?></span><b><?php esc_html_e( '۵ شرکت · ۲ مقام', 'madar' ); ?></b></li>
 				<li><span><?php esc_html_e( 'کار داوطلبانه', 'madar' ); ?></span><b><?php esc_html_e( '۳ برنامه', 'madar' ); ?></b></li>
 				<li><span><?php esc_html_e( 'مهارت تدوین', 'madar' ); ?></span><span class="meter"><i style="width:72%"></i></span></li>

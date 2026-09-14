@@ -59,10 +59,15 @@ function comments_open() { return false; }
 function get_comments_number() { return 0; }
 
 function wp_head() {
-	echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
-	echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
-	echo '<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">' . "\n";
-	echo "<style>\n" . file_get_contents( get_template_directory() . '/style.css' ) . "\n</style>\n";
+	$css  = file_get_contents( get_template_directory() . '/style.css' );
+	$font = base64_encode( file_get_contents( get_template_directory() . '/assets/fonts/Abar-VF.woff2' ) );
+	$css  = str_replace(
+		'src: url("assets/fonts/Abar-VF.woff2") format("woff2-variations"),
+		url("assets/fonts/Abar-VF.woff") format("woff-variations");',
+		'src: url(data:font/woff2;base64,' . $font . ') format("woff2-variations");',
+		$css
+	);
+	echo "<style>\n" . $css . "\n</style>\n";
 	echo '<title>مدار | باشگاه رشد دانش‌آموزان</title>' . "\n";
 }
 

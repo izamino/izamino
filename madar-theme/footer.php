@@ -38,10 +38,12 @@
 					?>
 					<ul>
 						<li><a href="#features"><?php esc_html_e( 'امکانات اپ', 'madar' ); ?></a></li>
+						<li><a href="#screens"><?php esc_html_e( 'اسکرین‌های اپ', 'madar' ); ?></a></li>
 						<li><a href="#contests"><?php esc_html_e( 'مسابقات هفتگی', 'madar' ); ?></a></li>
 						<li><a href="#academy"><?php esc_html_e( 'آکادمی مهارت', 'madar' ); ?></a></li>
 						<li><a href="#rewards"><?php esc_html_e( 'باشگاه امتیازات', 'madar' ); ?></a></li>
 						<li><a href="#gallery"><?php esc_html_e( 'نمایشگاه استعدادها', 'madar' ); ?></a></li>
+						<li><a href="#roadmap"><?php esc_html_e( 'نقشه راه', 'madar' ); ?></a></li>
 					</ul>
 					<?php
 				}
@@ -56,6 +58,7 @@
 					<li><a href="#panels"><?php esc_html_e( 'مدیریت مرکزی', 'madar' ); ?></a></li>
 					<li><a href="#safety"><?php esc_html_e( 'ایمنی نوجوان', 'madar' ); ?></a></li>
 					<li><a href="#faq"><?php esc_html_e( 'سؤالات والدین', 'madar' ); ?></a></li>
+					<li><a href="#voices"><?php esc_html_e( 'روایت‌ها', 'madar' ); ?></a></li>
 				</ul>
 			</div>
 
@@ -66,6 +69,11 @@
 					<li>☎️ <?php echo esc_html( madar_opt( 'madar_phone' ) ); ?></li>
 					<li>✉️ <?php echo esc_html( madar_opt( 'madar_email' ) ); ?></li>
 				</ul>
+				<form class="newsletter" onsubmit="return false">
+					<input type="email" placeholder="<?php esc_attr_e( 'ایمیل برای خبرنامه ماهانه', 'madar' ); ?>" aria-label="<?php esc_attr_e( 'ایمیل', 'madar' ); ?>">
+					<button class="btn btn--primary btn--sm" type="submit"><?php esc_html_e( 'عضویت', 'madar' ); ?></button>
+				</form>
+
 				<div class="social" style="margin-top:16px">
 					<a href="<?php echo esc_url( madar_opt( 'madar_social_ig' ) ); ?>" aria-label="<?php esc_attr_e( 'اینستاگرام', 'madar' ); ?>">📸</a>
 					<a href="<?php echo esc_url( madar_opt( 'madar_social_tg' ) ); ?>" aria-label="<?php esc_attr_e( 'تلگرام', 'madar' ); ?>">✈️</a>

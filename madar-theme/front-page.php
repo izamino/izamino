@@ -10,8 +10,11 @@ get_header();
 get_template_part( 'template-parts/home/hero' );
 
 $madar_sections = array(
+	'ticker',
 	'loop',
 	'features',
+	'how',
+	'screens',
 	'tracks',
 	'dossier',
 	'contests',
@@ -20,11 +23,15 @@ $madar_sections = array(
 	'events',
 	'gallery',
 	'teams',
+	'voices',
+	'numbers',
 	'schools',
 	'safety',
 	'panels',
+	'roadmap',
 	'news',
 	'faq',
+	'download',
 	'cta',
 );
 

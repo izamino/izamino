@@ -9,13 +9,13 @@ $madar_items = madar_posts( 'madar_team', 12 );
 ?>
 <section class="section section--tight" id="teams">
 	<div class="wrap">
-		<div class="s-head s-head--center reveal">
+		<div class="s-head s-head--center" data-anim="up">
 			<span class="eyebrow"><i></i><?php esc_html_e( 'تیم‌ها و انجمن‌ها', 'madar' ); ?></span>
 			<h2><?php esc_html_e( 'جای هر استعداد، یک تیم', 'madar' ); ?></h2>
 			<p><?php esc_html_e( 'با رسیدن به سطح لازم، درخواست عضویت بده و بخشی از تیم‌های واقعی مدار شو.', 'madar' ); ?></p>
 		</div>
 
-		<div class="teams reveal" style="justify-content:center">
+		<div class="teams" data-anim="up" data-stagger="50" style="justify-content:center">
 			<?php if ( $madar_items ) : ?>
 				<?php foreach ( $madar_items as $madar_item ) : ?>
 					<a class="team" href="<?php echo esc_url( get_permalink( $madar_item ) ); ?>">
