@@ -45,7 +45,7 @@
 		});
 	});
 
-	// بصری مداری هیرو: هزاران قوس مداری چرخان.
+	// بصری مداری هیرو: قوس‌های ظریف مداری روی کاغذ روشن.
 	var canvas = document.getElementById('madar-orbit');
 	if (canvas && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 		drawOrbit(canvas);
@@ -58,14 +58,14 @@
 		var h = 0;
 		var t = 0;
 
-		for (var i = 0; i < 230; i++) {
+		for (var i = 0; i < 190; i++) {
 			rings.push({
-				r: 0.12 + Math.random() * 0.42,
-				squash: 0.12 + Math.random() * 0.55,
+				r: 0.16 + Math.random() * 0.4,
+				squash: 0.14 + Math.random() * 0.52,
 				tilt: Math.random() * Math.PI,
-				drift: (Math.random() - 0.5) * 0.0016,
-				warm: Math.random() > 0.35,
-				alpha: 0.06 + Math.random() * 0.22
+				drift: (Math.random() - 0.5) * 0.0013,
+				warm: Math.random() > 0.55,
+				alpha: 0.03 + Math.random() * 0.08
 			});
 		}
 
@@ -83,26 +83,19 @@
 			ctx.clearRect(0, 0, w, h);
 
 			var cx = w / 2;
-			var cy = h * 0.42;
-			var base = Math.min(w, h) * 1.05;
+			var cy = h * 0.44;
+			var base = Math.min(w, h) * 1.12;
 
-			var glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, base * 0.42);
-			glow.addColorStop(0, 'rgba(242,161,92,.16)');
-			glow.addColorStop(0.5, 'rgba(226,112,58,.05)');
-			glow.addColorStop(1, 'rgba(8,9,11,0)');
-			ctx.fillStyle = glow;
-			ctx.fillRect(0, 0, w, h);
-
-			ctx.lineWidth = 0.7;
+			ctx.lineWidth = 0.65;
 			rings.forEach(function (ring, i) {
 				var angle = ring.tilt + t * ring.drift;
 				var rx = base * ring.r;
 				var ry = rx * ring.squash;
-				var pulse = 0.82 + 0.18 * Math.sin((t + i * 9) * 0.006);
+				var pulse = 0.78 + 0.22 * Math.sin((t + i * 11) * 0.005);
 
 				ctx.strokeStyle = ring.warm
-					? 'rgba(242,181,120,' + ring.alpha * pulse + ')'
-					: 'rgba(150,190,235,' + ring.alpha * pulse * 0.7 + ')';
+					? 'rgba(196,116,38,' + ring.alpha * pulse + ')'
+					: 'rgba(42,52,206,' + ring.alpha * pulse * 0.9 + ')';
 
 				ctx.beginPath();
 				ctx.ellipse(cx, cy, rx, ry, angle, 0, Math.PI * 2);
@@ -110,9 +103,9 @@
 			});
 
 			ctx.beginPath();
-			ctx.arc(cx, cy, base * 0.115, 0, Math.PI * 2);
-			ctx.strokeStyle = 'rgba(255,214,166,.5)';
-			ctx.lineWidth = 1.4;
+			ctx.arc(cx, cy, base * 0.1, 0, Math.PI * 2);
+			ctx.strokeStyle = 'rgba(42,52,206,.16)';
+			ctx.lineWidth = 1;
 			ctx.stroke();
 
 			requestAnimationFrame(frame);
