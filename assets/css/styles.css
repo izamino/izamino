@@ -89,6 +89,8 @@
   --pattern-star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76'%3E%3Cg fill='none' stroke='%230a4638' stroke-width='1'%3E%3Crect x='14.5' y='14.5' width='47' height='47'/%3E%3Crect x='14.5' y='14.5' width='47' height='47' transform='rotate(45 38 38)'/%3E%3C/g%3E%3C/svg%3E");
   --pattern-star-gold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76'%3E%3Cg fill='none' stroke='%23ecd394' stroke-width='1'%3E%3Crect x='14.5' y='14.5' width='47' height='47'/%3E%3Crect x='14.5' y='14.5' width='47' height='47' transform='rotate(45 38 38)'/%3E%3C/g%3E%3C/svg%3E");
   --rule-orn: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='112' height='10' viewBox='0 0 112 10'%3E%3Cg fill='none' stroke='%23cfa34a' stroke-width='1.4'%3E%3Cpath d='M0 5h40M72 5h40'/%3E%3Crect x='51.5' y='1.5' width='9' height='9' transform='rotate(45 56 6)'/%3E%3C/g%3E%3C/svg%3E");
+  --pattern-ground: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'%3E%3Cg fill='none' stroke='%230a4638' stroke-width='1.1'%3E%3Crect x='25' y='25' width='78' height='78'/%3E%3Crect x='25' y='25' width='78' height='78' transform='rotate(45 64 64)'/%3E%3Ccircle cx='64' cy='64' r='16'/%3E%3C/g%3E%3C/svg%3E");
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
   --arch-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140' preserveAspectRatio='none'%3E%3Cpath d='M0 140V56C0 26 22 0 50 0s50 26 50 56v84z' fill='%23000'/%3E%3C/svg%3E");
 }
 
@@ -181,6 +183,80 @@ svg {
 ::selection {
   background: var(--gold-300);
   color: var(--green-900);
+}
+
+/* -------------------------------------------------- زمینهٔ صفحه (کاغذ) --- */
+
+/* یک لایهٔ ثابت پشت همهٔ محتوا: تابش رنگی ملایم، نقش‌مایهٔ هندسی درشت،
+   حاشیهٔ مذهّب در دو سوی ستون محتوا، و دانه‌بندی کاغذ. */
+.page-ground {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(1150px 720px at 86% -8%, rgb(207 163 74 / 22%), transparent 62%),
+    radial-gradient(880px 640px at 4% 14%, rgb(15 90 73 / 11%), transparent 60%),
+    radial-gradient(1250px 820px at 46% 112%, rgb(10 70 56 / 14%), transparent 64%);
+  background-repeat: no-repeat;
+}
+
+/* نقش‌مایهٔ هندسی درشت — باید حس شود، نه دیده شود */
+.page-ground::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--pattern-ground);
+  background-size: 168px 168px;
+  opacity: 0.026;
+}
+
+.site-shell {
+  position: relative;
+  z-index: 1;
+}
+
+/* حاشیهٔ مذهّب: دو خط مویی طلایی در دو سوی ستون محتوا، با نقش‌مایه‌ای که
+   به سمت بیرون محو می‌شود. فقط وقتی فضای حاشیه واقعاً وجود دارد. */
+.ground-margins {
+  display: none;
+}
+
+@media (min-width: 1320px) {
+  .ground-margins {
+    display: block;
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--gold-600), var(--gold-600)),
+      linear-gradient(var(--gold-600), var(--gold-600)),
+      linear-gradient(var(--gold-600), var(--gold-600)),
+      linear-gradient(var(--gold-600), var(--gold-600));
+    background-size:
+      1px 100%,
+      3px 100%,
+      1px 100%,
+      3px 100%;
+    background-position:
+      calc(50% - 618px) 0,
+      calc(50% - 628px) 0,
+      calc(50% + 618px) 0,
+      calc(50% + 628px) 0;
+    background-repeat: no-repeat;
+    opacity: 0.34;
+    mask-image: linear-gradient(transparent, #000 14%, #000 86%, transparent);
+    -webkit-mask-image: linear-gradient(transparent, #000 14%, #000 86%, transparent);
+  }
+}
+
+/* دانه‌بندی کاغذ — رنگ تخت را می‌شکند */
+.ground-grain {
+  position: absolute;
+  inset: 0;
+  background-image: var(--grain);
+  background-size: 220px 220px;
+  opacity: 0.042;
 }
 
 .skip-link {
@@ -2451,6 +2527,11 @@ footer p {
     background var(--t) var(--ease);
 }
 
+body.is-locked .to-top {
+  opacity: 0;
+  visibility: hidden;
+}
+
 .to-top.is-visible {
   opacity: 1;
   visibility: visible;
@@ -2788,6 +2869,7 @@ footer p {
 }
 
 @media print {
+  .page-ground,
   .topbar,
   .menu-panel,
   .menu-backdrop,
