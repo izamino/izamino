@@ -1,0 +1,2808 @@
+@charset "UTF-8";
+
+/* ==========================================================================
+   تفکرناب آینده اروند — مجتمع مسجد‌محور شباب اهل‌الجنه
+   طراحی: تلفیق زبان بصری سنتی (هندسه اسلامی، طاق، رنگ‌های خاک و طلا)
+   با چیدمان و حرکت مدرن. تایپ‌فیس: اَبَر (Abar Variable — fontiran.com)
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- 1. فونت */
+
+@font-face {
+  font-family: "Abar VF";
+  src:
+    url("../fonts/Abar-VF.woff2") format("woff2"),
+    url("../fonts/Abar-VF.woff") format("woff");
+  font-weight: 100 950;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ------------------------------------------------------------ 2. توکن‌ها */
+
+:root {
+  /* رنگ */
+  --paper: #f6f1e4;
+  --paper-2: #fffdf7;
+  --paper-3: #fbf7ec;
+  --ink: #13302a;
+  --ink-soft: #5e726b;
+  --ink-faint: #8a9993;
+
+  --green-900: #04241d;
+  --green-800: #073329;
+  --green-700: #0a4638;
+  --green-600: #0f5a49;
+  --green-500: #15705c;
+
+  --gold-700: #8a6620;
+  --gold-600: #b3862f;
+  --gold-500: #cfa34a;
+  --gold-400: #ddb862;
+  --gold-300: #ecd394;
+
+  --clay: #a35334;
+  --navy: #16294a;
+
+  --line: #e3d8bd;
+  --line-soft: #ece4d2;
+
+  /* شعاع */
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 26px;
+  --r-xl: 34px;
+
+  /* سایه */
+  --sh-1: 0 1px 2px rgb(19 48 42 / 4%), 0 4px 14px rgb(19 48 42 / 5%);
+  --sh-2: 0 2px 6px rgb(19 48 42 / 5%), 0 18px 40px rgb(19 48 42 / 8%);
+  --sh-3: 0 4px 12px rgb(19 48 42 / 7%), 0 34px 70px rgb(19 48 42 / 12%);
+  --sh-gold: 0 10px 30px rgb(179 134 47 / 22%);
+
+  /* حرکت */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 0.18s;
+  --t: 0.32s;
+  --t-slow: 0.62s;
+
+  /* چیدمان */
+  --wrap: min(1180px, 100% - 44px);
+  --topbar-h: 76px;
+
+  /* محور کنتراست فونت اَبَر: ۰ مدرن/کم‌کنتراست، ۱۰۰ سنتی/پرکنتراست */
+  --cntr-body: 0;
+  --cntr-display: 100;
+
+  color-scheme: light;
+  font-family: "Abar VF", "Abar", Vazirmatn, Tahoma, "Segoe UI", sans-serif;
+  font-variation-settings: "CNTR" var(--cntr-body);
+  font-synthesis: none;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+/* نقش‌مایه هندسی (رُبع‌الحزب) — به‌عنوان بافت پس‌زمینه */
+:root {
+  --pattern-star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76'%3E%3Cg fill='none' stroke='%230a4638' stroke-width='1'%3E%3Crect x='14.5' y='14.5' width='47' height='47'/%3E%3Crect x='14.5' y='14.5' width='47' height='47' transform='rotate(45 38 38)'/%3E%3C/g%3E%3C/svg%3E");
+  --pattern-star-gold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76'%3E%3Cg fill='none' stroke='%23ecd394' stroke-width='1'%3E%3Crect x='14.5' y='14.5' width='47' height='47'/%3E%3Crect x='14.5' y='14.5' width='47' height='47' transform='rotate(45 38 38)'/%3E%3C/g%3E%3C/svg%3E");
+  --rule-orn: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='112' height='10' viewBox='0 0 112 10'%3E%3Cg fill='none' stroke='%23cfa34a' stroke-width='1.4'%3E%3Cpath d='M0 5h40M72 5h40'/%3E%3Crect x='51.5' y='1.5' width='9' height='9' transform='rotate(45 56 6)'/%3E%3C/g%3E%3C/svg%3E");
+  --arch-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140' preserveAspectRatio='none'%3E%3Cpath d='M0 140V56C0 26 22 0 50 0s50 26 50 56v84z' fill='%23000'/%3E%3C/svg%3E");
+}
+
+/* ------------------------------------------------------------- 3. پایه‌ها */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--topbar-h) + 18px);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--paper);
+  font-size: 16px;
+  line-height: 1.9;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body.is-locked {
+  overflow: hidden;
+}
+
+h1,
+h2,
+h3,
+.brand-text,
+.accordion-title,
+.progress-ring strong {
+  font-variation-settings: "CNTR" var(--cntr-display);
+  letter-spacing: -0.005em;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.45;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+button,
+a,
+input {
+  font: inherit;
+  font-variation-settings: inherit;
+}
+
+button {
+  cursor: pointer;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg {
+  max-width: 100%;
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold-600);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--gold-300);
+  color: var(--green-900);
+}
+
+.skip-link {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 200;
+  transform: translateY(-160%);
+  background: var(--green-800);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: var(--r-xs);
+  font-weight: 700;
+  transition: transform var(--t) var(--ease-out);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* ------------------------------------------------------- 4. اجزای مشترک */
+
+.section {
+  width: var(--wrap);
+  margin-inline: auto;
+  padding: clamp(52px, 6vw, 88px) 0;
+}
+
+.section-title {
+  position: relative;
+  max-width: 760px;
+}
+
+.section-title > span,
+.gold-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--gold-400), var(--gold-500));
+  color: var(--green-900);
+  border-radius: 999px;
+  padding: 7px 16px 7px 14px;
+  font-weight: 800;
+  font-size: 13.5px;
+  line-height: 1.6;
+  box-shadow: var(--sh-gold);
+}
+
+.section-title > span::before,
+.gold-pill::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  background: var(--green-800);
+  transform: rotate(45deg);
+  border-radius: 1px;
+  flex: none;
+}
+
+.section-title h2 {
+  font-size: clamp(27px, 3.1vw, 43px);
+  font-weight: 800;
+  margin: 18px 0 0;
+  color: var(--green-700);
+}
+
+.section-title h2::after {
+  content: "";
+  display: block;
+  width: 112px;
+  height: 10px;
+  margin-top: 18px;
+  background: var(--rule-orn) center / 112px 10px no-repeat;
+  opacity: 0.9;
+}
+
+.section-title p,
+.section-lead {
+  color: var(--ink-soft);
+  line-height: 2.05;
+  margin-top: 14px;
+  font-size: 15.5px;
+}
+
+.section-lead {
+  max-width: 760px;
+}
+
+/* ------------------------------------------------------------ 5. سربرگ */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: var(--green-800);
+  color: #fff;
+  transition: background var(--t) var(--ease), box-shadow var(--t) var(--ease);
+}
+
+.topbar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--pattern-star-gold);
+  background-size: 56px;
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.topbar.is-stuck {
+  background: rgb(4 36 29 / 92%);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: 0 10px 34px rgb(4 36 29 / 26%);
+}
+
+.topbar-inner {
+  position: relative;
+  width: var(--wrap);
+  margin-inline: auto;
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  transition: height var(--t) var(--ease);
+}
+
+.topbar.is-stuck .topbar-inner {
+  height: 62px;
+}
+
+.topbar-rule {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(236 211 148 / 45%) 22%,
+    rgb(236 211 148 / 45%) 78%,
+    transparent
+  );
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-inline-end: auto;
+  color: var(--gold-300);
+}
+
+.brand-mark {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgb(236 211 148 / 34%);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 6%);
+  transition: transform var(--t-slow) var(--ease-out), background var(--t) var(--ease);
+}
+
+.brand-mark svg {
+  width: 22px;
+  height: 22px;
+}
+
+.brand:hover .brand-mark {
+  transform: rotate(45deg);
+  background: rgb(236 211 148 / 16%);
+}
+
+.brand-text {
+  font-weight: 800;
+  font-size: clamp(16px, 1.5vw, 19px);
+  white-space: nowrap;
+}
+
+.desktop-links {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.desktop-links a {
+  position: relative;
+  color: #e9efe9;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 9px 16px;
+  border-radius: 999px;
+  transition: color var(--t) var(--ease), background var(--t) var(--ease);
+}
+
+.desktop-links a::after {
+  content: "";
+  position: absolute;
+  inset-inline: 16px;
+  bottom: 5px;
+  height: 1.5px;
+  background: var(--gold-400);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--t) var(--ease-out);
+}
+
+.desktop-links a:hover,
+.desktop-links a.is-active {
+  color: #fff;
+  background: rgb(255 255 255 / 7%);
+}
+
+.desktop-links a:hover::after,
+.desktop-links a.is-active::after {
+  transform: scaleX(1);
+}
+
+.menu-button {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  margin-inline-start: 14px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 7%);
+  display: grid;
+  align-content: center;
+  justify-items: stretch;
+  gap: 5px;
+  padding: 12px;
+  transition: background var(--t) var(--ease), border-color var(--t) var(--ease);
+}
+
+.menu-button:hover {
+  background: rgb(236 211 148 / 16%);
+  border-color: rgb(236 211 148 / 40%);
+}
+
+.menu-button i {
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transform-origin: center;
+  transition: transform var(--t) var(--ease-out), opacity var(--t-fast) var(--ease);
+}
+
+.menu-button[aria-expanded="true"] i:nth-child(1) {
+  transform: translateY(7px) rotate(-45deg);
+}
+
+.menu-button[aria-expanded="true"] i:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-button[aria-expanded="true"] i:nth-child(3) {
+  transform: translateY(-7px) rotate(45deg);
+}
+
+/* ---------------------------------------------------------- 6. منوی کشویی */
+
+.menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgb(4 36 29 / 55%);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity var(--t) var(--ease);
+}
+
+.menu-backdrop.is-open {
+  opacity: 1;
+}
+
+.menu-panel {
+  position: fixed;
+  z-index: 80;
+  top: 0;
+  inset-inline-end: 0;
+  height: 100dvh;
+  width: min(370px, 88vw);
+  background: var(--green-800);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 26px 26px calc(26px + env(safe-area-inset-bottom, 0px));
+  box-shadow: -26px 0 70px rgb(0 27 22 / 45%);
+  transform: translateX(-102%);
+  transition: transform var(--t-slow) var(--ease-out);
+  overflow-y: auto;
+}
+
+.menu-panel.is-open {
+  transform: translateX(0);
+}
+
+.menu-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--pattern-star-gold);
+  background-size: 68px;
+  opacity: 0.045;
+  pointer-events: none;
+}
+
+.menu-close {
+  align-self: flex-start;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 6%);
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  transition: background var(--t) var(--ease), transform var(--t) var(--ease-out);
+}
+
+.menu-close:hover {
+  background: rgb(255 255 255 / 14%);
+  transform: rotate(90deg);
+}
+
+.menu-eyebrow {
+  color: var(--gold-300);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin: 22px 0 8px;
+}
+
+.menu-panel a {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 15px 0;
+  border-bottom: 1px solid rgb(255 255 255 / 12%);
+  transition: padding-inline-start var(--t) var(--ease-out);
+}
+
+.menu-panel a b {
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.menu-panel a span {
+  font-size: 13px;
+  color: rgb(255 255 255 / 58%);
+}
+
+.menu-panel a::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  background: var(--gold-400);
+  transform: rotate(45deg) scale(0);
+  transition: transform var(--t) var(--ease-out);
+}
+
+.menu-panel a:hover {
+  padding-inline-start: 16px;
+}
+
+.menu-panel a:hover::before {
+  transform: rotate(45deg) scale(1);
+}
+
+.menu-ornament {
+  margin-top: auto;
+  height: 70px;
+  background-image: var(--pattern-star-gold);
+  background-size: 44px;
+  opacity: 0.22;
+  mask-image: linear-gradient(transparent, #000);
+  -webkit-mask-image: linear-gradient(transparent, #000);
+}
+
+/* ------------------------------------------------------------- 7. هیرو */
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  min-height: clamp(540px, 78vh, 720px);
+  display: flex;
+  align-items: center;
+  padding: clamp(60px, 8vw, 96px) 0 116px;
+  color: #fff;
+  overflow: hidden;
+}
+
+.hero-media {
+  position: absolute;
+  inset: -6% 0 0;
+  z-index: -3;
+}
+
+.hero-media img {
+  width: 100%;
+  height: 106%;
+  object-fit: cover;
+  object-position: center 48%;
+  transform: scale(1.04) translateY(var(--parallax, 0px));
+  will-change: transform;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(90deg, rgb(3 34 28 / 26%), rgb(3 34 28 / 84%) 62%, rgb(3 34 28 / 94%)),
+    linear-gradient(to top, rgb(3 34 28 / 78%), transparent 42%);
+}
+
+.hero-pattern {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: var(--pattern-star-gold);
+  background-size: 92px;
+  opacity: 0.07;
+  mask-image: linear-gradient(to left, #000, transparent 72%);
+  -webkit-mask-image: linear-gradient(to left, #000, transparent 72%);
+}
+
+.hero-content {
+  position: relative;
+  width: var(--wrap);
+  margin-inline: auto;
+  max-width: none;
+}
+
+.hero-content > * {
+  max-width: 660px;
+}
+
+.eyebrow {
+  display: inline-block;
+  color: var(--gold-300);
+  border-inline-start: 2px solid var(--gold-500);
+  padding-inline-start: 13px;
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.hero h1 {
+  font-size: clamp(34px, 5vw, 68px);
+  line-height: 1.32;
+  font-weight: 800;
+  margin: 20px 0 6px;
+  text-shadow: 0 2px 30px rgb(0 0 0 / 22%);
+}
+
+.hero-content > strong {
+  display: block;
+  color: var(--gold-400);
+  font-size: clamp(24px, 3.2vw, 45px);
+  font-weight: 700;
+  font-variation-settings: "CNTR" var(--cntr-display);
+  margin-bottom: 22px;
+}
+
+.hero p {
+  font-size: clamp(15px, 1.3vw, 18px);
+  line-height: 2.1;
+  color: rgb(255 255 255 / 86%);
+  max-width: 540px;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.hero-actions a {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 42%);
+  border-radius: var(--r-sm);
+  padding: 14px 30px;
+  font-weight: 700;
+  font-size: 15px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  background: rgb(255 255 255 / 6%);
+  transition:
+    transform var(--t) var(--ease-out),
+    background var(--t) var(--ease),
+    border-color var(--t) var(--ease),
+    box-shadow var(--t) var(--ease);
+}
+
+.hero-actions a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 26%), transparent);
+  transform: translateX(-120%);
+  transition: transform 0.7s var(--ease-out);
+}
+
+.hero-actions a:hover {
+  transform: translateY(-3px);
+  background: rgb(255 255 255 / 14%);
+  border-color: var(--gold-300);
+}
+
+.hero-actions a:hover::after {
+  transform: translateX(120%);
+}
+
+.hero-actions .primary {
+  background: linear-gradient(135deg, var(--gold-400), var(--gold-500));
+  color: var(--green-900);
+  border-color: transparent;
+  box-shadow: var(--sh-gold);
+}
+
+.hero-actions .primary:hover {
+  background: linear-gradient(135deg, var(--gold-300), var(--gold-400));
+  box-shadow: 0 16px 38px rgb(179 134 47 / 34%);
+}
+
+/* نوار اوقات شرعی */
+
+.prayer {
+  position: absolute;
+  z-index: 2;
+  inset: auto 0 0;
+  background: rgb(4 36 29 / 82%);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border-top: 1px solid rgb(236 211 148 / 26%);
+  color: #e6ece7;
+  font-size: 14px;
+}
+
+.prayer-track {
+  width: var(--wrap);
+  margin-inline: auto;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 3vw, 34px);
+  padding: 11px 0;
+}
+
+.prayer-city {
+  font-weight: 800;
+  color: #fff;
+  padding-inline-end: clamp(14px, 3vw, 34px);
+  border-inline-end: 1px solid rgb(255 255 255 / 16%);
+  white-space: nowrap;
+}
+
+.prayer time {
+  color: rgb(255 255 255 / 62%);
+  white-space: nowrap;
+}
+
+.prayer b {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  color: var(--gold-300);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.prayer b span {
+  color: rgb(255 255 255 / 55%);
+  font-weight: 500;
+  font-size: 12.5px;
+}
+
+/* ---------------------------------------------------------- 8. اطلاعیه */
+
+.notice {
+  position: relative;
+  width: var(--wrap);
+  margin: 26px auto 0;
+  border: 1px solid var(--line);
+  background: linear-gradient(135deg, var(--paper-2), #fff8e9);
+  border-radius: var(--r-md);
+  padding: 18px 26px 18px 26px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 24px;
+  box-shadow: var(--sh-1);
+  overflow: hidden;
+}
+
+.notice::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 4px;
+  background: linear-gradient(var(--gold-400), var(--gold-600));
+}
+
+.notice b {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--gold-700);
+  font-weight: 800;
+}
+
+.notice b::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold-500);
+  box-shadow: 0 0 0 0 rgb(207 163 74 / 60%);
+  animation: pulse 2.6s var(--ease) infinite;
+}
+
+.notice span {
+  color: var(--ink-soft);
+}
+
+@keyframes pulse {
+  70% {
+    box-shadow: 0 0 0 10px rgb(207 163 74 / 0%);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(207 163 74 / 0%);
+  }
+}
+
+/* ------------------------------------------------------------- 9. کارت‌ها */
+
+.two-col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  margin-top: 34px;
+}
+
+.card {
+  position: relative;
+  background: var(--paper-2);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  padding: 34px 32px;
+  box-shadow: var(--sh-1);
+  overflow: hidden;
+  transition:
+    transform var(--t) var(--ease-out),
+    box-shadow var(--t) var(--ease),
+    border-color var(--t) var(--ease);
+}
+
+.card::before {
+  /* گوشه‌ی تزئینی سنتی */
+  content: "";
+  position: absolute;
+  top: 14px;
+  inset-inline-end: 14px;
+  width: 26px;
+  height: 26px;
+  border-top: 1.5px solid var(--gold-400);
+  border-inline-end: 1.5px solid var(--gold-400);
+  border-start-end-radius: 8px;
+  opacity: 0.55;
+  transition: width var(--t-slow) var(--ease-out), height var(--t-slow) var(--ease-out);
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: -60px;
+  bottom: -70px;
+  width: 210px;
+  height: 210px;
+  background-image: var(--pattern-star);
+  background-size: 60px;
+  opacity: 0.05;
+  transition: opacity var(--t-slow) var(--ease), transform var(--t-slow) var(--ease-out);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  border-color: var(--line);
+  box-shadow: var(--sh-2);
+}
+
+.card:hover::before {
+  width: 44px;
+  height: 44px;
+}
+
+.card:hover::after {
+  opacity: 0.09;
+  transform: rotate(22.5deg);
+}
+
+.card-index {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--gold-600);
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+.card h3 {
+  font-size: clamp(20px, 2vw, 25px);
+  font-weight: 800;
+  color: var(--green-700);
+  margin-bottom: 14px;
+}
+
+.card p {
+  line-height: 2.05;
+  color: var(--ink-soft);
+  font-size: 15.5px;
+}
+
+.card > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  color: var(--green-600);
+  font-weight: 800;
+  font-size: 14.5px;
+}
+
+.card > a span,
+.units-grid a span,
+.news-grid a span {
+  display: inline-block;
+  transition: transform var(--t) var(--ease-out);
+}
+
+.card > a:hover span,
+.units-grid a:hover span,
+.news-grid a:hover span {
+  transform: translateX(-6px);
+}
+
+/* -------------------------------------------------------- 10. کاربری‌ها */
+
+.uses-section {
+  position: relative;
+  background: var(--paper-2);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-xl);
+  padding: clamp(26px, 4vw, 46px);
+  box-shadow: var(--sh-1);
+  overflow: hidden;
+}
+
+.uses-section::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: -90px;
+  top: -90px;
+  width: 300px;
+  height: 300px;
+  background-image: var(--pattern-star);
+  background-size: 76px;
+  opacity: 0.045;
+  pointer-events: none;
+}
+
+.uses-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  align-items: start;
+  gap: 10px;
+  margin-top: 32px;
+}
+
+.use {
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  background: var(--paper-3);
+  overflow: hidden;
+  transition: border-color var(--t) var(--ease), background var(--t) var(--ease);
+}
+
+.use h3 {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.use:hover {
+  border-color: var(--gold-300);
+  background: #fffdf4;
+}
+
+.use.is-open {
+  border-color: var(--gold-400);
+  background: var(--paper-2);
+  box-shadow: var(--sh-1);
+}
+
+.use-trigger {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  display: grid;
+  grid-template-columns: 46px 1fr 26px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 13px;
+  color: var(--green-700);
+  text-align: start;
+}
+
+.use-trigger b {
+  font-weight: 700;
+  font-size: 15.5px;
+  font-variation-settings: "CNTR" var(--cntr-display);
+}
+
+.use .num {
+  background: linear-gradient(135deg, #f4ecd6, #efe4c8);
+  border-radius: var(--r-xs);
+  padding: 7px 0;
+  text-align: center;
+  color: var(--gold-700);
+  font-weight: 800;
+  font-size: 14px;
+  transition: background var(--t) var(--ease), color var(--t) var(--ease);
+}
+
+.use.is-open .num {
+  background: linear-gradient(135deg, var(--gold-400), var(--gold-500));
+  color: var(--green-900);
+}
+
+.use .plus {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  justify-self: center;
+}
+
+.use .plus::before,
+.use .plus::after {
+  content: "";
+  position: absolute;
+  inset: 50% 3px auto;
+  height: 1.8px;
+  background: var(--gold-600);
+  border-radius: 2px;
+  transform: translateY(-50%);
+  transition: transform var(--t) var(--ease-out), opacity var(--t-fast) var(--ease);
+}
+
+.use .plus::after {
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.use.is-open .plus::after {
+  transform: translateY(-50%) rotate(0deg);
+  opacity: 0;
+}
+
+.use-body {
+  display: grid;
+  grid-template-rows: 1fr; /* بدون جاوااسکریپت همه توضیح‌ها باز می‌مانند */
+  transition: grid-template-rows var(--t) var(--ease-out);
+}
+
+.js .use-body {
+  grid-template-rows: 0fr;
+}
+
+.use-body > p {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  padding-inline: 71px 20px;
+  color: var(--ink-soft);
+  line-height: 1.95;
+  font-size: 14px;
+  padding-bottom: 16px;
+  transition: padding-bottom var(--t) var(--ease-out);
+}
+
+.js .use-body > p {
+  padding-bottom: 0;
+}
+
+.use.is-open .use-body {
+  grid-template-rows: 1fr;
+}
+
+.use.is-open .use-body > p {
+  padding-bottom: 16px;
+}
+
+/* --------------------------------------------------------- 11. پانوراما */
+
+.panorama-frame {
+  position: relative;
+  height: clamp(280px, 46vw, 520px);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  background: var(--green-800);
+  margin-top: 30px;
+  box-shadow: var(--sh-3);
+}
+
+.panorama-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgb(236 211 148 / 30%), inset 0 -120px 130px -70px rgb(4 36 29 / 78%);
+}
+
+.panorama-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.45s var(--ease), transform 1.6s var(--ease-out);
+  transform: scale(var(--pano-scale, 1.02)) translate(var(--pano-x, 0), var(--pano-y, 0));
+}
+
+.panorama-frame.is-swapping img {
+  opacity: 0.25;
+}
+
+.panorama-badge {
+  position: absolute;
+  top: 20px;
+  inset-inline-start: 20px;
+  background: rgb(4 36 29 / 86%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgb(236 211 148 / 26%);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+}
+
+.panorama-badge b {
+  color: var(--gold-300);
+  font-weight: 800;
+}
+
+.panorama-caption {
+  position: absolute;
+  inset-inline-start: 22px;
+  bottom: 20px;
+  color: #fff;
+  font-weight: 700;
+  font-size: clamp(15px, 1.8vw, 21px);
+  font-variation-settings: "CNTR" var(--cntr-display);
+  text-shadow: 0 2px 16px rgb(0 0 0 / 45%);
+  padding-inline-start: 14px;
+  border-inline-start: 2px solid var(--gold-400);
+}
+
+.panorama-corner {
+  position: absolute;
+  inset-inline-end: 20px;
+  top: 20px;
+  width: 42px;
+  height: 42px;
+  border-top: 1.5px solid rgb(236 211 148 / 55%);
+  border-inline-end: 1.5px solid rgb(236 211 148 / 55%);
+  border-start-end-radius: 10px;
+}
+
+.pano-tabs {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.pano-tabs button {
+  position: relative;
+  border: 1px solid var(--line-soft);
+  background: var(--paper-2);
+  border-radius: var(--r-sm);
+  padding: 13px 9px;
+  min-height: 78px;
+  color: var(--ink-soft);
+  text-align: center;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  overflow: hidden;
+  transition:
+    border-color var(--t) var(--ease),
+    color var(--t) var(--ease),
+    transform var(--t) var(--ease-out),
+    box-shadow var(--t) var(--ease);
+}
+
+.pano-tabs button b {
+  font-weight: 800;
+  font-size: 13.5px;
+  color: var(--green-700);
+}
+
+.pano-tabs button span {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.pano-tabs button::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold-300), var(--gold-600));
+  transform: scaleX(0);
+  transition: transform var(--t) var(--ease-out);
+}
+
+.pano-tabs button:hover {
+  transform: translateY(-2px);
+  border-color: var(--gold-300);
+}
+
+.pano-tabs .active {
+  border-color: var(--gold-500);
+  color: var(--green-700);
+  background: linear-gradient(180deg, #fffdf4, var(--paper-2));
+  box-shadow: var(--sh-1);
+}
+
+.pano-tabs .active::before {
+  transform: scaleX(1);
+}
+
+/* ---------------------------------------------------------- 12. مشارکت */
+
+.donate {
+  position: relative;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  padding: clamp(28px, 4vw, 50px);
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: clamp(26px, 4vw, 44px);
+  align-items: center;
+  box-shadow: var(--sh-2);
+  overflow: hidden;
+}
+
+.donate::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--gold-600),
+    var(--gold-300) 30%,
+    var(--gold-600) 50%,
+    var(--gold-300) 70%,
+    var(--gold-600)
+  );
+}
+
+.donate-arch {
+  position: absolute;
+  inset-inline-start: -40px;
+  bottom: -30px;
+  width: 190px;
+  height: 250px;
+  background-image: var(--pattern-star);
+  background-size: 68px;
+  opacity: 0.06;
+  mask-image: var(--arch-mask);
+  -webkit-mask-image: var(--arch-mask);
+  mask-size: 100% 100%;
+  -webkit-mask-size: 100% 100%;
+  pointer-events: none;
+}
+
+.donate h2 {
+  font-size: clamp(24px, 2.7vw, 34px);
+  font-weight: 800;
+  color: var(--green-700);
+  margin: 18px 0 14px;
+}
+
+.donate-copy p {
+  line-height: 2.1;
+  color: var(--ink-soft);
+  font-size: 15.5px;
+}
+
+.donate-fields {
+  display: grid;
+  gap: 12px;
+}
+
+.copy-field {
+  position: relative;
+  border: 1px solid var(--line);
+  background: linear-gradient(135deg, #fffcf2, #fdf8ea);
+  border-radius: var(--r-md);
+  padding: 16px 18px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease);
+}
+
+.copy-field:hover {
+  border-color: var(--gold-400);
+  box-shadow: var(--sh-1);
+}
+
+.copy-field small {
+  grid-column: 1 / -1;
+  color: var(--ink-faint);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+.copy-field code {
+  direction: ltr;
+  text-align: right;
+  font-family: "Abar VF", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  font-size: clamp(14px, 1.45vw, 18px);
+  letter-spacing: 0.04em;
+  color: var(--green-700);
+  overflow-wrap: anywhere;
+}
+
+.copy-btn {
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+  color: var(--green-700);
+  border-radius: var(--r-xs);
+  padding: 9px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition:
+    background var(--t) var(--ease),
+    border-color var(--t) var(--ease),
+    color var(--t) var(--ease),
+    transform var(--t-fast) var(--ease-out);
+}
+
+.copy-btn:hover {
+  background: var(--green-700);
+  border-color: var(--green-700);
+  color: #fff;
+}
+
+.copy-btn:active {
+  transform: scale(0.95);
+}
+
+.copy-btn.is-done {
+  background: linear-gradient(135deg, var(--gold-400), var(--gold-500));
+  border-color: transparent;
+  color: var(--green-900);
+}
+
+/* ---------------------------------------------------- 13. طرح‌های مشارکت */
+
+.plans-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  align-items: baseline;
+  padding: 16px 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: linear-gradient(135deg, var(--paper-2), #fffaec);
+}
+
+.plans-head b {
+  font-size: clamp(17px, 1.8vw, 21px);
+  font-weight: 800;
+  color: var(--green-700);
+  font-variation-settings: "CNTR" var(--cntr-display);
+}
+
+.plans-head span {
+  color: var(--ink-faint);
+  font-size: 14px;
+}
+
+.plan-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.plan-tabs button {
+  position: relative;
+  border: 0;
+  background: var(--green-700);
+  color: #fff;
+  padding: 16px 10px;
+  font-size: 14.5px;
+  font-weight: 600;
+  border-radius: var(--r-xs) var(--r-xs) 0 0;
+  overflow: hidden;
+  transition: background var(--t) var(--ease), color var(--t) var(--ease);
+}
+
+.plan-tabs button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--pattern-star-gold);
+  background-size: 48px;
+  opacity: 0;
+  transition: opacity var(--t) var(--ease);
+}
+
+.plan-tabs button:hover {
+  background: var(--green-600);
+}
+
+.plan-tabs button:hover::before {
+  opacity: 0.09;
+}
+
+.plan-tabs .active {
+  background: linear-gradient(135deg, var(--gold-400), var(--gold-500));
+  color: var(--green-900);
+  font-weight: 800;
+}
+
+.plan-copy {
+  position: relative;
+  background: var(--paper-2);
+  padding: clamp(22px, 3vw, 32px);
+  border-radius: 0 0 var(--r-md) var(--r-md);
+  border: 1px solid var(--line-soft);
+  border-top: 0;
+  min-height: 150px;
+}
+
+.plan-copy h3 {
+  color: var(--green-700);
+  font-size: clamp(19px, 2.2vw, 25px);
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.plan-copy p {
+  color: var(--ink-soft);
+  line-height: 2.05;
+  font-size: 15.5px;
+}
+
+.plan-copy.is-swapping h3,
+.plan-copy.is-swapping p {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.plan-copy h3,
+.plan-copy p {
+  transition: opacity 0.26s var(--ease), transform 0.26s var(--ease-out);
+}
+
+/* ------------------------------------------------------- 14. آکاردئون‌ها */
+
+.accordion-head {
+  margin: 0;
+}
+
+.accordion-title {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  color: var(--green-700);
+  font-size: clamp(23px, 2.7vw, 34px);
+  font-weight: 800;
+  padding: 0;
+  text-align: start;
+}
+
+.accordion-title.plain {
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.acc-icon {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--paper-2);
+  transition: background var(--t) var(--ease), border-color var(--t) var(--ease),
+    transform var(--t) var(--ease-out);
+}
+
+.acc-icon::before,
+.acc-icon::after {
+  content: "";
+  position: absolute;
+  inset: 50% 11px auto;
+  height: 2px;
+  background: var(--gold-600);
+  border-radius: 2px;
+  transform: translateY(-50%);
+  transition: transform var(--t) var(--ease-out), opacity var(--t-fast) var(--ease);
+}
+
+.acc-icon::after {
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.accordion-title[aria-expanded="true"] .acc-icon::after {
+  transform: translateY(-50%) rotate(0deg);
+  opacity: 0;
+}
+
+.accordion-title:hover .acc-icon {
+  background: linear-gradient(135deg, var(--gold-400), var(--gold-500));
+  border-color: transparent;
+  transform: rotate(90deg);
+}
+
+.accordion-title:hover .acc-icon::before,
+.accordion-title:hover .acc-icon::after {
+  background: var(--green-900);
+}
+
+.collapsible {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s var(--ease-out);
+}
+
+.collapsible.is-open {
+  grid-template-rows: 1fr;
+}
+
+.collapsible-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ------------------------------------------------------ 15. پیشرفت پروژه */
+
+.progress {
+  position: relative;
+  background: linear-gradient(150deg, #fff, #f3f8f4 52%, #fffaed);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-xl);
+  padding: clamp(26px, 4vw, 44px);
+  box-shadow: var(--sh-1);
+  overflow: hidden;
+}
+
+.progress::before {
+  content: "";
+  position: absolute;
+  inset-inline-end: -70px;
+  top: -70px;
+  width: 280px;
+  height: 280px;
+  background-image: var(--pattern-star);
+  background-size: 76px;
+  opacity: 0.045;
+  pointer-events: none;
+}
+
+.progress-body {
+  padding-top: 26px;
+}
+
+.progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 26px;
+  flex-wrap: wrap;
+}
+
+.progress-head p {
+  color: var(--ink-soft);
+  margin-top: 12px;
+  font-size: 15px;
+}
+
+.progress-ring {
+  position: relative;
+  width: 168px;
+  height: 168px;
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+
+.progress-ring svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.progress-ring circle {
+  fill: none;
+  stroke-width: 9;
+  stroke-linecap: round;
+}
+
+.ring-track {
+  stroke: #dfe9e3;
+}
+
+.ring-value {
+  stroke: var(--gold-500);
+  stroke-dasharray: 326.73;
+  stroke-dashoffset: 326.73;
+  transition: stroke-dashoffset 1.5s var(--ease-out);
+}
+
+.ring-label {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 2px;
+  place-items: center;
+  text-align: center;
+  width: 108px;
+}
+
+.ring-label strong {
+  font-size: 25px;
+  font-weight: 800;
+  color: var(--green-700);
+  font-feature-settings: "tnum";
+}
+
+.ring-label span {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--ink-faint);
+}
+
+.progress-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.progress-grid article {
+  background: var(--paper-2);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  padding: 20px;
+  display: grid;
+  gap: 13px;
+  align-content: start;
+  transition: transform var(--t) var(--ease-out), box-shadow var(--t) var(--ease);
+}
+
+.progress-grid article:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sh-1);
+}
+
+.progress-grid article b {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.progress-grid article > strong {
+  color: var(--gold-700);
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.progress-grid article.highlight {
+  background: linear-gradient(150deg, var(--green-600), var(--green-800));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 18px 40px rgb(7 51 41 / 22%);
+}
+
+.progress-grid article.highlight b {
+  color: #fff;
+}
+
+.progress-grid article.highlight > strong {
+  color: var(--gold-300);
+}
+
+.progress-grid article.highlight .bar {
+  background: rgb(255 255 255 / 18%);
+}
+
+.progress-grid article.highlight .bar i {
+  background: linear-gradient(90deg, var(--gold-300), var(--gold-500));
+}
+
+.bar {
+  height: 7px;
+  border-radius: 99px;
+  background: #dfe7e2;
+  overflow: hidden;
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--gold-500), var(--gold-600));
+  transition: width 1.2s var(--ease-out);
+}
+
+.bar.is-filled i {
+  width: var(--w);
+}
+
+.progress-grid small {
+  color: var(--ink-faint);
+  font-size: 12.5px;
+}
+
+.progress-grid article.highlight small {
+  color: rgb(255 255 255 / 66%);
+}
+
+/* ------------------------------------------------------ 16. بخش‌های مجموعه */
+
+.units-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.units-grid article {
+  position: relative;
+  background: #f0f5f1;
+  border: 1px solid transparent;
+  padding: 26px 22px;
+  min-height: 148px;
+  border-radius: var(--r-md);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  overflow: hidden;
+  transition:
+    transform var(--t) var(--ease-out),
+    box-shadow var(--t) var(--ease),
+    background var(--t) var(--ease);
+}
+
+.units-grid article::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: -48px;
+  bottom: -48px;
+  width: 140px;
+  height: 140px;
+  background-image: var(--pattern-star);
+  background-size: 52px;
+  opacity: 0.06;
+  transition: transform var(--t-slow) var(--ease-out);
+}
+
+.units-grid article:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--sh-2);
+  background: #eaf2ec;
+}
+
+.units-grid article:hover::after {
+  transform: rotate(22.5deg) scale(1.1);
+}
+
+.units-grid h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--green-700);
+  line-height: 1.75;
+}
+
+.units-grid a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--gold-700);
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.units-grid .special {
+  color: #fff;
+}
+
+.units-grid .special h3 {
+  color: #fff;
+}
+
+.units-grid .special a {
+  color: var(--gold-300);
+}
+
+.units-grid .special::after {
+  background-image: var(--pattern-star-gold);
+  opacity: 0.1;
+}
+
+.units-grid .green {
+  background: linear-gradient(150deg, var(--green-600), var(--green-800));
+}
+
+.units-grid .green:hover {
+  background: linear-gradient(150deg, var(--green-500), var(--green-700));
+}
+
+.units-grid .navy {
+  background: linear-gradient(150deg, #1e3760, var(--navy));
+}
+
+.units-grid .navy:hover {
+  background: linear-gradient(150deg, #264473, #1b3054);
+}
+
+/* ---------------------------------------------------------- 17. فعالیت‌ها */
+
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.activity-grid article {
+  position: relative;
+  background: var(--paper-2);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  padding: 27px 25px;
+  transition: transform var(--t) var(--ease-out), box-shadow var(--t) var(--ease),
+    border-color var(--t) var(--ease);
+}
+
+.activity-grid article::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 25px;
+  top: 0;
+  width: 32px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: linear-gradient(90deg, var(--gold-400), var(--gold-600));
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--t) var(--ease-out);
+}
+
+.activity-grid article:hover {
+  transform: translateY(-4px);
+  border-color: var(--line);
+  box-shadow: var(--sh-2);
+}
+
+.activity-grid article:hover::before {
+  transform: scaleX(1);
+}
+
+.activity-grid h3 {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--green-700);
+  margin-bottom: 10px;
+}
+
+.activity-grid p {
+  color: var(--ink-soft);
+  line-height: 1.95;
+  font-size: 14.5px;
+}
+
+/* ------------------------------------------------------------ 18. تازه‌ها */
+
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 30px;
+}
+
+.news-grid article {
+  background: var(--paper-2);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 126px 1fr;
+  transition: transform var(--t) var(--ease-out), box-shadow var(--t) var(--ease),
+    border-color var(--t) var(--ease);
+}
+
+.news-grid article:hover {
+  transform: translateY(-4px);
+  border-color: var(--line);
+  box-shadow: var(--sh-2);
+}
+
+.news-grid img {
+  width: 100%;
+  height: 100%;
+  min-height: 154px;
+  object-fit: cover;
+  transition: transform var(--t-slow) var(--ease-out);
+}
+
+.news-grid article:hover img {
+  transform: scale(1.07);
+}
+
+.news-grid article > div {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.news-grid small {
+  color: var(--ink-faint);
+  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.news-tag {
+  background: #f1ecdb;
+  color: var(--gold-700);
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11.5px;
+}
+
+.news-grid h3 {
+  font-size: 16.5px;
+  font-weight: 700;
+  line-height: 1.75;
+  color: var(--ink);
+}
+
+.news-grid a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: auto;
+  color: var(--green-600);
+  font-weight: 800;
+  font-size: 13.5px;
+}
+
+/* ------------------------------------------------------------- 19. رسانه */
+
+.media {
+  position: relative;
+  background: linear-gradient(140deg, var(--green-600), var(--green-800) 62%, var(--green-900));
+  color: #fff;
+  border-radius: var(--r-xl);
+  padding: clamp(28px, 4vw, 46px);
+  overflow: hidden;
+  box-shadow: var(--sh-2);
+}
+
+.media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--pattern-star-gold);
+  background-size: 88px;
+  opacity: 0.07;
+  pointer-events: none;
+}
+
+.media-copy {
+  position: relative;
+  max-width: 640px;
+}
+
+.media h2 {
+  font-size: clamp(24px, 2.8vw, 34px);
+  font-weight: 800;
+}
+
+.media p {
+  color: rgb(255 255 255 / 76%);
+  margin-top: 12px;
+  line-height: 2.05;
+  font-size: 15.5px;
+}
+
+.media-links {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 26px;
+}
+
+.media-links a {
+  background: #fff;
+  color: var(--green-800);
+  padding: 12px 20px;
+  border-radius: var(--r-xs);
+  font-weight: 700;
+  font-size: 14.5px;
+  transition: transform var(--t) var(--ease-out), background var(--t) var(--ease),
+    box-shadow var(--t) var(--ease);
+}
+
+.media-links a:hover {
+  transform: translateY(-3px);
+  background: var(--gold-300);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 22%);
+}
+
+/* ----------------------------------------------------------- 20. ویدئوها */
+
+.videos {
+  background: linear-gradient(140deg, #f9fcfa, #eef5f1);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-xl);
+  padding: clamp(26px, 4vw, 46px);
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  margin-top: 30px;
+}
+
+.video-card {
+  display: block;
+  background: var(--paper-2);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--sh-1);
+  transition: transform var(--t) var(--ease-out), box-shadow var(--t) var(--ease);
+}
+
+.video-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--sh-3);
+}
+
+.video-thumb {
+  position: relative;
+  height: clamp(180px, 24vw, 250px);
+  background: linear-gradient(145deg, var(--green-800), var(--green-600));
+  display: grid;
+  place-content: center;
+  gap: 14px;
+  justify-items: center;
+  color: var(--gold-300);
+  overflow: hidden;
+}
+
+.video-thumb::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--pattern-star-gold);
+  background-size: 66px;
+  opacity: 0.09;
+  transition: transform var(--t-slow) var(--ease-out);
+}
+
+.video-card:hover .video-thumb::before {
+  transform: scale(1.12) rotate(22.5deg);
+}
+
+.video-thumb em {
+  position: relative;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 14.5px;
+}
+
+.play {
+  position: relative;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  border: 1px solid rgb(236 211 148 / 45%);
+  background: rgb(255 255 255 / 8%);
+  display: grid;
+  place-items: center;
+  transition: transform var(--t) var(--ease-out), background var(--t) var(--ease);
+}
+
+.play::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-block: 9px solid transparent;
+  border-left: 14px solid var(--gold-300);
+  border-right: 0;
+  transform: translateX(3px);
+}
+
+.play::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 1px solid rgb(236 211 148 / 55%);
+  animation: ripple 2.8s var(--ease) infinite;
+}
+
+.video-card:hover .play {
+  transform: scale(1.09);
+  background: rgb(236 211 148 / 18%);
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  70% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.video-card h3 {
+  color: var(--green-700);
+  font-size: 19px;
+  font-weight: 800;
+  margin: 22px 24px 8px;
+}
+
+.video-card > p {
+  color: var(--ink-soft);
+  margin: 0 24px 24px;
+  font-size: 14.5px;
+  line-height: 1.9;
+}
+
+/* ------------------------------------------------------------ 21. گالری */
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.gallery-grid figure {
+  position: relative;
+  margin: 0;
+  background: var(--paper-2);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  padding: 9px;
+  overflow: hidden;
+  transition: transform var(--t) var(--ease-out), box-shadow var(--t) var(--ease),
+    border-color var(--t) var(--ease);
+}
+
+.gallery-grid figure::after {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 0 rgb(236 211 148 / 0%);
+  pointer-events: none;
+  transition: box-shadow var(--t) var(--ease);
+}
+
+.gallery-grid figure:hover {
+  transform: translateY(-4px);
+  border-color: var(--gold-300);
+  box-shadow: var(--sh-2);
+}
+
+.gallery-grid figure:hover::after {
+  box-shadow: inset 0 0 0 2px rgb(236 211 148 / 85%);
+}
+
+.gallery-grid img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 10px;
+  transition: transform var(--t-slow) var(--ease-out);
+}
+
+.gallery-grid figure:hover img {
+  transform: scale(1.06);
+}
+
+.gallery-grid figcaption {
+  font-weight: 800;
+  font-size: 14.5px;
+  color: var(--green-700);
+  padding: 13px 6px 6px;
+}
+
+/* ------------------------------------------------------------- 22. نقشه */
+
+.map {
+  position: relative;
+  background: linear-gradient(140deg, var(--green-700), var(--green-600) 60%, var(--green-800));
+  color: #fff;
+  border-radius: var(--r-lg);
+  padding: clamp(26px, 3.4vw, 38px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  overflow: hidden;
+  box-shadow: var(--sh-2);
+}
+
+.map::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--pattern-star-gold);
+  background-size: 76px;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.map > div,
+.map > a {
+  position: relative;
+}
+
+.map h2 {
+  font-size: clamp(21px, 2.4vw, 30px);
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.map p {
+  color: rgb(255 255 255 / 76%);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.map p::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  background: var(--gold-400);
+  transform: rotate(45deg);
+  flex: none;
+}
+
+.map a {
+  background: linear-gradient(135deg, var(--gold-400), var(--gold-500));
+  color: var(--green-900);
+  padding: 15px 24px;
+  border-radius: var(--r-xs);
+  font-weight: 800;
+  font-size: 15px;
+  white-space: nowrap;
+  box-shadow: var(--sh-gold);
+  transition: transform var(--t) var(--ease-out), box-shadow var(--t) var(--ease);
+}
+
+.map a:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px rgb(0 0 0 / 28%);
+}
+
+/* ---------------------------------------------------------- 23. ارتباط */
+
+.contact {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.contact article {
+  position: relative;
+  background: var(--paper-2);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  padding: clamp(24px, 3vw, 34px);
+  overflow: hidden;
+  transition: box-shadow var(--t) var(--ease), border-color var(--t) var(--ease);
+}
+
+.contact article::before {
+  content: "";
+  position: absolute;
+  inset-inline-end: 18px;
+  top: 18px;
+  width: 22px;
+  height: 22px;
+  border-top: 1.5px solid var(--gold-400);
+  border-inline-end: 1.5px solid var(--gold-400);
+  border-start-end-radius: 7px;
+  opacity: 0.6;
+}
+
+.contact article:hover {
+  border-color: var(--line);
+  box-shadow: var(--sh-2);
+}
+
+.contact h3 {
+  font-size: clamp(19px, 2.1vw, 23px);
+  font-weight: 800;
+  color: var(--green-700);
+  margin-bottom: 18px;
+}
+
+.contact dl {
+  margin: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.contact dl > div {
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  gap: 10px;
+  align-items: baseline;
+  padding: 11px 0;
+  border-bottom: 1px dashed var(--line-soft);
+}
+
+.contact dl > div:last-child {
+  border-bottom: 0;
+}
+
+.contact dt {
+  color: var(--ink-faint);
+  font-size: 14px;
+}
+
+.contact dd {
+  margin: 0;
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.85;
+}
+
+.contact dd a {
+  color: var(--green-600);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--t) var(--ease);
+}
+
+.contact dd a:hover {
+  border-bottom-color: currentColor;
+}
+
+/* ------------------------------------------------------------- 24. پاورقی */
+
+footer {
+  position: relative;
+  background: var(--green-900);
+  color: rgb(255 255 255 / 66%);
+  text-align: center;
+  padding: 34px 20px calc(34px + env(safe-area-inset-bottom, 0px));
+  font-size: 13.5px;
+  overflow: hidden;
+}
+
+footer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--pattern-star-gold);
+  background-size: 64px;
+  opacity: 0.05;
+}
+
+.footer-ornament {
+  position: relative;
+  display: block;
+  width: 112px;
+  height: 10px;
+  margin: 0 auto 18px;
+  background: var(--rule-orn) center / 112px 10px no-repeat;
+  opacity: 0.65;
+}
+
+footer p {
+  position: relative;
+  margin: 0;
+}
+
+/* -------------------------------------------- 25. دکمه بالا و پیام کوتاه */
+
+.to-top {
+  position: fixed;
+  z-index: 55;
+  inset-block-end: calc(24px + env(safe-area-inset-bottom, 0px));
+  inset-inline-start: 24px;
+  width: 50px;
+  height: 50px;
+  border: 1px solid rgb(236 211 148 / 34%);
+  border-radius: 50%;
+  background: var(--green-800);
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(14px) scale(0.9);
+  box-shadow: 0 14px 34px rgb(4 36 29 / 30%);
+  transition:
+    opacity var(--t) var(--ease),
+    transform var(--t) var(--ease-out),
+    visibility var(--t),
+    background var(--t) var(--ease);
+}
+
+.to-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.to-top:hover {
+  background: var(--green-600);
+}
+
+.to-top span {
+  width: 11px;
+  height: 11px;
+  border-top: 2px solid var(--gold-300);
+  border-left: 2px solid var(--gold-300);
+  transform: rotate(45deg) translate(1px, 1px);
+}
+
+.toast {
+  position: fixed;
+  z-index: 120;
+  inset-block-end: calc(28px + env(safe-area-inset-bottom, 0px));
+  inset-inline-end: 24px;
+  background: var(--green-800);
+  color: #fff;
+  border: 1px solid rgb(236 211 148 / 30%);
+  border-radius: var(--r-sm);
+  padding: 13px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: var(--sh-3);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(14px);
+  transition: opacity var(--t) var(--ease), transform var(--t) var(--ease-out), visibility var(--t);
+  max-width: min(360px, calc(100vw - 40px));
+}
+
+.toast.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* ------------------------------------------------------------ 26. حرکت */
+
+/* حالت پنهان فقط وقتی جاوااسکریپت فعال است، تا بدون آن چیزی گم نشود */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(22px);
+  filter: blur(5px);
+  transition:
+    opacity 0.7s var(--ease-out),
+    transform 0.7s var(--ease-out),
+    filter 0.7s var(--ease-out);
+  transition-delay: calc(var(--d, 0) * 70ms);
+}
+
+.js [data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+.hero .anim {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: rise 0.85s var(--ease-out) forwards;
+  animation-delay: calc(140ms + var(--d, 0) * 110ms);
+}
+
+@keyframes rise {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------- 27. واکنش‌گرایی */
+
+@media (max-width: 1080px) {
+  .pano-tabs {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .units-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  :root {
+    --wrap: min(100% - 32px, 720px);
+    --topbar-h: 64px;
+  }
+
+  .desktop-links {
+    display: none;
+  }
+
+
+  .hero {
+    min-height: 600px;
+    padding-bottom: 130px;
+  }
+
+  .hero-overlay {
+    background:
+      linear-gradient(rgb(3 34 28 / 52%), rgb(3 34 28 / 88%)),
+      linear-gradient(to top, rgb(3 34 28 / 86%), transparent 46%);
+  }
+
+  .hero-pattern {
+    mask-image: linear-gradient(to bottom, #000, transparent 70%);
+    -webkit-mask-image: linear-gradient(to bottom, #000, transparent 70%);
+  }
+
+  .hero-content > * {
+    max-width: none;
+  }
+
+  .hero-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .hero-actions a {
+    text-align: center;
+    padding-inline: 16px;
+  }
+
+  .hero-actions .primary {
+    grid-column: 1 / -1;
+  }
+
+  .prayer {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .prayer::-webkit-scrollbar {
+    display: none;
+  }
+
+  .prayer-track {
+    width: max-content;
+    min-width: 100%;
+    padding-inline: 16px;
+  }
+
+  .two-col,
+  .uses-grid,
+  .progress-grid,
+  .activity-grid,
+  .news-grid,
+  .video-grid,
+  .contact {
+    grid-template-columns: 1fr;
+  }
+
+  .donate {
+    grid-template-columns: 1fr;
+  }
+
+  .units-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pano-tabs {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    scroll-snap-type: inline mandatory;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-inline: contain;
+  }
+
+  .pano-tabs button {
+    min-width: 168px;
+    flex: none;
+    scroll-snap-align: center;
+  }
+
+  .plan-tabs {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scroll-snap-type: inline mandatory;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-inline: contain;
+  }
+
+  .plan-tabs button {
+    min-width: 152px;
+    flex: none;
+    border-radius: var(--r-xs);
+    scroll-snap-align: center;
+  }
+
+  .plan-copy {
+    border-radius: var(--r-md);
+    border-top: 1px solid var(--line-soft);
+    margin-top: 8px;
+  }
+
+  .progress-head {
+    align-items: flex-start;
+  }
+
+  .progress-ring {
+    width: 136px;
+    height: 136px;
+  }
+
+  .ring-label strong {
+    font-size: 21px;
+  }
+
+  .news-grid article {
+    grid-template-columns: 112px 1fr;
+  }
+
+  .contact dl > div {
+    grid-template-columns: 116px 1fr;
+  }
+
+  .to-top {
+    inset-inline-start: 16px;
+    inset-block-end: calc(16px + env(safe-area-inset-bottom, 0px));
+    width: 46px;
+    height: 46px;
+  }
+
+  .toast {
+    inset-inline: 16px auto;
+    inset-inline-end: 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  :root {
+    --wrap: min(100% - 26px, 620px);
+  }
+
+  .notice {
+    display: grid;
+    gap: 6px;
+    padding: 16px 18px;
+  }
+
+  .use-trigger {
+    grid-template-columns: 42px 1fr 24px;
+    gap: 10px;
+  }
+
+  .use-body > p {
+    padding-inline: 64px 18px;
+  }
+
+  .units-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .copy-field {
+    grid-template-columns: 1fr;
+  }
+
+  .copy-field code {
+    font-size: 13.5px;
+    letter-spacing: 0.02em;
+  }
+
+  .copy-btn {
+    justify-self: start;
+  }
+
+  .progress-head {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .map a {
+    width: 100%;
+    text-align: center;
+  }
+
+  .contact dl > div {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .media-links a {
+    flex: 1 1 calc(50% - 5px);
+    text-align: center;
+  }
+}
+
+/* --------------------------------------------- 28. احترام به ترجیح کاربر */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .js [data-reveal],
+  .hero .anim {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .hero-media img {
+    transform: scale(1.02) !important;
+  }
+}
+
+@media print {
+  .topbar,
+  .menu-panel,
+  .menu-backdrop,
+  .to-top,
+  .toast,
+  .prayer {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}

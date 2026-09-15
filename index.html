@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>تفکرناب و مسجد شباب اهل‌الجنه آبادان</title>
+    <meta
+      name="description"
+      content="مجتمع مسجد‌محور شباب اهل‌الجنه و مؤسسه فرهنگی هنری تفکر ناب آینده اروند — پایگاهی برای عبادت، رشد نوجوانان و جوانان و خدمت به خانواده‌های آبادان."
+    />
+    <meta name="theme-color" content="#063029" />
+    <meta name="color-scheme" content="light" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fa_IR" />
+    <meta property="og:title" content="تفکرناب و مسجد شباب اهل‌الجنه آبادان" />
+    <meta
+      property="og:description"
+      content="پایگاهی برای عبادت، رشد نوجوانان و جوانان و خدمت به خانواده‌های آبادان."
+    />
+    <meta property="og:image" content="assets/img/hero.webp" />
+
+    <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" as="font" type="font/woff2" href="assets/fonts/Abar-VF.woff2" crossorigin />
+    <link rel="preload" as="image" href="assets/img/hero.webp" fetchpriority="high" />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">پرش به محتوای اصلی</a>
+
+    <div class="site-shell">
+      <!-- ─────────────────────────  سربرگ  ───────────────────────── -->
+      <nav class="topbar" id="topbar" aria-label="ناوبری اصلی">
+        <div class="topbar-inner">
+          <a class="brand" href="#top">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 48 48" role="presentation">
+                <g fill="none" stroke="currentColor" stroke-width="1.6">
+                  <rect x="9.5" y="9.5" width="29" height="29" rx="2" />
+                  <rect x="9.5" y="9.5" width="29" height="29" rx="2" transform="rotate(45 24 24)" />
+                  <circle cx="24" cy="24" r="6.5" />
+                </g>
+              </svg>
+            </span>
+            <span class="brand-text">تفکرناب آینده اروند</span>
+          </a>
+
+          <div class="desktop-links">
+            <a href="#programs">برنامه‌ها</a>
+            <a href="#library">کتابخانه</a>
+            <a href="#donate">مشارکت</a>
+          </div>
+
+          <button
+            class="menu-button"
+            id="menuButton"
+            type="button"
+            aria-expanded="false"
+            aria-controls="menuPanel"
+            aria-label="باز کردن منو"
+          >
+            <i></i><i></i><i></i>
+          </button>
+        </div>
+        <span class="topbar-rule" aria-hidden="true"></span>
+      </nav>
+
+      <div class="menu-backdrop" id="menuBackdrop" hidden></div>
+      <aside class="menu-panel" id="menuPanel" aria-label="منوی موبایل" hidden>
+        <button type="button" class="menu-close" id="menuClose" aria-label="بستن منو">×</button>
+        <p class="menu-eyebrow">فهرست صفحه</p>
+        <a href="#programs"><b>برنامه‌ها</b><span>اطلاعیه و رویدادهای پیش‌رو</span></a>
+        <a href="#library"><b>کتابخانه</b><span>جست‌وجوی کتاب و بازدید ۳۶۰</span></a>
+        <a href="#donate"><b>مشارکت</b><span>سهمی در ساخت خانه خدا</span></a>
+        <a href="#contact"><b>ارتباط با ما</b><span>نشانی، تلفن و اطلاعات مؤسسه</span></a>
+        <span class="menu-ornament" aria-hidden="true"></span>
+      </aside>
+
+      <!-- ─────────────────────────  هیرو  ───────────────────────── -->
+      <header id="top" class="hero">
+        <div class="hero-media" aria-hidden="true">
+          <img src="assets/img/hero.webp" alt="" fetchpriority="high" decoding="async" />
+        </div>
+        <div class="hero-overlay" aria-hidden="true"></div>
+        <div class="hero-pattern" aria-hidden="true"></div>
+
+        <div class="hero-content">
+          <span class="eyebrow anim" style="--d: 0">فرهنگ، ایمان، مردم و آینده</span>
+          <h1 class="anim" style="--d: 1">مجتمع مسجد‌محور شباب اهل‌الجنه</h1>
+          <strong class="anim" style="--d: 2">مؤسسه تفکرناب</strong>
+          <p class="anim" style="--d: 3">
+            پایگاهی برای عبادت، رشد نوجوانان و جوانان و خدمت به خانواده‌های آبادان.
+          </p>
+          <div class="hero-actions anim" style="--d: 4">
+            <a class="primary" href="#programs">برنامه‌ها</a>
+            <a href="#library">کتابخانه</a>
+            <a href="#donate">مشارکت</a>
+          </div>
+        </div>
+
+        <div class="prayer">
+          <div class="prayer-track">
+            <span class="prayer-city">آبادان</span>
+            <time datetime="2026-09-15">۱۴۰۵ شهریور ۲۴، سه‌شنبه</time>
+            <b><span>صبح</span> ۰۴:۴۲</b>
+            <b><span>ظهر</span> ۱۲:۱۲</b>
+            <b><span>مغرب</span> ۱۸:۴۰</b>
+            <b><span>عشا</span> ۱۹:۲۴</b>
+          </div>
+        </div>
+      </header>
+
+      <main id="main">
+        <!-- ─────────────────────  اطلاعیه  ───────────────────── -->
+        <section id="programs" class="notice" data-reveal>
+          <b>اطلاعیه برنامه‌ها</b>
+          <span>برنامه آینده پس از اعلام مجموعه منتشر می‌شود.</span>
+        </section>
+
+        <!-- ─────────────────────  هویت  ───────────────────── -->
+        <section class="section identity">
+          <div class="section-title" data-reveal>
+            <span>هویت مشترک</span>
+            <h2>دو رکن، یک مسیر</h2>
+            <p>
+              تفکر ناب بستر فرهنگی و سازمانی مجموعه است و مسجد شباب پایگاه مردمی، عبادی و اجتماعی
+              آن.
+            </p>
+          </div>
+
+          <div class="two-col">
+            <article class="card" data-reveal style="--d: 0">
+              <span class="card-index" aria-hidden="true">۰۱</span>
+              <h3>مسجد شباب اهل‌الجنه</h3>
+              <p>
+                پایگاه عبادی و مردمی مجموعه برای برگزاری برنامه‌های مذهبی، تربیتی، اجتماعی و
+                فعالیت‌های داوطلبانه در آبادان.
+              </p>
+              <a href="https://instagram.com/masjed_shabab" target="_blank" rel="noopener">
+                مشاهده اینستاگرام مسجد <span aria-hidden="true">←</span>
+              </a>
+            </article>
+
+            <article class="card" data-reveal style="--d: 1">
+              <span class="card-index" aria-hidden="true">۰۲</span>
+              <h3>مؤسسه تفکر ناب آینده اروند</h3>
+              <p>
+                فعالیت‌های فرهنگی، هنری، آموزشی و اجتماعی مجموعه با تمرکز بر نوجوانان، جوانان،
+                خانواده و مسائل شهر آبادان.
+              </p>
+              <a href="https://instagram.com/tafakor.nab" target="_blank" rel="noopener">
+                مشاهده اینستاگرام تفکر ناب <span aria-hidden="true">←</span>
+              </a>
+            </article>
+          </div>
+        </section>
+
+        <!-- ─────────────────────  کاربری‌ها  ───────────────────── -->
+        <section class="section">
+          <div class="uses-section">
+            <div class="section-title" data-reveal>
+              <span>۱۸+ کاربری</span>
+              <h2>کاربری‌های مجتمع مسجد‌محور — ۱۸+ کاربری</h2>
+              <p>برای دیدن توضیحات، روی هر عنوان بزنید.</p>
+            </div>
+
+            <div class="uses-grid" id="usesGrid">
+              <article class="use" data-reveal style="--d: 0">
+                <h3>
+                  <button type="button" class="use-trigger" aria-expanded="false" aria-controls="use-1">
+                    <span class="num">۰۱</span>
+                    <b>مسجد و شبستان</b>
+                    <span class="plus" aria-hidden="true"></span>
+                  </button>
+                </h3>
+                <div class="use-body" id="use-1">
+                  <p>قلب عبادی مجموعه برای نماز جماعت، قرآن و برنامه‌های مذهبی.</p>
+                </div>
+              </article>
+
+              <article class="use" data-reveal style="--d: 1">
+                <h3>
+                  <button type="button" class="use-trigger" aria-expanded="false" aria-controls="use-2">
+                    <span class="num">۰۲</span>
+                    <b>درمانگاه</b>
+                    <span class="plus" aria-hidden="true"></span>
+                  </button>
+                </h3>
+                <div class="use-body" id="use-2">
+                  <p>فضای خدمات سلامت و درمان برای اهالی محله.</p>
+                </div>
+              </article>
+
+              <article class="use" data-reveal style="--d: 2">
+                <h3>
+                  <button type="button" class="use-trigger" aria-expanded="false" aria-controls="use-3">
+                    <span class="num">۰۳</span>
+                    <b>داروخانه</b>
+                    <span class="plus" aria-hidden="true"></span>
+                  </button>
+                </h3>
+                <div class="use-body" id="use-3">
+                  <p>پشتیبان خدمات درمانی و دسترسی آسان خانواده‌ها.</p>
+                </div>
+              </article>
+
+              <article class="use" data-reveal style="--d: 3">
+                <h3>
+                  <button type="button" class="use-trigger" aria-expanded="false" aria-controls="use-4">
+                    <span class="num">۰۴</span>
+                    <b>مدرسه</b>
+                    <span class="plus" aria-hidden="true"></span>
+                  </button>
+                </h3>
+                <div class="use-body" id="use-4">
+                  <p>فضای آموزشی و تربیتی برای نسل نوجوان.</p>
+                </div>
+              </article>
+
+              <article class="use" data-reveal style="--d: 4">
+                <h3>
+                  <button type="button" class="use-trigger" aria-expanded="false" aria-controls="use-5">
+                    <span class="num">۰۵</span>
+                    <b>کتابخانه</b>
+                    <span class="plus" aria-hidden="true"></span>
+                  </button>
+                </h3>
+                <div class="use-body" id="use-5">
+                  <p>محیط مطالعه، جست‌وجوی کتاب و برنامه‌های فرهنگی.</p>
+                </div>
+              </article>
+
+              <article class="use" data-reveal style="--d: 5">
+                <h3>
+                  <button type="button" class="use-trigger" aria-expanded="false" aria-controls="use-6">
+                    <span class="num">۰۶</span>
+                    <b>زائرسرا</b>
+                    <span class="plus" aria-hidden="true"></span>
+                  </button>
+                </h3>
+                <div class="use-body" id="use-6">
+                  <p>فضای اقامت مهمانان و زائران مجموعه.</p>
+                </div>
+              </article>
+
+              <article class="use" data-reveal style="--d: 6">
+                <h3>
+                  <button type="button" class="use-trigger" aria-expanded="false" aria-controls="use-7">
+                    <span class="num">۰۷</span>
+                    <b>حسینیه</b>
+                    <span class="plus" aria-hidden="true"></span>
+                  </button>
+                </h3>
+                <div class="use-body" id="use-7">
+                  <p>محل برگزاری آیین‌ها و مناسبت‌های مذهبی.</p>
+                </div>
+              </article>
+
+              <article class="use" data-reveal style="--d: 7">
+                <h3>
+                  <button type="button" class="use-trigger" aria-expanded="false" aria-controls="use-8">
+                    <span class="num">۰۸</span>
+                    <b>خیریه</b>
+                    <span class="plus" aria-hidden="true"></span>
+                  </button>
+                </h3>
+                <div class="use-body" id="use-8">
+                  <p>سامان‌دهی کمک‌های مردمی و خدمت‌رسانی اجتماعی.</p>
+                </div>
+              </article>
+
+              <article class="use" data-reveal style="--d: 8">
+                <h3>
+                  <button type="button" class="use-trigger" aria-expanded="false" aria-controls="use-9">
+                    <span class="num">۰۹</span>
+                    <b>فرهنگ‌سرا</b>
+                    <span class="plus" aria-hidden="true"></span>
+                  </button>
+                </h3>
+                <div class="use-body" id="use-9">
+                  <p>کلاس‌ها و رویدادهای فرهنگی و هنری.</p>
+                </div>
+              </article>
+
+              <article class="use" data-reveal style="--d: 9">
+                <h3>
+                  <button type="button" class="use-trigger" aria-expanded="false" aria-controls="use-10">
+                    <span class="num">۱۰</span>
+                    <b>سالن آمفی‌تئاتر</b>
+                    <span class="plus" aria-hidden="true"></span>
+                  </button>
+                </h3>
+                <div class="use-body" id="use-10">
+                  <p>فضای همایش، نمایش و گردهمایی‌های عمومی.</p>
+                </div>
+              </article>
+
+              <article class="use" data-reveal style="--d: 10">
+                <h3>
+                  <button type="button" class="use-trigger" aria-expanded="false" aria-controls="use-11">
+                    <span class="num">۱۱</span>
+                    <b>سینما</b>
+                    <span class="plus" aria-hidden="true"></span>
+                  </button>
+                </h3>
+                <div class="use-body" id="use-11">
+                  <p>نمایش آثار فرهنگی و برنامه‌های خانواده‌محور.</p>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─────────────────────  پانوراما  ───────────────────── -->
+        <section class="section panorama">
+          <div class="section-title" data-reveal>
+            <span>بازدید تعاملی</span>
+            <h2>داخل پروژه مسجد را ۳۶۰ درجه ببینید</h2>
+            <p>نمایی از مراحل ساخت مجتمع مسجد‌محور شباب.</p>
+          </div>
+
+          <div class="panorama-frame" data-reveal>
+            <img
+              src="assets/img/panorama-1.webp"
+              alt="نمای پروژه مسجد شباب"
+              id="panoImage"
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="panorama-badge">
+              نمای <b id="panoIndex">۱</b> از پروژه
+            </span>
+            <span class="panorama-caption" id="panoCaption">حیاط ورودی و بام سبز</span>
+            <span class="panorama-corner" aria-hidden="true"></span>
+          </div>
+
+          <div class="pano-tabs" id="panoTabs" role="tablist" aria-label="نماهای پروژه">
+            <button type="button" role="tab" class="active" aria-selected="true" data-view="حیاط ورودی و بام سبز">
+              <b>نمای ۱</b><span>حیاط ورودی و بام سبز</span>
+            </button>
+            <button type="button" role="tab" aria-selected="false" data-view="طبقه اول درمانگاه">
+              <b>نمای ۲</b><span>طبقه اول درمانگاه</span>
+            </button>
+            <button type="button" role="tab" aria-selected="false" data-view="طبقه همکف، ورودی مسجد">
+              <b>نمای ۳</b><span>طبقه همکف، ورودی مسجد</span>
+            </button>
+            <button type="button" role="tab" aria-selected="false" data-view="زیر گنبد؛ طبقه اول">
+              <b>نمای ۴</b><span>زیر گنبد؛ طبقه اول</span>
+            </button>
+            <button type="button" role="tab" aria-selected="false" data-view="نمای زیر گنبد">
+              <b>نمای ۵</b><span>نمای زیر گنبد</span>
+            </button>
+            <button type="button" role="tab" aria-selected="false" data-view="نمای طبقه اول">
+              <b>نمای ۶</b><span>نمای طبقه اول</span>
+            </button>
+            <button type="button" role="tab" aria-selected="false" data-view="همکف؛ فضای اداری">
+              <b>نمای ۷</b><span>همکف؛ فضای اداری</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- ─────────────────────  مشارکت  ───────────────────── -->
+        <section id="donate" class="section">
+          <div class="donate" data-reveal>
+            <span class="donate-arch" aria-hidden="true"></span>
+
+            <div class="donate-copy">
+              <span class="gold-pill">سهمی در ساخت خانه خدا</span>
+              <h2>مشارکت در ساخت مسجد شباب اهل‌الجنه</h2>
+              <p>
+                علاقه‌مندان جهت مشارکت در ساخت‌وساز این بیت‌الله می‌توانند کمک‌های خود را به حساب
+                مسجد شباب اهل‌الجنه واریز کنند.
+              </p>
+            </div>
+
+            <div class="donate-fields">
+              <div class="copy-field">
+                <small>شماره کارت — به نام مسجد شباب اهل‌الجنه</small>
+                <code>6037 9975 9964 9457</code>
+                <button type="button" class="copy-btn" data-copy="6037 9975 9964 9457">کپی</button>
+              </div>
+              <div class="copy-field">
+                <small>شماره شبا</small>
+                <code>IR27 0170 0000 0011 6682 9590 01</code>
+                <button type="button" class="copy-btn" data-copy="IR27 0170 0000 0011 6682 9590 01">
+                  کپی
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─────────────────────  طرح‌های مشارکت  ───────────────────── -->
+        <section class="section plans">
+          <div class="plans-head" data-reveal>
+            <b>طرح‌های مشارکت</b>
+            <span>برای دیدن توضیحات هر طرح کلیک کنید</span>
+          </div>
+
+          <div class="plan-tabs" id="planTabs" role="tablist" aria-label="طرح‌های مشارکت" data-reveal>
+            <button type="button" role="tab" class="active" aria-selected="true" aria-controls="planCopy">
+              صدقه ماندگار
+            </button>
+            <button type="button" role="tab" aria-selected="false" aria-controls="planCopy">
+              سجاده بهشتی
+            </button>
+            <button type="button" role="tab" aria-selected="false" aria-controls="planCopy">
+              تُنْفِقُوا مِمَّا تُحِبُّونَ
+            </button>
+            <button type="button" role="tab" aria-selected="false" aria-controls="planCopy">
+              بلوک بهشتی
+            </button>
+            <button type="button" role="tab" aria-selected="false" aria-controls="planCopy">
+              یک ستون تا بهشت
+            </button>
+          </div>
+
+          <article class="plan-copy" id="planCopy" role="tabpanel" data-reveal>
+            <h3 id="planTitle">صدقه ماندگار</h3>
+            <p id="planText">
+              با مشارکت در ساخت مسجد، سهمی ماندگار از عبادت، آموزش و خدمت‌رسانی این خانه خدا برای
+              خود یا درگذشتگان ثبت کنید.
+            </p>
+          </article>
+        </section>
+
+        <!-- ─────────────────────  پیشرفت پروژه  ───────────────────── -->
+        <section class="section">
+          <div class="progress" data-reveal>
+            <h2 class="accordion-head">
+              <button type="button" class="accordion-title" aria-expanded="true" aria-controls="progressBody">
+                <span>گزارش پیشرفت پروژه مسجد</span>
+                <b class="acc-icon" aria-hidden="true"></b>
+              </button>
+            </h2>
+
+            <div class="collapsible is-open" id="progressBody">
+              <div class="collapsible-inner">
+                <div class="progress-body">
+                  <div class="progress-head">
+                    <div>
+                      <span class="gold-pill">مسیر تکمیل پروژه</span>
+                      <p>درصدهای ثبت‌شده در جدول پروژه</p>
+                    </div>
+
+                    <div class="progress-ring" id="progressRing" data-value="32.08">
+                      <svg viewBox="0 0 120 120" aria-hidden="true">
+                        <circle class="ring-track" cx="60" cy="60" r="52" />
+                        <circle class="ring-value" cx="60" cy="60" r="52" />
+                      </svg>
+                      <div class="ring-label">
+                        <strong data-count="32.08" data-decimals="2">۰٫۰۰٪</strong>
+                        <span>پیشرفت کلی پروژه</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="progress-grid">
+                    <article class="highlight" data-reveal style="--d: 0">
+                      <b>سازه بتنی، گنبد و گلدسته</b>
+                      <strong>۹۱٪</strong>
+                      <div class="bar"><i style="--w: 91%"></i></div>
+                      <small>وزن در پروژه: ۳۵٪</small>
+                    </article>
+                    <article data-reveal style="--d: 1">
+                      <b>معماری</b>
+                      <strong>۰٫۴۶٪</strong>
+                      <div class="bar"><i style="--w: 8%"></i></div>
+                      <small>وزن در پروژه: ۲۵٪</small>
+                    </article>
+                    <article data-reveal style="--d: 2">
+                      <b>تأسیسات</b>
+                      <strong>آغاز نشده</strong>
+                      <div class="bar"><i style="--w: 0%"></i></div>
+                      <small>وزن در پروژه: ۱۰٪</small>
+                    </article>
+                    <article data-reveal style="--d: 3">
+                      <b>برق</b>
+                      <strong>آغاز نشده</strong>
+                      <div class="bar"><i style="--w: 0%"></i></div>
+                      <small>وزن در پروژه: ۱۰٪</small>
+                    </article>
+                    <article data-reveal style="--d: 4">
+                      <b>نمای ساختمان</b>
+                      <strong>آغاز نشده</strong>
+                      <div class="bar"><i style="--w: 0%"></i></div>
+                      <small>وزن در پروژه: ۱۰٪</small>
+                    </article>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─────────────────────  بخش‌های مجموعه  ───────────────────── -->
+        <section class="section units">
+          <div class="section-title" data-reveal>
+            <span>بخش‌های مجموعه</span>
+            <h2>شبکه‌ای برای خدمت</h2>
+          </div>
+
+          <div class="units-grid">
+            <article data-reveal style="--d: 0">
+              <h3>پایگاه خادم‌الشهدا حاج احمد یلالی</h3>
+              <a href="#contact">ورود به صفحه اختصاصی <span aria-hidden="true">←</span></a>
+            </article>
+            <article data-reveal style="--d: 1">
+              <h3>گروه جهادی انصارالمهدی</h3>
+              <a href="#contact">ورود به صفحه اختصاصی <span aria-hidden="true">←</span></a>
+            </article>
+            <article data-reveal style="--d: 2">
+              <h3>هیئت شباب‌الرضا</h3>
+              <a href="#contact">ورود به صفحه اختصاصی <span aria-hidden="true">←</span></a>
+            </article>
+            <article data-reveal style="--d: 3">
+              <h3>مجتمع مسجد‌محور شباب</h3>
+              <a href="#contact">ورود به صفحه اختصاصی <span aria-hidden="true">←</span></a>
+            </article>
+            <article id="library" class="special navy" data-reveal style="--d: 4">
+              <h3>کتابخانه مسجد</h3>
+              <a href="#contact">جست‌وجوی کتاب و بازدید ۳۶۰ <span aria-hidden="true">←</span></a>
+            </article>
+            <article class="special green" data-reveal style="--d: 5">
+              <h3>ورود و عضویت</h3>
+              <a href="#contact">همراه خانواده شباب شوید <span aria-hidden="true">←</span></a>
+            </article>
+          </div>
+        </section>
+
+        <!-- ─────────────────────  فعالیت‌ها  ───────────────────── -->
+        <section class="section activities">
+          <h2 class="accordion-head" data-reveal>
+            <button type="button" class="accordion-title plain" aria-expanded="true" aria-controls="activityBody">
+              <span>فعالیت‌های مسجد شباب اهل‌الجنه</span>
+              <b class="acc-icon" aria-hidden="true"></b>
+            </button>
+          </h2>
+
+          <div class="collapsible is-open" id="activityBody">
+            <div class="collapsible-inner">
+              <p class="section-lead">
+                مجتمع مسجد‌محور شباب در حال ساخت است. در کنار توسعه فضاهای آینده، برنامه‌های عبادی،
+                تربیتی، فرهنگی و داوطلبانه مجموعه در آبادان ادامه دارد.
+              </p>
+
+              <div class="activity-grid">
+                <article data-reveal style="--d: 0">
+                  <h3>برنامه‌های عبادی و مذهبی</h3>
+                  <p>اقامه نماز جماعت، جلسات قرآن، مناسبت‌های مذهبی و برنامه‌های معرفتی.</p>
+                </article>
+                <article data-reveal style="--d: 1">
+                  <h3>نوجوانان و جوانان</h3>
+                  <p>حلقه‌های تربیتی، اردو، مسابقه، آموزش مهارت و برنامه‌های هویتی.</p>
+                </article>
+                <article data-reveal style="--d: 2">
+                  <h3>فرهنگی و هنری</h3>
+                  <p>تولید محتوای رسانه‌ای، کلاس‌های هنری، کتاب‌خوانی و برنامه‌های خانواده‌محور.</p>
+                </article>
+                <article data-reveal style="--d: 3">
+                  <h3>خدمت‌رسانی جهادی</h3>
+                  <p>کمک‌رسانی مردمی، فعالیت‌های داوطلبانه و حضور در مسائل محله و شهر.</p>
+                </article>
+                <article data-reveal style="--d: 4">
+                  <h3>رویدادهای اجتماعی</h3>
+                  <p>نشست‌ها، همایش‌ها و ایجاد فضای همدلی برای اهالی آبادان.</p>
+                </article>
+                <article data-reveal style="--d: 5">
+                  <h3>عمران و توسعه مسجد</h3>
+                  <p>گزارش مراحل ساخت و مشارکت مردمی در توسعه پایگاه فرهنگی مجموعه.</p>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─────────────────────  تازه‌ها  ───────────────────── -->
+        <section class="section latest">
+          <h2 class="accordion-head" data-reveal>
+            <button type="button" class="accordion-title plain" aria-expanded="true" aria-controls="newsBody">
+              <span>تازه‌های مجموعه</span>
+              <b class="acc-icon" aria-hidden="true"></b>
+            </button>
+          </h2>
+
+          <div class="collapsible is-open" id="newsBody">
+            <div class="collapsible-inner">
+              <div class="news-grid">
+                <article data-reveal style="--d: 0">
+                  <img
+                    src="assets/img/news-omran.webp"
+                    alt="تازه‌ترین گزارش ساخت مجتمع شباب"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div>
+                    <small><span class="news-tag">عمران</span> · ۱۴ شهریور ۱۴۰۵</small>
+                    <h3>تازه‌ترین گزارش ساخت مجتمع شباب</h3>
+                    <a href="#contact">خواندن گزارش <span aria-hidden="true">←</span></a>
+                  </div>
+                </article>
+
+                <article data-reveal style="--d: 1">
+                  <img
+                    src="assets/img/news-farhangi.webp"
+                    alt="قدردانی خانواده‌ها از برنامه اردویی"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div>
+                    <small><span class="news-tag">فرهنگی</span> · ۱۳ شهریور ۱۴۰۵</small>
+                    <h3>قدردانی خانواده‌ها از برنامه اردویی</h3>
+                    <a href="#contact">خواندن گزارش <span aria-hidden="true">←</span></a>
+                  </div>
+                </article>
+
+                <article data-reveal style="--d: 2">
+                  <img
+                    src="assets/img/news-khedmat.webp"
+                    alt="پویش اروند همدل برای دانش‌آموزان"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div>
+                    <small><span class="news-tag">خدمت‌رسانی</span> · ۱۱ شهریور ۱۴۰۵</small>
+                    <h3>پویش اروند همدل برای دانش‌آموزان</h3>
+                    <a href="#contact">خواندن گزارش <span aria-hidden="true">←</span></a>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─────────────────────  رسانه  ───────────────────── -->
+        <section class="section">
+          <div class="media" data-reveal>
+            <div class="media-copy">
+              <h2>اخبار و رسانه مجموعه</h2>
+              <p>
+                گزارش برنامه‌ها، رویدادها، تصاویر و تولیدات رسانه‌ای مجموعه را از مسیرهای رسمی
+                دنبال کنید.
+              </p>
+            </div>
+            <div class="media-links">
+              <a href="https://eitaa.com/Masjed_Shabab" target="_blank" rel="noopener">کانال ایتای مسجد</a>
+              <a href="https://www.aparat.com/Tafakor.nab" target="_blank" rel="noopener">آپارات تفکر ناب</a>
+              <a href="https://www.aparat.com/Masjed.shabab" target="_blank" rel="noopener">آپارات مسجد شباب</a>
+              <a href="https://instagram.com/tafakor.nab" target="_blank" rel="noopener">اینستاگرام تفکر ناب</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─────────────────────  ویدئوها  ───────────────────── -->
+        <section class="section">
+          <div class="videos">
+            <div class="section-title" data-reveal>
+              <span>تماشاخانه مسجد</span>
+              <h2>ویدئوهای مجتمع شباب اهل‌الجنه</h2>
+              <p>روایت تصویری از مسجد، برنامه‌های مذهبی و فعالیت‌های فرهنگی مجموعه.</p>
+            </div>
+
+            <div class="video-grid">
+              <a
+                href="https://www.aparat.com/Masjed.shabab"
+                class="video-card"
+                target="_blank"
+                rel="noopener"
+                data-reveal
+                style="--d: 0"
+              >
+                <span class="video-thumb">
+                  <span class="play" aria-hidden="true"></span>
+                  <em>پخش ویدئو</em>
+                </span>
+                <h3>مسجد شباب اهل‌الجنه آبادان</h3>
+                <p>معرفی تصویری مسجد و فضای فعالیت‌های مجموعه</p>
+              </a>
+
+              <a
+                href="https://www.aparat.com/Tafakor.nab"
+                class="video-card"
+                target="_blank"
+                rel="noopener"
+                data-reveal
+                style="--d: 1"
+              >
+                <span class="video-thumb">
+                  <span class="play" aria-hidden="true"></span>
+                  <em>پخش ویدئو</em>
+                </span>
+                <h3>برنامه‌های مؤسسه تفکر ناب</h3>
+                <p>روایت تصویری برنامه‌های فرهنگی و مردمی مؤسسه</p>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─────────────────────  گالری  ───────────────────── -->
+        <section class="section gallery">
+          <div class="section-title" data-reveal>
+            <span>گزارش‌های تاریخ‌دار</span>
+            <h2>روایت تصویری شباب</h2>
+          </div>
+
+          <div class="gallery-grid">
+            <figure data-reveal style="--d: 0">
+              <img src="assets/img/hero.webp" alt="آینده مسجد" loading="lazy" decoding="async" />
+              <figcaption>آینده مسجد</figcaption>
+            </figure>
+            <figure data-reveal style="--d: 1">
+              <img src="assets/img/news-omran.webp" alt="ساخت‌وساز" loading="lazy" decoding="async" />
+              <figcaption>ساخت‌وساز</figcaption>
+            </figure>
+            <figure data-reveal style="--d: 2">
+              <img
+                src="assets/img/news-farhangi.webp"
+                alt="فرهنگی و تربیتی"
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption>فرهنگی و تربیتی</figcaption>
+            </figure>
+            <figure data-reveal style="--d: 3">
+              <img
+                src="assets/img/news-khedmat.webp"
+                alt="خدمت‌رسانی"
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption>خدمت‌رسانی</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <!-- ─────────────────────  نقشه  ───────────────────── -->
+        <section id="contact" class="section">
+          <div class="map" data-reveal>
+            <div>
+              <h2>نقشه و مکان‌های اطراف مسجد شباب</h2>
+              <p>امیرآباد آبادان، استان خوزستان</p>
+            </div>
+            <a href="https://maps.google.com/?q=Abadan,Iran" target="_blank" rel="noopener">
+              نمایش نقشه و مکان‌ها
+            </a>
+          </div>
+        </section>
+
+        <!-- ─────────────────────  ارتباط  ───────────────────── -->
+        <section class="section contact">
+          <article data-reveal style="--d: 0">
+            <h3>ارتباط با مجموعه</h3>
+            <dl>
+              <div><dt>دفتر مجموعه</dt><dd><a href="tel:09106468665">۰۹۱۰۶۴۶۸۶۶۵</a></dd></div>
+              <div><dt>روابط عمومی</dt><dd><a href="tel:09206468665">۰۹۲۰۶۴۶۸۶۶۵</a></dd></div>
+              <div><dt>تبلیغات مسجد</dt><dd><a href="tel:09216468665">۰۹۲۱۶۴۶۸۶۶۵</a></dd></div>
+              <div><dt>سامانه پیامکی</dt><dd>۱۰۰۰۶۴۶۸۶۶۵</dd></div>
+            </dl>
+          </article>
+
+          <article data-reveal style="--d: 1">
+            <h3>اطلاعات مؤسسه</h3>
+            <dl>
+              <div><dt>نام رسمی</dt><dd>مؤسسه فرهنگی هنری تفکر ناب آینده اروند</dd></div>
+              <div><dt>شناسه ملی</dt><dd>۱۴۰۰۸۸۷۹۷۲۸</dd></div>
+              <div><dt>شماره ثبت</dt><dd>۱۹۵</dd></div>
+            </dl>
+          </article>
+        </section>
+      </main>
+
+      <footer>
+        <span class="footer-ornament" aria-hidden="true"></span>
+        <p>نسخه بازسازی‌شده و مستقل از صفحه اصلی — برای استفاده با مجوز صاحب اثر</p>
+      </footer>
+    </div>
+
+    <button type="button" class="to-top" id="toTop" aria-label="بازگشت به بالای صفحه">
+      <span aria-hidden="true"></span>
+    </button>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="assets/js/app.js" defer></script>
+  </body>
+</html>
