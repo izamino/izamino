@@ -194,22 +194,89 @@ svg {
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  overflow: hidden;
   background-color: var(--paper);
-  background-image:
-    radial-gradient(1150px 720px at 86% -8%, rgb(207 163 74 / 22%), transparent 62%),
-    radial-gradient(880px 640px at 4% 14%, rgb(15 90 73 / 11%), transparent 60%),
-    radial-gradient(1250px 820px at 46% 112%, rgb(10 70 56 / 14%), transparent 64%);
-  background-repeat: no-repeat;
 }
 
-/* نقش‌مایهٔ هندسی درشت — باید حس شود، نه دیده شود */
-.page-ground::before {
-  content: "";
+.page-ground > span {
   position: absolute;
-  inset: 0;
+}
+
+/* تابش رنگی زمینه — با نفسی بسیار کند */
+.ground-wash {
+  inset: -14%;
+  background-image:
+    radial-gradient(1150px 720px at 86% 4%, rgb(207 163 74 / 24%), transparent 62%),
+    radial-gradient(880px 640px at 6% 22%, rgb(15 90 73 / 12%), transparent 60%),
+    radial-gradient(1250px 820px at 46% 96%, rgb(10 70 56 / 15%), transparent 64%);
+  background-repeat: no-repeat;
+  transform-origin: 70% 30%;
+  will-change: transform;
+  animation: ground-breathe 38s ease-in-out infinite alternate;
+}
+
+/* یک هالهٔ طلایی که آرام در صفحه می‌گردد */
+.ground-glow {
+  top: 4%;
+  right: 8%;
+  width: 62vmax;
+  height: 62vmax;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgb(221 184 98 / 26%),
+    rgb(221 184 98 / 9%) 45%,
+    transparent 72%
+  );
+  will-change: transform;
+  animation: ground-orbit 54s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+/* نقش‌مایهٔ هندسی درشت — باید حس شود، نه دیده شود.
+   جابه‌جایی دقیقاً به اندازهٔ یک کاشی است تا حلقه بی‌درز ببندد. */
+.ground-pattern {
+  inset: -200px;
   background-image: var(--pattern-ground);
   background-size: 168px 168px;
   opacity: 0.026;
+  will-change: transform;
+  animation: ground-drift 150s linear infinite;
+}
+
+@keyframes ground-breathe {
+  from {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.09) translate3d(1.5%, -2%, 0);
+  }
+}
+
+@keyframes ground-orbit {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate3d(14%, 22%, 0);
+  }
+  50% {
+    transform: translate3d(-6%, 44%, 0);
+  }
+  75% {
+    transform: translate3d(-20%, 18%, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes ground-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-168px, -168px, 0);
+  }
 }
 
 .site-shell {
@@ -221,6 +288,13 @@ svg {
    به سمت بیرون محو می‌شود. فقط وقتی فضای حاشیه واقعاً وجود دارد. */
 .ground-margins {
   display: none;
+}
+
+.ground-grain {
+  inset: 0;
+  background-image: var(--grain);
+  background-size: 220px 220px;
+  opacity: 0.042;
 }
 
 @media (min-width: 1320px) {
@@ -250,13 +324,16 @@ svg {
   }
 }
 
-/* دانه‌بندی کاغذ — رنگ تخت را می‌شکند */
-.ground-grain {
+/* عنوان لازم برای ساختار سند، ولی در طراحی دیده نمی‌شود */
+.visually-hidden-head {
   position: absolute;
-  inset: 0;
-  background-image: var(--grain);
-  background-size: 220px 220px;
-  opacity: 0.042;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .skip-link {
@@ -2865,6 +2942,13 @@ body.is-locked .to-top {
 
   .hero-media img {
     transform: scale(1.02) !important;
+  }
+
+  .ground-wash,
+  .ground-glow,
+  .ground-pattern {
+    animation: none !important;
+    transform: none !important;
   }
 }
 

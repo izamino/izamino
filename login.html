@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>ورود و عضویت شباب</title>
+    <meta
+      name="description"
+      content="ورود اعضا و عضویت در خانواده مسجد شباب اهل‌الجنه آبادان — با شماره موبایل."
+    />
+    <meta name="theme-color" content="#063029" />
+    <meta name="color-scheme" content="light" />
+
+    <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" as="font" type="font/woff2" href="assets/fonts/Abar-VF.woff2" crossorigin />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="assets/css/pages.css" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">پرش به محتوای اصلی</a>
+
+    <div class="page-ground" aria-hidden="true">
+      <span class="ground-wash"></span>
+      <span class="ground-glow"></span>
+      <span class="ground-pattern"></span>
+      <span class="ground-margins"></span>
+      <span class="ground-grain"></span>
+    </div>
+
+    <div class="site-shell">
+      <nav class="topbar" id="topbar" aria-label="ناوبری اصلی">
+        <div class="topbar-inner">
+          <a class="brand" href="index.html">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 48 48" role="presentation">
+                <g fill="none" stroke="currentColor" stroke-width="1.6">
+                  <rect x="9.5" y="9.5" width="29" height="29" rx="2" />
+                  <rect x="9.5" y="9.5" width="29" height="29" rx="2" transform="rotate(45 24 24)" />
+                  <circle cx="24" cy="24" r="6.5" />
+                </g>
+              </svg>
+            </span>
+            <span class="brand-text">تفکرناب آینده اروند</span>
+          </a>
+
+          <div class="desktop-links">
+            <a href="index.html#programs">برنامه‌ها</a>
+            <a href="library.html">کتابخانه</a>
+            <a href="index.html#donate">مشارکت</a>
+          </div>
+
+          <button
+            class="menu-button"
+            id="menuButton"
+            type="button"
+            aria-expanded="false"
+            aria-controls="menuPanel"
+            aria-label="باز کردن منو"
+          >
+            <i></i><i></i><i></i>
+          </button>
+        </div>
+        <span class="topbar-rule" aria-hidden="true"></span>
+      </nav>
+
+      <div class="menu-backdrop" id="menuBackdrop" hidden></div>
+      <aside class="menu-panel" id="menuPanel" aria-label="منوی موبایل" hidden>
+        <button type="button" class="menu-close" id="menuClose" aria-label="بستن منو">×</button>
+        <p class="menu-eyebrow">فهرست صفحه</p>
+        <a href="index.html#programs"><b>برنامه‌ها</b><span>اطلاعیه و رویدادهای پیش‌رو</span></a>
+        <a href="library.html"><b>کتابخانه</b><span>جست‌وجوی کتاب و بازدید ۳۶۰</span></a>
+        <a href="login.html"><b>ورود و عضویت</b><span>همراه خانواده شباب شوید</span></a>
+        <a href="index.html#donate"><b>مشارکت</b><span>سهمی در ساخت خانه خدا</span></a>
+        <a href="index.html#contact"><b>ارتباط با ما</b><span>نشانی، تلفن و اطلاعات مؤسسه</span></a>
+        <span class="menu-ornament" aria-hidden="true"></span>
+      </aside>
+
+      <main id="main">
+        <header class="page-head">
+          <nav class="crumbs" aria-label="مسیر صفحه">
+            <a href="index.html">خانه</a>
+            <span aria-hidden="true">←</span>
+            <span aria-current="page">ورود و عضویت</span>
+          </nav>
+          <span class="gold-pill">خانوادهٔ شباب</span>
+          <h1>ورود و عضویت</h1>
+          <p>
+            با شمارهٔ موبایل وارد شوید یا عضو شوید — برای امانت کتاب، ثبت‌نام در برنامه‌ها و
+            دریافت اطلاعیه‌های مجموعه.
+          </p>
+        </header>
+
+        <p class="demo-note">
+          <b>نمونهٔ طراحی</b>
+          <span>
+            این فرم به هیچ سامانه‌ای وصل نیست و هیچ اطلاعاتی را ارسال یا ذخیره نمی‌کند. برای
+            راه‌اندازی واقعی باید به سرویس پیامک و پایگاه دادهٔ اعضا متصل شود.
+          </span>
+        </p>
+
+        <div class="auth">
+          <!-- ─────────────────  فرم  ───────────────── -->
+          <section class="auth-card" aria-labelledby="auth-h">
+            <h2 id="auth-h" class="visually-hidden-head">ورود یا عضویت</h2>
+
+            <div class="auth-tabs" role="tablist" aria-label="ورود یا عضویت">
+              <button
+                type="button"
+                role="tab"
+                id="tabLogin"
+                aria-selected="true"
+                aria-controls="paneLogin"
+              >
+                ورود اعضا
+              </button>
+              <button
+                type="button"
+                role="tab"
+                id="tabJoin"
+                aria-selected="false"
+                aria-controls="paneJoin"
+              >
+                عضویت جدید
+              </button>
+            </div>
+
+            <!-- ورود -->
+            <div class="auth-pane" id="paneLogin" role="tabpanel" aria-labelledby="tabLogin">
+              <!-- گام ۱ -->
+              <div id="loginStep1">
+                <h2>خوش آمدید</h2>
+                <p>شمارهٔ موبایلی که با آن عضو شده‌اید را وارد کنید تا کد تأیید برایتان بفرستیم.</p>
+
+                <div class="field" id="fieldPhone">
+                  <label for="loginPhone">شمارهٔ موبایل</label>
+                  <input
+                    type="tel"
+                    id="loginPhone"
+                    inputmode="numeric"
+                    autocomplete="tel"
+                    placeholder="09xxxxxxxxx"
+                    maxlength="11"
+                  />
+                  <span class="hint">کد تأیید به همین شماره پیامک می‌شود.</span>
+                  <span class="error" id="phoneError" hidden>شمارهٔ موبایل معتبر نیست.</span>
+                </div>
+
+                <button type="button" class="btn-gold btn-block" id="sendCode">دریافت کد تأیید</button>
+              </div>
+
+              <!-- گام ۲ -->
+              <div id="loginStep2" hidden>
+                <h2>کد تأیید را وارد کنید</h2>
+                <p id="sentTo">کد پنج‌رقمی به شمارهٔ شما پیامک شد.</p>
+
+                <div class="field" id="fieldOtp">
+                  <label for="otp1">کد تأیید</label>
+                  <div class="otp" id="otpBox">
+                    <input type="text" id="otp1" inputmode="numeric" maxlength="1" placeholder="·" aria-label="رقم اول" />
+                    <input type="text" id="otp2" inputmode="numeric" maxlength="1" placeholder="·" aria-label="رقم دوم" />
+                    <input type="text" id="otp3" inputmode="numeric" maxlength="1" placeholder="·" aria-label="رقم سوم" />
+                    <input type="text" id="otp4" inputmode="numeric" maxlength="1" placeholder="·" aria-label="رقم چهارم" />
+                    <input type="text" id="otp5" inputmode="numeric" maxlength="1" placeholder="·" aria-label="رقم پنجم" />
+                  </div>
+                  <span class="error" id="otpError" hidden>کد کامل نیست.</span>
+                </div>
+
+                <div class="resend">
+                  <span>ارسال دوبارهٔ کد تا</span>
+                  <time id="countdown">۰۲:۰۰</time>
+                  <button type="button" id="resendBtn" disabled>ارسال دوباره</button>
+                </div>
+
+                <button type="button" class="btn-gold btn-block" id="verifyCode" style="margin-top: 22px">
+                  ورود به حساب
+                </button>
+
+                <div class="auth-alt">
+                  شماره را اشتباه زدید؟
+                  <button type="button" id="changePhone">ویرایش شمارهٔ موبایل</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- عضویت -->
+            <div class="auth-pane" id="paneJoin" role="tabpanel" aria-labelledby="tabJoin" hidden>
+              <h2>عضو خانوادهٔ شباب شوید</h2>
+              <p>عضویت رایگان است. پس از ثبت‌نام، کارت عضویت کتابخانه را در مسجد تحویل بگیرید.</p>
+
+              <div class="field" id="fieldName">
+                <label for="joinName">نام و نام خانوادگی</label>
+                <input type="text" id="joinName" autocomplete="name" placeholder="مثلاً: علی رضایی" />
+                <span class="error" id="nameError" hidden>نام و نام خانوادگی را کامل بنویسید.</span>
+              </div>
+
+              <div class="field" id="fieldJoinPhone">
+                <label for="joinPhone">شمارهٔ موبایل</label>
+                <input
+                  type="tel"
+                  id="joinPhone"
+                  inputmode="numeric"
+                  autocomplete="tel"
+                  placeholder="09xxxxxxxxx"
+                  maxlength="11"
+                />
+                <span class="error" id="joinPhoneError" hidden>شمارهٔ موبایل معتبر نیست.</span>
+              </div>
+
+              <div class="field">
+                <label for="joinGroup">گروه سنی</label>
+                <select id="joinGroup">
+                  <option value="نوجوان">نوجوان (۱۲ تا ۱۷ سال)</option>
+                  <option value="جوان" selected>جوان (۱۸ تا ۳۰ سال)</option>
+                  <option value="بزرگسال">بزرگسال (بالای ۳۰ سال)</option>
+                  <option value="خانواده">خانواده</option>
+                </select>
+                <span class="hint">برنامه‌های مجموعه بر اساس گروه سنی به شما پیشنهاد می‌شود.</span>
+              </div>
+
+              <label class="check">
+                <input type="checkbox" id="joinTerms" />
+                <span>
+                  قوانین عضویت و شرایط امانت کتاب را می‌پذیرم و با دریافت پیامک اطلاعیه‌های مجموعه
+                  موافقم.
+                </span>
+              </label>
+              <span class="error" id="termsError" hidden style="display: none">
+                برای ادامه باید قوانین را بپذیرید.
+              </span>
+
+              <button type="button" class="btn-gold btn-block" id="submitJoin">ثبت عضویت</button>
+
+              <div class="auth-alt">
+                قبلاً عضو شده‌اید؟
+                <button type="button" id="goLogin">وارد شوید</button>
+              </div>
+            </div>
+
+            <p class="form-note" id="formNote" hidden></p>
+          </section>
+
+          <!-- ─────────────────  معرفی عضویت  ───────────────── -->
+          <aside class="auth-aside">
+            <span class="gold-pill">چرا عضو شویم؟</span>
+            <h2>عضویت، در چهار چیز به کارتان می‌آید</h2>
+            <p>
+              حساب شباب یک شناسهٔ ساده برای همهٔ خدمات مجموعه است — از قفسهٔ کتابخانه تا ثبت‌نام
+              اردو.
+            </p>
+
+            <ul class="benefits">
+              <li>
+                <span class="mark" aria-hidden="true">۰۱</span>
+                <div>
+                  <b>امانت کتاب</b>
+                  <span>هم‌زمان دو عنوان، هر کدام تا دو هفته، با امکان رزرو عنوان‌های در امانت.</span>
+                </div>
+              </li>
+              <li>
+                <span class="mark" aria-hidden="true">۰۲</span>
+                <div>
+                  <b>ثبت‌نام در برنامه‌ها</b>
+                  <span>اردو، کلاس‌های مهارتی، مسابقه و حلقه‌های تربیتی بدون مراجعهٔ حضوری.</span>
+                </div>
+              </li>
+              <li>
+                <span class="mark" aria-hidden="true">۰۳</span>
+                <div>
+                  <b>اطلاعیه‌های مجموعه</b>
+                  <span>خبر برنامه‌های پیش‌رو و مناسبت‌ها را زودتر از بقیه دریافت می‌کنید.</span>
+                </div>
+              </li>
+              <li>
+                <span class="mark" aria-hidden="true">۰۴</span>
+                <div>
+                  <b>کار داوطلبانه</b>
+                  <span>اعلام آمادگی برای گروه جهادی انصارالمهدی و پویش‌های خدمت‌رسانی محله.</span>
+                </div>
+              </li>
+            </ul>
+
+            <p class="aside-foot">
+              سؤالی دارید؟ روابط عمومی مجموعه:
+              <a href="tel:09206468665">۰۹۲۰۶۴۶۸۶۶۵</a>
+            </p>
+          </aside>
+        </div>
+      </main>
+
+      <footer>
+        <span class="footer-ornament" aria-hidden="true"></span>
+        <p>نسخه بازسازی‌شده و مستقل از صفحه اصلی — برای استفاده با مجوز صاحب اثر</p>
+      </footer>
+    </div>
+
+    <button type="button" class="to-top" id="toTop" aria-label="بازگشت به بالای صفحه">
+      <span aria-hidden="true"></span>
+    </button>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/login.js" defer></script>
+  </body>
+</html>

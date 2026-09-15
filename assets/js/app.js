@@ -177,7 +177,9 @@
           observer.unobserve(entry.target);
         });
       },
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.12 }
+      // آستانه باید صفر بماند: عنصری بلندتر از پنجره هرگز درصد مشخصی از
+      // خودش را نشان نمی‌دهد و با آستانهٔ غیرصفر هیچ‌وقت ظاهر نمی‌شود.
+      { rootMargin: "0px 0px -10% 0px", threshold: 0 }
     );
 
     items.forEach(function (item) {

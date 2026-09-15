@@ -1,0 +1,1060 @@
+@charset "UTF-8";
+
+/* ==========================================================================
+   اجزای صفحه‌های داخلی — کتابخانه و ورود/عضویت
+   این فایل بعد از styles.css بارگذاری می‌شود و همان توکن‌ها را به کار می‌برد.
+   ========================================================================== */
+
+/* ------------------------------------------------- ۱. سرصفحهٔ صفحهٔ داخلی */
+
+.page-head {
+  position: relative;
+  width: var(--wrap);
+  margin-inline: auto;
+  padding: clamp(34px, 5vw, 62px) 0 clamp(24px, 3vw, 38px);
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13.5px;
+  color: var(--ink-faint);
+  margin-bottom: 20px;
+}
+
+.crumbs a {
+  color: var(--green-600);
+  font-weight: 700;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--t) var(--ease);
+}
+
+.crumbs a:hover {
+  border-bottom-color: currentColor;
+}
+
+.crumbs span[aria-hidden] {
+  color: var(--gold-600);
+}
+
+.page-head h1 {
+  font-size: clamp(30px, 4.2vw, 54px);
+  font-weight: 800;
+  color: var(--green-700);
+  margin: 16px 0 0;
+}
+
+.page-head h1::after {
+  content: "";
+  display: block;
+  width: 112px;
+  height: 10px;
+  margin-top: 18px;
+  background: var(--rule-orn) center / 112px 10px no-repeat;
+  opacity: 0.9;
+}
+
+.page-head > p {
+  color: var(--ink-soft);
+  line-height: 2.05;
+  font-size: 15.5px;
+  max-width: 660px;
+  margin-top: 14px;
+}
+
+/* نوار «این صفحه نمونهٔ طراحی است» */
+.demo-note {
+  width: var(--wrap);
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  border: 1px dashed var(--gold-500);
+  background: rgb(221 184 98 / 10%);
+  border-radius: var(--r-sm);
+  padding: 13px 18px;
+  color: var(--gold-700);
+  font-size: 13.5px;
+  line-height: 1.85;
+}
+
+.demo-note b {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.demo-note b::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background: var(--gold-600);
+  transform: rotate(45deg);
+  flex: none;
+}
+
+.demo-note span {
+  color: var(--ink-soft);
+}
+
+/* ---------------------------------------------------- ۲. جست‌وجوی کتاب */
+
+.search-panel {
+  position: relative;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  padding: clamp(22px, 3.4vw, 36px);
+  box-shadow: var(--sh-2);
+  overflow: hidden;
+}
+
+.search-panel::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--gold-600),
+    var(--gold-300) 30%,
+    var(--gold-600) 50%,
+    var(--gold-300) 70%,
+    var(--gold-600)
+  );
+}
+
+.search-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.search-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  background: var(--paper-3);
+  border-radius: var(--r-md);
+  padding: 0 18px;
+  transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease),
+    background var(--t) var(--ease);
+}
+
+.search-field:focus-within {
+  border-color: var(--gold-500);
+  background: var(--paper-2);
+  box-shadow: 0 0 0 4px rgb(221 184 98 / 18%);
+}
+
+.search-field svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: var(--gold-600);
+}
+
+.search-field input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 17px 0;
+  font-size: 16px;
+  color: var(--ink);
+  outline: none;
+}
+
+.search-field input::placeholder {
+  color: var(--ink-faint);
+}
+
+.search-clear {
+  border: 0;
+  background: transparent;
+  color: var(--ink-faint);
+  font-size: 22px;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: color var(--t) var(--ease), background var(--t) var(--ease);
+}
+
+.search-clear:hover {
+  color: var(--clay);
+  background: rgb(163 83 52 / 10%);
+}
+
+.btn-gold {
+  border: 0;
+  border-radius: var(--r-md);
+  background: linear-gradient(135deg, var(--gold-400), var(--gold-500));
+  color: var(--green-900);
+  font-weight: 800;
+  font-size: 15px;
+  padding: 0 30px;
+  box-shadow: var(--sh-gold);
+  transition: transform var(--t) var(--ease-out), box-shadow var(--t) var(--ease),
+    background var(--t) var(--ease);
+}
+
+.btn-gold:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, var(--gold-300), var(--gold-400));
+  box-shadow: 0 16px 38px rgb(179 134 47 / 32%);
+}
+
+.btn-gold:active {
+  transform: translateY(0);
+}
+
+/* برچسب‌های موضوعی */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.chip {
+  border: 1px solid var(--line);
+  background: var(--paper-3);
+  color: var(--ink-soft);
+  border-radius: 999px;
+  padding: 9px 17px;
+  font-size: 13.5px;
+  font-weight: 600;
+  transition:
+    background var(--t) var(--ease),
+    border-color var(--t) var(--ease),
+    color var(--t) var(--ease),
+    transform var(--t-fast) var(--ease-out);
+}
+
+.chip:hover {
+  border-color: var(--gold-400);
+  color: var(--green-700);
+  transform: translateY(-2px);
+}
+
+.chip[aria-pressed="true"] {
+  background: var(--green-700);
+  border-color: var(--green-700);
+  color: #fff;
+}
+
+.chip .count {
+  opacity: 0.6;
+  font-size: 12px;
+  margin-inline-start: 6px;
+}
+
+.result-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 30px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.result-line b {
+  color: var(--green-700);
+  font-weight: 800;
+}
+
+/* ------------------------------------------------------- ۳. قفسهٔ کتاب */
+
+.shelf {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+  gap: 16px;
+  margin-top: 26px;
+}
+
+.book {
+  display: flex;
+  flex-direction: column;
+  background: var(--paper-2);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  padding: 14px;
+  gap: 14px;
+  transition: transform var(--t) var(--ease-out), box-shadow var(--t) var(--ease),
+    border-color var(--t) var(--ease);
+}
+
+.book:hover {
+  transform: translateY(-5px);
+  border-color: var(--line);
+  box-shadow: var(--sh-2);
+}
+
+/* جلد کتاب با CSS ساخته می‌شود — بدون تصویر ساختگی */
+.book-cover {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: 8px;
+  overflow: hidden;
+  display: grid;
+  align-content: center;
+  padding-block: 18px;
+  padding-inline: 26px 16px;
+  background: linear-gradient(150deg, var(--c1, #0f5a49), var(--c2, #073329));
+  color: #fff;
+  isolation: isolate;
+}
+
+.book-cover::before {
+  /* عطف کتاب */
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 13px;
+  background: linear-gradient(to left, rgb(0 0 0 / 32%), rgb(255 255 255 / 12%));
+}
+
+.book-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--pattern-star-gold);
+  background-size: 54px;
+  opacity: 0.11;
+  z-index: -1;
+  transition: transform var(--t-slow) var(--ease-out);
+}
+
+.book:hover .book-cover::after {
+  transform: rotate(22.5deg) scale(1.15);
+}
+
+.book-cover h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.65;
+  font-variation-settings: "CNTR" var(--cntr-display);
+  text-wrap: balance;
+}
+
+.book-cover em {
+  font-style: normal;
+  font-size: 12px;
+  color: rgb(255 255 255 / 62%);
+  margin-top: 8px;
+}
+
+.book-cover .rule {
+  width: 34px;
+  height: 1.5px;
+  background: var(--gold-400);
+  margin-bottom: 12px;
+}
+
+.book-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.tag {
+  background: #f1ecdb;
+  color: var(--gold-700);
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 4px 11px;
+  font-size: 11.5px;
+}
+
+/* وضعیت امانت — رنگ معنایی، جدا از رنگ تأکید صفحه */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 4px 11px;
+}
+
+.status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+.status.free {
+  background: rgb(21 112 92 / 12%);
+  color: #126a56;
+}
+
+.status.out {
+  background: rgb(163 83 52 / 13%);
+  color: #94492b;
+}
+
+.status.hold {
+  background: rgb(179 134 47 / 16%);
+  color: var(--gold-700);
+}
+
+.shelf-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 54px 20px;
+  color: var(--ink-soft);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-md);
+  background: var(--paper-3);
+}
+
+.shelf-empty b {
+  display: block;
+  color: var(--green-700);
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+/* --------------------------------------------------- ۴. بازدید ۳۶۰ درجه */
+
+.tour {
+  position: relative;
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  background: linear-gradient(140deg, var(--green-600), var(--green-800) 62%, var(--green-900));
+  color: #fff;
+  padding: clamp(28px, 4vw, 48px);
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: clamp(24px, 4vw, 44px);
+  align-items: center;
+  box-shadow: var(--sh-2);
+}
+
+.tour::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--pattern-star-gold);
+  background-size: 88px;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.tour > * {
+  position: relative;
+}
+
+.tour h2 {
+  font-size: clamp(23px, 2.8vw, 34px);
+  font-weight: 800;
+  margin: 16px 0 12px;
+}
+
+.tour p {
+  color: rgb(255 255 255 / 76%);
+  line-height: 2.05;
+  font-size: 15.5px;
+}
+
+.tour .btn-gold {
+  margin-top: 24px;
+  padding: 15px 28px;
+  display: inline-block;
+}
+
+.tour-dial {
+  position: relative;
+  aspect-ratio: 1;
+  max-width: 260px;
+  justify-self: center;
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.tour-dial span {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgb(236 211 148 / 28%);
+  border-radius: 50%;
+}
+
+.tour-dial span:nth-child(2) {
+  inset: 14%;
+  border-style: dashed;
+  animation: dial-spin 26s linear infinite;
+}
+
+.tour-dial span:nth-child(3) {
+  inset: 28%;
+  border-color: rgb(236 211 148 / 45%);
+  animation: dial-spin 18s linear infinite reverse;
+}
+
+.tour-dial b {
+  position: relative;
+  font-size: clamp(30px, 4vw, 44px);
+  font-weight: 800;
+  color: var(--gold-300);
+  font-variation-settings: "CNTR" var(--cntr-display);
+}
+
+@keyframes dial-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------------------------------------------- ۵. شرایط امانت و ساعات */
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.info-grid article {
+  position: relative;
+  background: var(--paper-2);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  padding: 26px 24px;
+  transition: transform var(--t) var(--ease-out), box-shadow var(--t) var(--ease);
+}
+
+.info-grid article:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--sh-2);
+}
+
+.info-grid .n {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f4ecd6, #efe4c8);
+  color: var(--gold-700);
+  font-weight: 800;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.info-grid h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--green-700);
+  margin-bottom: 9px;
+}
+
+.info-grid p {
+  color: var(--ink-soft);
+  line-height: 1.95;
+  font-size: 14.5px;
+}
+
+.hours {
+  background: var(--paper-2);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  padding: clamp(22px, 3vw, 32px);
+  margin-top: 12px;
+}
+
+.hours table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14.5px;
+}
+
+.hours caption {
+  text-align: start;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--green-700);
+  padding-bottom: 16px;
+  font-variation-settings: "CNTR" var(--cntr-display);
+}
+
+.hours th,
+.hours td {
+  text-align: start;
+  padding: 13px 4px;
+  border-bottom: 1px dashed var(--line-soft);
+}
+
+.hours thead th {
+  color: var(--ink-faint);
+  font-weight: 600;
+  font-size: 13px;
+  border-bottom-style: solid;
+  border-bottom-color: var(--line);
+}
+
+.hours tbody th {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.hours td {
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.hours tr:last-child th,
+.hours tr:last-child td {
+  border-bottom: 0;
+}
+
+.hours .closed {
+  color: var(--clay);
+}
+
+/* --------------------------------------------------- ۶. ورود و عضویت */
+
+.auth {
+  width: var(--wrap);
+  margin-inline: auto;
+  padding: clamp(26px, 4vw, 56px) 0 clamp(52px, 6vw, 88px);
+  display: grid;
+  grid-template-columns: 1.06fr 0.94fr;
+  gap: clamp(24px, 4vw, 48px);
+  align-items: start;
+}
+
+.auth-card {
+  position: relative;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  padding: clamp(24px, 3.4vw, 40px);
+  box-shadow: var(--sh-2);
+  overflow: hidden;
+}
+
+.auth-card::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--gold-600),
+    var(--gold-300) 30%,
+    var(--gold-600) 50%,
+    var(--gold-300) 70%,
+    var(--gold-600)
+  );
+}
+
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  background: var(--paper-3);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  padding: 5px;
+  margin-bottom: 28px;
+}
+
+.auth-tabs button {
+  border: 0;
+  background: transparent;
+  border-radius: 13px;
+  padding: 13px 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  transition: background var(--t) var(--ease), color var(--t) var(--ease),
+    box-shadow var(--t) var(--ease);
+}
+
+.auth-tabs button[aria-selected="true"] {
+  background: var(--green-700);
+  color: #fff;
+  box-shadow: 0 6px 18px rgb(10 70 56 / 24%);
+}
+
+.auth-pane[hidden] {
+  display: none;
+}
+
+.auth-pane h2 {
+  font-size: clamp(21px, 2.4vw, 27px);
+  font-weight: 800;
+  color: var(--green-700);
+  margin-bottom: 8px;
+}
+
+.auth-pane > p {
+  color: var(--ink-soft);
+  font-size: 14.5px;
+  line-height: 1.95;
+  margin-bottom: 24px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.field label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.field .hint {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  line-height: 1.7;
+}
+
+.field input,
+.field select {
+  border: 1px solid var(--line);
+  background: var(--paper-3);
+  border-radius: var(--r-sm);
+  padding: 15px 16px;
+  font-size: 15.5px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease),
+    background var(--t) var(--ease);
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: var(--gold-500);
+  background: var(--paper-2);
+  box-shadow: 0 0 0 4px rgb(221 184 98 / 18%);
+}
+
+.field input[type="tel"] {
+  direction: ltr;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+}
+
+.field.invalid input {
+  border-color: #b4543a;
+  box-shadow: 0 0 0 4px rgb(180 84 58 / 14%);
+}
+
+.field .error {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #94492b;
+}
+
+.field .error[hidden] {
+  display: none;
+}
+
+/* خانه‌های کد تأیید */
+
+.otp {
+  display: flex;
+  gap: 9px;
+  direction: ltr;
+  justify-content: flex-end;
+}
+
+.otp input {
+  width: 54px;
+  height: 60px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+  padding: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.otp input:not(:placeholder-shown) {
+  border-color: var(--gold-500);
+  background: #fffcf2;
+}
+
+.resend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.resend button {
+  border: 0;
+  background: transparent;
+  color: var(--green-600);
+  font-weight: 800;
+  font-size: 13px;
+  padding: 0;
+}
+
+.resend button[disabled] {
+  color: var(--ink-faint);
+  opacity: 0.55;
+  font-weight: 600;
+  cursor: not-allowed;
+}
+
+.resend time {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--gold-700);
+}
+
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin: 6px 0 22px;
+  font-size: 13.5px;
+  line-height: 1.85;
+  color: var(--ink-soft);
+}
+
+.check input {
+  width: 20px;
+  height: 20px;
+  margin-top: 3px;
+  flex: none;
+  accent-color: var(--green-700);
+}
+
+.check a {
+  color: var(--green-600);
+  font-weight: 700;
+  border-bottom: 1px solid transparent;
+}
+
+.check a:hover {
+  border-bottom-color: currentColor;
+}
+
+.btn-block {
+  width: 100%;
+  padding: 17px 24px;
+  font-size: 16px;
+}
+
+.auth-alt {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--line);
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+.auth-alt button {
+  border: 0;
+  background: transparent;
+  color: var(--green-600);
+  font-weight: 800;
+  font-size: 13.5px;
+  padding: 0;
+}
+
+.auth-alt button:hover {
+  text-decoration: underline;
+}
+
+/* پیام نتیجه */
+
+.form-note {
+  margin-top: 18px;
+  border-radius: var(--r-sm);
+  padding: 15px 18px;
+  font-size: 14px;
+  line-height: 1.9;
+  border: 1px solid var(--gold-500);
+  background: rgb(221 184 98 / 12%);
+  color: var(--gold-700);
+}
+
+.form-note[hidden] {
+  display: none;
+}
+
+.form-note b {
+  font-weight: 800;
+}
+
+/* ستون معرفی عضویت */
+
+.auth-aside {
+  position: relative;
+  border-radius: var(--r-xl);
+  padding: clamp(26px, 3.6vw, 44px);
+  background: linear-gradient(150deg, var(--green-600), var(--green-800) 60%, var(--green-900));
+  color: #fff;
+  overflow: hidden;
+  box-shadow: var(--sh-2);
+}
+
+.auth-aside::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--pattern-star-gold);
+  background-size: 82px;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.auth-aside > * {
+  position: relative;
+}
+
+.auth-aside h2 {
+  font-size: clamp(22px, 2.6vw, 31px);
+  font-weight: 800;
+  margin: 16px 0 12px;
+}
+
+.auth-aside > p {
+  color: rgb(255 255 255 / 76%);
+  line-height: 2.05;
+  font-size: 15px;
+}
+
+.benefits {
+  display: grid;
+  gap: 2px;
+  margin-top: 26px;
+}
+
+.benefits li {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 16px 0;
+  border-bottom: 1px solid rgb(255 255 255 / 12%);
+}
+
+.benefits li:last-child {
+  border-bottom: 0;
+}
+
+.benefits .mark {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgb(236 211 148 / 32%);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 6%);
+  color: var(--gold-300);
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.benefits b {
+  display: block;
+  font-weight: 700;
+  font-size: 15.5px;
+  margin-bottom: 3px;
+}
+
+.benefits span {
+  color: rgb(255 255 255 / 62%);
+  font-size: 13.5px;
+  line-height: 1.8;
+}
+
+.auth-aside ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.aside-foot {
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid rgb(255 255 255 / 14%);
+  font-size: 13.5px;
+  color: rgb(255 255 255 / 66%);
+  line-height: 1.9;
+}
+
+.aside-foot a {
+  color: var(--gold-300);
+  font-weight: 700;
+}
+
+/* --------------------------------------------------- ۷. واکنش‌گرایی */
+
+@media (max-width: 1000px) {
+  .tour,
+  .auth {
+    grid-template-columns: 1fr;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-aside {
+    order: -1;
+  }
+}
+
+@media (max-width: 620px) {
+  .search-row {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-gold {
+    padding: 16px 24px;
+  }
+
+  .shelf {
+    grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 12px;
+  }
+
+  .otp input {
+    width: 100%;
+    height: 54px;
+    font-size: 19px;
+  }
+
+  .hours table {
+    font-size: 13.5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-dial span {
+    animation: none !important;
+  }
+}

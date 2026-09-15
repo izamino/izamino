@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>کتابخانه مسجد شباب اهل‌الجنه</title>
+    <meta
+      name="description"
+      content="جست‌وجوی کتاب، شرایط امانت، ساعات کار و بازدید ۳۶۰ درجه از کتابخانه مسجد شباب اهل‌الجنه آبادان."
+    />
+    <meta name="theme-color" content="#063029" />
+    <meta name="color-scheme" content="light" />
+
+    <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" as="font" type="font/woff2" href="assets/fonts/Abar-VF.woff2" crossorigin />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="assets/css/pages.css" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">پرش به محتوای اصلی</a>
+
+    <div class="page-ground" aria-hidden="true">
+      <span class="ground-wash"></span>
+      <span class="ground-glow"></span>
+      <span class="ground-pattern"></span>
+      <span class="ground-margins"></span>
+      <span class="ground-grain"></span>
+    </div>
+
+    <div class="site-shell">
+      <nav class="topbar" id="topbar" aria-label="ناوبری اصلی">
+        <div class="topbar-inner">
+          <a class="brand" href="index.html">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 48 48" role="presentation">
+                <g fill="none" stroke="currentColor" stroke-width="1.6">
+                  <rect x="9.5" y="9.5" width="29" height="29" rx="2" />
+                  <rect x="9.5" y="9.5" width="29" height="29" rx="2" transform="rotate(45 24 24)" />
+                  <circle cx="24" cy="24" r="6.5" />
+                </g>
+              </svg>
+            </span>
+            <span class="brand-text">تفکرناب آینده اروند</span>
+          </a>
+
+          <div class="desktop-links">
+            <a href="index.html#programs">برنامه‌ها</a>
+            <a href="library.html" class="is-active">کتابخانه</a>
+            <a href="index.html#donate">مشارکت</a>
+          </div>
+
+          <button
+            class="menu-button"
+            id="menuButton"
+            type="button"
+            aria-expanded="false"
+            aria-controls="menuPanel"
+            aria-label="باز کردن منو"
+          >
+            <i></i><i></i><i></i>
+          </button>
+        </div>
+        <span class="topbar-rule" aria-hidden="true"></span>
+      </nav>
+
+      <div class="menu-backdrop" id="menuBackdrop" hidden></div>
+      <aside class="menu-panel" id="menuPanel" aria-label="منوی موبایل" hidden>
+        <button type="button" class="menu-close" id="menuClose" aria-label="بستن منو">×</button>
+        <p class="menu-eyebrow">فهرست صفحه</p>
+        <a href="index.html#programs"><b>برنامه‌ها</b><span>اطلاعیه و رویدادهای پیش‌رو</span></a>
+        <a href="library.html"><b>کتابخانه</b><span>جست‌وجوی کتاب و بازدید ۳۶۰</span></a>
+        <a href="login.html"><b>ورود و عضویت</b><span>همراه خانواده شباب شوید</span></a>
+        <a href="index.html#donate"><b>مشارکت</b><span>سهمی در ساخت خانه خدا</span></a>
+        <a href="index.html#contact"><b>ارتباط با ما</b><span>نشانی، تلفن و اطلاعات مؤسسه</span></a>
+        <span class="menu-ornament" aria-hidden="true"></span>
+      </aside>
+
+      <main id="main">
+        <header class="page-head">
+          <nav class="crumbs" aria-label="مسیر صفحه">
+            <a href="index.html">خانه</a>
+            <span aria-hidden="true">←</span>
+            <span aria-current="page">کتابخانه مسجد</span>
+          </nav>
+          <span class="gold-pill">مطالعه، پژوهش، انس با کتاب</span>
+          <h1>کتابخانه مسجد شباب اهل‌الجنه</h1>
+          <p>
+            فهرست کتاب‌ها را جست‌وجو کنید، وضعیت امانت هر عنوان را ببینید، و پیش از مراجعه از
+            ساعات کار و شرایط عضویت مطلع شوید.
+          </p>
+        </header>
+
+        <p class="demo-note">
+          <b>نمونهٔ طراحی</b>
+          <span>
+            عنوان‌ها، وضعیت امانت و ساعات کار در این صفحه نمونه‌اند و صرفاً برای نشان دادن چیدمان
+            آمده‌اند؛ باید با فهرست واقعی کتابخانه جایگزین شوند.
+          </span>
+        </p>
+
+        <!-- ─────────────────────  جست‌وجو  ───────────────────── -->
+        <section class="section" aria-labelledby="search-h">
+          <div class="search-panel" data-reveal>
+            <h2 id="search-h" class="visually-hidden-head">جست‌وجوی کتاب</h2>
+
+            <div class="search-row">
+              <div class="search-field">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="M20 20l-3.6-3.6" stroke-linecap="round" />
+                </svg>
+                <input
+                  type="search"
+                  id="bookSearch"
+                  placeholder="نام کتاب یا نویسنده را بنویسید…"
+                  aria-label="جست‌وجو در فهرست کتاب‌ها"
+                  autocomplete="off"
+                />
+                <button type="button" class="search-clear" id="searchClear" aria-label="پاک کردن جست‌وجو" hidden>
+                  ×
+                </button>
+              </div>
+              <button type="button" class="btn-gold" id="searchGo">جست‌وجو</button>
+            </div>
+
+            <div class="chips" id="catChips" role="group" aria-label="فیلتر موضوعی">
+              <button type="button" class="chip" data-cat="all" aria-pressed="true">همهٔ موضوع‌ها</button>
+              <button type="button" class="chip" data-cat="قرآن و تفسیر" aria-pressed="false">قرآن و تفسیر</button>
+              <button type="button" class="chip" data-cat="تاریخ اسلام" aria-pressed="false">تاریخ اسلام</button>
+              <button type="button" class="chip" data-cat="ادبیات فارسی" aria-pressed="false">ادبیات فارسی</button>
+              <button type="button" class="chip" data-cat="کودک و نوجوان" aria-pressed="false">کودک و نوجوان</button>
+              <button type="button" class="chip" data-cat="دفاع مقدس" aria-pressed="false">دفاع مقدس</button>
+              <button type="button" class="chip" data-cat="مهارت و خانواده" aria-pressed="false">مهارت و خانواده</button>
+            </div>
+
+            <div class="result-line">
+              <span id="resultCount">در حال آماده‌سازی فهرست…</span>
+              <span>برای دیدن جزئیات هر عنوان، روی آن بزنید</span>
+            </div>
+
+            <div class="shelf" id="shelf"></div>
+          </div>
+        </section>
+
+        <!-- ─────────────────────  بازدید ۳۶۰  ───────────────────── -->
+        <section class="section" aria-labelledby="tour-h">
+          <div class="tour" data-reveal>
+            <div>
+              <span class="gold-pill">بازدید تعاملی</span>
+              <h2 id="tour-h">کتابخانه را پیش از مراجعه ببینید</h2>
+              <p>
+                نمای ۳۶۰ درجه از سالن مطالعه، قفسه‌های موضوعی و بخش کودک و نوجوان — همان‌طور که در
+                مجتمع مسجد‌محور شباب ساخته می‌شود.
+              </p>
+              <a class="btn-gold" href="index.html#top">تماشای نمای ۳۶۰ درجه</a>
+            </div>
+
+            <div class="tour-dial" aria-hidden="true">
+              <span></span><span></span><span></span>
+              <b>۳۶۰°</b>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─────────────────────  شرایط امانت  ───────────────────── -->
+        <section class="section" aria-labelledby="rules-h">
+          <div class="section-title" data-reveal>
+            <span>پیش از امانت گرفتن</span>
+            <h2 id="rules-h">شرایط عضویت و امانت</h2>
+            <p>سه قدم ساده تا بردن کتاب به خانه.</p>
+          </div>
+
+          <div class="info-grid">
+            <article data-reveal style="--d: 0">
+              <span class="n">۰۱</span>
+              <h3>عضویت</h3>
+              <p>
+                با شمارهٔ موبایل در سامانهٔ شباب ثبت‌نام کنید و کارت عضویت کتابخانه را در همان
+                مراجعهٔ اول تحویل بگیرید.
+              </p>
+            </article>
+
+            <article data-reveal style="--d: 1">
+              <span class="n">۰۲</span>
+              <h3>مدت امانت</h3>
+              <p>
+                هر عضو هم‌زمان دو عنوان و هر عنوان تا دو هفته. تمدید در صورت نداشتن نوبت رزرو،
+                یک‌بار و به‌صورت حضوری یا تلفنی انجام می‌شود.
+              </p>
+            </article>
+
+            <article data-reveal style="--d: 2">
+              <span class="n">۰۳</span>
+              <h3>رزرو عنوان</h3>
+              <p>
+                عنوان‌هایی که در امانت هستند قابل رزرو شدن‌اند؛ به‌محض بازگشت کتاب با پیامک به شما
+                اطلاع داده می‌شود.
+              </p>
+            </article>
+          </div>
+
+          <div class="hours" data-reveal>
+            <table>
+              <caption>ساعات کار کتابخانه</caption>
+              <thead>
+                <tr>
+                  <th scope="col">روز</th>
+                  <th scope="col">نوبت صبح</th>
+                  <th scope="col">نوبت عصر</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">شنبه تا چهارشنبه</th>
+                  <td>۰۹:۰۰ – ۱۲:۳۰</td>
+                  <td>۱۶:۳۰ – ۲۰:۰۰</td>
+                </tr>
+                <tr>
+                  <th scope="row">پنجشنبه</th>
+                  <td>۰۹:۰۰ – ۱۳:۰۰</td>
+                  <td class="closed">تعطیل</td>
+                </tr>
+                <tr>
+                  <th scope="row">جمعه</th>
+                  <td class="closed">تعطیل</td>
+                  <td>۱۷:۰۰ – ۲۰:۰۰</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ─────────────────────  دعوت به عضویت  ───────────────────── -->
+        <section class="section" aria-labelledby="join-h">
+          <div class="map" data-reveal>
+            <div>
+              <h2 id="join-h">هنوز عضو کتابخانه نیستید؟</h2>
+              <p>عضویت رایگان است و با شمارهٔ موبایل انجام می‌شود.</p>
+            </div>
+            <a href="login.html">ورود و عضویت</a>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <span class="footer-ornament" aria-hidden="true"></span>
+        <p>نسخه بازسازی‌شده و مستقل از صفحه اصلی — برای استفاده با مجوز صاحب اثر</p>
+      </footer>
+    </div>
+
+    <button type="button" class="to-top" id="toTop" aria-label="بازگشت به بالای صفحه">
+      <span aria-hidden="true"></span>
+    </button>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/library.js" defer></script>
+  </body>
+</html>
