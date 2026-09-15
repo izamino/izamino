@@ -76,6 +76,7 @@
   --cntr-display: 100;
 
   color-scheme: light;
+  direction: rtl;
   font-family: "Abar VF", "Abar", Vazirmatn, Tahoma, "Segoe UI", sans-serif;
   font-variation-settings: "CNTR" var(--cntr-body);
   font-synthesis: none;
@@ -272,7 +273,7 @@ svg {
 
 .topbar {
   position: sticky;
-  top: 0;
+  top: env(safe-area-inset-top, 0px);
   z-index: 60;
   background: var(--green-800);
   color: #fff;
