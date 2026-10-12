@@ -116,37 +116,58 @@ function anbar_install_schema()
   PRIMARY KEY  (id),
   UNIQUE KEY name (name)
 ) $c;
-CREATE TABLE {$p}warehouse_managers (
-  warehouse_id BIGINT UNSIGNED NOT NULL,
-  user_id BIGINT UNSIGNED NOT NULL,
-  PRIMARY KEY  (warehouse_id,user_id),
-  KEY user_id (user_id)
-) $c;
 CREATE TABLE {$p}items (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   warehouse_id BIGINT UNSIGNED NOT NULL,
-  name VARCHAR(150) NOT NULL,
+  name VARCHAR(200) NOT NULL,
   code VARCHAR(50) NOT NULL,
+  item_type VARCHAR(20) NOT NULL DEFAULT 'other',
   category VARCHAR(80) NULL,
-  location VARCHAR(150) NULL,
+  location VARCHAR(200) NULL,
+  custodian VARCHAR(150) NULL,
   unit VARCHAR(30) NOT NULL,
   min_qty $q NOT NULL DEFAULT 0,
   qty $q NOT NULL DEFAULT 0,
+  broken_qty $q NOT NULL DEFAULT 0,
   loaned_qty $q NOT NULL DEFAULT 0,
   `condition` VARCHAR(10) NOT NULL DEFAULT 'ok',
-  brand VARCHAR(80) NULL,
-  model VARCHAR(80) NULL,
-  serial VARCHAR(120) NULL,
+  condition_notes TEXT NULL,
+  brand VARCHAR(120) NULL,
+  model VARCHAR(160) NULL,
+  serial VARCHAR(160) NULL,
+  purchase_price DECIMAL(20,0) NULL,
+  current_value DECIMAL(20,0) NULL,
+  currency VARCHAR(10) NULL,
+  purchase_date DATE NULL,
+  valuation_date DATE NULL,
+  source VARCHAR(20) NULL,
+  vendor VARCHAR(200) NULL,
+  details LONGTEXT NULL,
+  card_status VARCHAR(12) NOT NULL DEFAULT 'draft',
   image VARCHAR(60) NULL,
   notes TEXT NULL,
   batch_tracked TINYINT(1) NOT NULL DEFAULT 0,
   archived TINYINT(1) NOT NULL DEFAULT 0,
   created_by BIGINT UNSIGNED NULL,
+  reviewed_by BIGINT UNSIGNED NULL,
+  last_review_at DATETIME NULL,
   created_at DATETIME NOT NULL,
   updated_at DATETIME NOT NULL,
   PRIMARY KEY  (id),
   UNIQUE KEY wh_code (warehouse_id,code),
-  KEY warehouse_id (warehouse_id)
+  KEY warehouse_id (warehouse_id),
+  KEY card_status (card_status)
+) $c;
+CREATE TABLE {$p}item_photos (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  item_id BIGINT UNSIGNED NOT NULL,
+  file VARCHAR(60) NOT NULL,
+  caption VARCHAR(200) NULL,
+  sort INT NOT NULL DEFAULT 0,
+  user_id BIGINT UNSIGNED NULL,
+  created_at DATETIME NOT NULL,
+  PRIMARY KEY  (id),
+  KEY item_id (item_id)
 ) $c;
 CREATE TABLE {$p}batches (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -173,22 +194,28 @@ CREATE TABLE {$p}transactions (
   batch_alloc TEXT NULL,
   loan_id BIGINT UNSIGNED NULL,
   transfer_id BIGINT UNSIGNED NULL,
-  request_id BIGINT UNSIGNED NULL,
+  exit_id BIGINT UNSIGNED NULL,
   corrects_id BIGINT UNSIGNED NULL,
+  op_key VARCHAR(64) NULL,
   user_id BIGINT UNSIGNED NOT NULL,
   created_at DATETIME NOT NULL,
   PRIMARY KEY  (id),
+  UNIQUE KEY op_key (op_key),
   KEY item_id (item_id),
+  KEY exit_id (exit_id),
   KEY op_date (op_date)
 ) $c;
 CREATE TABLE {$p}loans (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   item_id BIGINT UNSIGNED NOT NULL,
   warehouse_id BIGINT UNSIGNED NOT NULL,
+  exit_id BIGINT UNSIGNED NULL,
   borrower VARCHAR(150) NOT NULL,
-  program VARCHAR(150) NULL,
+  borrower_phone VARCHAR(20) NULL,
+  program VARCHAR(200) NULL,
   qty $q NOT NULL,
   returned_qty $q NOT NULL DEFAULT 0,
+  returned_broken $q NOT NULL DEFAULT 0,
   due_date DATE NULL,
   status VARCHAR(10) NOT NULL DEFAULT 'open',
   note TEXT NULL,
@@ -203,6 +230,7 @@ CREATE TABLE {$p}transfers (
   item_id BIGINT UNSIGNED NOT NULL,
   from_wh BIGINT UNSIGNED NOT NULL,
   to_wh BIGINT UNSIGNED NOT NULL,
+  exit_id BIGINT UNSIGNED NULL,
   qty $q NOT NULL,
   batch_alloc TEXT NULL,
   status VARCHAR(10) NOT NULL DEFAULT 'pending',
@@ -216,24 +244,79 @@ CREATE TABLE {$p}transfers (
   PRIMARY KEY  (id),
   KEY item_id (item_id)
 ) $c;
-CREATE TABLE {$p}requests (
+CREATE TABLE {$p}exits (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  warehouse_id BIGINT UNSIGNED NOT NULL,
-  item_id BIGINT UNSIGNED NULL,
-  item_name VARCHAR(150) NOT NULL,
-  qty $q NOT NULL,
-  unit VARCHAR(30) NULL,
-  kind VARCHAR(10) NOT NULL DEFAULT 'use',
-  reason TEXT NOT NULL,
-  needed_by DATE NULL,
+  ticket_id BIGINT UNSIGNED NULL,
+  from_wh BIGINT UNSIGNED NOT NULL,
+  to_wh BIGINT UNSIGNED NULL,
+  type VARCHAR(12) NOT NULL,
+  status VARCHAR(15) NOT NULL DEFAULT 'draft',
   requester_id BIGINT UNSIGNED NOT NULL,
-  status VARCHAR(12) NOT NULL DEFAULT 'pending',
-  reviewer_id BIGINT UNSIGNED NULL,
-  review_note TEXT NULL,
-  reviewed_at DATETIME NULL,
+  recipient VARCHAR(150) NULL,
+  recipient_phone VARCHAR(20) NULL,
+  reason TEXT NULL,
+  program VARCHAR(200) NULL,
+  delivery_place VARCHAR(200) NULL,
+  needed_by DATE NULL,
+  due_date DATE NULL,
+  note TEXT NULL,
+  submitted_at DATETIME NULL,
+  approver_id BIGINT UNSIGNED NULL,
+  approved_at DATETIME NULL,
+  decision_note TEXT NULL,
+  deliverer_id BIGINT UNSIGNED NULL,
+  delivered_at DATETIME NULL,
+  delivery_note TEXT NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  PRIMARY KEY  (id),
+  KEY status (status),
+  KEY from_wh (from_wh),
+  KEY ticket_id (ticket_id)
+) $c;
+CREATE TABLE {$p}exit_lines (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  exit_id BIGINT UNSIGNED NOT NULL,
+  item_id BIGINT UNSIGNED NOT NULL,
+  qty $q NOT NULL,
+  from_broken TINYINT(1) NOT NULL DEFAULT 0,
+  tx_id BIGINT UNSIGNED NULL,
+  PRIMARY KEY  (id),
+  KEY exit_id (exit_id),
+  KEY item_id (item_id)
+) $c;
+CREATE TABLE {$p}tickets (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  code VARCHAR(12) NOT NULL,
+  first_name VARCHAR(80) NOT NULL,
+  last_name VARCHAR(80) NOT NULL,
+  national_id VARCHAR(10) NOT NULL,
+  phone VARCHAR(15) NOT NULL,
+  referral VARCHAR(300) NULL,
+  item_text VARCHAR(300) NOT NULL,
+  qty_text VARCHAR(100) NULL,
+  need_time VARCHAR(200) NULL,
+  description TEXT NULL,
+  status VARCHAR(12) NOT NULL DEFAULT 'new',
+  referred_wh BIGINT UNSIGNED NULL,
+  appointment VARCHAR(200) NULL,
+  ip VARCHAR(45) NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  PRIMARY KEY  (id),
+  UNIQUE KEY code (code),
+  KEY status (status)
+) $c;
+CREATE TABLE {$p}ticket_events (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  ticket_id BIGINT UNSIGNED NOT NULL,
+  user_id BIGINT UNSIGNED NULL,
+  kind VARCHAR(12) NOT NULL,
+  text TEXT NULL,
+  appointment VARCHAR(200) NULL,
   created_at DATETIME NOT NULL,
   PRIMARY KEY  (id),
-  KEY warehouse_id (warehouse_id)
+  KEY ticket_id (ticket_id)
 ) $c;
 CREATE TABLE {$p}notifications (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -272,13 +355,23 @@ CREATE TABLE {$p}audit (
   KEY entity (entity,entity_id)
 ) $c;");
 
-    if ((int) anbar_var('SELECT COUNT(*) FROM {warehouses}') === 0) {
-        $defaults = [
-            ['انبار کارگاه', 0], ['انبار مسجد', 0], ['انبار رسانه', 0], ['انبار صوت مسجد', 0],
-            ['انبار پایگاه حاج احمد یلالی', 0], ['انبار مدرسه', 0], ['انبار داروخانه', 1], ['انبار آشپزخانه', 1],
-        ];
-        foreach ($defaults as $i => [$name, $exp]) {
+    $defaults = [
+        ['انبار کارگاه', 0], ['انبار مسجد', 0], ['انبار رسانه', 0], ['انبار صوت مسجد', 0],
+        ['انبار پایگاه حاج احمد یلالی', 0], ['انبار مدرسه', 0], ['انبار داروخانه', 1], ['انبار آشپزخانه', 1],
+        ['اموال و انبار کتابخانه', 0], ['اموال و انبار نمازخانه', 0],
+    ];
+    foreach ($defaults as $i => [$name, $exp]) {
+        if (!anbar_get('SELECT id FROM {warehouses} WHERE name = ?', $name)) {
             anbar_run('INSERT INTO {warehouses} (name, tracks_expiry, sort, created_at) VALUES (?, ?, ?, UTC_TIMESTAMP())', $name, $exp, $i + 1);
+        }
+    }
+    // Version 1 stored warehouse managers in a table; carry them over as restricted scopes.
+    if ($wpdb->get_var("SHOW TABLES LIKE '{$p}warehouse_managers'")) {
+        foreach ($wpdb->get_results("SELECT user_id, GROUP_CONCAT(warehouse_id) AS whs FROM {$p}warehouse_managers GROUP BY user_id", ARRAY_A) as $r) {
+            if (!get_user_meta($r['user_id'], 'anbar_perms', true)) {
+                anbar_save_perms($r['user_id'], ['warehouses' => explode(',', $r['whs']), 'edit' => true, 'stock_in' => true,
+                    'request_out' => true, 'deliver' => true]);
+            }
         }
     }
     update_option('anbar_db_version', ANBAR_DB_VERSION);
@@ -314,8 +407,8 @@ function anbar_audit($user_id, $action, $entity = null, $entity_id = null, $deta
 function anbar_backup_now()
 {
     global $wpdb;
-    $tables = ['warehouses', 'warehouse_managers', 'items', 'batches', 'transactions', 'loans', 'transfers', 'requests',
-        'notifications', 'announcements', 'audit'];
+    $tables = ['warehouses', 'items', 'item_photos', 'batches', 'transactions', 'loans', 'transfers', 'exits', 'exit_lines',
+        'tickets', 'ticket_events', 'notifications', 'announcements', 'audit'];
     $dump = ['plugin' => 'anbar-shabab', 'version' => ANBAR_VERSION, 'created_at' => gmdate('c'), 'tables' => []];
     foreach ($tables as $t) {
         $dump['tables'][$t] = $wpdb->get_results('SELECT * FROM ' . $wpdb->prefix . 'anbar_' . $t, ARRAY_A);

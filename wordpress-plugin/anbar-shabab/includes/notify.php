@@ -4,8 +4,8 @@ if (!defined('ABSPATH')) {
 }
 
 /** Kinds that are also pushed to SMS/messenger when configured in Settings → انبار شباب. */
-const ANBAR_EXTERNAL_KINDS = ['out_of_stock', 'low_stock', 'request_new', 'request_result', 'transfer_in', 'loan_overdue',
-    'damage', 'expiry', 'announcement'];
+const ANBAR_EXTERNAL_KINDS = ['out_of_stock', 'low_stock', 'ticket_new', 'exit_pending', 'exit_result', 'exit_ready', 'transfer_in',
+    'loan_overdue', 'damage', 'expiry', 'announcement'];
 
 /** Fire-and-forget delivery to Bale / Telegram bots and Kavenegar SMS. Never blocks the in-app notification. */
 function anbar_send_external($user_id, $text)
@@ -45,16 +45,14 @@ function anbar_notify($user_ids, $n)
     }
 }
 
-/** Managers of the warehouse plus every active general admin. */
+/** People who work in a warehouse (any operational permission there). */
 function anbar_warehouse_audience($warehouse_id, $except = 0)
 {
-    $ids = array_map('intval', array_column(anbar_all('SELECT user_id FROM {warehouse_managers} WHERE warehouse_id = ?', (int) $warehouse_id), 'user_id'));
-    foreach (get_users(['capability' => 'anbar_manage', 'fields' => 'ID']) as $id) {
-        $ids[] = (int) $id;
+    $ids = [];
+    foreach (['edit', 'stock_in', 'deliver', 'approve'] as $perm) {
+        $ids = array_merge($ids, anbar_users_with($perm, $warehouse_id, $except));
     }
-    return array_values(array_filter(array_unique($ids), function ($id) use ($except) {
-        return $id !== (int) $except && anbar_is_active($id) && user_can($id, 'anbar_access');
-    }));
+    return array_values(array_unique($ids));
 }
 
 function anbar_all_active_users($except = 0)
@@ -121,6 +119,13 @@ function anbar_run_scheduled_checks()
             'title' => $stage === 'expired' ? "«{$b['item_name']}» منقضی شده است" : "انقضای نزدیک «{$b['item_name']}»",
             'body' => "سری {$b['batch_no']} — " . anbar_fmt($b['qty']) . " {$b['unit']} — تاریخ انقضا " . anbar_jalali($b['expiry']),
             'link' => '#/items/' . $b['item_id'], 'warehouse_id' => (int) $b['warehouse_id'], 'dedupe' => "exp-{$stage}-{$b['id']}",
+        ]);
+    }
+    $incomplete = (int) anbar_var("SELECT COUNT(*) FROM {items} WHERE archived = 0 AND card_status <> 'reviewed'");
+    if ($incomplete > 0) {
+        anbar_notify(anbar_users_with('steward'), [
+            'kind' => 'card_incomplete', 'title' => "{$incomplete} شناسنامه اموال نیازمند تکمیل یا بررسی است",
+            'link' => '#/items?card=incomplete', 'dedupe' => 'cards-' . $t,
         ]);
     }
 }

@@ -1,12 +1,15 @@
 'use strict';
-// End-to-end tests against a running WordPress with the plugin active.
-// Usage: WP_URL=http://127.0.0.1:8080 WP_ADMIN_PASS=admin123 node --test wordpress-plugin/tests/api.test.js
-// Uses a fresh install: the test creates users ali / reza / hasan.
+/**
+ * End-to-end tests against a running WordPress with the plugin active, one per acceptance criterion.
+ * Prepare a throwaway site first (this wipes app data and recreates the 15 initial accounts
+ * with test passwords "test-<username>"):
+ *   wp eval-file wordpress-plugin/tests/reset.php
+ * Then: WP_URL=http://127.0.0.1:8080 node --test wordpress-plugin/tests/api.test.js
+ */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 
 const SITE = process.env.WP_URL || 'http://127.0.0.1:8080';
-const ADMIN_PASS = process.env.WP_ADMIN_PASS || 'admin123';
 
 class Client {
   constructor() { this.jar = {}; this.nonce = ''; }
@@ -19,13 +22,11 @@ class Client {
     }
   }
   async refreshNonce() {
-    const res = await fetch(SITE + '/anbar/', { headers: { cookie: this.cookie } });
-    const html = await res.text();
+    const html = await (await fetch(SITE + '/anbar/', { headers: { cookie: this.cookie } })).text();
     this.nonce = /"nonce":"(\w+)"/.exec(html)[1];
   }
   async req(method, url, body) {
-    const u = SITE + '/wp-json/anbar/v1' + url.replace(/^\/api/, '');
-    const res = await fetch(u, {
+    const res = await fetch(SITE + '/wp-json/anbar/v1' + url, {
       method, redirect: 'manual',
       headers: { ...(this.nonce ? { 'X-WP-Nonce': this.nonce } : {}), cookie: this.cookie, ...(body ? { 'content-type': 'application/json' } : {}) },
       body: body ? JSON.stringify(body) : undefined,
@@ -33,167 +34,223 @@ class Client {
     this.store(res);
     const type = res.headers.get('content-type') || '';
     const data = type.includes('json') ? await res.json() : Buffer.from(await res.arrayBuffer());
-    if (data && data.message && !data.error) data.error = data.message;
     return { status: res.status, data };
   }
   async ok(method, url, body) {
     const r = await this.req(method, url, body);
-    assert.equal(r.status, 200, `${method} ${url} → ${r.status} ${JSON.stringify(r.data)}`);
+    assert.equal(r.status, 200, `${method} ${url} → ${r.status} ${JSON.stringify(r.data?.message || r.data)}`);
     return r.data;
   }
-  async login(username, password) {
-    this.jar = {}; this.nonce = '';
-    const r = await this.ok('POST', '/api/login', { username, password });
-    await this.refreshNonce();
-    return r;
+  async status(method, url, body) { return (await this.req(method, url, body)).status; }
+  static async as(username) {
+    const c = new Client();
+    await c.ok('POST', '/login', { username, password: `test-${username}` });
+    await c.refreshNonce();
+    return c;
   }
 }
-const admin = new Client();
-const kitchenMgr = new Client();
-const mediaMgr = new Client();
-const plain = new Client();
+
+const U = {};
+const W = {};
 const ids = {};
+const item = (c, id) => c.ok('GET', `/items/${id}`);
 
-test('login is required and wrong passwords are refused', async () => {
-  assert.equal((await new Client().req('GET', '/api/bootstrap')).status, 401);
-  assert.equal((await new Client().req('POST', '/api/login', { username: 'admin', password: 'nope' })).status, 401);
-  await admin.login('admin', ADMIN_PASS);
-  const boot = await admin.ok('GET', '/api/bootstrap');
-  assert.equal(boot.user.role, 'admin');
-  assert.equal(boot.warehouses.length, 8);
-  ids.wh = Object.fromEntries(boot.warehouses.map((w) => [w.name, w.id]));
-  assert.ok(boot.warehouses.find((w) => w.name === 'انبار داروخانه').tracks_expiry);
+test('only defined accounts log in; WordPress admin and wrong passwords are refused', async () => {
+  for (const name of ['mohammadali', 'mehdi', 'mostafa', 'amin', 'gholamreza', 'morteza', 'yahya', 'abbasali', 'amirhossein', 'ali',
+    'reserve01', 'reserve02', 'reserve03', 'reserve04', 'reserve05']) {
+    U[name] = await Client.as(name);
+  }
+  assert.equal(await new Client().status('GET', '/bootstrap'), 401);
+  assert.equal(await new Client().status('POST', '/login', { username: 'ali', password: 'wrong-pass' }), 401);
+  assert.equal(await new Client().status('POST', '/login', { username: 'farani', password: 'whatever1' }), 401);
+  const boot = await U.mohammadali.ok('GET', '/bootstrap');
+  assert.equal(boot.warehouses.length, 10);
+  for (const w of boot.warehouses) W[w.name] = w.id;
 });
 
-test('admin creates users and assigns warehouses (one user can manage several)', async () => {
-  const k = await admin.ok('POST', '/api/users', { full_name: 'علی آشپزخانه', username: 'ali', password: 'secret1', managed: [ids.wh['انبار آشپزخانه'], ids.wh['انبار داروخانه']] });
-  const m = await admin.ok('POST', '/api/users', { full_name: 'رضا رسانه', username: 'reza', password: 'secret2', managed: [ids.wh['انبار رسانه']] });
-  await admin.ok('POST', '/api/users', { full_name: 'حسن', username: 'hasan', password: 'secret3' });
-  ids.ali = k.id; ids.reza = m.id;
-  await kitchenMgr.login('ali', 'secret1');
-  await mediaMgr.login('reza', 'secret2');
-  await plain.login('hasan', 'secret3');
-  const me = await kitchenMgr.ok('GET', '/api/me');
-  assert.equal(me.user.must_change_pw, true);
-  assert.deepEqual(me.user.managed.sort(), [ids.wh['انبار آشپزخانه'], ids.wh['انبار داروخانه']].sort());
+test('permissions follow the table; restricted users only see their warehouse', async () => {
+  const p = (u) => u.ok('GET', '/me').then((r) => r.user.perms);
+  const gm = await p(U.mehdi);
+  assert.ok(gm.scope_all && gm.approve && gm.manage_users);
+  const ali = await p(U.ali);
+  assert.ok(ali.scope_all && ali.approve && ali.deliver && !ali.manage_users);
+  const res = await p(U.reserve03);
+  assert.ok(res.scope_all && res.edit && res.deliver && !res.approve && !res.manage_users);
+  const mo = await p(U.morteza);
+  assert.ok(!mo.scope_all && !mo.approve && mo.warehouses.length === 1 && mo.warehouses[0] === W['انبار صوت مسجد']);
+  assert.equal((await U.morteza.ok('GET', '/bootstrap')).warehouses.length, 1);
+  assert.equal((await U.abbasali.ok('GET', '/bootstrap')).warehouses[0].name, 'اموال و انبار کتابخانه');
+  assert.equal(await U.ali.status('GET', '/users'), 403);
+  assert.equal(await U.reserve01.status('GET', '/users'), 403);
 });
 
-test('items: decimals, permissions, and refusing to issue more than stock', async () => {
-  const cable = await mediaMgr.ok('POST', '/api/items', {
-    warehouse_id: ids.wh['انبار رسانه'], name: 'کابل صوت', unit: 'متر', min_qty: '۱۰', opening_qty: '۱۲٫۵', location: 'قفسه ۲',
+test('asset cards: restricted user records in own warehouse only; partial cards are allowed', async () => {
+  const r = await U.morteza.ok('POST', '/items', {
+    warehouse_id: W['انبار صوت مسجد'], name: 'باند اکتیو JBL EON712', item_type: 'audio', unit: 'عدد', opening_qty: '۴', brand: 'JBL', model: 'EON712',
+    condition_notes: 'خروجی دوم صدا ندارد', details: { specs: { power: '1300W', active: 'اکتیو' }, custom: [{ label: 'رنگ بدنه', value: 'مشکی' }] },
+    purchase_price: '', current_value: '۴۵۰۰۰۰۰۰',
   });
-  ids.cable = cable.id;
-  let item = await mediaMgr.ok('GET', `/api/items/${cable.id}`);
-  assert.equal(item.qty, 12.5);
-  assert.equal(item.history.length, 1);
-  // A manager of another warehouse and a plain user can see but not change it.
-  assert.equal((await kitchenMgr.req('POST', `/api/items/${cable.id}/out`, { qty: 1, reason: 'consume' })).status, 403);
-  assert.equal((await plain.req('PUT', `/api/items/${cable.id}`, { ...item, name: 'x' })).status, 403);
-  assert.equal((await plain.ok('GET', '/api/items?q=کابل')).length, 1);
-  const tooMuch = await mediaMgr.req('POST', `/api/items/${cable.id}/out`, { qty: 13, reason: 'consume' });
-  assert.equal(tooMuch.status, 400);
-  assert.match(tooMuch.data.error, /بیشتر از موجودی/);
-  await mediaMgr.ok('POST', `/api/items/${cable.id}/out`, { qty: '3.2', reason: 'consume', party: 'مراسم' });
-  item = await mediaMgr.ok('GET', `/api/items/${cable.id}`);
-  assert.equal(item.qty, 9.3);
-  // Crossing the minimum notified the warehouse manager and admins.
-  const notes = await admin.ok('GET', '/api/notifications');
-  assert.ok(notes.some((n) => n.kind === 'low_stock'));
+  ids.speaker = r.id;
+  const it = await item(U.morteza, r.id);
+  assert.equal(it.qty, 4);
+  assert.equal(it.details.specs.power, '1300W');
+  assert.equal(it.card_status, 'draft');
+  assert.ok(it.missing.includes('عکس'));
+  assert.equal(it.purchase_price, undefined, 'operators do not see prices');
+  const gmView = await item(U.mehdi, r.id);
+  assert.equal(gmView.purchase_price, null, 'unknown price stays empty, not 0');
+  assert.equal(String(gmView.current_value), '45000000');
+  assert.equal(await U.morteza.status('POST', '/items', { warehouse_id: W['انبار رسانه'], name: 'x', unit: 'عدد' }), 403);
+  assert.equal(await U.amirhossein.status('GET', `/items/${r.id}`), 403);
+  assert.equal((await U.amirhossein.ok('GET', '/items?q=JBL')).length, 0);
+  const minimal = await U.abbasali.ok('POST', '/items', { warehouse_id: W['اموال و انبار کتابخانه'], name: 'نهج‌البلاغه', unit: 'جلد', item_type: 'book', opening_qty: 3 });
+  ids.book = minimal.id;
 });
 
-test('adjustment needs a reason and keeps history', async () => {
-  const r = await mediaMgr.req('POST', `/api/items/${ids.cable}/adjust`, { new_qty: 9 });
-  assert.equal(r.status, 400);
-  await mediaMgr.ok('POST', `/api/items/${ids.cable}/adjust`, { new_qty: 9, note: 'شمارش ماهانه' });
-  const item = await mediaMgr.ok('GET', `/api/items/${ids.cable}`);
-  assert.equal(item.qty, 9);
-  assert.equal(item.history[0].reason, 'adjust');
-  assert.equal(item.history[0].delta, -0.3);
+test('exit: request → approval by an authorised approver → delivery; stock drops only at delivery', async () => {
+  const ex = await U.morteza.ok('POST', '/exits', { from_wh: W['انبار صوت مسجد'], type: 'consume', recipient: 'هیئت جوانان', reason: 'مراسم',
+    lines: [{ item_id: ids.speaker, qty: 2 }], submit: 1 });
+  ids.exit1 = ex.id;
+  let e = await U.morteza.ok('GET', `/exits/${ex.id}`);
+  assert.equal(e.status, 'pending');
+  assert.equal((await item(U.morteza, ids.speaker)).qty, 4);
+  assert.equal(await U.morteza.status('POST', `/exits/${ex.id}/decide`, { decision: 'approve' }), 403);
+  assert.equal(await U.reserve01.status('POST', `/exits/${ex.id}/decide`, { decision: 'approve' }), 403);
+  assert.equal(await U.morteza.status('POST', `/exits/${ex.id}/deliver`, {}), 400, 'cannot deliver before approval');
+  await U.ali.ok('POST', `/exits/${ex.id}/decide`, { decision: 'approve' });
+  let it = await item(U.morteza, ids.speaker);
+  assert.equal(it.qty, 4, 'approval does not reduce stock');
+  assert.equal(it.reserved_qty, 2);
+  assert.equal(it.usable_qty, 2);
+  // Reserved quantity cannot be promised twice.
+  const ex2 = await U.yahya.ok('POST', '/exits', { from_wh: W['انبار صوت مسجد'], type: 'consume', recipient: 'x', lines: [{ item_id: ids.speaker, qty: 3 }], submit: 1 });
+  assert.equal(await U.mehdi.status('POST', `/exits/${ex2.id}/decide`, { decision: 'approve' }), 400);
+  await U.mehdi.ok('POST', `/exits/${ex2.id}/decide`, { decision: 'reject', note: 'موجودی کافی نیست' });
+  assert.equal(await U.mehdi.status('POST', `/exits/${ex2.id}/decide`, { decision: 'reject' }), 400, 'already decided');
+  await U.morteza.ok('POST', `/exits/${ex.id}/deliver`, { note: 'تحویل شد' });
+  it = await item(U.morteza, ids.speaker);
+  assert.equal(it.qty, 2);
+  assert.equal(it.reserved_qty, 0);
+  assert.equal(await U.morteza.status('POST', `/exits/${ex.id}/deliver`, {}), 400, 'no duplicate delivery');
+  e = await U.morteza.ok('GET', `/exits/${ex.id}`);
+  assert.equal(e.status, 'delivered');
+  assert.ok(e.approver && e.deliverer && e.requester);
+  assert.ok(e.lines[0].tx_id, 'voucher line linked to its stock transaction');
 });
 
-test('loans: separate on-loan quantity and partial returns', async () => {
-  const cam = await mediaMgr.ok('POST', '/api/items', { warehouse_id: ids.wh['انبار رسانه'], name: 'دوربین', unit: 'عدد', opening_qty: 3, serial: 'SN-1' });
-  const loan = await mediaMgr.ok('POST', `/api/items/${cam.id}/loan`, { qty: 2, borrower: 'محمد', program: 'اردو', due_date: '2020-01-01' });
-  let item = await mediaMgr.ok('GET', `/api/items/${cam.id}`);
-  assert.equal(item.qty, 1);
-  assert.equal(item.loaned_qty, 2);
-  await mediaMgr.ok('POST', `/api/loans/${loan.loan_id}/return`, { qty: 1 });
-  item = await mediaMgr.ok('GET', `/api/items/${cam.id}`);
-  assert.equal(item.qty, 2);
-  assert.equal(item.loaned_qty, 1);
-  assert.equal(item.loans[0].status, 'open');
-  assert.equal((await mediaMgr.req('POST', `/api/loans/${loan.loan_id}/return`, { qty: 2 })).status, 400);
-  await mediaMgr.ok('POST', `/api/loans/${loan.loan_id}/return`, { qty: 1 });
-  item = await mediaMgr.ok('GET', `/api/items/${cam.id}`);
-  assert.equal(item.loans[0].status, 'closed');
-  assert.equal(item.loaned_qty, 0);
+test('approver approving their own request is recorded; changes after approval void it', async () => {
+  const ex = await U.mehdi.ok('POST', '/exits', { from_wh: W['انبار صوت مسجد'], type: 'consume', recipient: 'مسجد', lines: [{ item_id: ids.speaker, qty: 1 }], submit: 1 });
+  await U.mehdi.ok('POST', `/exits/${ex.id}/decide`, { decision: 'approve' });
+  let e = await U.mehdi.ok('GET', `/exits/${ex.id}`);
+  assert.equal(e.requester_id, e.approver_id);
+  await U.morteza.ok('PUT', `/exits/${ex.id}`, { from_wh: W['انبار صوت مسجد'], type: 'consume', recipient: 'مسجد', lines: [{ item_id: ids.speaker, qty: 2 }] });
+  e = await U.morteza.ok('GET', `/exits/${ex.id}`);
+  assert.equal(e.status, 'pending');
+  assert.equal(e.approver_id, null);
+  await U.morteza.ok('POST', `/exits/${ex.id}/cancel`, { note: 'لازم نشد' });
 });
 
-test('expiry batches: first-expiring batch is issued first', async () => {
-  const rice = await kitchenMgr.ok('POST', '/api/items', { warehouse_id: ids.wh['انبار آشپزخانه'], name: 'برنج', unit: 'کیلوگرم', opening_qty: 10, batch_no: 'B-LATE', expiry: '2030-01-01' });
-  ids.rice = rice.id;
-  await kitchenMgr.ok('POST', `/api/items/${rice.id}/in`, { qty: 5, reason: 'purchase', batch_no: 'B-EARLY', expiry: '2027-01-01' });
-  assert.equal((await kitchenMgr.req('POST', `/api/items/${rice.id}/in`, { qty: 5, reason: 'purchase' })).status, 400);
-  const out = await kitchenMgr.ok('POST', `/api/items/${rice.id}/out`, { qty: 7, reason: 'consume' });
-  const receipt = await kitchenMgr.ok('GET', `/api/transactions/${out.tx_id}`);
-  const alloc = JSON.parse(receipt.batch_alloc);
-  assert.deepEqual(alloc.map((a) => [a.batch_no, a.qty]), [['B-EARLY', 5], ['B-LATE', 2]]);
-  const item = await kitchenMgr.ok('GET', `/api/items/${rice.id}`);
-  assert.equal(item.qty, 8);
-  assert.deepEqual(item.batches.map((b) => b.qty), [8]);
+test('loan with partial, damaged return; broken stock is separate from usable', async () => {
+  const cam = await U.amirhossein.ok('POST', '/items', { warehouse_id: W['انبار رسانه'], name: 'دوربین کانن 90D', unit: 'دستگاه', item_type: 'camera', opening_qty: 3, serial: 'CN-1' });
+  const ex = await U.amirhossein.ok('POST', '/exits', { from_wh: W['انبار رسانه'], type: 'loan', recipient: 'سید محمد', recipient_phone: '09121234567', due_date: '2026-10-20',
+    lines: [{ item_id: cam.id, qty: 2 }], submit: 1 });
+  await U.ali.ok('POST', `/exits/${ex.id}/decide`, { decision: 'approve' });
+  await U.amirhossein.ok('POST', `/exits/${ex.id}/deliver`, {});
+  let it = await item(U.amirhossein, cam.id);
+  assert.equal(it.qty, 1);
+  assert.equal(it.loaned_qty, 2);
+  const loan = it.loans[0];
+  await U.amirhossein.ok('POST', `/loans/${loan.id}/return`, { qty: 1, broken: 1, note: 'لنز ترک دارد' });
+  it = await item(U.amirhossein, cam.id);
+  assert.equal(it.qty, 2);
+  assert.equal(it.broken_qty, 1);
+  assert.equal(it.usable_qty, 1);
+  assert.equal(it.loaned_qty, 1);
+  await U.amirhossein.ok('POST', `/items/${cam.id}/repair`, { qty: 1, note: 'لنز تعویض شد' });
+  assert.equal((await item(U.amirhossein, cam.id)).usable_qty, 2);
 });
 
-test('transfers stay in transit until the destination confirms', async () => {
-  const sent = await kitchenMgr.ok('POST', `/api/items/${ids.rice}/transfer`, { to_wh: ids.wh['انبار مسجد'], qty: 3 });
-  let src = await kitchenMgr.ok('GET', `/api/items/${ids.rice}`);
-  assert.equal(src.qty, 5);
-  assert.equal(src.transit_qty, 3);
-  // Origin manager cannot confirm on behalf of the destination.
-  assert.equal((await kitchenMgr.req('POST', `/api/transfers/${sent.transfer_id}/receive`)).status, 403);
-  await admin.ok('POST', `/api/transfers/${sent.transfer_id}/receive`, {});
-  src = await kitchenMgr.ok('GET', `/api/items/${ids.rice}`);
-  assert.equal(src.transit_qty, 0);
-  const dest = await admin.ok('GET', `/api/items?warehouse=${ids.wh['انبار مسجد']}&q=برنج`);
-  assert.equal(dest[0].qty, 3);
-  // Rejected transfer returns stock to origin.
-  const t2 = await kitchenMgr.ok('POST', `/api/items/${ids.rice}/transfer`, { to_wh: ids.wh['انبار مسجد'], qty: 1 });
-  assert.equal((await admin.req('POST', `/api/transfers/${t2.transfer_id}/reject`, {})).status, 400);
-  await admin.ok('POST', `/api/transfers/${t2.transfer_id}/reject`, { note: 'لازم نیست' });
-  src = await kitchenMgr.ok('GET', `/api/items/${ids.rice}`);
-  assert.equal(src.qty, 5);
+test('transfers need approval and stay in transit until the destination receives', async () => {
+  const ex = await U.reserve01.ok('POST', '/exits', { from_wh: W['انبار صوت مسجد'], to_wh: W['انبار مسجد'], type: 'transfer', lines: [{ item_id: ids.speaker, qty: 1 }], submit: 1 });
+  assert.equal(await U.reserve01.status('POST', `/exits/${ex.id}/decide`, { decision: 'approve' }), 403);
+  await U.gholamreza.ok('POST', `/exits/${ex.id}/decide`, { decision: 'approve' });
+  await U.reserve01.ok('POST', `/exits/${ex.id}/deliver`, {});
+  const it = await item(U.reserve01, ids.speaker);
+  assert.equal(it.transit_qty, 1);
+  const tr = it.transfers[0];
+  assert.equal(await U.morteza.status('POST', `/transfers/${tr.id}/receive`), 403, 'origin-only user cannot receive at destination');
+  await U.reserve02.ok('POST', `/transfers/${tr.id}/receive`, {});
+  const dest = await U.mehdi.ok('GET', `/items?warehouse=${W['انبار مسجد']}`);
+  assert.equal(dest[0].qty, 1);
 });
 
-test('requests do not change stock; review notifies the requester', async () => {
-  const before = (await plain.ok('GET', `/api/items/${ids.cable}`)).qty;
-  const r = await plain.ok('POST', '/api/requests', { warehouse_id: ids.wh['انبار رسانه'], item_id: ids.cable, qty: 2, reason: 'جلسه', kind: 'use' });
-  assert.equal((await plain.ok('GET', `/api/items/${ids.cable}`)).qty, before);
-  assert.ok((await mediaMgr.ok('GET', '/api/notifications')).some((n) => n.kind === 'request_new'));
-  assert.equal((await plain.req('POST', `/api/requests/${r.id}/review`, { decision: 'approve' })).status, 403);
-  await mediaMgr.ok('POST', `/api/requests/${r.id}/review`, { decision: 'approve' });
-  assert.ok((await plain.ok('GET', '/api/notifications')).some((n) => n.kind === 'request_result'));
-  await mediaMgr.ok('POST', `/api/items/${ids.cable}/out`, { qty: 2, reason: 'consume', request_id: r.id });
-  const mine = await plain.ok('GET', '/api/requests?scope=mine');
-  assert.equal(mine[0].status, 'delivered');
+test('no exit without approval: decreasing correction needs approver; duplicate submissions blocked', async () => {
+  assert.equal(await U.morteza.status('POST', `/items/${ids.speaker}/adjust`, { new_qty: 0, note: 'شمارش' }), 403);
+  assert.equal(await U.reserve01.status('POST', `/items/${ids.speaker}/adjust`, { new_qty: 0, note: 'شمارش' }), 403);
+  await U.morteza.ok('POST', `/items/${ids.speaker}/adjust`, { new_qty: 2, note: 'یک عدد پیدا شد' });
+  const key = 'k-' + Date.now();
+  await U.morteza.ok('POST', `/items/${ids.speaker}/in`, { qty: 1, reason: 'gift', op_key: key });
+  assert.equal(await U.morteza.status('POST', `/items/${ids.speaker}/in`, { qty: 1, reason: 'gift', op_key: key }), 400);
+  assert.equal((await item(U.morteza, ids.speaker)).qty, 3);
+  assert.equal(await U.morteza.status('POST', '/exits', { from_wh: W['انبار صوت مسجد'], type: 'consume', recipient: 'x', lines: [{ item_id: ids.speaker, qty: 0 }] }), 400);
+  assert.equal(await U.morteza.status('POST', '/exits', { from_wh: W['انبار صوت مسجد'], type: 'consume', recipient: 'x', lines: [{ item_id: ids.speaker, qty: -1 }] }), 400);
 });
 
-test('archiving keeps history; reports export to xlsx; backups', async () => {
-  await mediaMgr.ok('POST', `/api/items/${ids.cable}/archive`, { archived: true });
-  assert.equal((await admin.ok('GET', '/api/items?q=کابل')).length, 0);
-  assert.equal((await admin.ok('GET', '/api/items?q=کابل&archived=1')).length, 1);
-  const rep = await admin.ok('GET', '/api/reports/transactions?from=2000-01-01&to=2100-01-01');
-  assert.ok(rep.rows.length >= 8);
-  const x = await admin.req('GET', '/api/reports/inventory?format=xlsx');
+test('public ticket → referral → staff picks items → approval → ready → call note → delivery', async () => {
+  const anon = new Client();
+  assert.equal(await anon.status('POST', '/public/tickets', { first_name: 'رضا', last_name: 'احمدی', national_id: '1234567890', phone: '09121234567',
+    referral: 'معرفی', item_text: 'کتاب', description: 'برای کلاس' }), 400, 'invalid national id');
+  const pub = await anon.ok('POST', '/public/tickets', { first_name: 'رضا', last_name: 'احمدی', national_id: '0084575948', phone: '۰۹۱۲۱۲۳۴۵۶۷',
+    referral: 'معرفی آقای کریمی', item_text: 'دو جلد نهج‌البلاغه', qty_text: '۲ جلد', description: 'برای کلاس قرآن' });
+  assert.match(pub.code, /^\d{8}$/);
+  assert.equal(await anon.status('GET', '/items'), 401, 'public cannot list stock');
+  const tickets = await U.reserve01.ok('GET', '/tickets?status=new');
+  const t = tickets.find((x) => x.code === pub.code);
+  assert.ok(t);
+  assert.equal(await U.abbasali.status('GET', `/tickets/${t.id}`), 403, 'not referred yet');
+  await U.reserve01.ok('POST', `/tickets/${t.id}/refer`, { warehouse_id: W['اموال و انبار کتابخانه'] });
+  const seen = await U.abbasali.ok('GET', `/tickets/${t.id}`);
+  assert.equal(seen.phone, '09121234567');
+  assert.equal(await U.reserve01.status('POST', `/tickets/${t.id}/status`, { status: 'accepted' }), 403, 'reserves follow up but do not decide');
+  await U.ali.ok('POST', `/tickets/${t.id}/status`, { status: 'accepted' });
+  const ex = await U.abbasali.ok('POST', '/exits', { from_wh: W['اموال و انبار کتابخانه'], type: 'loan', ticket_id: t.id, recipient: 'رضا احمدی',
+    recipient_phone: '09121234567', due_date: '2026-11-01', delivery_place: 'کتابخانه', lines: [{ item_id: ids.book, qty: 2 }], submit: 1 });
+  assert.equal((await U.ali.ok('GET', `/tickets/${t.id}`)).status, 'accepted', 'a ticket alone reserves nothing');
+  assert.equal((await item(U.abbasali, ids.book)).qty, 3);
+  await U.ali.ok('POST', `/exits/${ex.id}/decide`, { decision: 'approve' });
+  assert.equal((await U.ali.ok('GET', `/tickets/${t.id}`)).status, 'ready');
+  await U.abbasali.ok('POST', `/tickets/${t.id}/note`, { kind: 'call', text: 'تماس گرفته شد؛ فردا ساعت ۱۷ مراجعه می‌کند.', appointment: 'فردا ساعت ۱۷' });
+  await U.abbasali.ok('POST', `/exits/${ex.id}/deliver`, {});
+  const final = await U.ali.ok('GET', `/tickets/${t.id}`);
+  assert.equal(final.status, 'delivered');
+  assert.equal(final.appointment, 'فردا ساعت ۱۷');
+  assert.equal(final.exits[0].status, 'delivered');
+  const track = await anon.ok('POST', '/public/track', { code: pub.code, national_id: '0084575948' });
+  assert.match(track.status, /تحویل/);
+  assert.equal(await anon.status('POST', '/public/track', { code: pub.code, national_id: '0000000000' }), 404);
+});
+
+test('user management: only manage_users holders; nobody grants themselves approval', async () => {
+  const users = await U.mohammadali.ok('GET', '/users');
+  const r1 = users.find((u) => u.username === 'reserve01');
+  assert.equal(await U.reserve01.status('PUT', `/users/${r1.id}`, { full_name: r1.full_name, active: true, perms: { ...r1.perms, approve: true } }), 403);
+  assert.equal(await U.ali.status('POST', '/users', { username: 'x1', full_name: 'x', password: '12345678' }), 403);
+  const me = users.find((u) => u.username === 'mohammadali');
+  assert.equal(await U.mohammadali.status('PUT', `/users/${me.id}`, { full_name: me.full_name, active: true, perms: { ...me.perms, manage_users: false } }), 400);
+  await U.mohammadali.ok('PUT', `/users/${r1.id}`, { full_name: r1.full_name, title: r1.title, active: true, perms: { ...r1.perms, steward: true } });
+  assert.ok((await U.reserve01.ok('GET', '/me')).user.perms.steward);
+});
+
+test('reports are scoped and export to Excel; backups for user managers', async () => {
+  const mine = await U.morteza.ok('GET', '/reports/inventory');
+  assert.ok(mine.rows.every((r) => r[0] === 'انبار صوت مسجد'));
+  assert.equal(await U.morteza.status('GET', `/reports/inventory?warehouse=${W['انبار رسانه']}`), 403);
+  const ex = await U.ali.ok('GET', '/reports/exits?from=2000-01-01&to=2100-01-01');
+  assert.ok(ex.rows.length >= 5);
+  const x = await U.ali.req('GET', `/reports/cards?format=xlsx&_wpnonce=${U.ali.nonce}`);
   assert.equal(x.status, 200);
   assert.equal(x.data.subarray(0, 2).toString(), 'PK');
-  assert.equal((await plain.req('POST', '/api/backups')).status, 403);
-  const b = await admin.ok('POST', '/api/backups');
-  assert.match(b.name, /^anbar-/);
-});
-
-test('deactivated users are logged out', async () => {
-  const users = await admin.ok('GET', '/api/users');
-  const hasan = users.find((u) => u.username === 'hasan');
-  await admin.ok('PUT', `/api/users/${hasan.id}`, { full_name: hasan.full_name, role: 'user', active: false, managed: [] });
-  assert.ok([401, 403].includes((await plain.req('GET', '/api/me')).status));
-  assert.equal((await new Client().req('POST', '/api/login', { username: 'hasan', password: 'secret3' })).status, 403);
+  assert.equal(await U.morteza.status('GET', '/reports/tickets'), 404, 'ticket report only for ticket staff');
+  assert.equal(await U.ali.status('POST', '/backups'), 403);
+  assert.match((await U.mehdi.ok('POST', '/backups')).name, /^anbar-/);
 });

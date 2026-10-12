@@ -205,7 +205,7 @@ function anbar_cast($data)
     foreach ($data as $k => $v) {
         if (is_array($v)) {
             $data[$k] = anbar_cast($v);
-        } elseif (is_string($k) && is_string($v) && is_numeric($v)
+        } elseif (is_string($k) && is_string($v) && is_numeric($v) && !in_array($k, ['national_id', 'chat_id', 'phone', 'code'], true)
             && preg_match('/^(id|ID|delta|sort|active|pinned|archived|is_read|transit|n|s)$|_id$|qty|_count$|^tracks_expiry$|^batch_tracked$/', $k)) {
             $data[$k] = $v + 0;
         }

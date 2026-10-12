@@ -280,73 +280,101 @@ function sheet(title, html, mount) {
   return close;
 }
 
-/* ---------- labels */
+
+Object.assign(ICONS, {
+  ticket: '<path d="M4 7a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v3a2 2 0 0 0 0 4v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2"/>',
+  file: '<path d="M7 3.5h7l4 4V20a.5.5 0 0 1-.5.5h-10A.5.5 0 0 1 7 20z"/><path d="M14 3.5V8h4M9.5 12h6M9.5 15.5h6"/>',
+  phone: '<path d="M6.5 4h3l1.5 4-2 1.5a10 10 0 0 0 5.5 5.5l1.5-2 4 1.5v3a1.5 1.5 0 0 1-1.6 1.5A15 15 0 0 1 5 5.6 1.5 1.5 0 0 1 6.5 4z"/>',
+  copy: '<rect x="8" y="8" width="11" height="12" rx="1.5"/><path d="M5 15V5.5A1.5 1.5 0 0 1 6.5 4H15"/>',
+  star: '<path d="m12 4 2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 16.3 7.2 18.9l.9-5.4L4.2 9.7l5.4-.8z"/>',
+  send: '<path d="M20 4 10 14M20 4l-6 16-4-6-6-4z"/>',
+  login: '<path d="M10 4H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M14 8l4 4-4 4M18 12H9"/>',
+  clipboard: '<rect x="6" y="5" width="12" height="16" rx="1.5"/><path d="M9 5V3.5h6V5M9 11h6M9 15h4"/>',
+});
+
+/* ---------- labels & permission helpers */
 const CONDITION = { ok: ['سالم', 'ok'], broken: ['خراب', 'bad'], repair: ['نیازمند تعمیر', 'warn'] };
 const condPill = (c) => (c && c !== 'ok' ? `<span class="pill ${CONDITION[c][1]}">${CONDITION[c][0]}</span>` : '');
 const reasonLabel = (r) => state.boot?.reasons?.[r] || r;
-const REQ_STATUS = { pending: ['در انتظار بررسی', 'warn'], approved: ['تأیید شده', 'info'], rejected: ['رد شده', 'bad'], delivered: ['تحویل شد', 'ok'], cancelled: ['لغو شده', ''] };
-const REQ_KIND = { use: 'دریافت وسیله', loan: 'امانت', supply: 'تأمین کالا' };
+const EXIT_TONE = { draft: '', pending: 'warn', needs_changes: 'brass', rejected: 'bad', approved: 'info', delivered: 'ok', cancelled: '' };
+const exitPill = (s) => `<span class="pill ${EXIT_TONE[s] ?? ''}">${esc(state.boot.exit_statuses[s] || s)}</span>`;
+const TICKET_TONE = { new: 'brass', reviewing: 'info', needs_info: 'warn', referred: 'info', accepted: 'brand', ready: 'ok', delivered: 'ok', rejected: 'bad', closed: '' };
+const ticketPill = (s) => `<span class="pill ${TICKET_TONE[s] ?? ''}">${esc(state.boot.ticket_statuses[s] || s)}</span>`;
 const TR_STATUS = { pending: ['در حال انتقال', 'warn'], received: ['دریافت شد', 'ok'], rejected: ['رد شد', 'bad'], cancelled: ['لغو شد', ''] };
+const CARD_TONE = { draft: '', incomplete: 'warn', reviewed: 'ok' };
+const cardPill = (s) => `<span class="pill ${CARD_TONE[s] ?? ''}">شناسنامه: ${esc(state.boot.card_statuses[s] || s)}</span>`;
 const pill = ([t, c]) => `<span class="pill ${c}">${t}</span>`;
+const exitCode = (id) => 'E-' + String(id).padStart(5, '0');
+const usable = (i) => Math.round((i.qty - i.broken_qty - (i.reserved_qty || 0)) * 1000) / 1000;
 function stockPill(i) {
-  if (i.qty <= 0) return '<span class="pill bad">تمام شده</span>';
-  if (i.min_qty > 0 && i.qty <= i.min_qty) return '<span class="pill warn">کمبود</span>';
+  const u = i.qty - i.broken_qty;
+  if (u <= 0) return '<span class="pill bad">تمام شده</span>';
+  if (i.min_qty > 0 && u <= i.min_qty) return '<span class="pill warn">کمبود</span>';
   return '';
 }
 function expiryPill(iso) {
   if (!iso) return '';
   const d = daysBetween(todayIso(), iso);
-  if (d < 0) return `<span class="pill bad">منقضی</span>`;
+  if (d < 0) return '<span class="pill bad">منقضی</span>';
   if (d <= 30) return `<span class="pill warn">انقضا ${relDays(iso)}</span>`;
   if (d <= 60) return `<span class="pill brass">انقضا ${jdate(iso)}</span>`;
   return '';
 }
-const whName = (id) => state.boot.warehouses.find((w) => w.id === Number(id))?.name || '';
-const canEditWh = (id) => state.user.role === 'admin' || state.user.managed.includes(Number(id));
-const editableWarehouses = () => state.boot.warehouses.filter((w) => !w.archived && canEditWh(w.id));
-const isManager = () => state.user.role === 'admin' || state.user.managed.length > 0;
+const whName = (id) => state.boot.all_warehouses.find((w) => w.id === Number(id))?.name || state.boot.warehouses.find((w) => w.id === Number(id))?.name || '';
+const P = () => state.user.perms;
+const canSee = (wh) => P().scope_all || P().warehouses.includes(Number(wh));
+const can = (perm, wh = null) => !!P()[perm] && (wh == null || canSee(wh));
+const visibleWarehouses = () => state.boot.warehouses.filter((w) => !w.archived);
+const whsWith = (perm) => visibleWarehouses().filter((w) => can(perm, w.id));
+const ticketsAllowed = () => can('tickets_all') || can('tickets_review') || (!P().scope_all && P().warehouses.length > 0);
 const thumb = (url) => (url ? `<img class="thumb" src="${esc(url)}" alt="" loading="lazy">` : `<span class="thumb">${icon('box')}</span>`);
+const opKey = () => [...crypto.getRandomValues(new Uint8Array(12))].map((b) => b.toString(16).padStart(2, '0')).join('');
+const telLink = (phone) => phone ? `<a href="tel:${esc(phone)}" dir="ltr" class="num">${esc(faDigits(phone))}</a>` : '';
+function copyBtn(text) {
+  return `<button type="button" class="btn sm ghost" data-copy="${esc(text)}">${icon('copy')} کپی</button>`;
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-copy]');
+  if (!b) return;
+  navigator.clipboard?.writeText(b.dataset.copy).then(() => toast('کپی شد.'), () => toast(b.dataset.copy));
+});
 
 /* ================================================================ shell */
-const NAV = [
-  ['#/', 'home', 'خانه'],
-  ['#/items', 'box', 'کالاها'],
-  ['#/requests', 'inbox', 'درخواست‌ها'],
-  ['#/loans', 'loan', 'امانت‌ها'],
-  ['#/transfers', 'truck', 'انتقال‌ها'],
-  ['#/reports', 'chart', 'گزارش‌ها'],
-  ['#/announcements', 'megaphone', 'اطلاعیه‌ها'],
-  ['#/notifications', 'bell', 'اعلان‌ها'],
-];
+function navItems() {
+  const items = [['#/', 'home', 'خانه'], ['#/items', 'box', 'اموال و کالاها'], ['#/exits', 'file', 'درخواست‌ها و حواله‌های خروج']];
+  if (ticketsAllowed()) items.push(['#/tickets', 'ticket', 'تیکت‌های درخواست وسیله']);
+  items.push(['#/loans', 'loan', 'امانت‌ها'], ['#/transfers', 'truck', 'انتقال‌ها'], ['#/reports', 'chart', 'گزارش‌ها'],
+    ['#/announcements', 'megaphone', 'اطلاعیه‌ها'], ['#/notifications', 'bell', 'اعلان‌ها']);
+  return items;
+}
 const ADMIN_NAV = [
-  ['#/admin/users', 'users', 'کاربران'],
-  ['#/admin/warehouses', 'warehouse', 'انبارها و مدیران'],
+  ['#/admin/users', 'users', 'کاربران و مجوزها'],
+  ['#/admin/warehouses', 'warehouse', 'انبارها'],
   ['#/admin/backup', 'database', 'پشتیبان‌گیری'],
   ['#/admin/audit', 'history', 'سوابق تغییرات'],
 ];
 
 function renderShell() {
-  const admin = state.user.role === 'admin';
+  const admin = can('manage_users');
+  const quick = can('stock_in') || can('request_out');
   $('#app').innerHTML = `<div class="shell">
     <header class="topbar">
       <a class="brand" href="#/"><img src="${LOGO}" alt=""><span><b>انبار شباب</b><small>${esc(ORG)} · ${esc(ORG_SUB)}</small></span></a>
       <a class="icon-btn" href="#/notifications" aria-label="اعلان‌ها">${icon('bell')}<span class="badge-dot" id="unread" hidden></span></a>
     </header>
     <nav class="sidebar" aria-label="منوی اصلی">
-      ${editableWarehouses().length ? `<button class="btn brass cta" data-quick>${icon('plus')} ثبت ورود یا خروج</button>` : ''}
-      ${NAV.map(([h, i, t]) => `<a href="${h}" data-nav="${h}">${icon(i)}${t}</a>`).join('')}
-      ${admin ? `<div class="sep">مدیریت کل</div>${ADMIN_NAV.map(([h, i, t]) => `<a href="${h}" data-nav="${h}">${icon(i)}${t}</a>`).join('')}` : ''}
+      ${quick ? `<button class="btn brass cta" data-quick>${icon('plus')} ثبت ورود یا درخواست خروج</button>` : ''}
+      ${navItems().map(([h, i, t]) => `<a href="${h}" data-nav="${h}">${icon(i)}${t}</a>`).join('')}
+      ${admin ? `<div class="sep">مدیریت</div>${ADMIN_NAV.map(([h, i, t]) => `<a href="${h}" data-nav="${h}">${icon(i)}${t}</a>`).join('')}` : ''}
       <div class="sep">حساب</div>
       <a href="#/account" data-nav="#/account">${icon('user')}${esc(state.user.full_name)}</a>
     </nav>
     <main class="main" id="main"></main>
     <nav class="bottomnav" aria-label="منوی پایین">
       <a href="#/" data-nav="#/">${icon('home')}<span>خانه</span></a>
-      <a href="#/items" data-nav="#/items">${icon('box')}<span>کالاها</span></a>
-      ${editableWarehouses().length
-    ? `<button class="plus" data-quick><span class="fab">${icon('plus')}</span><span>ثبت</span></button>`
-    : `<a href="#/requests?new=1" class="plus"><span class="fab">${icon('plus')}</span><span>درخواست</span></a>`}
-      <a href="#/requests" data-nav="#/requests">${icon('inbox')}<span>درخواست‌ها</span></a>
+      <a href="#/items" data-nav="#/items">${icon('box')}<span>اموال</span></a>
+      ${quick ? `<button class="plus" data-quick><span class="fab">${icon('plus')}</span><span>ثبت</span></button>` : `<a href="#/exits" data-nav="#/exits">${icon('file')}<span>حواله‌ها</span></a>`}
+      ${ticketsAllowed() ? `<a href="#/tickets" data-nav="#/tickets">${icon('ticket')}<span>تیکت‌ها</span></a>` : `<a href="#/exits" data-nav="#/exits">${icon('file')}<span>خروج</span></a>`}
       <a href="#/more" data-nav="#/more">${icon('menu')}<span>بیشتر</span></a>
     </nav>
   </div>`;
@@ -365,23 +393,25 @@ async function refreshUnread() {
   try { const me = await GET('/api/me'); state.unread = me.unread; updateUnread(); } catch { /* offline */ }
 }
 
-/** "+" button: pick an item you manage, then the operation. */
+/** "+" button: entry for an item, or a new exit request. */
 function quickOp() {
   sheet('ثبت سریع', `
-    <div class="searchbox">${icon('search')}<input class="input" id="qo-q" placeholder="نام، کد یا سریال کالا…" autocomplete="off"></div>
-    <div class="list" id="qo-list" style="margin-top:8px"><p class="empty">نام کالا را بنویسید.</p></div>
-    <p class="hint" style="margin-top:10px;color:var(--muted);font-size:.8rem">فقط کالاهای انبارهایی که مدیرشان هستید نمایش داده می‌شود. <a href="#/items/new" data-close>ثبت کالای جدید</a></p>`,
-  (root, close) => {
+    ${can('request_out') ? `<a class="btn block" href="#/exits/new" data-close>${icon('file')} درخواست خروج جدید (یک یا چند کالا)</a>` : ''}
+    ${can('stock_in') ? `<p class="hint" style="margin:14px 0 6px;color:var(--muted);font-size:.84rem">ثبت ورود: کالا را پیدا کنید</p>
+    <div class="searchbox">${icon('search')}<input class="input" id="qo-q" placeholder="نام، کد، مدل یا سریال…" autocomplete="off"></div>
+    <div class="list" id="qo-list" style="margin-top:8px"></div>
+    ${can('edit') ? '<p style="margin-top:10px;font-size:.84rem"><a href="#/items/new" data-close>کالا ثبت نشده است؟ ثبت شناسنامه جدید</a></p>' : ''}` : ''}`,
+  (root) => {
+    const box = $('#qo-q', root);
+    if (!box) return;
     let timer;
     const search = async () => {
-      const q = $('#qo-q', root).value.trim();
-      const rows = (await GET(`/api/items?q=${encodeURIComponent(q)}`)).filter((i) => i.can_edit).slice(0, 25);
-      $('#qo-list', root).innerHTML = rows.length ? rows.map((i) => `
+      const rows = (await GET(`/api/items?q=${encodeURIComponent(box.value.trim())}`)).filter((i) => i.can.stock_in).slice(0, 20);
+      $('#qo-list', root).innerHTML = rows.map((i) => `
         <div class="row"><div class="grow"><span class="title">${esc(i.name)}</span><span class="meta">${esc(i.warehouse)} · ${qtyHtml(i.qty, i.unit)}</span></div>
-          <div class="btns"><a class="btn sm ghost" href="#/items/${i.id}?do=in" data-close>ورود</a><a class="btn sm ghost" href="#/items/${i.id}?do=out" data-close>خروج</a></div></div>`).join('')
-        : '<p class="empty">کالایی پیدا نشد.</p>';
+          <a class="btn sm ghost" href="#/items/${i.id}?do=in" data-close>ورود</a></div>`).join('') || '<p class="empty">کالایی پیدا نشد.</p>';
     };
-    $('#qo-q', root).addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(search, 250); });
+    box.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(search, 250); });
     search();
   });
 }
@@ -390,18 +420,26 @@ function quickOp() {
 const ROUTES = [
   [/^\/$/, pageDashboard],
   [/^\/items$/, pageItems],
-  [/^\/items\/new$/, (p, q) => pageItemForm(null, q)],
-  [/^\/items\/(\d+)\/edit$/, (p) => pageItemForm(Number(p[1]))],
+  [/^\/items\/new$/, (p, q, m) => pageItemForm(null, q, m)],
+  [/^\/items\/(\d+)\/edit$/, (p, q, m) => pageItemForm(Number(p[1]), q, m)],
   [/^\/items\/(\d+)$/, (p, q, m) => pageItem(Number(p[1]), q, m)],
   [/^\/receipt\/(\d+)$/, (p, q, m) => pageReceipt(Number(p[1]), q, m)],
+  [/^\/exits$/, pageExits],
+  [/^\/exits\/new$/, (p, q, m) => pageExitForm(null, q, m)],
+  [/^\/exits\/(\d+)\/edit$/, (p, q, m) => pageExitForm(Number(p[1]), q, m)],
+  [/^\/exits\/(\d+)$/, (p, q, m) => pageExit(Number(p[1]), q, m)],
+  [/^\/voucher\/(\d+)$/, (p, q, m) => pageVoucher(Number(p[1]), q, m)],
+  [/^\/tickets$/, pageTickets],
+  [/^\/tickets\/(\d+)$/, (p, q, m) => pageTicket(Number(p[1]), q, m)],
   [/^\/loans$/, pageLoans],
   [/^\/transfers$/, pageTransfers],
-  [/^\/requests$/, pageRequests],
   [/^\/notifications$/, pageNotifications],
   [/^\/announcements$/, pageAnnouncements],
   [/^\/reports$/, pageReports],
   [/^\/more$/, pageMore],
   [/^\/account$/, pageAccount],
+  [/^\/request$/, (p, q, m) => pagePublicRequest(m)],
+  [/^\/track$/, (p, q, m) => pagePublicTrack(m)],
   [/^\/admin\/users$/, pageUsers],
   [/^\/admin\/warehouses$/, pageWarehouses],
   [/^\/admin\/backup$/, pageBackup],
@@ -419,11 +457,11 @@ const setQuery = (path, q) => {
 };
 
 async function route() {
-  if (!state.user) return;
   document.querySelectorAll('.sheet-backdrop').forEach((s) => s.remove());
+  const { path, query } = parseHash();
+  if (!state.user) return renderPublic(path);
   if (state.user.must_change_pw) return pageForcePassword();
   if (!$('#main')) renderShell();
-  const { path, query } = parseHash();
   $$('[data-nav]').forEach((a) => {
     const n = a.dataset.nav;
     a.classList.toggle('on', n === '#/' ? path === '/' : ('#' + path).startsWith(n));
@@ -442,39 +480,105 @@ async function route() {
 window.addEventListener('hashchange', route);
 const reload = () => route();
 
-/* ================================================================ login */
+/* ================================================================ public pages (no account) */
+function publicFrame(inner) {
+  $('#app').innerHTML = `<div class="public">
+    <header class="public-head"><img src="${LOGO}" alt=""><div><b>${esc(ORG)}</b><small>${esc(ORG_SUB)}</small></div></header>
+    <main class="public-main" id="pub">${inner}</main></div>`;
+  return $('#pub');
+}
+
+function renderPublic(path) {
+  if (path === '/request') return pagePublicRequest();
+  if (path === '/track') return pagePublicTrack();
+  renderLogin();
+}
+
 function renderLogin() {
-  $('#app').innerHTML = `<div class="login"><form class="login-card card" id="login" autocomplete="on">
-    <div class="login-head"><img src="${LOGO}" alt=""><h1>سامانه انبار</h1>
-      <span class="org">${esc(ORG)}<br>${esc(ORG_SUB)}</span></div>
-    ${A.wpUser ? `<p class="callout">حساب «${esc(A.wpUser)}» به سامانه انبار دسترسی ندارد. با حساب دیگری وارد شوید یا از مدیر کل دسترسی بگیرید.</p>` : ''}
-    <p class="form-error" hidden></p>
-    ${field('نام کاربری', input('username', { required: true, attrs: 'autocomplete="username" autocapitalize="off" dir="ltr"' }))}
-    ${field('رمز عبور', input('password', { type: 'password', required: true, attrs: 'autocomplete="current-password" dir="ltr"' }))}
-    <button class="btn block" type="submit">ورود</button>
-    <p class="login-note">ثبت‌نام عمومی وجود ندارد. حساب کاربری را مدیر کل می‌سازد.</p>
-  </form></div>`;
-  onSubmit($('#login'), async (d) => {
-    await POST('/api/login', { username: toEn(d.username), password: d.password });
+  const root = publicFrame(`
+    <section class="gate">
+      <form class="card form gate-login" id="login" autocomplete="on">
+        <h1>${icon('login')} ورود مسئولان</h1>
+        ${A.wpUser ? `<p class="callout">حساب «${esc(A.wpUser)}» به سامانه انبار دسترسی ندارد. با حساب سامانه وارد شوید.</p>` : ''}
+        <p class="form-error" hidden></p>
+        ${field('نام کاربری', input('username', { required: true, attrs: 'autocomplete="username" autocapitalize="off" dir="ltr"' }))}
+        ${field('رمز عبور', input('password', { type: 'password', required: true, attrs: 'autocomplete="current-password" dir="ltr" inputmode="text"' }))}
+        <button class="btn block" type="submit">ورود</button>
+        <p class="login-note">فقط حساب‌هایی که مدیر سامانه تعریف کرده وارد می‌شوند. ثبت‌نام عمومی وجود ندارد.</p>
+      </form>
+      <div class="card gate-request">
+        <h2>${icon('ticket')} درخواست وسیله</h2>
+        <p>اگر برای برنامه یا نیاز خود وسیله‌ای لازم دارید، بدون نیاز به حساب کاربری درخواست خود را بنویسید.
+          مسئولان درخواست را بررسی می‌کنند و برای هماهنگی با شما تماس می‌گیرند.</p>
+        <a class="btn brass block" href="#/request">${icon('send')} ثبت درخواست وسیله</a>
+        <a class="btn ghost block" href="#/track">پیگیری درخواست</a>
+      </div>
+    </section>`);
+  onSubmit($('#login', root), async (d) => {
+    await POST('/api/login', { username: toEn(d.username), password: toEn(d.password) });
+    location.hash = '#/';
     location.reload();
   });
 }
 
+function pagePublicRequest(main) {
+  const html = `
+    <a class="back" href="#/">${icon('back')} بازگشت</a>
+    <form class="card form" id="pubreq" style="max-width:640px;width:100%;margin-inline:auto">
+      <h1>درخواست وسیله</h1>
+      <p style="color:var(--muted);font-size:.9rem">وسیله موردنیاز و شرایط استفاده را بنویسید. پس از بررسی، مسئولان برای هماهنگی با شما تماس می‌گیرند.</p>
+      <p class="form-error" hidden></p>
+      <div class="form-row">${field('نام', input('first_name', { required: true, attrs: 'autocomplete="given-name"' }))}${field('نام خانوادگی', input('last_name', { required: true, attrs: 'autocomplete="family-name"' }))}</div>
+      <div class="form-row">${field('کد ملی', input('national_id', { required: true, attrs: 'inputmode="numeric" dir="ltr" maxlength="10" autocomplete="off"' }))}
+        ${field('شماره تماس', input('phone', { required: true, placeholder: '۰۹۱۲۱۲۳۴۵۶۷', attrs: 'inputmode="tel" dir="ltr" autocomplete="tel"' }))}</div>
+      ${field('نحوه آشنایی یا مراجعه', input('referral', { required: true, placeholder: 'مثلاً معرفی آقای … یا از طرف هیئت …' }))}
+      ${field('نام وسیله موردنیاز', input('item_text', { required: true, placeholder: 'مثلاً باند و میکروفون برای مراسم' }))}
+      <div class="form-row">${field('تعداد یا مقدار', input('qty_text', { placeholder: 'مثلاً ۲ عدد' }))}${field('زمان نیاز و مدت استفاده', input('need_time', { placeholder: 'مثلاً پنجشنبه شب، یک روز' }))}</div>
+      ${field('شرح کامل درخواست', textarea('description', { required: true, placeholder: 'برای چه برنامه‌ای، کجا و چه شرایطی لازم است' }))}
+      <input type="text" name="website" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+      <p style="color:var(--muted);font-size:.8rem">اطلاعات تماس و کد ملی شما فقط در اختیار مسئولان رسیدگی قرار می‌گیرد.</p>
+      <button class="btn block" type="submit">${icon('send')} ارسال درخواست</button>
+    </form>`;
+  const root = main ? (main.innerHTML = html, main) : publicFrame(html);
+  onSubmit($('#pubreq', root), async (d) => {
+    const r = await POST('/api/public/tickets', { ...d, national_id: toEn(d.national_id), phone: toEn(d.phone) });
+    $('#pubreq', root).outerHTML = `<div class="card done-card" style="max-width:640px;width:100%;margin-inline:auto">
+      <h1>${icon('check')} درخواست شما ثبت شد</h1>
+      <p>شماره پیگیری:</p><p class="tracking num">${faDigits(r.code)}</p>
+      <p style="color:var(--muted)">این شماره را نگه دارید. برای پیگیری، شماره پیگیری و کد ملی لازم است. مسئولان برای هماهنگی با شما تماس می‌گیرند.</p>
+      <div class="btns">${copyBtn(r.code)}<a class="btn ghost" href="#/">بازگشت</a></div></div>`;
+  });
+}
+
+function pagePublicTrack(main) {
+  const html = `<a class="back" href="#/">${icon('back')} بازگشت</a>
+    <form class="card form" id="trk" style="max-width:520px;width:100%;margin-inline:auto">
+      <h1>پیگیری درخواست وسیله</h1><p class="form-error" hidden></p>
+      ${field('شماره پیگیری', input('code', { required: true, attrs: 'inputmode="numeric" dir="ltr"' }))}
+      ${field('کد ملی', input('national_id', { required: true, attrs: 'inputmode="numeric" dir="ltr" maxlength="10"' }))}
+      <button class="btn block" type="submit">نمایش وضعیت</button><div id="trk-out"></div></form>`;
+  const root = main ? (main.innerHTML = html, main) : publicFrame(html);
+  onSubmit($('#trk', root), async (d) => {
+    const r = await POST('/api/public/track', { code: toEn(d.code), national_id: toEn(d.national_id) });
+    $('#trk-out', root).innerHTML = `<div class="callout info"><b>${esc(r.status)}</b><br><span style="font-size:.82rem">ثبت: ${jdate(r.created_at)} · آخرین به‌روزرسانی: ${jdate(r.updated_at)}</span></div>`;
+  });
+}
+
 function pageForcePassword() {
-  $('#app').innerHTML = `<div class="login"><form class="login-card card" id="pw">
-    <div class="login-head"><img src="${LOGO}" alt=""><h1>تعیین رمز جدید</h1>
-      <span class="org">${esc(state.user.full_name)}، برای امنیت حساب، رمز عبور شخصی خودتان را تعیین کنید.</span></div>
+  publicFrame(`<form class="card form" id="pw" style="max-width:420px;width:100%;margin-inline:auto">
+    <h1>تعیین رمز شخصی</h1>
+    <p style="color:var(--muted)">${esc(state.user.full_name)}، برای امنیت حساب، رمز عبور شخصی خودتان را تعیین کنید.</p>
     <p class="form-error" hidden></p>
-    ${field('رمز فعلی (رمزی که به شما داده شده)', input('current', { type: 'password', required: true, attrs: 'autocomplete="current-password" dir="ltr"' }))}
+    ${field('رمز فعلی (رمز اولیه)', input('current', { type: 'password', required: true, attrs: 'autocomplete="current-password" dir="ltr"' }))}
     ${field('رمز جدید', input('password', { type: 'password', required: true, attrs: 'autocomplete="new-password" dir="ltr" minlength="6"' }), 'حداقل ۶ کاراکتر')}
     ${field('تکرار رمز جدید', input('password2', { type: 'password', required: true, attrs: 'autocomplete="new-password" dir="ltr"' }))}
     <button class="btn block" type="submit">ذخیره و ادامه</button>
     <button class="btn ghost block" type="button" id="lo">خروج</button>
-  </form></div>`;
+  </form>`);
   $('#lo').onclick = logout;
   onSubmit($('#pw'), async (d) => {
     if (d.password !== d.password2) throw new Error('تکرار رمز با رمز جدید یکسان نیست.');
-    await POST('/api/me/password', d);
+    await POST('/api/me/password', { current: toEn(d.current), password: toEn(d.password) });
     location.hash = '#/';
     location.reload();
   });
@@ -487,53 +591,63 @@ async function logout() {
 }
 
 /* ================================================================ dashboard */
+function exitRow(e) {
+  return `<a class="row" href="#/exits/${e.id}"><span class="grow"><span class="title">${exitCode(e.id)} · ${esc(state.boot.exit_types[e.type])}${e.recipient ? ' · ' + esc(e.recipient) : ''}</span>
+    <span class="meta">${esc(e.from_name)} · ${fa(e.line_count)} قلم · ${esc(e.requester)} · ${jdate(e.updated_at || e.created_at)}</span></span>${exitPill(e.status)}</a>`;
+}
+
 async function pageDashboard(_, __, main) {
   const d = await GET('/api/dashboard');
   const t = todayIso();
   const overdue = d.loans.filter((l) => l.due_date && l.due_date < t);
-  const myIncoming = d.transfers.filter((tr) => canEditWh(tr.to_wh));
-  const pendingReq = d.requests.filter((r) => r.status === 'pending');
-  const outCount = d.shortages.filter((i) => i.qty <= 0).length;
-  const expSoon = d.expiring.filter((b) => daysBetween(t, b.expiry) <= 30);
+  const outCount = d.shortages.filter((i) => i.qty - (i.broken_qty || 0) <= 0).length;
+  const newTickets = d.tickets.filter((x) => x.status === 'new');
+  const stat = (href, n, label, tone) => `<a class="stat ${n ? tone : ''}" href="${href}"><b>${fa(n)}</b><span>${label}</span></a>`;
   main.innerHTML = `
-    <div class="page-head"><div><h1>سلام، ${esc(state.user.full_name)}</h1><span class="sub">${jdate(t, { long: true })}</span></div>
-      ${isManager() ? '' : `<a class="btn" href="#/requests?new=1">${icon('plus')} ثبت درخواست</a>`}</div>
+    <div class="page-head"><div><h1>سلام، ${esc(state.user.full_name)}</h1><span class="sub">${jdate(t, { long: true })}${state.user.title ? ' · ' + esc(state.user.title) : ''}</span></div>
+      ${can('request_out') ? `<a class="btn" href="#/exits/new">${icon('plus')} درخواست خروج</a>` : ''}</div>
     <div class="stats">
-      <a class="stat ${d.shortages.length - outCount ? 'warn' : ''}" href="#/items?status=low"><b>${fa(d.shortages.length - outCount)}</b><span>کمبود</span></a>
-      <a class="stat ${outCount ? 'alert' : ''}" href="#/items?status=out"><b>${fa(outCount)}</b><span>تمام‌شده</span></a>
-      <a class="stat ${pendingReq.length ? 'warn' : ''}" href="#/requests"><b>${fa(pendingReq.length)}</b><span>درخواست در انتظار</span></a>
-      <a class="stat ${overdue.length ? 'alert' : ''}" href="#/loans"><b>${fa(d.loans.length)}</b><span>امانت باز${overdue.length ? ` · ${fa(overdue.length)} با تأخیر` : ''}</span></a>
-      <a class="stat ${myIncoming.length ? 'warn' : ''}" href="#/transfers"><b>${fa(d.transfers.length)}</b><span>در حال انتقال</span></a>
-      <a class="stat ${expSoon.length ? 'alert' : ''}" href="#/items?status=expiring"><b>${fa(d.expiring.length)}</b><span>نزدیک انقضا</span></a>
+      ${can('approve') ? stat('#/exits?tab=approve', d.to_approve.length, 'منتظر تأیید شما', 'alert') : ''}
+      ${can('deliver') ? stat('#/exits?tab=deliver', d.to_deliver.length, 'آماده تحویل', 'warn') : ''}
+      ${ticketsAllowed() ? stat('#/tickets', newTickets.length, 'تیکت جدید', 'warn') : ''}
+      ${stat('#/items?status=low', d.shortages.length - outCount, 'کمبود', 'warn')}
+      ${stat('#/items?status=out', outCount, 'تمام‌شده', 'alert')}
+      ${stat('#/loans', d.loans.length, `امانت باز${overdue.length ? ` · ${fa(overdue.length)} با تأخیر` : ''}`, overdue.length ? 'alert' : '')}
+      ${stat('#/transfers', d.transfers.length, 'در حال انتقال', 'warn')}
+      ${stat('#/items?status=expiring', d.expiring.length, 'نزدیک انقضا', 'alert')}
+      ${can('steward') || can('edit') ? stat('#/items?card=incomplete', d.incomplete_cards, 'شناسنامه ناقص', 'warn') : ''}
     </div>
     ${d.announcements.map((a) => `<div class="card announce"><h3>${esc(a.title)}${a.pinned ? ' <span class="pill brass">سنجاق‌شده</span>' : ''}</h3><p class="body">${esc(a.body)}</p>
       <p class="meta">${esc(a.author)} · ${jdate(a.created_at)}</p></div>`).join('')}
-    ${myIncoming.length ? `<div class="card"><h2>منتظر تأیید دریافت شما <a href="#/transfers">همه</a></h2><div class="list">
-      ${myIncoming.map((tr) => `<a class="row" href="#/transfers"><span class="grow"><span class="title">${esc(tr.item_name)}</span>
-        <span class="meta">از ${esc(tr.from_name)} به ${esc(tr.to_name)} · ${jdate(tr.sent_at)}</span></span>${qtyHtml(tr.qty, tr.unit)}</a>`).join('')}</div></div>` : ''}
     <div class="grid-2">
+      ${d.to_approve.length ? `<div class="card"><h2>منتظر تأیید خروج <a href="#/exits?tab=approve">همه</a></h2><div class="list">${d.to_approve.map(exitRow).join('')}</div></div>` : ''}
+      ${d.to_deliver.length ? `<div class="card"><h2>تأییدشده، آماده تحویل <a href="#/exits?tab=deliver">همه</a></h2><div class="list">${d.to_deliver.map(exitRow).join('')}</div></div>` : ''}
+      ${d.my_exits.length ? `<div class="card"><h2>درخواست‌های خروج من <a href="#/exits?tab=mine">همه</a></h2><div class="list">${d.my_exits.map(exitRow).join('')}</div></div>` : ''}
+      ${d.tickets.length ? `<div class="card"><h2>تیکت‌های باز <a href="#/tickets">همه</a></h2><div class="list">${d.tickets.map((x) => `
+        <a class="row" href="#/tickets/${x.id}"><span class="grow"><span class="title">${esc(x.item_text)}</span>
+          <span class="meta">${esc(x.first_name)} ${esc(x.last_name)} · ${jdate(x.created_at)}</span></span>${ticketPill(x.status)}</a>`).join('')}</div></div>` : ''}
       <div class="card"><h2>کمبودها <a href="#/items?status=low">همه</a></h2><div class="list">
         ${d.shortages.slice(0, 8).map((i) => `<a class="row" href="#/items/${i.id}"><span class="grow"><span class="title">${esc(i.name)}</span>
           <span class="meta">${esc(i.warehouse)} · حداقل ${fa(i.min_qty)} ${esc(i.unit)}</span></span>
-          <span class="end">${qtyHtml(i.qty, i.unit)}${stockPill(i)}</span></a>`).join('') || '<p class="empty">کمبودی ثبت نشده است.</p>'}</div></div>
-      <div class="card"><h2>درخواست‌های باز <a href="#/requests">همه</a></h2><div class="list">
-        ${d.requests.slice(0, 8).map((r) => `<a class="row" href="#/requests"><span class="grow"><span class="title">${esc(r.item_name)} · ${fa(r.qty)} ${esc(r.unit || '')}</span>
-          <span class="meta">${esc(r.requester)} · ${esc(r.warehouse)}${r.needed_by ? ` · تا ${jdate(r.needed_by)}` : ''}</span></span>${pill(REQ_STATUS[r.status])}</a>`).join('') || '<p class="empty">درخواست بازی نیست.</p>'}</div></div>
+          <span class="end">${qtyHtml(i.qty, i.unit)}</span></a>`).join('') || '<p class="empty">کمبودی ثبت نشده است.</p>'}</div></div>
       <div class="card"><h2>امانت‌های باز <a href="#/loans">همه</a></h2><div class="list">
         ${d.loans.slice(0, 8).map((l) => `<a class="row" href="#/loans"><span class="grow"><span class="title">${esc(l.item_name)}</span>
           <span class="meta">${esc(l.borrower)}${l.program ? ` · ${esc(l.program)}` : ''} · ${esc(l.warehouse)}</span></span>
           <span class="end">${qtyHtml(l.qty - l.returned_qty, l.unit)}${loanDuePill(l)}</span></a>`).join('') || '<p class="empty">امانت بازی نیست.</p>'}</div></div>
-      <div class="card"><h2>نزدیک به انقضا <a href="#/items?status=expiring">همه</a></h2><div class="list">
+      ${d.expiring.length ? `<div class="card"><h2>نزدیک به انقضا <a href="#/items?status=expiring">همه</a></h2><div class="list">
         ${d.expiring.slice(0, 8).map((b) => `<a class="row" href="#/items/${b.item_id}"><span class="grow"><span class="title">${esc(b.item_name)}</span>
           <span class="meta">${esc(b.warehouse)} · سری ${esc(b.batch_no)} · ${jdate(b.expiry)}</span></span>
-          <span class="end">${qtyHtml(b.qty, b.unit)}${expiryPill(b.expiry)}</span></a>`).join('') || '<p class="empty">قلم نزدیک به انقضا نیست.</p>'}</div></div>
+          <span class="end">${qtyHtml(b.qty, b.unit)}${expiryPill(b.expiry)}</span></a>`).join('')}</div></div>` : ''}
+      ${d.transfers.length ? `<div class="card"><h2>انتقال‌های در راه <a href="#/transfers">همه</a></h2><div class="list">
+        ${d.transfers.map((tr) => `<a class="row" href="#/transfers"><span class="grow"><span class="title">${esc(tr.item_name)}</span>
+          <span class="meta">${esc(tr.from_name)} ← ${esc(tr.to_name)} · ${jdate(tr.sent_at)}</span></span>${qtyHtml(tr.qty, tr.unit)}</a>`).join('')}</div></div>` : ''}
     </div>
     <section class="section"><h2>انبارها</h2><div class="wh-grid">
       ${d.warehouses.map((w) => `<a class="wh" href="#/items?warehouse=${w.id}"><b>${esc(w.name)}</b>
-        <span class="meta">${fa(w.item_count)} قلم · ${w.managers.length ? 'مدیر: ' + w.managers.map((m) => esc(m.full_name)).join('، ') : 'بدون مدیر'}</span>
+        <span class="meta">${fa(w.item_count)} قلم${w.people.length ? ' · مسئول: ' + w.people.map((m) => esc(m.full_name)).join('، ') : ''}</span>
         <span class="pills">${w.out_count ? `<span class="pill bad">${fa(w.out_count)} تمام‌شده</span>` : ''}${w.low_count ? `<span class="pill warn">${fa(w.low_count)} کمبود</span>` : ''}
-          ${w.loan_count ? `<span class="pill info">${fa(w.loan_count)} امانت</span>` : ''}${w.incoming_count ? `<span class="pill brass">${fa(w.incoming_count)} انتقال ورودی</span>` : ''}
-          ${canEditWh(w.id) ? '<span class="pill brand">مدیر هستید</span>' : ''}</span></a>`).join('')}</div></section>
+          ${w.pending_count ? `<span class="pill warn">${fa(w.pending_count)} منتظر تأیید</span>` : ''}${w.loan_count ? `<span class="pill info">${fa(w.loan_count)} امانت</span>` : ''}
+          ${w.incomplete_count ? `<span class="pill">${fa(w.incomplete_count)} شناسنامه ناقص</span>` : ''}</span></a>`).join('')}</div></section>
     <div class="card"><h2>آخرین عملیات <a href="#/reports?kind=transactions">گزارش کامل</a></h2><div class="list">${d.recent.map(txRow).join('') || '<p class="empty">هنوز عملیاتی ثبت نشده است.</p>'}</div></div>`;
 }
 
@@ -548,26 +662,29 @@ function loanDuePill(l) {
 
 function txRow(t) {
   const cls = t.direction === 'in' ? 'delta-in' : t.direction === 'out' ? 'delta-out' : 'delta-adj';
-  const sign = t.delta > 0 ? '+' : '−';
-  return `<a class="row" href="#/receipt/${t.id}"><span class="grow"><span class="title">${esc(t.item_name)} <span class="pill">${esc(reasonLabel(t.reason))}</span></span>
+  const shown = t.direction === 'st' ? `${fa(t.qty)}` : `${t.delta > 0 ? '+' : '−'}${fa(Math.abs(t.delta))}`;
+  return `<a class="row" href="#/receipt/${t.id}"><span class="grow"><span class="title">${esc(t.item_name)} <span class="pill">${esc(reasonLabel(t.reason))}</span>${t.exit_id ? ` <span class="pill info">${exitCode(t.exit_id)}</span>` : ''}</span>
     <span class="meta">${jdate(t.op_date)} · ${esc(t.warehouse)} · ${esc(t.recorder)}${t.party ? ` · طرف: ${esc(t.party)}` : ''}</span></span>
-    <span class="end"><span class="qty num ${cls}">${sign}${fa(Math.abs(t.delta))}<small>${esc(t.unit)}</small></span><span class="meta">مانده ${fa(t.qty_after)}</span></span></a>`;
+    <span class="end"><span class="qty num ${cls}">${shown}<small>${esc(t.unit)}</small></span><span class="meta">مانده ${fa(t.qty_after)}</span></span></a>`;
 }
 
 /* ================================================================ items list */
 async function pageItems(_, q, main) {
-  const whs = state.boot.warehouses.filter((w) => !w.archived);
-  const statuses = [['', 'همه'], ['low', 'کمبود'], ['out', 'تمام‌شده'], ['loaned', 'در امانت'], ['expiring', 'نزدیک انقضا']];
+  const whs = visibleWarehouses();
+  const statuses = [['', 'همه'], ['low', 'کمبود'], ['out', 'تمام‌شده'], ['broken', 'خراب / نیازمند تعمیر'], ['loaned', 'در امانت'], ['expiring', 'نزدیک انقضا']];
+  const types = Object.entries(state.boot.item_types).map(([k, v]) => [k, v.label]);
   main.innerHTML = `
-    <div class="page-head"><h1>کالاها و تجهیزات</h1>
-      ${editableWarehouses().length ? `<a class="btn" href="#/items/new${q.warehouse && canEditWh(q.warehouse) ? '?warehouse=' + q.warehouse : ''}">${icon('plus')} کالای جدید</a>` : ''}</div>
+    <div class="page-head"><h1>اموال و کالاها</h1>
+      ${whsWith('edit').length || whsWith('steward').length ? `<a class="btn" href="#/items/new${q.warehouse ? '?warehouse=' + q.warehouse : ''}">${icon('plus')} شناسنامه جدید</a>` : ''}</div>
     <form class="filters" id="f">
-      <div class="searchbox">${icon('search')}<input class="input" name="q" value="${esc(q.q || '')}" placeholder="جست‌وجوی نام، کد، برند، سریال یا محل…" autocomplete="off" type="search"></div>
+      <div class="searchbox">${icon('search')}<input class="input" name="q" value="${esc(q.q || '')}" placeholder="نام، کد، برند، مدل، سریال یا محل نگهداری…" autocomplete="off" type="search"></div>
       <div class="filter-row">
-        ${select('warehouse', whs.map((w) => [w.id, w.name]), q.warehouse, { empty: 'همه انبارها' })}
+        ${whs.length > 1 ? select('warehouse', whs.map((w) => [w.id, w.name]), q.warehouse, { empty: 'همه انبارها' }) : ''}
+        ${select('item_type', types, q.item_type, { empty: 'همه انواع' })}
         ${select('condition', Object.entries(state.boot.conditions), q.condition, { empty: 'هر وضعیتی' })}
         ${select('category', state.boot.categories.map((c) => [c, c]), q.category, { empty: 'همه دسته‌ها' })}
         ${select('location', state.boot.locations.map((c) => [c, c]), q.location, { empty: 'همه محل‌ها' })}
+        ${select('card', [['incomplete', 'شناسنامه ناقص'], ['draft', 'پیش‌نویس'], ['reviewed', 'بررسی‌شده']], q.card, { empty: 'هر شناسنامه‌ای' })}
         ${select('archived', [['1', 'بایگانی‌شده‌ها']], q.archived, { empty: 'کالاهای فعال' })}
       </div>
       <div class="filter-row">${statuses.map(([v, t]) => `<button type="button" class="chip ${String(q.status || '') === v ? 'on' : ''}" data-status="${v}">${t}</button>`).join('')}</div>
@@ -584,11 +701,14 @@ async function pageItems(_, q, main) {
     $('#results').innerHTML = rows.length ? `<p class="sub" style="color:var(--muted);font-size:.84rem;margin-bottom:8px">${fa(rows.length)} قلم</p><div class="items">${rows.map((i) => `
       <a class="item-card" href="#/items/${i.id}">${thumb(i.image_url)}
         <span class="grow" style="flex:1;min-width:0"><span class="title" style="font-weight:700;display:block">${esc(i.name)}</span>
-          <span class="meta" style="color:var(--muted);font-size:.8rem;display:block">${esc(i.warehouse)}${i.location ? ' · ' + esc(i.location) : ''} · کد ${esc(faDigits(i.code))}</span>
+          <span class="meta" style="color:var(--muted);font-size:.8rem;display:block">${esc(i.warehouse)}${i.location ? ' · ' + esc(i.location) : ''} · کد ${esc(faDigits(i.code))}${i.model ? ' · ' + esc(i.model) : ''}</span>
           <span class="pills" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">${stockPill(i)}${condPill(i.condition)}
+            ${i.broken_qty > 0 ? `<span class="pill bad">${fa(i.broken_qty)} خراب</span>` : ''}
+            ${i.reserved_qty > 0 ? `<span class="pill brand">${fa(i.reserved_qty)} رزرو</span>` : ''}
             ${i.loaned_qty > 0 ? `<span class="pill info">${fa(i.loaned_qty)} در امانت</span>` : ''}
-            ${i.transit_qty > 0 ? `<span class="pill brass">${fa(i.transit_qty)} در حال انتقال</span>` : ''}${expiryPill(i.next_expiry)}</span></span>
-        <span class="end">${qtyHtml(i.qty, i.unit)}</span></a>`).join('')}</div>`
+            ${i.transit_qty > 0 ? `<span class="pill brass">${fa(i.transit_qty)} در حال انتقال</span>` : ''}${expiryPill(i.next_expiry)}
+            ${i.card_status !== 'reviewed' && i.missing.length ? `<span class="pill">ناقص: ${esc(i.missing.slice(0, 3).join('، '))}${i.missing.length > 3 ? '…' : ''}</span>` : ''}</span></span>
+        <span class="end">${qtyHtml(i.qty, i.unit)}${i.qty !== usable(i) ? `<span class="meta">قابل‌استفاده ${fa(usable(i))}</span>` : ''}</span></a>`).join('')}</div>`
       : '<div class="card"><p class="empty">کالایی با این مشخصات پیدا نشد.</p></div>';
   };
   f.addEventListener('input', (e) => { clearTimeout(timer); timer = setTimeout(load, e.target.name === 'q' ? 300 : 0); });
@@ -601,52 +721,109 @@ async function pageItems(_, q, main) {
   await load();
 }
 
-/* ================================================================ item form */
-async function pageItemForm(id, q = {}) {
-  const main = $('#main');
+/* ================================================================ asset card form */
+async function pageItemForm(id, q, main) {
   const item = id ? await GET(`/api/items/${id}`) : null;
-  if (item && !item.can_edit) throw new Error('فقط مدیر این انبار می‌تواند کالا را ویرایش کند.');
-  const whs = editableWarehouses();
-  if (!whs.length) throw new Error('شما مدیر هیچ انباری نیستید.');
+  if (item && !item.can.edit) throw new Error('شما اجازه ویرایش شناسنامه این انبار را ندارید.');
+  const whs = visibleWarehouses().filter((w) => can('edit', w.id) || can('steward', w.id));
+  if (!whs.length) throw new Error('شما اجازه ثبت شناسنامه ندارید.');
   const whId = item?.warehouse_id || Number(q.warehouse) || whs[0].id;
   const wh = state.boot.warehouses.find((w) => w.id === whId);
-  const v = item || { unit: 'عدد', condition: 'ok', min_qty: 0, batch_tracked: wh?.tracks_expiry };
+  const v = item || { unit: 'عدد', condition: 'ok', min_qty: 0, batch_tracked: wh?.tracks_expiry, item_type: 'other', currency: 'toman', card_status: 'draft', details: { specs: {}, custom: [] } };
+  const d = v.details || { specs: {}, custom: [] };
+  const types = state.boot.item_types;
+  const specFields = (type) => (types[type]?.fields || []).map(([k, label, kind]) =>
+    field(label, kind === 'long' ? textarea(`d.specs.${k}`, { value: d.specs?.[k] || '' }) : input(`d.specs.${k}`, { value: d.specs?.[k] || '' }))).join('');
+  const gen = Object.fromEntries(state.boot.general_fields);
+  const g = (k, long = false) => field(gen[k], long ? textarea(`d.${k}`, { value: d[k] || '' }) : input(`d.${k}`, { value: d[k] || '' }));
+  const showPrices = !item || 'purchase_price' in item;
   main.innerHTML = `
     <a class="back" href="${item ? `#/items/${item.id}` : '#/items'}">${icon('back')} بازگشت</a>
-    <h1>${item ? 'ویرایش کالا' : 'ثبت کالای جدید'}</h1>
-    <form class="card form" id="itemf">
+    <h1>${item ? 'ویرایش شناسنامه' : 'شناسنامه جدید'}</h1>
+    <p style="color:var(--muted);font-size:.88rem">همه بخش‌ها اختیاری‌اند جز نام، انبار و واحد. اطلاعات نامعلوم را خالی بگذارید و بعداً تکمیل کنید.</p>
+    <form class="form" id="itemf">
       <p class="form-error" hidden></p>
-      ${item ? `<div class="field"><span class="label">انبار</span><span>${esc(item.warehouse)}</span><span class="hint">برای جابه‌جایی بین انبارها از «انتقال» استفاده کنید.</span></div>`
+      <fieldset class="card form"><legend>اطلاعات پایه</legend>
+        ${item ? `<div class="field"><span class="label">انبار</span><span>${esc(item.warehouse)}</span><span class="hint">برای جابه‌جایی، درخواست خروج از نوع انتقال ثبت کنید.</span></div>`
     : field('انبار', select('warehouse_id', whs.map((w) => [w.id, w.name]), whId))}
-      ${field('نام کالا', input('name', { value: v.name, required: true, placeholder: 'مثلاً کابل برق ۲.۵ یا دوربین کانن' }))}
-      <div class="form-row">
-        ${field('کد کالا', input('code', { value: v.code ? faDigits(v.code) : '', placeholder: 'خالی بگذارید تا خودکار ساخته شود', attrs: 'dir="ltr"' }))}
-        ${field('دسته‌بندی', input('category', { value: v.category, attrs: 'list="dl-cat"', placeholder: 'مثلاً صوتی، برقی، خوراکی' }))}
-      </div>
-      <div class="form-row">
-        ${field('محل دقیق نگهداری', input('location', { value: v.location, attrs: 'list="dl-loc"', placeholder: 'مثلاً قفسه ۳، طبقه دوم' }))}
-        ${field('واحد', input('unit', { value: v.unit, required: true, attrs: 'list="dl-unit"' }), 'عدد، متر، کیلوگرم، لیتر، بسته، جلد…')}
-      </div>
-      <div class="form-row">
-        ${field('حداقل موجودی موردنیاز', numInput('min_qty', { value: v.min_qty || '', required: false, placeholder: '۰', unit: '' }), 'وقتی موجودی به این مقدار برسد، اعلان کمبود ارسال می‌شود.')}
-        <div class="field"><span class="label">وضعیت</span>${radioChips('condition', Object.entries(state.boot.conditions), v.condition)}</div>
-      </div>
-      ${!item ? `<div class="form-row">${field('موجودی اولیه', numInput('opening_qty', { required: false, placeholder: '۰' }), 'به‌صورت یک «ورود» در سابقه ثبت می‌شود. اعشار مجاز است، مثل ۱۲٫۵')}</div>` : ''}
-      <label class="check"><input type="checkbox" name="batch_tracked" ${v.batch_tracked ? 'checked' : ''}> ثبت موجودی به‌تفکیک سری و تاریخ انقضا (دارو، مواد غذایی)</label>
-      ${!item ? `<div class="form-row" id="batch-fields">${field('شماره سری موجودی اولیه', input('batch_no', { attrs: 'dir="ltr"' }))}
-        ${dateInput('expiry', 'تاریخ انقضا')}</div>` : ''}
-      <details class="more" ${v.brand || v.model || v.serial ? 'open' : ''}><summary>برند، مدل و شماره سریال</summary>
-        <div class="form-row">${field('برند', input('brand', { value: v.brand }))}${field('مدل', input('model', { value: v.model }))}</div>
-        <div style="margin-top:14px">${field('شماره سریال', input('serial', { value: v.serial, attrs: 'dir="ltr"' }))}</div>
-      </details>
-      <div class="field"><span class="label">تصویر</span>
-        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-          <span id="img-prev">${item?.image_url ? `<img class="thumb" style="width:72px;height:72px" src="${esc(item.image_url)}" alt="">` : `<span class="thumb" style="width:72px;height:72px">${icon('image')}</span>`}</span>
-          <label class="btn ghost sm">${icon('image')} انتخاب یا گرفتن عکس<input type="file" accept="image/*" capture="environment" id="img" hidden></label>
-          ${item?.image_url ? '<label class="check"><input type="checkbox" name="remove_image"> حذف تصویر</label>' : ''}
-        </div></div>
-      ${field('توضیحات تکمیلی', textarea('notes', { value: v.notes }))}
-      <div class="btns"><button class="btn" type="submit">${item ? 'ذخیره تغییرات' : 'ثبت کالا'}</button>
+        ${field('نام کامل و دقیق', input('name', { value: v.name, required: true, placeholder: 'مثلاً باند اکتیو ۱۲ اینچ JBL مدل EON712' }))}
+        <div class="form-row">
+          ${field('نوع وسیله', select('item_type', Object.entries(types).map(([k, t]) => [k, t.label]), v.item_type))}
+          ${field('کد اموال', input('code', { value: v.code ? faDigits(v.code) : '', placeholder: 'خالی = خودکار', attrs: 'dir="ltr"' }))}
+        </div>
+        <div class="form-row">
+          ${field('دسته‌بندی', input('category', { value: v.category, attrs: 'list="dl-cat"', placeholder: 'مثلاً صوتی، برقی، کتاب' }))}
+          ${field('واحد', input('unit', { value: v.unit, required: true, attrs: 'list="dl-unit"' }), 'عدد، دستگاه، متر، کیلوگرم، لیتر، بسته، جلد…')}
+        </div>
+        <div class="form-row">
+          ${field('برند / سازنده', input('brand', { value: v.brand }))}
+          ${field('مدل کامل و نسخه', input('model', { value: v.model }))}
+        </div>
+        <div class="form-row">
+          ${field('شماره سریال یا شناسه', input('serial', { value: v.serial, attrs: 'dir="ltr"' }), 'برای وسایل سریال‌دار، هر دستگاه را جدا ثبت کنید.')}
+          ${field('حداقل موجودی موردنیاز', numInput('min_qty', { value: v.min_qty || '', required: false, placeholder: '۰' }))}
+        </div>
+        ${!item ? `<div class="form-row">${field('موجودی اولیه', numInput('opening_qty', { required: false, placeholder: '۰' }), 'به‌صورت رسید «موجودی اولیه» ثبت می‌شود.')}</div>` : ''}
+        <label class="check"><input type="checkbox" name="batch_tracked" ${v.batch_tracked ? 'checked' : ''}> موجودی به‌تفکیک سری و تاریخ انقضا (دارو، مواد غذایی)</label>
+        ${!item ? `<div class="form-row" id="batch-fields">${field('شماره سری موجودی اولیه', input('batch_no', { attrs: 'dir="ltr"' }))}${dateInput('expiry', 'تاریخ انقضا')}</div>` : ''}
+      </fieldset>
+
+      <fieldset class="card form"><legend>مشخصات اختصاصی <span id="type-label">${esc(types[v.item_type]?.label || '')}</span></legend>
+        <div class="form-grid" id="spec-fields">${specFields(v.item_type)}</div>
+      </fieldset>
+
+      <fieldset class="card form"><legend>مشخصات ظاهری و فنی</legend>
+        <div class="form-grid">${g('material')}${g('color')}${g('dimensions')}${g('weight')}</div>
+        ${g('appearance', true)}
+      </fieldset>
+
+      <fieldset class="card form"><legend>سلامت و وضعیت</legend>
+        <div class="field"><span class="label">وضعیت خلاصه</span>${radioChips('condition', Object.entries(state.boot.conditions), v.condition)}</div>
+        ${g('function_status', true)}
+        ${field('شرح نقص، خرابی یا تعمیر موردنیاز', textarea('condition_notes', { value: v.condition_notes, placeholder: 'مثلاً روشن می‌شود ولی خروجی دوم صدا ندارد؛ بدنه خط‌وخش دارد.' }))}
+        ${g('accessories', true)}${g('missing_parts', true)}${g('warranty')}
+      </fieldset>
+
+      <fieldset class="card form"><legend>نگهداری</legend>
+        <div class="form-row">
+          ${field('محل دقیق نگهداری', input('location', { value: v.location, attrs: 'list="dl-loc"', placeholder: 'مثلاً انبار صوت مسجد، کمد دوم، طبقه بالا' }))}
+          ${field('تحویل‌دار', input('custodian', { value: v.custodian, placeholder: 'اگر نزد شخص خاصی است' }))}
+        </div>
+      </fieldset>
+
+      ${showPrices ? `<fieldset class="card form"><legend>منبع و ارزش</legend>
+        <div class="form-row">
+          <div class="field"><span class="label">منبع دریافت</span>${radioChips('source', Object.entries(state.boot.sources), v.source || '')}</div>
+          ${field('فروشنده یا اهداکننده', input('vendor', { value: v.vendor }))}
+        </div>
+        <div class="form-row">
+          ${field('قیمت خرید', input('purchase_price', { value: v.purchase_price ? faDigits(v.purchase_price) : '', attrs: 'inputmode="numeric" data-num', placeholder: 'نامعلوم = خالی' }))}
+          ${dateInput('purchase_date', 'تاریخ خرید', v.purchase_date || '')}
+        </div>
+        <div class="form-row">
+          ${field('ارزش تقریبی فعلی', input('current_value', { value: v.current_value ? faDigits(v.current_value) : '', attrs: 'inputmode="numeric" data-num', placeholder: 'نامعلوم = خالی' }))}
+          ${dateInput('valuation_date', 'تاریخ برآورد', v.valuation_date || '')}
+        </div>
+        ${field('واحد پول', radioChips('currency', Object.entries(state.boot.currencies), v.currency || 'toman'))}
+        <p class="hint" style="color:var(--muted);font-size:.8rem">صفر به معنی «نامشخص» نیست؛ مبلغ نامعلوم را خالی بگذارید.</p>
+      </fieldset>` : ''}
+
+      <fieldset class="card form"><legend>عکس‌ها</legend>
+        <div class="gallery" id="gallery">${(item?.photos || []).map((p) => `<figure><img src="${esc(p.url)}" alt=""><figcaption>${esc(p.caption || '')}</figcaption></figure>`).join('')}</div>
+        <label class="btn ghost sm" style="justify-self:start">${icon('image')} افزودن عکس<input type="file" accept="image/*" id="img" multiple hidden></label>
+        <span class="hint" style="color:var(--muted);font-size:.8rem">نمای کلی، برچسب مدل، سریال، متعلقات و محل آسیب. برای هر عکس توضیح بنویسید.${item ? ' عکس‌های فعلی را در صفحه کالا ویرایش کنید.' : ''}</span>
+        <div id="new-photos" class="form"></div>
+      </fieldset>
+
+      <fieldset class="card form"><legend>فیلدهای اختصاصی و توضیحات</legend>
+        <div id="custom" class="form">${(d.custom || []).map(customRow).join('')}</div>
+        <button type="button" class="btn ghost sm" id="add-custom" style="justify-self:start">${icon('plus')} افزودن فیلد</button>
+        ${field('توضیحات تکمیلی', textarea('notes', { value: v.notes }))}
+        <div class="field"><span class="label">وضعیت شناسنامه</span>${radioChips('card_status', Object.entries(state.boot.card_statuses).filter(([k]) => k !== 'reviewed' || v.card_status === 'reviewed'), v.card_status)}
+          <span class="hint">علامت «بررسی‌شده» را مسئول تکمیل شناسنامه اموال می‌زند.</span></div>
+      </fieldset>
+
+      <div class="btns sticky-actions"><button class="btn" type="submit">${item ? 'ذخیره تغییرات' : 'ثبت شناسنامه'}</button>
         <a class="btn ghost" href="${item ? `#/items/${item.id}` : '#/items'}">انصراف</a></div>
     </form>
     <datalist id="dl-cat">${state.boot.categories.map((c) => `<option value="${esc(c)}">`).join('')}</datalist>
@@ -654,46 +831,65 @@ async function pageItemForm(id, q = {}) {
     <datalist id="dl-unit">${state.boot.units.map((c) => `<option value="${esc(c)}">`).join('')}</datalist>`;
   const f = $('#itemf');
   wireChips(f);
-  let imageData = null;
-  $('#img').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try {
-      imageData = await resizeImage(file);
-      $('#img-prev').innerHTML = `<img class="thumb" style="width:72px;height:72px" src="${imageData}" alt="">`;
-    } catch { toast('این تصویر قابل خواندن نیست.', { error: true }); }
+  const typeSel = $('[name=item_type]', f);
+  typeSel.addEventListener('change', () => {
+    $('#spec-fields').innerHTML = specFields(typeSel.value);
+    $('#type-label').textContent = types[typeSel.value]?.label || '';
   });
-  const syncBatch = () => {
-    const on = $('[name=batch_tracked]', f).checked;
-    const bf = $('#batch-fields');
-    if (bf) bf.hidden = !on;
-  };
+  $('#add-custom').addEventListener('click', () => $('#custom').insertAdjacentHTML('beforeend', customRow({})));
+  $('#custom').addEventListener('click', (e) => { if (e.target.closest('[data-rm]')) e.target.closest('.custom-row').remove(); });
+  const photos = [];
+  $('#img').addEventListener('change', async (e) => {
+    for (const file of e.target.files) {
+      try {
+        const data = await resizeImage(file);
+        photos.push({ image_data: data });
+        const idx = photos.length - 1;
+        $('#new-photos').insertAdjacentHTML('beforeend', `<div class="photo-row"><img src="${data}" alt=""><input class="input" data-cap="${idx}" placeholder="توضیح عکس (مثلاً برچسب سریال)"></div>`);
+      } catch { toast('یکی از تصاویر قابل خواندن نیست.', { error: true }); }
+    }
+    e.target.value = '';
+  });
+  const syncBatch = () => { const bf = $('#batch-fields'); if (bf) bf.hidden = !$('[name=batch_tracked]', f).checked; };
   $('[name=batch_tracked]', f).addEventListener('change', syncBatch);
-  const whSel = $('[name=warehouse_id]', f);
-  whSel?.addEventListener('change', () => {
-    const w = state.boot.warehouses.find((x) => x.id === Number(whSel.value));
-    $('[name=batch_tracked]', f).checked = !!w?.tracks_expiry;
+  $('[name=warehouse_id]', f)?.addEventListener('change', (e) => {
+    $('[name=batch_tracked]', f).checked = !!state.boot.warehouses.find((x) => x.id === Number(e.target.value))?.tracks_expiry;
     syncBatch();
   });
   syncBatch();
-  onSubmit(f, async (d) => {
-    d.code = toEn(d.code).trim();
-    d.serial = toEn(d.serial);
-    if (imageData) d.image_data = imageData;
+  const opk = opKey();
+  onSubmit(f, async (raw) => {
+    const body = { details: { specs: {}, custom: [] } };
+    for (const [k, val] of Object.entries(raw)) {
+      if (k.startsWith('d.specs.')) body.details.specs[k.slice(8)] = val;
+      else if (k.startsWith('d.')) body.details[k.slice(2)] = val;
+      else if (!k.startsWith('cf_')) body[k] = val;
+    }
+    $$('.custom-row', f).forEach((r) => {
+      const label = $('[data-cf=label]', r).value.trim();
+      const value = $('[data-cf=value]', r).value.trim();
+      if (label && value) body.details.custom.push({ label, value });
+    });
+    body.code = toEn(body.code).trim();
+    body.serial = toEn(body.serial);
+    $$('[data-cap]', f).forEach((c) => { photos[Number(c.dataset.cap)].caption = c.value; });
     if (item) {
-      await PUT(`/api/items/${item.id}`, d);
-      toast('تغییرات ذخیره شد.');
+      await PUT(`/api/items/${item.id}`, body);
+      for (const ph of photos) await POST(`/api/items/${item.id}/photos`, ph);
+      toast('شناسنامه ذخیره شد.');
       location.hash = `#/items/${item.id}`;
     } else {
-      const r = await POST('/api/items', d);
+      const r = await POST('/api/items', { ...body, photos, op_key: opk });
       await loadBoot();
-      toast('کالا ثبت شد.');
+      toast('شناسنامه ثبت شد.');
       location.hash = `#/items/${r.id}`;
     }
   });
 }
+const customRow = (c) => `<div class="custom-row form-row"><input class="input" data-cf="label" placeholder="عنوان فیلد" value="${esc(c.label || '')}">
+  <div style="display:flex;gap:6px"><input class="input" data-cf="value" placeholder="مقدار" value="${esc(c.value || '')}"><button type="button" class="icon-btn" data-rm aria-label="حذف">${icon('x')}</button></div></div>`;
 
-function resizeImage(file, max = 1280) {
+function resizeImage(file, max = 1600) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
@@ -703,7 +899,7 @@ function resizeImage(file, max = 1280) {
       c.height = Math.round(img.height * s);
       c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
       URL.revokeObjectURL(img.src);
-      resolve(c.toDataURL('image/jpeg', 0.82));
+      resolve(c.toDataURL('image/jpeg', 0.84));
     };
     img.onerror = reject;
     img.src = URL.createObjectURL(file);
@@ -713,73 +909,98 @@ function resizeImage(file, max = 1280) {
 /* ================================================================ item detail */
 async function pageItem(id, q, main) {
   const i = await GET(`/api/items/${id}`);
+  const types = state.boot.item_types;
+  const d = i.details || { specs: {}, custom: [] };
   const openLoans = i.loans.filter((l) => l.status === 'open');
+  const gen = state.boot.general_fields.filter(([k]) => d[k]);
+  const specs = (types[i.item_type]?.fields || []).filter(([k]) => d.specs?.[k]);
+  const money = (v) => (v == null || v === '' ? '' : `${fa(v)} ${esc(state.boot.currencies[i.currency] || '')}`);
   main.innerHTML = `
     <a class="back" href="#/items?warehouse=${i.warehouse_id}">${icon('back')} ${esc(i.warehouse)}</a>
     <div class="card item-hero">
-      ${i.image_url ? `<img class="item-photo" src="${esc(i.image_url)}" alt="${esc(i.name)}">` : `<div class="item-photo noimg">${icon('box')}</div>`}
+      ${i.photos.length ? `<img class="item-photo" src="${esc(i.photos[0].url)}" alt="${esc(i.name)}">` : `<div class="item-photo noimg">${icon('box')}</div>`}
       <div style="display:grid;gap:12px;min-width:0">
         <div><h1>${esc(i.name)}</h1>
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">${i.archived ? '<span class="pill">بایگانی</span>' : ''}${condPill(i.condition) || '<span class="pill ok">سالم</span>'}${stockPill(i)}
-            ${i.batch_tracked ? '<span class="pill brass">تاریخ‌دار</span>' : ''}${i.category ? `<span class="pill">${esc(i.category)}</span>` : ''}</div></div>
+            <span class="pill">${esc(types[i.item_type]?.label || '')}</span>${i.batch_tracked ? '<span class="pill brass">تاریخ‌دار</span>' : ''}${cardPill(i.card_status)}</div></div>
         <div class="stock">
-          <div class="main-stock"><b>${fa(i.qty)}</b><span>در انبار (${esc(i.unit)})</span></div>
-          <div><b>${fa(i.loaned_qty)}</b><span>در امانت</span></div>
+          <div class="main-stock"><b>${fa(i.usable_qty)}</b><span>قابل‌استفاده (${esc(i.unit)})</span></div>
+          <div><b>${fa(i.qty)}</b><span>داخل انبار</span></div>
+          ${i.reserved_qty > 0 ? `<div><b>${fa(i.reserved_qty)}</b><span>رزروشده برای حواله</span></div>` : ''}
+          ${i.broken_qty > 0 ? `<div><b>${fa(i.broken_qty)}</b><span>خراب</span></div>` : ''}
+          ${i.loaned_qty > 0 ? `<div><b>${fa(i.loaned_qty)}</b><span>در امانت</span></div>` : ''}
           ${i.transit_qty > 0 ? `<div><b>${fa(i.transit_qty)}</b><span>در حال انتقال</span></div>` : ''}
-          <div><b>${fa(i.min_qty)}</b><span>حداقل لازم</span></div>
+          ${i.min_qty > 0 ? `<div><b>${fa(i.min_qty)}</b><span>حداقل لازم</span></div>` : ''}
         </div>
-        <dl class="specs">
-          <dt>کد</dt><dd class="num">${esc(faDigits(i.code))}</dd>
-          <dt>انبار</dt><dd>${esc(i.warehouse)}</dd>
-          ${i.location ? `<dt>محل</dt><dd>${esc(i.location)}</dd>` : ''}
-          ${i.brand ? `<dt>برند</dt><dd>${esc(i.brand)}</dd>` : ''}
-          ${i.model ? `<dt>مدل</dt><dd>${esc(i.model)}</dd>` : ''}
-          ${i.serial ? `<dt>سریال</dt><dd dir="ltr" style="text-align:right">${esc(i.serial)}</dd>` : ''}
-          ${i.notes ? `<dt>توضیحات</dt><dd style="white-space:pre-line">${esc(i.notes)}</dd>` : ''}
-        </dl>
       </div>
     </div>
-    ${i.can_edit && !i.archived ? `<div class="actions">
-      <button class="action in" data-op="in">${icon('in')}ورود</button>
-      <button class="action out" data-op="out">${icon('out')}خروج</button>
-      ${i.batch_tracked ? '' : `<button class="action loan" data-op="loan">${icon('loan')}امانت</button>`}
-      <button class="action transfer" data-op="transfer">${icon('transfer')}انتقال</button>
-      <button class="action adjust" data-op="adjust">${icon('adjust')}اصلاح موجودی</button>
-      <a class="action" href="#/items/${i.id}/edit">${icon('edit')}ویرایش</a>
+    ${!i.archived ? `<div class="actions">
+      ${i.can.request_out ? `<a class="action out" href="#/exits/new?warehouse=${i.warehouse_id}&item=${i.id}">${icon('file')}درخواست خروج</a>` : ''}
+      ${i.can.stock_in ? `<button class="action in" data-op="in">${icon('in')}ورود</button>` : ''}
+      ${i.can.edit ? `<button class="action loan" data-op="damage">${icon('wrench')}ثبت خرابی</button>` : ''}
+      ${i.can.edit && i.broken_qty > 0 ? `<button class="action transfer" data-op="repair">${icon('check')}ثبت تعمیر</button>` : ''}
+      ${i.can.stock_in || i.can.approve ? `<button class="action adjust" data-op="adjust">${icon('adjust')}اصلاح موجودی</button>` : ''}
+      ${i.can.edit ? `<a class="action" href="#/items/${i.id}/edit">${icon('edit')}ویرایش شناسنامه</a>` : ''}
+      ${i.can.steward ? `<button class="action" data-op="review">${icon('star')}بررسی شناسنامه</button>` : ''}
     </div>` : ''}
-    ${!i.can_edit && !i.archived ? `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-      <span style="color:var(--muted);font-size:.9rem">ثبت تغییرات این کالا با مدیر ${esc(i.warehouse)} است.</span>
-      <a class="btn" href="#/requests?new=1&item=${i.id}">${icon('inbox')} درخواست این وسیله</a></div>` : ''}
-    ${i.open_requests.length && i.can_edit ? `<div class="card"><h2>درخواست‌های باز این کالا</h2><div class="list">${i.open_requests.map((r) => `
-      <div class="row"><span class="grow"><span class="title">${esc(r.requester)} · ${fa(r.qty)} ${esc(i.unit)} · ${REQ_KIND[r.kind]}</span><span class="meta">${esc(r.reason)}</span></span>
-        ${pill(REQ_STATUS[r.status])}${r.kind !== 'supply' ? `<button class="btn sm" data-deliver="${r.id}" data-kind="${r.kind}" data-qty="${r.qty}" data-party="${esc(r.requester)}">تحویل</button>` : ''}</div>`).join('')}</div></div>` : ''}
+    ${i.card_status !== 'reviewed' && i.missing.length ? `<div class="callout">برای تکمیل شناسنامه: ${esc(i.missing.join('، '))}</div>` : ''}
+    ${i.open_exits.length ? `<div class="card"><h2>درخواست‌های خروج باز این کالا</h2><div class="list">${i.open_exits.map((e) => `
+      <a class="row" href="#/exits/${e.id}"><span class="grow"><span class="title">${exitCode(e.id)} · ${esc(state.boot.exit_types[e.type])}${e.recipient ? ' · ' + esc(e.recipient) : ''}</span></span>
+        <span class="end">${qtyHtml(e.qty, i.unit)}${exitPill(e.status)}</span></a>`).join('')}</div></div>` : ''}
+    <div class="card"><h2>شناسنامه</h2>
+      <dl class="specs">
+        <dt>کد اموال</dt><dd class="num">${esc(faDigits(i.code))}</dd>
+        <dt>انبار</dt><dd>${esc(i.warehouse)}</dd>
+        ${i.category ? `<dt>دسته‌بندی</dt><dd>${esc(i.category)}</dd>` : ''}
+        ${i.brand ? `<dt>برند / سازنده</dt><dd>${esc(i.brand)}</dd>` : ''}
+        ${i.model ? `<dt>مدل</dt><dd>${esc(i.model)}</dd>` : ''}
+        ${i.serial ? `<dt>سریال</dt><dd dir="ltr" style="text-align:right">${esc(i.serial)}</dd>` : ''}
+        ${i.location ? `<dt>محل نگهداری</dt><dd>${esc(i.location)}</dd>` : ''}
+        ${i.custodian ? `<dt>تحویل‌دار</dt><dd>${esc(i.custodian)}</dd>` : ''}
+        ${specs.map(([k, label]) => `<dt>${esc(label)}</dt><dd style="white-space:pre-line">${esc(d.specs[k])}</dd>`).join('')}
+        ${gen.map(([k, label]) => `<dt>${esc(label)}</dt><dd style="white-space:pre-line">${esc(d[k])}</dd>`).join('')}
+        ${i.condition_notes ? `<dt>شرح سلامت و نقص</dt><dd style="white-space:pre-line">${esc(i.condition_notes)}</dd>` : ''}
+        ${(d.custom || []).map((c) => `<dt>${esc(c.label)}</dt><dd style="white-space:pre-line">${esc(c.value)}</dd>`).join('')}
+        ${i.source ? `<dt>منبع</dt><dd>${esc(state.boot.sources[i.source])}${i.vendor ? ' — ' + esc(i.vendor) : ''}</dd>` : (i.vendor ? `<dt>فروشنده / اهداکننده</dt><dd>${esc(i.vendor)}</dd>` : '')}
+        ${'purchase_price' in i ? `<dt>قیمت خرید</dt><dd>${money(i.purchase_price) || 'نامشخص'}${i.purchase_date ? ' — ' + jdate(i.purchase_date) : ''}</dd>
+          <dt>ارزش فعلی</dt><dd>${money(i.current_value) || 'نامشخص'}${i.valuation_date ? ' — برآورد ' + jdate(i.valuation_date) : ''}</dd>` : ''}
+        ${i.notes ? `<dt>توضیحات</dt><dd style="white-space:pre-line">${esc(i.notes)}</dd>` : ''}
+        <dt>ثبت‌کننده</dt><dd>${esc(i.creator || '—')} · ${jdate(i.created_at)}</dd>
+        ${i.last_review_at ? `<dt>آخرین بررسی</dt><dd>${esc(i.reviewer || '')} · ${jdate(i.last_review_at)}</dd>` : ''}
+      </dl>
+    </div>
+    ${i.photos.length ? `<div class="card"><h2>عکس‌ها</h2><div class="gallery">${i.photos.map((p) => `<figure>
+      <a href="${esc(p.url)}" target="_blank" rel="noopener"><img src="${esc(p.url)}" alt="${esc(p.caption || '')}" loading="lazy"></a>
+      <figcaption>${esc(p.caption || '')}${i.can.edit ? ` <button class="link-btn" data-ph="${p.id}" data-cap="${esc(p.caption || '')}">ویرایش</button>` : ''}</figcaption></figure>`).join('')}</div></div>` : ''}
     ${i.batch_tracked ? `<div class="card"><h2>سری‌ها و تاریخ انقضا</h2><div class="list">${i.batches.map((b, n) => `
       <div class="row"><span class="grow"><span class="title">سری ${esc(b.batch_no)} ${n === 0 ? '<span class="pill brand">اول مصرف شود</span>' : ''}</span>
         <span class="meta">انقضا: ${b.expiry ? jdate(b.expiry) + ' (' + relDays(b.expiry) + ')' : 'ندارد'}</span></span>
         <span class="end">${qtyHtml(b.qty, i.unit)}${expiryPill(b.expiry)}</span></div>`).join('') || '<p class="empty">سری دارای موجودی ثبت نشده است.</p>'}</div></div>` : ''}
-    ${openLoans.length ? `<div class="card"><h2>امانت‌های باز</h2><div class="list">${openLoans.map((l) => loanRow({ ...l, unit: i.unit, item_name: i.name, can_edit: i.can_edit }, false)).join('')}</div></div>` : ''}
+    ${openLoans.length ? `<div class="card"><h2>امانت‌های باز</h2><div class="list">${openLoans.map((l) => loanRow({ ...l, unit: i.unit, item_name: i.name, can_return: i.can.stock_in }, false)).join('')}</div></div>` : ''}
     ${i.transfers.length ? `<div class="card"><h2>انتقال‌ها</h2><div class="list">${i.transfers.slice(0, 6).map((t) => `
       <div class="row"><span class="grow"><span class="title">${esc(t.from_name)} ← ${esc(t.to_name)}</span><span class="meta">${jdate(t.sent_at)}</span></span>
         <span class="end">${qtyHtml(t.qty, i.unit)}${pill(TR_STATUS[t.status])}</span></div>`).join('')}</div></div>` : ''}
     <div class="card"><h2>سابقه عملیات <span style="font-size:.8rem;color:var(--muted);font-weight:500">${fa(i.history.length)} مورد</span></h2>
       <div class="list">${i.history.map((t) => `<div class="row" style="align-items:flex-start">
-        <a class="grow" href="#/receipt/${t.id}" style="color:inherit"><span class="title">${esc(reasonLabel(t.reason))}${t.batch_alloc ? ` <span class="pill">سری ${JSON.parse(t.batch_alloc).map((a) => esc(a.batch_no)).join('، ')}</span>` : ''}${t.corrects_id ? ` <span class="pill info">اصلاح رسید ${fa(t.corrects_id)}</span>` : ''}</span>
+        <a class="grow" href="#/receipt/${t.id}" style="color:inherit"><span class="title">${esc(reasonLabel(t.reason))}${t.exit_id ? ` <span class="pill info">${exitCode(t.exit_id)}</span>` : ''}${t.corrects_id ? ` <span class="pill info">اصلاح رسید ${fa(t.corrects_id)}</span>` : ''}</span>
           <span class="meta">${jdate(t.op_date)} · ${esc(t.recorder)}${t.party ? ` · طرف: ${esc(t.party)}` : ''}${t.note ? ` · ${esc(t.note)}` : ''}</span></a>
-        <span class="end"><span class="qty num ${t.delta > 0 ? 'delta-in' : 'delta-out'}">${t.delta > 0 ? '+' : '−'}${fa(Math.abs(t.delta))}</span>
+        <span class="end"><span class="qty num ${t.direction === 'st' ? 'delta-adj' : t.delta > 0 ? 'delta-in' : 'delta-out'}">${t.direction === 'st' ? fa(t.qty) : (t.delta > 0 ? '+' : '−') + fa(Math.abs(t.delta))}</span>
           <span class="meta">مانده ${fa(t.qty_after)}</span>
-          ${i.can_edit && t.reason !== 'adjust' ? `<button class="btn sm ghost" data-correct="${t.id}">اصلاح</button>` : ''}</span></div>`).join('') || '<p class="empty">هنوز عملیاتی ثبت نشده است.</p>'}</div></div>
-    ${i.can_edit ? `<div class="btns no-print">
+          ${(i.can.stock_in || i.can.approve) && t.reason !== 'adjust' && t.direction !== 'st' ? `<button class="btn sm ghost" data-correct="${t.id}">اصلاح</button>` : ''}</span></div>`).join('') || '<p class="empty">هنوز عملیاتی ثبت نشده است.</p>'}</div></div>
+    ${i.can.edit ? `<div class="btns no-print">
       <button class="btn ghost sm" id="arch">${icon('archive')} ${i.archived ? 'خارج‌کردن از بایگانی' : 'بایگانی کالا'}</button>
-      ${state.user.role === 'admin' ? `<a class="btn ghost sm" href="#/admin/audit?entity=item&entity_id=${i.id}">${icon('history')} سابقه ویرایش</a>` : ''}</div>` : ''}`;
+      ${can('manage_users') ? `<a class="btn ghost sm" href="#/admin/audit?entity=item&entity_id=${i.id}">${icon('history')} سابقه ویرایش</a>` : ''}</div>` : ''}`;
 
-  const ops = { in: opIn, out: opOut, loan: opLoan, transfer: opTransfer, adjust: opAdjust };
+  const ops = { in: opIn, adjust: opAdjust, damage: (x) => opDamage(x, 'damage'), repair: (x) => opDamage(x, 'repair'), review: opReview };
   $$('[data-op]', main).forEach((b) => b.addEventListener('click', () => ops[b.dataset.op](i)));
   $$('[data-correct]', main).forEach((b) => b.addEventListener('click', () => opAdjust(i, Number(b.dataset.correct))));
   $$('[data-return]', main).forEach((b) => b.addEventListener('click', () => opReturn(i.loans.find((l) => l.id === Number(b.dataset.return)), i.unit)));
-  $$('[data-deliver]', main).forEach((b) => b.addEventListener('click', () => {
-    const pre = { request_id: b.dataset.deliver, qty: b.dataset.qty, party: b.dataset.party };
-    (b.dataset.kind === 'loan' ? opLoan : opOut)(i, pre);
-  }));
+  $$('[data-ph]', main).forEach((b) => b.addEventListener('click', () => sheet('توضیح عکس', `<form class="form" id="phf"><p class="form-error" hidden></p>
+    ${field('توضیح', input('caption', { value: b.dataset.cap }))}
+    <div class="btns"><button class="btn" type="submit">ذخیره</button><button class="btn ghost danger-text" type="button" id="phdel">حذف عکس از شناسنامه</button></div></form>`, (root, close) => {
+    onSubmit($('#phf', root), async (dd) => { await POST(`/api/photos/${b.dataset.ph}`, dd); close(); reload(); });
+    $('#phdel', root).onclick = async () => { await POST(`/api/photos/${b.dataset.ph}`, { delete: 1 }); close(); reload(); };
+  })));
   $('#arch')?.addEventListener('click', async () => {
     const want = !i.archived;
     if (want && !$('#arch').dataset.confirm) {
@@ -793,139 +1014,426 @@ async function pageItem(id, q, main) {
       reload();
     } catch (e) { toast(e.message, { error: true }); }
   });
-  if (q.do && ops[q.do] && i.can_edit) {
+  if (q.do && ops[q.do]) {
     setQuery(`/items/${i.id}`, {});
-    const pre = q.req ? { request_id: q.req, qty: q.qty, party: q.party } : {};
-    ops[q.do](i, pre);
+    ops[q.do](i);
   }
 }
 
 const done = (msg, txId) => toast(msg, txId ? { link: `#/receipt/${txId}`, linkText: 'رسید' } : {});
+const opForm = (inner, submit) => `<form class="form" id="opf"><p class="form-error" hidden></p>${inner}<button class="btn block" type="submit">${submit}</button></form>`;
+function bindOp(root, close, url, msg, extra = {}) {
+  const key = opKey();
+  onSubmit($('#opf', root), async (d) => {
+    const r = await POST(url, { ...d, ...extra, op_key: key });
+    close(); done(msg, r.tx_id); reload();
+  });
+}
 
 function opIn(i) {
-  sheet(`ورود «${i.name}»`, `<form class="form" id="opf"><p class="form-error" hidden></p>
+  sheet(`ورود «${i.name}»`, opForm(`
     ${field('مقدار', numInput('qty', { unit: i.unit }))}
-    <div class="field"><span class="label">علت</span>${radioChips('reason', [['purchase', 'خرید'], ['receive', 'دریافت / اهدا']], 'purchase')}</div>
+    <div class="field"><span class="label">علت ورود</span>${radioChips('reason', [['purchase', 'خرید'], ['gift', 'هدیه'], ['opening', 'موجودی اولیه'], ['return_in', 'بازگشت']], 'purchase')}</div>
     ${i.batch_tracked ? `<div class="form-row">${field('شماره سری', input('batch_no', { required: true, attrs: 'dir="ltr"' }))}${dateInput('expiry', 'تاریخ انقضا', '', { required: true })}</div>` : ''}
-    ${field('تحویل‌دهنده / فروشنده', input('party', { placeholder: 'اختیاری' }))}
-    <details class="more"><summary>تاریخ و توضیحات</summary><div class="form">${dateInput('op_date', 'تاریخ عملیات', todayIso())}${field('توضیحات', textarea('note'))}</div></details>
-    <button class="btn block" type="submit">${icon('in')} ثبت ورود</button></form>`, (root, close) => {
-    onSubmit($('#opf', root), async (d) => {
-      const r = await POST(`/api/items/${i.id}/in`, d);
-      close(); done('ورود ثبت شد.', r.tx_id); reload();
-    });
-  });
+    ${field('تحویل‌دهنده', input('party', { placeholder: 'فروشنده، اهداکننده یا شخص' }))}
+    <details class="more"><summary>تاریخ و توضیحات</summary><div class="form">${dateInput('op_date', 'تاریخ', todayIso())}${field('توضیحات', textarea('note'))}</div></details>`,
+  `${icon('in')} ثبت رسید ورود`), (root, close) => bindOp(root, close, `/api/items/${i.id}/in`, 'رسید ورود ثبت شد.'));
 }
 
-function opOut(i, pre = {}) {
-  const batchOpts = i.batches.map((b) => [b.id, `سری ${b.batch_no} · ${fa(b.qty)} ${i.unit} · انقضا ${jdate(b.expiry) || '—'}`]);
-  sheet(`خروج «${i.name}»`, `<form class="form" id="opf"><p class="form-error" hidden></p>
-    <div class="callout info">موجودی قابل‌استفاده: <b>${fa(i.qty)} ${esc(i.unit)}</b></div>
-    ${field('مقدار', numInput('qty', { unit: i.unit, value: pre.qty || '' }))}
-    <div class="field"><span class="label">علت</span>${radioChips('reason', [['consume', 'مصرف / تحویل'], ['damage', 'خرابی / ازبین‌رفتن']], 'consume')}</div>
-    ${i.batch_tracked ? field('سری', select('batch_id', batchOpts, '', { empty: 'خودکار — اول سری‌هایی که زودتر منقضی می‌شوند' }),
-    i.batches[0] ? `پیشنهاد: سری ${esc(i.batches[0].batch_no)} با انقضای ${jdate(i.batches[0].expiry)}` : '') : ''}
-    ${field('تحویل‌گیرنده', input('party', { value: pre.party || '', placeholder: 'نام شخص یا برنامه' }))}
-    ${pre.request_id ? `<input type="hidden" name="request_id" value="${esc(pre.request_id)}"><div class="callout">این خروج، درخواست شماره ${fa(pre.request_id)} را «تحویل شد» می‌کند.</div>` : ''}
-    <details class="more"><summary>تاریخ و توضیحات</summary><div class="form">${dateInput('op_date', 'تاریخ عملیات', todayIso())}${field('توضیحات', textarea('note'))}</div></details>
-    <button class="btn block" type="submit">${icon('out')} ثبت خروج</button></form>`, (root, close) => {
-    onSubmit($('#opf', root), async (d) => {
-      const r = await POST(`/api/items/${i.id}/out`, d);
-      close(); done('خروج ثبت شد.', r.tx_id); reload();
-    });
-  });
+function opDamage(i, mode) {
+  const max = mode === 'damage' ? i.usable_qty : i.broken_qty - (i.reserved_broken || 0);
+  sheet(mode === 'damage' ? `ثبت خرابی «${i.name}»` : `ثبت تعمیر «${i.name}»`, opForm(`
+    <div class="callout info">${mode === 'damage' ? 'سالم و آزاد' : 'خراب'}: <b>${fa(max)} ${esc(i.unit)}</b>. این عملیات موجودی کل را تغییر نمی‌دهد؛ فقط وضعیت را جابه‌جا می‌کند.</div>
+    ${field('مقدار', numInput('qty', { unit: i.unit, value: max === 1 ? 1 : '' }))}
+    ${field(mode === 'damage' ? 'شرح خرابی' : 'شرح تعمیر', textarea('note', { required: true, placeholder: mode === 'damage' ? 'مثلاً خروجی دوم صدا ندارد' : 'مثلاً کابل تعویض شد و سالم است' }))}`,
+  mode === 'damage' ? `${icon('wrench')} ثبت خرابی` : `${icon('check')} ثبت تعمیر`), (root, close) => bindOp(root, close, `/api/items/${i.id}/${mode}`, 'ثبت شد.'));
 }
 
-function opLoan(i, pre = {}) {
-  sheet(`امانت «${i.name}»`, `<form class="form" id="opf"><p class="form-error" hidden></p>
-    <div class="callout info">موجودی قابل‌استفاده: <b>${fa(i.qty)} ${esc(i.unit)}</b></div>
-    ${field('مقدار', numInput('qty', { unit: i.unit, value: pre.qty || '' }))}
-    ${field('نام تحویل‌گیرنده', input('borrower', { required: true, value: pre.party || '' }))}
-    ${field('برنامه مربوط', input('program', { placeholder: 'مثلاً مراسم دهه فجر، اردوی مشهد' }))}
-    ${dateInput('due_date', 'موعد بازگشت', addDays(todayIso(), 3), { quick: [[1, 'فردا'], [3, '۳ روز'], [7, 'یک هفته'], [30, 'یک ماه']] })}
-    ${pre.request_id ? `<input type="hidden" name="request_id" value="${esc(pre.request_id)}">` : ''}
-    ${field('توضیحات', textarea('note', { placeholder: 'اختیاری' }))}
-    <button class="btn block" type="submit">${icon('loan')} ثبت امانت</button></form>`, (root, close) => {
-    onSubmit($('#opf', root), async (d) => {
-      const r = await POST(`/api/items/${i.id}/loan`, d);
-      close(); done('امانت ثبت شد.', r.tx_id); reload();
-    });
-  });
-}
-
-function opTransfer(i) {
-  const dests = state.boot.warehouses.filter((w) => !w.archived && w.id !== i.warehouse_id);
-  sheet(`انتقال «${i.name}»`, `<form class="form" id="opf"><p class="form-error" hidden></p>
-    <div class="callout info">کالا تا تأیید مدیر انبار مقصد در وضعیت «در حال انتقال» می‌ماند.</div>
-    ${field('انبار مقصد', select('to_wh', dests.map((w) => [w.id, w.name]), '', { empty: 'انتخاب کنید', attrs: 'required' }))}
-    ${field('مقدار', numInput('qty', { unit: i.unit }), `موجودی: ${fa(i.qty)} ${esc(i.unit)}`)}
-    ${field('توضیحات', textarea('note', { placeholder: 'اختیاری' }))}
-    <button class="btn block" type="submit">${icon('transfer')} ارسال</button></form>`, (root, close) => {
-    onSubmit($('#opf', root), async (d) => {
-      const r = await POST(`/api/items/${i.id}/transfer`, d);
-      close(); done('انتقال ارسال شد و منتظر تأیید مقصد است.', r.tx_id); reload();
-    });
+function opReview(i) {
+  sheet('بررسی شناسنامه', `<form class="form" id="rvf"><p class="form-error" hidden></p>
+    ${i.missing.length ? `<div class="callout">موارد ناقص: ${esc(i.missing.join('، '))}</div>` : '<div class="callout info">مورد ناقص مهمی دیده نمی‌شود.</div>'}
+    <div class="field"><span class="label">نتیجه</span>${radioChips('status', [['reviewed', 'بررسی‌شده و یکدست'], ['incomplete', 'نیازمند تکمیل']], i.missing.length ? 'incomplete' : 'reviewed')}</div>
+    ${field('یادداشت', textarea('note'))}
+    <button class="btn block" type="submit">ثبت بررسی</button></form>`, (root, close) => {
+    onSubmit($('#rvf', root), async (d) => { await POST(`/api/items/${i.id}/review`, d); close(); toast('بررسی ثبت شد.'); reload(); });
   });
 }
 
 function opAdjust(i, correctsId = null) {
   const batchOpts = i.batches.map((b) => [b.id, `سری ${b.batch_no} · ${fa(b.qty)} ${i.unit}`]);
-  sheet(correctsId ? `اصلاح رسید ${fa(correctsId)}` : `اصلاح موجودی «${i.name}»`, `<form class="form" id="opf"><p class="form-error" hidden></p>
-    <div class="callout">سوابق حذف نمی‌شوند. مقدار درست را وارد کنید تا اختلاف با علت آن ثبت شود.</div>
+  sheet(correctsId ? `اصلاح رسید ${fa(correctsId)}` : `اصلاح موجودی «${i.name}»`, opForm(`
+    <div class="callout">سوابق حذف نمی‌شوند. مقدار درست را وارد کنید تا اختلاف با علت آن ثبت شود.
+      ${i.can.approve ? '' : '<br>شما فقط می‌توانید موجودی را افزایش دهید؛ کاهش با تأییدکنندگان خروج است.'}</div>
     ${i.batch_tracked ? field('سری', select('batch_id', batchOpts, '', { empty: 'انتخاب سری', attrs: 'required' })) : ''}
     ${field('مقدار شمارش‌شده (درست)', numInput('new_qty', { unit: i.unit }), `موجودی فعلی در سامانه: ${fa(i.qty)} ${esc(i.unit)}`)}
-    ${field('علت اصلاح (الزامی)', textarea('note', { required: true, placeholder: 'مثلاً شمارش پایان ماه، اشتباه در ثبت رسید …' }))}
-    ${correctsId ? `<input type="hidden" name="corrects_id" value="${correctsId}">` : ''}
-    <button class="btn block" type="submit">${icon('adjust')} ثبت اصلاح</button></form>`, (root, close) => {
-    onSubmit($('#opf', root), async (d) => {
-      const r = await POST(`/api/items/${i.id}/adjust`, d);
-      close(); done('اصلاح موجودی ثبت شد.', r.tx_id); reload();
-    });
-  });
+    ${field('علت اصلاح (الزامی)', textarea('note', { required: true, placeholder: 'مثلاً شمارش پایان ماه' }))}
+    ${correctsId ? `<input type="hidden" name="corrects_id" value="${correctsId}">` : ''}`,
+  `${icon('adjust')} ثبت اصلاح`), (root, close) => bindOp(root, close, `/api/items/${i.id}/adjust`, 'اصلاح ثبت شد.'));
 }
 
 function opReturn(l, unit) {
   const left = Math.round((l.qty - l.returned_qty) * 1000) / 1000;
-  sheet(`بازگشت امانت «${l.item_name || ''}»`, `<form class="form" id="opf"><p class="form-error" hidden></p>
+  sheet(`بازگشت امانت «${l.item_name || ''}»`, opForm(`
     <div class="callout info">${esc(l.borrower)} — باقی‌مانده: <b>${fa(left)} ${esc(unit)}</b></div>
     ${field('مقدار برگشتی', numInput('qty', { unit, value: left }), 'بازگشت جزئی هم ممکن است.')}
-    ${field('توضیحات', textarea('note', { placeholder: 'مثلاً سالم تحویل شد' }))}
-    <button class="btn block" type="submit">${icon('in')} ثبت بازگشت</button></form>`, (root, close) => {
-    onSubmit($('#opf', root), async (d) => {
-      const r = await POST(`/api/loans/${l.id}/return`, d);
-      close(); done('بازگشت ثبت شد.', r.tx_id); reload();
-    });
-  });
+    ${field('از این مقدار، چند مورد خراب برگشته؟', numInput('broken', { unit, required: false, placeholder: '۰' }))}
+    ${field('بررسی سلامت و توضیحات', textarea('note', { placeholder: 'مثلاً سالم تحویل شد / کابل همراه آن نیست' }))}`,
+  `${icon('in')} ثبت بازگشت`), (root, close) => bindOp(root, close, `/api/loans/${l.id}/return`, 'بازگشت ثبت شد.'));
 }
 
-/* ================================================================ receipt */
+/* ================================================================ receipt (single stock operation) */
 async function pageReceipt(id, _, main) {
   const t = await GET(`/api/transactions/${id}`);
-  const kind = t.direction === 'in' ? 'رسید ورود کالا' : t.direction === 'out' ? (t.reason === 'loan' ? 'رسید تحویل امانی' : 'حواله خروج کالا') : 'سند اصلاح موجودی';
+  const kind = { in: 'رسید ورود کالا', out: 'رسید خروج کالا', adj: 'سند اصلاح موجودی', st: 'سند تغییر وضعیت (خرابی/تعمیر)' }[t.direction];
   const alloc = t.batch_alloc ? JSON.parse(t.batch_alloc) : null;
   main.innerHTML = `
     <div class="btns no-print"><a class="back" href="#/items/${t.item_id}">${icon('back')} بازگشت به کالا</a><span style="flex:1"></span>
-      <button class="btn" onclick="window.print()">${icon('printer')} چاپ رسید</button></div>
+      ${t.exit_id ? `<a class="btn ghost" href="#/voucher/${t.exit_id}">حواله ${exitCode(t.exit_id)}</a>` : ''}
+      <button class="btn" onclick="window.print()">${icon('printer')} چاپ</button></div>
     <article class="receipt">
       <header><div class="org"><img src="${LOGO}" alt=""><div><b>${esc(ORG)}</b><small>${esc(ORG_SUB)} · ${esc(t.warehouse)}</small></div></div>
         <div style="text-align:left"><h1>${kind}</h1><small>شماره ${fa(t.id)}</small></div></header>
       <table>
-        <tr><th>تاریخ عملیات</th><td>${jdate(t.op_date, { long: true })}</td></tr>
+        <tr><th>تاریخ</th><td>${jdate(t.op_date, { long: true })}</td></tr>
         <tr><th>کالا</th><td>${esc(t.item_name)} — کد ${esc(faDigits(t.code))}${t.brand || t.model ? ` — ${esc([t.brand, t.model].filter(Boolean).join(' '))}` : ''}${t.serial ? ` — سریال ${esc(t.serial)}` : ''}</td></tr>
-        <tr><th>مقدار</th><td><b>${fa(Math.abs(t.delta))} ${esc(t.unit)}</b> ${t.direction === 'adj' ? (t.delta > 0 ? '(افزایش)' : '(کاهش)') : ''}</td></tr>
+        <tr><th>مقدار</th><td><b>${fa(t.direction === 'st' ? t.qty : Math.abs(t.delta))} ${esc(t.unit)}</b></td></tr>
         <tr><th>علت</th><td>${esc(reasonLabel(t.reason))}</td></tr>
         ${alloc ? `<tr><th>سری</th><td>${alloc.map((a) => `${esc(a.batch_no)} (${fa(a.qty)} ${esc(t.unit)}${a.expiry ? '، انقضا ' + jdate(a.expiry) : ''})`).join('، ')}</td></tr>` : ''}
         ${t.party ? `<tr><th>${t.direction === 'in' ? 'تحویل‌دهنده' : 'تحویل‌گیرنده'}</th><td>${esc(t.party)}</td></tr>` : ''}
-        ${t.program ? `<tr><th>برنامه</th><td>${esc(t.program)}</td></tr>` : ''}
-        ${t.due_date && t.reason === 'loan' ? `<tr><th>موعد بازگشت</th><td>${jdate(t.due_date, { long: true })}</td></tr>` : ''}
+        ${t.exit_id ? `<tr><th>حواله خروج</th><td>${exitCode(t.exit_id)}</td></tr>` : ''}
         <tr><th>موجودی پس از عملیات</th><td>${fa(t.qty_after)} ${esc(t.unit)}</td></tr>
         ${t.note ? `<tr><th>توضیحات</th><td>${esc(t.note)}</td></tr>` : ''}
         ${t.corrects_id ? `<tr><th>اصلاح سند</th><td>شماره ${fa(t.corrects_id)}</td></tr>` : ''}
         ${t.corrections.length ? `<tr><th>اصلاحیه‌ها</th><td>${t.corrections.map((c) => `سند ${fa(c.id)}: ${c.delta > 0 ? '+' : '−'}${fa(Math.abs(c.delta))} — ${esc(c.note)}`).join('<br>')}</td></tr>` : ''}
         <tr><th>ثبت‌کننده</th><td>${esc(t.recorder)} — ${jdate(t.created_at, { time: true })}</td></tr>
       </table>
-      <div class="sign"><div>ثبت‌کننده<br>${esc(t.recorder)}</div><div>${t.direction === 'in' ? 'تحویل‌دهنده' : 'تحویل‌گیرنده'}${t.party ? '<br>' + esc(t.party) : ''}</div><div>مدیر انبار</div></div>
+      <div class="sign"><div>ثبت‌کننده<br>${esc(t.recorder)}</div><div>${t.direction === 'in' ? 'تحویل‌دهنده' : 'تحویل‌گیرنده'}${t.party ? '<br>' + esc(t.party) : ''}</div><div>مسئول انبار</div></div>
     </article>`;
+}
+
+/* ================================================================ exit requests (درخواست خروج → تأیید → تحویل) */
+async function pageExits(_, q, main) {
+  const tabs = [];
+  if (can('approve')) tabs.push(['approve', 'منتظر تأیید']);
+  if (can('deliver')) tabs.push(['deliver', 'آماده تحویل']);
+  tabs.push(['mine', 'درخواست‌های من'], ['drafts', 'پیش‌نویس / اصلاح'], ['all', 'همه']);
+  const tab = q.tab || tabs[0][0];
+  const rows = await GET(`/api/exits?tab=${tab}${q.q ? '&q=' + encodeURIComponent(q.q) : ''}`);
+  main.innerHTML = `<div class="page-head"><h1>درخواست‌ها و حواله‌های خروج</h1>${can('request_out') ? `<a class="btn" href="#/exits/new">${icon('plus')} درخواست خروج</a>` : ''}</div>
+    <div class="tabs">${tabs.map(([k, l]) => `<a href="#/exits?tab=${k}" class="${k === tab ? 'on' : ''}">${l}</a>`).join('')}</div>
+    <form id="xs" class="searchbox">${icon('search')}<input class="input" name="q" value="${esc(q.q || '')}" placeholder="شماره پیگیری (مثلاً ۱۲) یا نام تحویل‌گیرنده" type="search"></form>
+    <p style="color:var(--muted);font-size:.84rem">خروج سه مرحله دارد: ثبت درخواست، تأیید یکی از تأییدکنندگان، و ثبت تحویل واقعی. موجودی فقط هنگام تحویل کم می‌شود.</p>
+    <div class="card"><div class="list">${rows.map((e) => `<a class="row" href="#/exits/${e.id}"><span class="grow">
+        <span class="title">${exitCode(e.id)} · ${esc(state.boot.exit_types[e.type])}${e.to_name ? ' به ' + esc(e.to_name) : ''}${e.recipient ? ' · ' + esc(e.recipient) : ''}</span>
+        <span class="meta">${esc(e.from_name)} · ${esc(e.item_names || '')}</span>
+        <span class="meta">${esc(e.requester)} · ${jdate(e.created_at)}${e.approver ? ` · تصمیم: ${esc(e.approver)}` : ''}${e.ticket_id ? ' · از تیکت' : ''}</span></span>
+      ${exitPill(e.status)}</a>`).join('') || '<p class="empty">موردی نیست.</p>'}</div></div>`;
+  $('#xs').addEventListener('submit', (e) => { e.preventDefault(); location.hash = `#/exits?tab=${tab}&q=${encodeURIComponent(new FormData(e.target).get('q'))}`; });
+}
+
+async function pageExitForm(id, q, main) {
+  const ex = id ? await GET(`/api/exits/${id}`) : null;
+  if (ex && !ex.can.edit) throw new Error('این درخواست قابل ویرایش نیست.');
+  const ticket = !ex && q.ticket ? await GET(`/api/tickets/${q.ticket}`) : (ex?.ticket_id ? await GET(`/api/tickets/${ex.ticket_id}`).catch(() => null) : null);
+  const whs = whsWith('request_out');
+  if (!whs.length) throw new Error('شما اجازه ثبت درخواست خروج ندارید.');
+  const v = ex || {
+    type: 'consume', from_wh: Number(q.warehouse) || ticket?.referred_wh || whs[0].id, lines: q.item ? [{ item_id: Number(q.item), qty: '' }] : [],
+    recipient: ticket ? `${ticket.first_name} ${ticket.last_name}` : '', recipient_phone: ticket?.phone || '', ticket_id: ticket?.id || null,
+    reason: ticket ? `درخواست ${ticket.code}: ${ticket.item_text}` : '',
+  };
+  const sel = new Map((v.lines || []).map((l) => [Number(l.item_id), { qty: l.qty, from_broken: Number(l.from_broken || 0) }]));
+  main.innerHTML = `
+    <a class="back" href="${ex ? `#/exits/${ex.id}` : ticket ? `#/tickets/${ticket.id}` : '#/exits'}">${icon('back')} بازگشت</a>
+    <h1>${ex ? `ویرایش درخواست ${exitCode(ex.id)}` : 'درخواست خروج'}</h1>
+    ${ex?.status === 'approved' ? '<div class="callout">این درخواست تأیید شده است. تغییر کالا، مقدار، انبار، تحویل‌گیرنده یا نوع خروج، تأیید را باطل می‌کند و درخواست دوباره بررسی می‌شود.</div>' : ''}
+    ${ticket ? `<div class="callout info">${icon('ticket')} برای تیکت ${faDigits(ticket.code)} — ${esc(ticket.first_name)} ${esc(ticket.last_name)}: «${esc(ticket.item_text)}»${ticket.qty_text ? ' — ' + esc(ticket.qty_text) : ''}</div>` : ''}
+    <form class="form" id="exf">
+      <p class="form-error" hidden></p>
+      <fieldset class="card form"><legend>۱. انبار و نوع خروج</legend>
+        <div class="form-row">${field('انبار مبدأ', select('from_wh', whs.map((w) => [w.id, w.name]), v.from_wh))}
+          <div class="field"><span class="label">نوع خروج</span>${radioChips('type', Object.entries(state.boot.exit_types), v.type)}</div></div>
+        <div id="to-wh" ${v.type === 'transfer' ? '' : 'hidden'}>${field('انبار مقصد', select('to_wh', state.boot.all_warehouses.map((w) => [w.id, w.name]), v.to_wh, { empty: 'انتخاب کنید' }))}</div>
+      </fieldset>
+      <fieldset class="card form"><legend>۲. انتخاب کالاها</legend>
+        <div class="searchbox">${icon('search')}<input class="input" id="pick-q" placeholder="جست‌وجو در اموال این انبار…" autocomplete="off" type="search"></div>
+        <div id="picked" class="picked"></div>
+        <div class="list pick-list" id="pick-list"><p class="empty">در حال بارگذاری…</p></div>
+      </fieldset>
+      <fieldset class="card form"><legend>۳. تحویل‌گیرنده و جزئیات</legend>
+        <div class="form-row">${field('نام تحویل‌گیرنده', input('recipient', { value: v.recipient }))}${field('شماره تماس', input('recipient_phone', { value: v.recipient_phone ? faDigits(v.recipient_phone) : '', attrs: 'inputmode="tel" dir="ltr"' }))}</div>
+        ${field('علت خروج', textarea('reason', { value: v.reason, placeholder: 'برای چه کاری لازم است' }))}
+        <div class="form-row">${field('برنامه یا محل استفاده', input('program', { value: v.program }))}${field('محل تحویل', input('delivery_place', { value: v.delivery_place, placeholder: 'مثلاً درِ انبار مسجد' }))}</div>
+        <div class="form-row">${dateInput('needed_by', 'تاریخ موردنیاز', v.needed_by || '')}
+          <div id="due" ${v.type === 'loan' ? '' : 'hidden'}>${dateInput('due_date', 'موعد بازگشت امانت', v.due_date || addDays(todayIso(), 3), { quick: [[1, 'فردا'], [3, '۳ روز'], [7, 'یک هفته'], [30, 'یک ماه']] })}</div></div>
+        ${field('توضیحات', textarea('note', { value: v.note }))}
+      </fieldset>
+      <div class="btns sticky-actions">
+        <button class="btn" type="submit" name="go" value="submit">${icon('send')} ${ex && !['draft', 'needs_changes'].includes(ex.status) ? 'ذخیره تغییرات' : 'ارسال برای تأیید'}</button>
+        ${!ex || ['draft', 'needs_changes'].includes(ex.status) ? '<button class="btn ghost" type="submit" name="go" value="draft">ذخیره پیش‌نویس</button>' : ''}
+      </div>
+    </form>`;
+  const f = $('#exf');
+  wireChips(f);
+  let items = [];
+  const typeVal = () => $('[name=type]:checked', f)?.value;
+  const renderPicked = () => {
+    const rows = [...sel.entries()].map(([iid, s]) => {
+      const it = items.find((x) => x.id === iid) || (v.lines || []).find((l) => Number(l.item_id) === iid) || {};
+      const name = it.name || it.item_name || 'کالا';
+      const unitName = it.unit || '';
+      const avail = it.id ? (s.from_broken ? it.broken_qty - (it.reserved_broken || 0) : usable(it)) : null;
+      return `<div class="picked-row" data-iid="${iid}"><span class="grow"><b>${esc(name)}</b>${avail != null ? `<span class="meta">آزاد: ${fa(avail)} ${esc(unitName)}</span>` : ''}
+        ${typeVal() === 'permanent' && it.broken_qty > 0 ? `<label class="check" style="font-size:.8rem"><input type="checkbox" data-broken ${s.from_broken ? 'checked' : ''}> از اقلام خراب (اسقاط)</label>` : ''}</span>
+        <div class="with-unit qty-in"><input class="input" data-qty inputmode="decimal" value="${esc(s.qty === '' ? '' : faDigits(s.qty))}" placeholder="مقدار"><span>${esc(unitName)}</span></div>
+        <button type="button" class="icon-btn" data-unpick aria-label="حذف">${icon('x')}</button></div>`;
+    });
+    $('#picked').innerHTML = rows.length ? `<p class="label" style="font-weight:700;font-size:.85rem">انتخاب‌شده (${fa(rows.length)})</p>${rows.join('')}` : '<p class="hint" style="color:var(--muted);font-size:.84rem">کالایی انتخاب نشده است. از فهرست زیر تیک بزنید.</p>';
+  };
+  const renderList = () => {
+    const s = $('#pick-q').value.trim();
+    const shown = items.filter((i) => !s || [i.name, i.code, i.brand, i.model, i.serial, i.location].some((x) => x && String(x).includes(s))).slice(0, 80);
+    $('#pick-list').innerHTML = shown.map((i) => `<label class="row pick">
+      <input type="checkbox" data-pick="${i.id}" ${sel.has(i.id) ? 'checked' : ''}>
+      ${thumb(i.image_url)}<span class="grow"><span class="title">${esc(i.name)}</span>
+        <span class="meta">کد ${esc(faDigits(i.code))}${i.model ? ' · ' + esc(i.model) : ''}${i.location ? ' · ' + esc(i.location) : ''}</span></span>
+      <span class="end">${qtyHtml(usable(i), i.unit)}<span class="meta">قابل‌استفاده</span></span></label>`).join('') || '<p class="empty">کالایی در این انبار پیدا نشد.</p>';
+  };
+  const loadItems = async () => {
+    items = await GET(`/api/items?warehouse=${$('[name=from_wh]', f).value}`);
+    renderList(); renderPicked();
+  };
+  $('#pick-q').addEventListener('input', renderList);
+  $('#pick-list').addEventListener('change', (e) => {
+    const cb = e.target.closest('[data-pick]');
+    if (!cb) return;
+    const iid = Number(cb.dataset.pick);
+    if (cb.checked) sel.set(iid, { qty: usable(items.find((x) => x.id === iid)) === 1 ? 1 : '', from_broken: 0 }); else sel.delete(iid);
+    renderPicked();
+  });
+  $('#picked').addEventListener('input', (e) => {
+    const row = e.target.closest('[data-iid]');
+    if (!row) return;
+    const s = sel.get(Number(row.dataset.iid));
+    if (e.target.matches('[data-qty]')) s.qty = toEn(e.target.value);
+  });
+  $('#picked').addEventListener('change', (e) => {
+    const row = e.target.closest('[data-iid]');
+    if (row && e.target.matches('[data-broken]')) { sel.get(Number(row.dataset.iid)).from_broken = e.target.checked ? 1 : 0; renderPicked(); }
+  });
+  $('#picked').addEventListener('click', (e) => {
+    const row = e.target.closest('[data-iid]');
+    if (row && e.target.closest('[data-unpick]')) { sel.delete(Number(row.dataset.iid)); renderPicked(); renderList(); }
+  });
+  $('[name=from_wh]', f).addEventListener('change', () => { sel.clear(); loadItems(); });
+  f.addEventListener('change', (e) => {
+    if (e.target.name !== 'type') return;
+    $('#to-wh').hidden = typeVal() !== 'transfer';
+    $('#due').hidden = typeVal() !== 'loan';
+    if (typeVal() !== 'permanent') sel.forEach((s) => { s.from_broken = 0; });
+    renderPicked();
+  });
+  let go = 'submit';
+  $$('[name=go]', f).forEach((b) => b.addEventListener('click', () => { go = b.value; }));
+  onSubmit(f, async (d) => {
+    const body = {
+      ...d, recipient_phone: toEn(d.recipient_phone), ticket_id: v.ticket_id || null, submit: go === 'submit' ? 1 : 0,
+      lines: [...sel.entries()].map(([item_id, s]) => ({ item_id, qty: s.qty, from_broken: s.from_broken })),
+    };
+    if (!body.lines.length) throw new Error('حداقل یک کالا انتخاب کنید.');
+    const r = ex ? await PUT(`/api/exits/${ex.id}`, body) : await POST('/api/exits', body);
+    toast(go === 'submit' ? 'درخواست برای تأیید ارسال شد.' : 'پیش‌نویس ذخیره شد.');
+    location.hash = `#/exits/${r.id}`;
+  });
+  await loadItems();
+}
+
+const EXIT_ACTION = { exit_create: 'ثبت درخواست', exit_update: 'ویرایش', exit_submit: 'ارسال برای تأیید', exit_approve: 'تأیید خروج', exit_reject: 'رد درخواست',
+  exit_changes: 'درخواست اصلاح', exit_reapproval: 'باطل‌شدن تأیید به‌علت تغییر', exit_deliver: 'ثبت تحویل و صدور حواله', exit_cancel: 'لغو' };
+
+async function pageExit(id, _, main) {
+  const e = await GET(`/api/exits/${id}`);
+  const T = state.boot.exit_types;
+  main.innerHTML = `
+    <a class="back" href="#/exits">${icon('back')} درخواست‌ها و حواله‌ها</a>
+    <div class="page-head"><div><h1>${e.status === 'delivered' ? 'حواله خروج' : 'درخواست خروج'} ${e.code}</h1>
+      <span class="sub">${esc(T[e.type])}${e.to_name ? ' به ' + esc(e.to_name) : ''} · از ${esc(e.from_name)}</span></div>${exitPill(e.status)}</div>
+    ${e.status === 'needs_changes' || e.status === 'rejected' ? `<div class="callout">${e.status === 'rejected' ? 'علت رد' : 'اصلاح لازم'}: ${esc(e.decision_note || '')} — ${esc(e.approver || '')}</div>` : ''}
+    ${e.status === 'approved' ? `<div class="callout info"><b>آماده هماهنگی و تحویل.</b> مقدار تأییدشده برای این حواله رزرو شده است.
+      ${e.recipient ? `<br>تحویل‌گیرنده: <b>${esc(e.recipient)}</b> ${e.recipient_phone ? telLink(e.recipient_phone) : ''}` : ''}${e.delivery_place ? `<br>محل تحویل: ${esc(e.delivery_place)}` : ''}</div>` : ''}
+    <div class="actions-bar no-print">
+      ${e.can.decide ? `<button class="btn" data-decide="approve">${icon('check')} تأیید خروج</button><button class="btn ghost" data-decide="changes">نیازمند اصلاح</button><button class="btn ghost" data-decide="reject">رد</button>` : ''}
+      ${e.can.deliver ? `<button class="btn brass" id="deliver">${icon('out')} ثبت تحویل واقعی</button>` : ''}
+      ${e.can.submit ? `<button class="btn" id="submit">${icon('send')} ارسال برای تأیید</button>` : ''}
+      ${e.can.edit ? `<a class="btn ghost" href="#/exits/${e.id}/edit">${icon('edit')} ویرایش</a>` : ''}
+      ${e.status === 'delivered' ? `<a class="btn" href="#/voucher/${e.id}">${icon('printer')} حواله قابل چاپ / PDF</a>` : ''}
+      ${e.can.cancel ? '<button class="btn ghost" id="cancel">لغو درخواست</button>' : ''}
+    </div>
+    <div class="card"><h2>اقلام</h2><div class="list">${e.lines.map((l) => `
+      <a class="row" href="#/items/${l.item_id}"><span class="grow"><span class="title">${esc(l.item_name)}${l.from_broken ? ' <span class="pill bad">از اقلام خراب</span>' : ''}</span>
+        <span class="meta">کد ${esc(faDigits(l.code))}${['pending', 'approved'].includes(e.status) ? ` · آزاد اکنون: ${fa(l.from_broken ? l.broken_free : l.usable_qty)}` : ''}</span></span>
+        <span class="end">${qtyHtml(l.qty, l.unit)}${['pending', 'approved'].includes(e.status) && l.qty > (l.from_broken ? l.broken_free : l.usable_qty) ? '<span class="pill bad">موجودی کافی نیست</span>' : ''}</span></a>`).join('')}</div></div>
+    <div class="card"><h2>جزئیات</h2><dl class="specs">
+      <dt>شماره پیگیری</dt><dd class="num">${e.code}</dd>
+      <dt>درخواست‌کننده</dt><dd>${esc(e.requester)} · ${jdate(e.created_at, { time: true })}</dd>
+      ${e.recipient ? `<dt>تحویل‌گیرنده</dt><dd>${esc(e.recipient)} ${e.recipient_phone ? '· ' + telLink(e.recipient_phone) : ''}</dd>` : ''}
+      ${e.reason ? `<dt>علت خروج</dt><dd style="white-space:pre-line">${esc(e.reason)}</dd>` : ''}
+      ${e.program ? `<dt>برنامه / محل استفاده</dt><dd>${esc(e.program)}</dd>` : ''}
+      ${e.delivery_place ? `<dt>محل تحویل</dt><dd>${esc(e.delivery_place)}</dd>` : ''}
+      ${e.needed_by ? `<dt>تاریخ موردنیاز</dt><dd>${jdate(e.needed_by)}</dd>` : ''}
+      ${e.due_date ? `<dt>موعد بازگشت</dt><dd>${jdate(e.due_date)}</dd>` : ''}
+      ${e.note ? `<dt>توضیحات</dt><dd style="white-space:pre-line">${esc(e.note)}</dd>` : ''}
+      ${e.approver ? `<dt>${e.status === 'rejected' ? 'ردکننده' : e.status === 'needs_changes' ? 'بررسی‌کننده' : 'تأییدکننده'}</dt><dd>${esc(e.approver)} · ${jdate(e.approved_at, { time: true })}${e.decision_note ? ' — ' + esc(e.decision_note) : ''}${e.approver_id === e.requester_id ? ' <span class="pill">تأیید درخواست خود</span>' : ''}</dd>` : ''}
+      ${e.deliverer ? `<dt>تحویل‌دهنده</dt><dd>${esc(e.deliverer)} · ${jdate(e.delivered_at, { time: true })}${e.delivery_note ? ' — ' + esc(e.delivery_note) : ''}</dd>` : ''}
+      ${e.ticket ? `<dt>تیکت</dt><dd><a href="#/tickets/${e.ticket.id}">${faDigits(e.ticket.code)} — ${esc(e.ticket.first_name)} ${esc(e.ticket.last_name)}</a></dd>` : ''}
+    </dl></div>
+    <div class="card"><h2>سابقه</h2><ol class="timeline">${e.history.map((h) => {
+      const det = h.details ? JSON.parse(h.details) : {};
+      return `<li><b>${EXIT_ACTION[h.action] || esc(h.action)}</b> — ${esc(h.actor || '')}<span class="meta"> ${jdate(h.created_at, { time: true })}</span>${det.note ? `<div class="meta">${esc(det.note)}</div>` : ''}</li>`;
+    }).join('')}</ol></div>`;
+  $$('[data-decide]', main).forEach((b) => b.addEventListener('click', () => {
+    const dec = b.dataset.decide;
+    const title = { approve: 'تأیید خروج', changes: 'درخواست اصلاح', reject: 'رد درخواست' }[dec];
+    sheet(title, `<form class="form" id="df"><p class="form-error" hidden></p>
+      ${dec === 'approve' ? `<div class="callout info">با تأیید، ${fa(e.lines.length)} قلم برای این درخواست رزرو می‌شود. موجودی هنگام ثبت تحویل کم می‌شود.</div>` : ''}
+      ${field(dec === 'approve' ? 'توضیح (اختیاری)' : 'توضیح (الزامی)', textarea('note', { required: dec !== 'approve' }))}
+      <button class="btn block ${dec === 'reject' ? 'danger' : ''}" type="submit">${title}</button></form>`, (root, close) => {
+      onSubmit($('#df', root), async (d) => { await POST(`/api/exits/${e.id}/decide`, { ...d, decision: dec }); close(); toast('ثبت شد.'); reload(); });
+    });
+  }));
+  $('#submit')?.addEventListener('click', async () => { try { await POST(`/api/exits/${e.id}/submit`); toast('برای تأیید ارسال شد.'); reload(); } catch (err) { toast(err.message, { error: true }); } });
+  $('#cancel')?.addEventListener('click', () => sheet('لغو درخواست', `<form class="form" id="cf"><p class="form-error" hidden></p>${field('علت لغو', textarea('note'))}
+    <button class="btn danger block" type="submit">لغو درخواست</button></form>`, (root, close) => {
+    onSubmit($('#cf', root), async (d) => { await POST(`/api/exits/${e.id}/cancel`, d); close(); toast('لغو شد.'); reload(); });
+  }));
+  $('#deliver')?.addEventListener('click', () => sheet(`ثبت تحویل ${e.code}`, `<form class="form" id="dlf"><p class="form-error" hidden></p>
+    <div class="callout">فقط وقتی ثبت کنید که اقلام واقعاً تحویل شده است. با ثبت، موجودی کم و حواله خروج صادر می‌شود.</div>
+    <ul class="plain">${e.lines.map((l) => `<li>${esc(l.item_name)} — <b>${fa(l.qty)} ${esc(l.unit)}</b></li>`).join('')}</ul>
+    ${e.recipient ? `<p>تحویل‌گیرنده: <b>${esc(e.recipient)}</b></p>` : ''}
+    ${dateInput('op_date', 'تاریخ تحویل', todayIso())}
+    ${field('توضیح تحویل', textarea('note', { placeholder: 'مثلاً تحویل شد؛ کابل برق همراه آن بود' }))}
+    <button class="btn brass block" type="submit">${icon('check')} تحویل انجام شد</button></form>`, (root, close) => {
+    onSubmit($('#dlf', root), async (d) => {
+      await POST(`/api/exits/${e.id}/deliver`, d);
+      close(); toast('تحویل ثبت و حواله صادر شد.', { link: `#/voucher/${e.id}`, linkText: 'حواله' }); reload();
+    });
+  }));
+}
+
+async function pageVoucher(id, _, main) {
+  const e = await GET(`/api/exits/${id}`);
+  if (e.status !== 'delivered') throw new Error('حواله فقط پس از ثبت تحویل صادر می‌شود.');
+  main.innerHTML = `
+    <div class="btns no-print"><a class="back" href="#/exits/${e.id}">${icon('back')} بازگشت</a><span style="flex:1"></span>
+      <button class="btn" onclick="window.print()">${icon('printer')} چاپ یا ذخیره PDF</button></div>
+    <p class="no-print" style="color:var(--muted);font-size:.8rem">برای فایل PDF، در پنجره چاپ گزینه «ذخیره به‌صورت PDF» (Save as PDF) را انتخاب کنید.</p>
+    <article class="receipt">
+      <header><div class="org"><img src="${LOGO}" alt=""><div><b>${esc(ORG)}</b><small>${esc(ORG_SUB)} · ${esc(e.from_name)}</small></div></div>
+        <div style="text-align:left"><h1>حواله خروج کالا</h1><small>شماره ${e.code}</small></div></header>
+      <table>
+        <tr><th>نوع خروج</th><td>${esc(state.boot.exit_types[e.type])}${e.to_name ? ' به ' + esc(e.to_name) : ''}</td></tr>
+        <tr><th>تاریخ تحویل</th><td>${jdate(e.delivered_at, { long: true, time: true })}</td></tr>
+        ${e.recipient ? `<tr><th>تحویل‌گیرنده</th><td>${esc(e.recipient)}${e.recipient_phone ? ' — ' + esc(faDigits(e.recipient_phone)) : ''}</td></tr>` : ''}
+        ${e.reason ? `<tr><th>علت</th><td>${esc(e.reason)}</td></tr>` : ''}
+        ${e.program ? `<tr><th>برنامه / محل استفاده</th><td>${esc(e.program)}</td></tr>` : ''}
+        ${e.due_date ? `<tr><th>موعد بازگشت</th><td>${jdate(e.due_date, { long: true })}</td></tr>` : ''}
+        <tr><th>درخواست‌کننده</th><td>${esc(e.requester)} — ${jdate(e.created_at)}</td></tr>
+        <tr><th>تأییدکننده</th><td>${esc(e.approver)} — ${jdate(e.approved_at, { time: true })}</td></tr>
+        <tr><th>تحویل‌دهنده</th><td>${esc(e.deliverer)}</td></tr>
+        ${e.ticket ? `<tr><th>تیکت</th><td>${faDigits(e.ticket.code)}</td></tr>` : ''}
+      </table>
+      <table style="margin-top:14px"><thead><tr><th style="width:auto">ردیف</th><th style="width:auto">کالا</th><th style="width:auto">کد</th><th style="width:auto">مقدار</th></tr></thead>
+        <tbody>${e.lines.map((l, n) => `<tr><td>${fa(n + 1)}</td><td>${esc(l.item_name)}${l.from_broken ? ' (اقلام خراب)' : ''}</td><td>${esc(faDigits(l.code))}</td><td>${fa(l.qty)} ${esc(l.unit)}</td></tr>`).join('')}</tbody></table>
+      ${e.delivery_note ? `<p style="margin-top:10px">توضیح: ${esc(e.delivery_note)}</p>` : ''}
+      <div class="sign"><div>تحویل‌دهنده<br>${esc(e.deliverer)}</div><div>تحویل‌گیرنده${e.recipient ? '<br>' + esc(e.recipient) : ''}</div><div>تأییدکننده<br>${esc(e.approver)}</div></div>
+    </article>`;
+}
+
+/* ================================================================ tickets */
+async function pageTickets(_, q, main) {
+  const status = q.status ?? 'open';
+  const rows = await GET(`/api/tickets?status=${status}${q.q ? '&q=' + encodeURIComponent(q.q) : ''}`);
+  const tabs = [['open', 'باز'], ['new', 'جدید'], ['ready', 'آماده تحویل'], ['', 'همه']];
+  main.innerHTML = `<div class="page-head"><h1>تیکت‌های درخواست وسیله</h1><a class="btn ghost" href="#/request">${icon('plus')} ثبت درخواست برای متقاضی</a></div>
+    <div class="tabs">${tabs.map(([k, l]) => `<a href="#/tickets?status=${k}" class="${k === status ? 'on' : ''}">${l}</a>`).join('')}</div>
+    <form id="ts" class="searchbox">${icon('search')}<input class="input" name="q" value="${esc(q.q || '')}" placeholder="شماره پیگیری، نام، شماره تماس یا وسیله" type="search"></form>
+    ${!can('tickets_all') && !can('tickets_review') ? '<p style="color:var(--muted);font-size:.84rem">فقط تیکت‌هایی که به انبار شما ارجاع شده‌اند نمایش داده می‌شوند.</p>' : ''}
+    <div class="card"><div class="list">${rows.map((t) => `<a class="row" href="#/tickets/${t.id}"><span class="grow">
+        <span class="title">${esc(t.item_text)}${t.qty_text ? ' · ' + esc(t.qty_text) : ''}</span>
+        <span class="meta">${esc(t.first_name)} ${esc(t.last_name)} · ${faDigits(t.code)} · ${jdate(t.created_at)}${t.referred_name ? ' · ارجاع: ' + esc(t.referred_name) : ''}${t.exit_count ? ` · ${fa(t.exit_count)} حواله` : ''}</span>
+        ${t.appointment ? `<span class="meta">${icon('clock')} ${esc(t.appointment)}</span>` : ''}</span>${ticketPill(t.status)}</a>`).join('') || '<p class="empty">تیکتی نیست.</p>'}</div></div>`;
+  $('#ts').addEventListener('submit', (e) => { e.preventDefault(); location.hash = `#/tickets?status=${status}&q=${encodeURIComponent(new FormData(e.target).get('q'))}`; });
+}
+
+const TEV = { status: ['clipboard', 'info'], note: ['edit', ''], call: ['phone', 'ok'], refer: ['send', 'warn'], link: ['file', 'brand'] };
+async function pageTicket(id, _, main) {
+  const t = await GET(`/api/tickets/${id}`);
+  const S = state.boot.ticket_statuses;
+  const approvedItems = t.exits.filter((e) => ['approved', 'delivered'].includes(e.status)).flatMap((e) => e.lines.map((l) => `${l.item_name} (${fa(l.qty)} ${l.unit})`));
+  const places = [...new Set(t.exits.filter((e) => e.status === 'approved').map((e) => e.delivery_place).filter(Boolean))];
+  const reviewStatuses = Object.entries(S).filter(([k]) => !['ready', 'delivered', 'referred'].includes(k) && (t.can_review || ['reviewing', 'needs_info'].includes(k)));
+  main.innerHTML = `
+    <a class="back" href="#/tickets">${icon('back')} تیکت‌ها</a>
+    <div class="page-head"><div><h1>${esc(t.item_text)}</h1><span class="sub">تیکت ${faDigits(t.code)} · ${jdate(t.created_at, { time: true })}</span></div>${ticketPill(t.status)}</div>
+    ${t.status === 'ready' ? `<div class="card ready-card"><h2>${icon('phone')} آماده هماهنگی و تحویل</h2>
+      <dl class="specs"><dt>متقاضی</dt><dd>${esc(t.first_name)} ${esc(t.last_name)}</dd><dt>شماره تماس</dt><dd>${telLink(t.phone)} ${copyBtn(t.phone)}</dd>
+      <dt>اقلام تأییدشده</dt><dd>${esc(approvedItems.join('، ') || '—')}</dd>${places.length ? `<dt>محل تحویل</dt><dd>${esc(places.join('، '))}</dd>` : ''}
+      ${t.appointment ? `<dt>زمان مراجعه</dt><dd>${esc(t.appointment)}</dd>` : ''}</dl>
+      <p class="hint" style="font-size:.84rem;color:var(--muted)">با متقاضی تماس بگیرید و نتیجه را با «ثبت تماس» یادداشت کنید. هنگام مراجعه، تحویل را از صفحه حواله ثبت کنید.</p></div>` : ''}
+    <div class="grid-2">
+      <div class="card"><h2>متقاضی</h2><dl class="specs">
+        <dt>نام</dt><dd>${esc(t.first_name)} ${esc(t.last_name)}</dd>
+        <dt>شماره تماس</dt><dd>${telLink(t.phone)} ${copyBtn(t.phone)}</dd>
+        <dt>کد ملی</dt><dd class="num" dir="ltr" style="text-align:right">${esc(faDigits(t.national_id))}</dd>
+        <dt>نحوه آشنایی</dt><dd>${esc(t.referral || '')}</dd>
+        ${t.appointment ? `<dt>زمان مراجعه</dt><dd>${esc(t.appointment)}</dd>` : ''}
+      </dl></div>
+      <div class="card"><h2>درخواست</h2><dl class="specs">
+        <dt>وسیله</dt><dd>${esc(t.item_text)}</dd>
+        ${t.qty_text ? `<dt>مقدار</dt><dd>${esc(t.qty_text)}</dd>` : ''}
+        ${t.need_time ? `<dt>زمان و مدت</dt><dd>${esc(t.need_time)}</dd>` : ''}
+        <dt>شرح</dt><dd style="white-space:pre-line">${esc(t.description || '')}</dd>
+        ${t.referred_name ? `<dt>ارجاع</dt><dd>${esc(t.referred_name)}</dd>` : ''}
+      </dl></div>
+    </div>
+    <div class="actions-bar no-print">
+      ${t.can_create_exit && !['rejected', 'closed', 'delivered'].includes(t.status) ? `<a class="btn" href="#/exits/new?ticket=${t.id}${t.referred_wh ? '&warehouse=' + t.referred_wh : ''}">${icon('file')} انتخاب کالا و درخواست خروج</a>` : ''}
+      <button class="btn ghost" id="call">${icon('phone')} ثبت تماس / زمان مراجعه</button>
+      <button class="btn ghost" id="note">${icon('edit')} یادداشت داخلی</button>
+      ${t.can_follow ? `<button class="btn ghost" id="refer">${icon('send')} ارجاع به انبار</button>` : ''}
+      ${reviewStatuses.length ? `<button class="btn ghost" id="status">${icon('clipboard')} تغییر وضعیت</button>` : ''}
+    </div>
+    <div class="card"><h2>درخواست‌ها و حواله‌های خروج این تیکت</h2><div class="list">${t.exits.map((e) => `
+      <a class="row" href="#/exits/${e.id}"><span class="grow"><span class="title">${exitCode(e.id)} · ${esc(state.boot.exit_types[e.type])} · ${esc(e.from_name)}</span>
+        <span class="meta">${esc(e.lines.map((l) => `${l.item_name} (${fa(l.qty)} ${l.unit})`).join('، '))}</span>
+        ${e.approver ? `<span class="meta">تأیید: ${esc(e.approver)}${e.deliverer ? ' · تحویل: ' + esc(e.deliverer) : ''}</span>` : ''}</span>${exitPill(e.status)}</a>`).join('')
+        || '<p class="empty">هنوز کالایی برای این تیکت انتخاب نشده است. تیکت به‌تنهایی کالا رزرو نمی‌کند و موجودی را تغییر نمی‌دهد.</p>'}</div></div>
+    <div class="card"><h2>پیگیری‌ها</h2><ol class="timeline">${t.events.map((ev) => {
+      const [ic, tone] = TEV[ev.kind] || ['edit', ''];
+      return `<li class="${tone}"><span class="ev-ico">${icon(ic)}</span><div><b>${esc(ev.author || 'سامانه')}</b><span class="meta"> ${jdate(ev.created_at, { time: true })}</span>
+        <div style="white-space:pre-line">${esc(ev.text || '')}</div>${ev.appointment ? `<div class="pill ok" style="margin-top:4px">${icon('clock')} ${esc(ev.appointment)}</div>` : ''}</div></li>`;
+    }).join('')}</ol></div>`;
+  const noteSheet = (kind) => sheet(kind === 'call' ? 'ثبت تماس با متقاضی' : 'یادداشت داخلی', `<form class="form" id="nf"><p class="form-error" hidden></p>
+    ${kind === 'call' ? `<p>${telLink(t.phone)} ${copyBtn(t.phone)}</p>` : ''}
+    ${field(kind === 'call' ? 'نتیجه تماس' : 'یادداشت', textarea('text', { required: true, placeholder: kind === 'call' ? 'مثلاً تماس گرفته شد؛ فردا ساعت ۱۷ برای دریافت مراجعه می‌کند.' : '' }))}
+    ${kind === 'call' ? field('زمان مراجعه (اختیاری)', input('appointment', { placeholder: 'مثلاً پنجشنبه ۱۴۰۵/۰۷/۲۴ ساعت ۱۷' })) : ''}
+    <button class="btn block" type="submit">ثبت</button></form>`, (root, close) => {
+    onSubmit($('#nf', root), async (d) => { await POST(`/api/tickets/${t.id}/note`, { ...d, kind }); close(); toast('ثبت شد.'); reload(); });
+  });
+  $('#call').onclick = () => noteSheet('call');
+  $('#note').onclick = () => noteSheet('note');
+  $('#refer')?.addEventListener('click', () => sheet('ارجاع به انبار', `<form class="form" id="rf"><p class="form-error" hidden></p>
+    ${field('انبار', select('warehouse_id', state.boot.all_warehouses.map((w) => [w.id, w.name]), t.referred_wh, { empty: 'انتخاب کنید', attrs: 'required' }))}
+    ${field('توضیح', textarea('note'))}<p class="hint" style="font-size:.8rem;color:var(--muted)">مسئولان آن انبار تیکت و اطلاعات تماس را می‌بینند.</p>
+    <button class="btn block" type="submit">ارجاع</button></form>`, (root, close) => {
+    onSubmit($('#rf', root), async (d) => { await POST(`/api/tickets/${t.id}/refer`, d); close(); toast('ارجاع شد.'); reload(); });
+  }));
+  $('#status')?.addEventListener('click', () => sheet('تغییر وضعیت تیکت', `<form class="form" id="sf"><p class="form-error" hidden></p>
+    <div class="field"><span class="label">وضعیت</span>${radioChips('status', reviewStatuses, '')}</div>
+    ${field('توضیح', textarea('note', { placeholder: 'برای رد، علت الزامی است' }))}
+    <button class="btn block" type="submit">ثبت</button></form>`, (root, close) => {
+    onSubmit($('#sf', root), async (d) => { await POST(`/api/tickets/${t.id}/status`, d); close(); toast('وضعیت ثبت شد.'); reload(); });
+  }));
 }
 
 /* ================================================================ loans */
@@ -933,18 +1441,19 @@ function loanRow(l, showItem = true) {
   const left = Math.round((l.qty - l.returned_qty) * 1000) / 1000;
   return `<div class="row"><span class="grow">
       <span class="title">${showItem ? `<a href="#/items/${l.item_id}">${esc(l.item_name)}</a> · ` : ''}${esc(l.borrower)}</span>
-      <span class="meta">${l.program ? esc(l.program) + ' · ' : ''}${showItem ? esc(l.warehouse) + ' · ' : ''}تحویل ${jdate(l.created_at)}${l.due_date ? ' · موعد ' + jdate(l.due_date) : ''}${l.returned_qty > 0 ? ` · ${fa(l.returned_qty)} برگشته` : ''}</span></span>
+      <span class="meta">${l.program ? esc(l.program) + ' · ' : ''}${showItem ? esc(l.warehouse) + ' · ' : ''}تحویل ${jdate(l.created_at)}${l.due_date ? ' · موعد ' + jdate(l.due_date) : ''}${l.returned_qty > 0 ? ` · ${fa(l.returned_qty)} برگشته` : ''}${l.returned_broken > 0 ? ` (${fa(l.returned_broken)} خراب)` : ''}${l.exit_id ? ' · ' + exitCode(l.exit_id) : ''}</span>
+      ${l.borrower_phone ? `<span class="meta">${telLink(l.borrower_phone)}</span>` : ''}</span>
     <span class="end">${qtyHtml(l.status === 'open' ? left : l.qty, l.unit)}${loanDuePill(l)}
-      ${l.can_edit && l.status === 'open' ? `<button class="btn sm" data-return="${l.id}">بازگشت</button>` : ''}</span></div>`;
+      ${l.can_return && l.status === 'open' ? `<button class="btn sm" data-return="${l.id}">بازگشت</button>` : ''}</span></div>`;
 }
 
 async function pageLoans(_, q, main) {
   const status = q.status || 'open';
-  const rows = await GET(`/api/loans?status=${status}&warehouse=${q.warehouse || ''}`);
-  const t = todayIso();
-  const late = rows.filter((l) => l.status === 'open' && l.due_date && l.due_date < t);
+  const rows = await GET(`/api/loans?status=${status}`);
+  const late = rows.filter((l) => l.status === 'open' && l.due_date && l.due_date < todayIso());
   main.innerHTML = `<div class="page-head"><h1>امانت‌ها</h1></div>
     <div class="tabs"><a href="#/loans?status=open" class="${status === 'open' ? 'on' : ''}">امانت‌های باز</a><a href="#/loans?status=all" class="${status === 'all' ? 'on' : ''}">همه</a></div>
+    <p style="color:var(--muted);font-size:.84rem">امانت با درخواست خروج از نوع «امانت» و پس از تأیید و تحویل ثبت می‌شود.</p>
     ${late.length ? `<div class="callout">${fa(late.length)} امانت از موعد بازگشت گذشته است.</div>` : ''}
     <div class="card"><div class="list">${rows.map((l) => loanRow(l)).join('') || '<p class="empty">امانتی ثبت نشده است.</p>'}</div></div>`;
   $$('[data-return]', main).forEach((b) => b.addEventListener('click', () => {
@@ -959,120 +1468,30 @@ async function pageTransfers(_, q, main) {
   const rows = await GET(`/api/transfers?status=${status}`);
   main.innerHTML = `<div class="page-head"><h1>انتقال بین انبارها</h1></div>
     <div class="tabs"><a href="#/transfers?status=pending" class="${status === 'pending' ? 'on' : ''}">در حال انتقال</a><a href="#/transfers?status=all" class="${status === 'all' ? 'on' : ''}">همه</a></div>
-    <p style="color:var(--muted);font-size:.86rem">برای انتقال، از صفحه کالا دکمه «انتقال» را بزنید. مدیر انبار مقصد باید دریافت را تأیید کند.</p>
+    <p style="color:var(--muted);font-size:.86rem">انتقال با درخواست خروج از نوع «انتقال» ثبت و پس از تأیید، تحویل می‌شود. تا تأیید دریافت در انبار مقصد، کالا «در حال انتقال» است.</p>
     <div class="card"><div class="list">${rows.map((t) => `<div class="row" style="flex-wrap:wrap">
       <span class="grow"><span class="title"><a href="#/items/${t.item_id}">${esc(t.item_name)}</a></span>
-        <span class="meta">${esc(t.from_name)} ← ${esc(t.to_name)} · ${esc(t.sender)} · ${jdate(t.sent_at)}${t.note ? ' · ' + esc(t.note) : ''}
+        <span class="meta">${esc(t.from_name)} ← ${esc(t.to_name)} · ${esc(t.sender)} · ${jdate(t.sent_at)}${t.exit_id ? ' · ' + exitCode(t.exit_id) : ''}${t.note ? ' · ' + esc(t.note) : ''}
           ${t.handler ? ` · بررسی: ${esc(t.handler)}${t.handle_note ? ' (' + esc(t.handle_note) + ')' : ''}` : ''}</span></span>
       <span class="end">${qtyHtml(t.qty, t.unit)}${pill(TR_STATUS[t.status])}</span>
-      ${t.status === 'pending' && (t.can_receive || t.can_cancel) ? `<div class="btns" style="width:100%;justify-content:flex-end">
-        ${t.can_receive ? `<button class="btn sm" data-recv="${t.id}">${icon('check')} تأیید دریافت</button><button class="btn sm ghost" data-rej="${t.id}">رد</button>` : ''}
-        ${t.can_cancel && !t.can_receive ? `<button class="btn sm ghost" data-cancel="${t.id}">لغو انتقال</button>` : ''}</div>` : ''}
+      ${t.status === 'pending' && t.can_receive ? `<div class="btns" style="width:100%;justify-content:flex-end">
+        <button class="btn sm" data-recv="${t.id}">${icon('check')} تأیید دریافت</button><button class="btn sm ghost" data-rej="${t.id}">رد</button></div>` : ''}
     </div>`).join('') || '<p class="empty">انتقالی وجود ندارد.</p>'}</div></div>`;
   $$('[data-recv]', main).forEach((b) => b.addEventListener('click', async () => {
     b.disabled = true;
-    try { const r = await POST(`/api/transfers/${b.dataset.recv}/receive`); done('دریافت تأیید و به موجودی اضافه شد.', r.tx_id); reload(); } catch (e) { toast(e.message, { error: true }); b.disabled = false; }
+    try { const r = await POST(`/api/transfers/${b.dataset.recv}/receive`); done('دریافت تأیید و به موجودی مقصد اضافه شد.', r.tx_id); reload(); } catch (e) { toast(e.message, { error: true }); b.disabled = false; }
   }));
-  const withNote = (title, url, required) => sheet(title, `<form class="form" id="nf"><p class="form-error" hidden></p>
-    ${field(required ? 'علت (الزامی)' : 'توضیحات', textarea('note', { required }))}<button class="btn block" type="submit">ثبت</button></form>`, (root, close) => {
-    onSubmit($('#nf', root), async (d) => { await POST(url, d); close(); toast('ثبت شد؛ موجودی به انبار مبدأ برگشت.'); reload(); });
-  });
-  $$('[data-rej]', main).forEach((b) => b.addEventListener('click', () => withNote('رد انتقال', `/api/transfers/${b.dataset.rej}/reject`, true)));
-  $$('[data-cancel]', main).forEach((b) => b.addEventListener('click', () => withNote('لغو انتقال', `/api/transfers/${b.dataset.cancel}/cancel`, false)));
-}
-
-/* ================================================================ requests */
-async function pageRequests(_, q, main) {
-  const manager = isManager();
-  const scope = q.scope || (manager ? 'review' : 'mine');
-  const rows = await GET(`/api/requests?scope=${scope}`);
-  main.innerHTML = `<div class="page-head"><h1>درخواست‌ها</h1><button class="btn" id="newreq">${icon('plus')} درخواست جدید</button></div>
-    <div class="tabs">${manager ? `<a href="#/requests?scope=review" class="${scope === 'review' ? 'on' : ''}">برای بررسی من</a>` : ''}
-      <a href="#/requests?scope=mine" class="${scope === 'mine' ? 'on' : ''}">درخواست‌های من</a>
-      <a href="#/requests?scope=all" class="${scope === 'all' ? 'on' : ''}">همه</a></div>
-    <div class="card"><div class="list">${rows.map((r) => `<div class="row" style="flex-wrap:wrap;align-items:flex-start">
-      <span class="grow"><span class="title">${r.item_id ? `<a href="#/items/${r.item_id}">${esc(r.item_name)}</a>` : esc(r.item_name)} · ${fa(r.qty)} ${esc(r.unit || '')}
-        <span class="pill">${REQ_KIND[r.kind]}</span></span>
-        <span class="meta">${esc(r.requester)} · ${esc(r.warehouse)} · ${jdate(r.created_at)}${r.needed_by ? ` · موردنیاز تا ${jdate(r.needed_by)}` : ''}</span>
-        <span class="meta">علت: ${esc(r.reason)}</span>
-        ${r.reviewer ? `<span class="meta">بررسی: ${esc(r.reviewer)}${r.review_note ? ' — ' + esc(r.review_note) : ''}</span>` : ''}</span>
-      <span class="end">${pill(REQ_STATUS[r.status])}${r.item_id && r.item_qty != null && ['pending', 'approved'].includes(r.status) ? `<span class="meta">موجودی ${fa(r.item_qty)}</span>` : ''}</span>
-      ${requestActions(r)}</div>`).join('') || '<p class="empty">درخواستی نیست.</p>'}</div></div>`;
-  $('#newreq').onclick = () => newRequest();
-  if (q.new) { setQuery('/requests', { scope }); newRequest(q.item ? Number(q.item) : null); }
-  $$('[data-review]', main).forEach((b) => b.addEventListener('click', () => {
-    const [id, decision] = b.dataset.review.split(':');
-    if (decision === 'approve') return POST(`/api/requests/${id}/review`, { decision }).then(() => { toast('درخواست تأیید شد.'); reload(); }, (e) => toast(e.message, { error: true }));
-    const title = decision === 'reject' ? 'رد درخواست' : 'ثبت انجام درخواست';
-    sheet(title, `<form class="form" id="rf"><p class="form-error" hidden></p>
-      ${field(decision === 'reject' ? 'علت رد (الزامی)' : 'توضیحات', textarea('note', { required: decision === 'reject' }))}
-      <button class="btn block ${decision === 'reject' ? 'danger' : ''}" type="submit">${title}</button></form>`, (root, close) => {
-      onSubmit($('#rf', root), async (d) => { await POST(`/api/requests/${id}/review`, { ...d, decision }); close(); toast('ثبت شد.'); reload(); });
-    });
-  }));
-  $$('[data-cancelreq]', main).forEach((b) => b.addEventListener('click', async () => {
-    try { await POST(`/api/requests/${b.dataset.cancelreq}/cancel`); toast('درخواست لغو شد.'); reload(); } catch (e) { toast(e.message, { error: true }); }
-  }));
-}
-
-function requestActions(r) {
-  const btns = [];
-  if (r.can_review && ['pending', 'approved'].includes(r.status)) {
-    if (r.status === 'pending') btns.push(`<button class="btn sm" data-review="${r.id}:approve">${icon('check')} تأیید</button>`);
-    if (r.item_id && r.kind !== 'supply') {
-      btns.push(`<a class="btn sm ${r.status === 'approved' ? '' : 'ghost'}" href="#/items/${r.item_id}?do=${r.kind === 'loan' ? 'loan' : 'out'}&req=${r.id}&qty=${r.qty}&party=${encodeURIComponent(r.requester)}">تحویل</a>`);
-    } else btns.push(`<button class="btn sm ghost" data-review="${r.id}:deliver">انجام شد</button>`);
-    btns.push(`<button class="btn sm ghost" data-review="${r.id}:reject">رد</button>`);
-  }
-  if (r.is_mine && r.status === 'pending') btns.push(`<button class="btn sm ghost" data-cancelreq="${r.id}">لغو</button>`);
-  return btns.length ? `<div class="btns" style="width:100%;justify-content:flex-end">${btns.join('')}</div>` : '';
-}
-
-async function newRequest(itemId = null) {
-  const pre = itemId ? await GET(`/api/items/${itemId}`) : null;
-  const whs = state.boot.warehouses.filter((w) => !w.archived);
-  sheet('درخواست جدید', `<form class="form" id="rq"><p class="form-error" hidden></p>
-    <div class="field"><span class="label">نوع درخواست</span>${radioChips('kind', Object.entries(REQ_KIND), 'use')}</div>
-    ${field('از کدام انبار؟', select('warehouse_id', whs.map((w) => [w.id, w.name]), pre?.warehouse_id || '', { empty: 'انتخاب کنید', attrs: 'required' }))}
-    <div class="field"><label>کالا</label>
-      <input class="input" name="item_name" list="rq-items" value="${esc(pre?.name || '')}" required placeholder="نام کالا را بنویسید یا از فهرست انتخاب کنید" autocomplete="off">
-      <datalist id="rq-items"></datalist><input type="hidden" name="item_id" value="${pre?.id || ''}">
-      <span class="hint" id="rq-hint">${pre ? `موجودی فعلی: ${fa(pre.qty)} ${esc(pre.unit)}` : 'اگر کالا در انبار نیست، نامش را بنویسید (برای تأمین).'}</span></div>
-    <div class="form-row">${field('مقدار', numInput('qty'))}${field('واحد', input('unit', { value: pre?.unit || 'عدد', attrs: 'list="dl-unit2"' }))}</div>
-    ${field('علت نیاز', textarea('reason', { required: true, placeholder: 'مثلاً برای مراسم شب جمعه' }))}
-    ${dateInput('needed_by', 'زمان موردنیاز', '', { quick: [[0, 'امروز'], [1, 'فردا'], [7, 'هفته بعد']] })}
-    <p class="hint" style="color:var(--muted);font-size:.8rem">ثبت درخواست موجودی را تغییر نمی‌دهد؛ کاهش موجودی هنگام تحویل ثبت می‌شود.</p>
-    <button class="btn block" type="submit">ارسال درخواست</button></form>
-    <datalist id="dl-unit2">${state.boot.units.map((c) => `<option value="${esc(c)}">`).join('')}</datalist>`, (root, close) => {
-    const f = $('#rq', root);
-    let items = [];
-    const loadItems = async () => {
-      const wh = $('[name=warehouse_id]', f).value;
-      items = wh ? await GET(`/api/items?warehouse=${wh}`) : [];
-      $('#rq-items', root).innerHTML = items.map((i) => `<option value="${esc(i.name)}">`).join('');
-    };
-    const match = () => {
-      const it = items.find((i) => i.name === $('[name=item_name]', f).value.trim());
-      $('[name=item_id]', f).value = it ? it.id : '';
-      if (it) $('[name=unit]', f).value = it.unit;
-      $('#rq-hint', root).textContent = it ? `موجودی فعلی: ${fa(it.qty)} ${it.unit}` : 'کالای جدید یا خارج از فهرست — برای تأمین ثبت می‌شود.';
-    };
-    $('[name=warehouse_id]', f).addEventListener('change', () => { loadItems().then(match); });
-    $('[name=item_name]', f).addEventListener('input', match);
-    if (pre) loadItems();
-    onSubmit(f, async (d) => {
-      await POST('/api/requests', d);
-      close(); toast('درخواست ثبت شد و برای مدیر انبار ارسال شد.');
-      location.hash = '#/requests?scope=mine';
-    });
-  });
+  $$('[data-rej]', main).forEach((b) => b.addEventListener('click', () => sheet('رد انتقال', `<form class="form" id="nf"><p class="form-error" hidden></p>
+    ${field('علت (الزامی)', textarea('note', { required: true }))}<button class="btn block" type="submit">ثبت</button></form>`, (root, close) => {
+    onSubmit($('#nf', root), async (d) => { await POST(`/api/transfers/${b.dataset.rej}/reject`, d); close(); toast('رد شد؛ موجودی به انبار مبدأ برگشت.'); reload(); });
+  })));
 }
 
 /* ================================================================ notifications & announcements */
 const NOTIF_ICON = {
-  out_of_stock: ['alert', 'bad'], low_stock: ['alert', 'warn'], request_new: ['inbox', 'info'], request_result: ['check', 'ok'],
-  transfer_in: ['truck', 'warn'], transfer_done: ['truck', 'info'], loan_due: ['clock', 'warn'], loan_overdue: ['clock', 'bad'],
-  damage: ['wrench', 'bad'], expiry: ['pill', 'warn'], announcement: ['megaphone', 'info'],
+  out_of_stock: ['alert', 'bad'], low_stock: ['alert', 'warn'], ticket_new: ['ticket', 'info'], exit_pending: ['file', 'warn'], exit_result: ['check', 'ok'],
+  exit_ready: ['out', 'info'], stock_in: ['in', 'ok'], transfer_in: ['truck', 'warn'], transfer_done: ['truck', 'info'], loan_due: ['clock', 'warn'],
+  loan_overdue: ['clock', 'bad'], damage: ['wrench', 'bad'], expiry: ['pill', 'warn'], card_incomplete: ['clipboard', 'warn'], announcement: ['megaphone', 'info'],
 };
 async function pageNotifications(_, __, main) {
   const rows = await GET('/api/notifications');
@@ -1085,42 +1504,40 @@ async function pageNotifications(_, __, main) {
       <span class="when">${jdate(n.created_at, { time: true })}</span></span></a>`;
   }).join('') || '<p class="empty">اعلانی ندارید.</p>'}</div></div>`;
   $('#readall')?.addEventListener('click', async () => { await POST('/api/notifications/read', { all: true }); state.unread = 0; updateUnread(); reload(); });
-  $$('[data-id]', main).forEach((a) => a.addEventListener('click', () => {
-    POST('/api/notifications/read', { ids: [a.dataset.id] }).then(refreshUnread);
-  }));
+  $$('[data-id]', main).forEach((a) => a.addEventListener('click', () => { POST('/api/notifications/read', { ids: [a.dataset.id] }).then(refreshUnread); }));
 }
 
 async function pageAnnouncements(_, __, main) {
   const rows = await GET('/api/announcements');
-  main.innerHTML = `<div class="page-head"><h1>اطلاعیه‌ها</h1>${isManager() ? `<button class="btn" id="newann">${icon('plus')} اطلاعیه جدید</button>` : ''}</div>
+  const mayPost = can('manage_users') || can('approve');
+  main.innerHTML = `<div class="page-head"><h1>اطلاعیه‌ها</h1>${mayPost ? `<button class="btn" id="newann">${icon('plus')} اطلاعیه جدید</button>` : ''}</div>
     ${rows.map((a) => `<div class="card announce"><h3>${esc(a.title)}${a.pinned ? ' <span class="pill brass">سنجاق‌شده</span>' : ''}</h3><p class="body">${esc(a.body)}</p>
       <p class="meta">${esc(a.author)} · ${jdate(a.created_at, { time: true })}
-      ${a.user_id === state.user.id || state.user.role === 'admin' ? ` · <a href="#" data-arch="${a.id}">برداشتن</a>` : ''}</p></div>`).join('') || '<div class="card"><p class="empty">اطلاعیه‌ای منتشر نشده است.</p></div>'}`;
+      ${a.user_id === state.user.id || can('manage_users') ? ` · <a href="#" data-arch="${a.id}">برداشتن</a>` : ''}</p></div>`).join('') || '<div class="card"><p class="empty">اطلاعیه‌ای منتشر نشده است.</p></div>'}`;
   $('#newann')?.addEventListener('click', () => sheet('اطلاعیه عمومی', `<form class="form" id="af"><p class="form-error" hidden></p>
     ${field('عنوان', input('title', { required: true }))}${field('متن', textarea('body', { required: true }))}
     <label class="check"><input type="checkbox" name="pinned"> سنجاق در صفحه اصلی</label>
-    <p class="hint" style="color:var(--muted);font-size:.8rem">برای همه کاربران اعلان ارسال می‌شود.</p>
-    <button class="btn block" type="submit">انتشار</button></form>`, (root, close) => {
+    <button class="btn block" type="submit">انتشار برای همه کاربران</button></form>`, (root, close) => {
     onSubmit($('#af', root), async (d) => { await POST('/api/announcements', d); close(); toast('اطلاعیه منتشر شد.'); reload(); });
   }));
-  $$('[data-arch]', main).forEach((a) => a.addEventListener('click', async (e) => {
-    e.preventDefault();
-    await POST(`/api/announcements/${a.dataset.arch}/archive`); reload();
-  }));
+  $$('[data-arch]', main).forEach((a) => a.addEventListener('click', async (e) => { e.preventDefault(); await POST(`/api/announcements/${a.dataset.arch}/archive`); reload(); }));
 }
 
 /* ================================================================ reports */
 async function pageReports(_, q, main) {
-  const kinds = [['inventory', 'موجودی'], ['transactions', 'ورود و خروج'], ['loans', 'امانت‌ها'], ['transfers', 'انتقال‌ها']];
+  const kinds = [['inventory', 'موجودی'], ['cards', 'شناسنامه اموال'], ['transactions', 'گردش کالا'], ['exits', 'درخواست‌ها و حواله‌ها'],
+    ['loans', 'امانت‌ها'], ['transfers', 'انتقال‌ها'], ['repairs', 'خرابی و تعمیر']];
+  if (can('tickets_all') || can('tickets_review')) kinds.push(['tickets', 'تیکت‌ها']);
   const kind = q.kind || 'inventory';
   const t = todayIso();
   const [jy, jm] = isoToJ(t);
   const monthStart = jToIso(`${jy}/${jm}/1`);
+  const noRange = ['inventory', 'cards'].includes(kind);
   main.innerHTML = `<div class="page-head no-print"><h1>گزارش‌ها</h1></div>
     <div class="tabs no-print">${kinds.map(([k, l]) => `<a href="#/reports?kind=${k}" class="${k === kind ? 'on' : ''}">${l}</a>`).join('')}</div>
     <form class="card form no-print" id="rf">
-      <div class="form-row">${field('انبار', select('warehouse', state.boot.warehouses.map((w) => [w.id, w.name]), q.warehouse, { empty: 'همه انبارها' }))}
-        ${kind === 'inventory' ? '' : `<div class="form-row">${dateInput('from', 'از تاریخ', q.from || monthStart)}${dateInput('to', 'تا تاریخ', q.to || t)}</div>`}</div>
+      <div class="form-row">${kind !== 'tickets' ? field('انبار', select('warehouse', visibleWarehouses().map((w) => [w.id, w.name]), q.warehouse, { empty: P().scope_all ? 'همه انبارها' : 'همه انبارهای من' })) : '<span></span>'}
+        ${noRange ? '' : `<div class="form-row">${dateInput('from', 'از تاریخ', q.from || monthStart)}${dateInput('to', 'تا تاریخ', q.to || t)}</div>`}</div>
       <div class="btns"><button class="btn" type="submit">${icon('search')} نمایش</button>
         <button class="btn ghost" type="button" id="xlsx">${icon('download')} خروجی اکسل</button>
         <button class="btn ghost" type="button" onclick="window.print()">${icon('printer')} چاپ</button></div>
@@ -1128,21 +1545,18 @@ async function pageReports(_, q, main) {
     </form>
     <div id="rep"></div>`;
   const f = $('#rf');
-  const params = () => {
-    const d = readForm(f);
-    return new URLSearchParams(Object.entries(d).filter(([, v]) => v));
-  };
+  const params = () => new URLSearchParams(Object.entries(readForm(f)).filter(([, v]) => v));
   const show = async () => {
     const p = params();
     setQuery('/reports', { kind, ...Object.fromEntries(p) });
     const r = await GET(`/api/reports/${kind}?${p}`);
-    const whLabel = p.get('warehouse') ? whName(p.get('warehouse')) : 'همه انبارها';
-    const range = kind === 'inventory' ? `تا ${jdate(t)}` : `${jdate(p.get('from'))} تا ${jdate(p.get('to'))}`;
+    const whLabel = p.get('warehouse') ? whName(p.get('warehouse')) : (P().scope_all ? 'همه انبارها' : 'انبارهای من');
+    const range = noRange ? `تا ${jdate(t)}` : `${jdate(p.get('from'))} تا ${jdate(p.get('to'))}`;
     $('#rep').innerHTML = `<div class="print-title"><h2>${esc(r.title)} — ${esc(whLabel)}</h2><p>${esc(ORG)} · ${range}</p></div>
       <p class="no-print" style="color:var(--muted);font-size:.86rem;margin-bottom:8px">${esc(r.title)} · ${esc(whLabel)} · ${range} · ${fa(r.rows.length)} ردیف</p>
       ${r.rows.length ? `<div class="table-wrap"><table><thead><tr>${r.headers.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead>
       <tbody>${r.rows.map((row) => `<tr>${row.map((c) => `<td>${typeof c === 'number' ? fa(c) : esc(faDigits(c ?? ''))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`
-    : '<div class="card"><p class="empty">برای این بازه موردی نیست.</p></div>'}`;
+    : '<div class="card"><p class="empty">موردی نیست.</p></div>'}`;
   };
   f.addEventListener('submit', (e) => { e.preventDefault(); show().catch((err) => toast(err.message, { error: true })); });
   $('#xlsx').addEventListener('click', () => {
@@ -1153,25 +1567,40 @@ async function pageReports(_, q, main) {
 
 /* ================================================================ more / account */
 function pageMore(_, __, main) {
-  const admin = state.user.role === 'admin';
   const link = ([h, i, t]) => `<a href="${h}">${icon(i)}${t}</a>`;
   main.innerHTML = `<h1>بیشتر</h1>
-    <div class="card more-menu">${NAV.slice(3).map(link).join('')}</div>
-    ${admin ? `<div class="card more-menu"><h2 style="padding:4px 10px">مدیریت کل</h2>${ADMIN_NAV.map(link).join('')}</div>` : ''}
-    ${A.wpAdmin ? `<div class="card more-menu"><a href="${esc(A.wpAdmin)}">${icon('shield')}تنظیمات افزونه در پیشخوان وردپرس</a></div>` : ''}
+    <div class="card more-menu">${navItems().slice(1).map(link).join('')}${can('steward') || can('edit') ? link(['#/items?card=incomplete', 'clipboard', 'شناسنامه‌های ناقص']) : ''}</div>
+    ${can('manage_users') ? `<div class="card more-menu"><h2 style="padding:4px 10px">مدیریت</h2>${ADMIN_NAV.map(link).join('')}</div>` : ''}
     <div class="card more-menu">${link(['#/account', 'user', 'حساب من و تغییر رمز'])}<button id="lo">${icon('logout')}خروج از حساب</button></div>`;
   $('#lo').onclick = logout;
 }
 
+const PERM_LABELS = {
+  edit: 'ثبت و ویرایش شناسنامه اموال، ثبت خرابی و تعمیر',
+  stock_in: 'ثبت ورود کالا، بازگشت امانت و دریافت انتقال',
+  request_out: 'ثبت درخواست خروج',
+  approve: 'تأیید یا رد خروج',
+  deliver: 'ثبت تحویل و خروج واقعی',
+  manage_users: 'مدیریت کاربران، مجوزها و انبارها',
+  tickets_review: 'بررسی و تصمیم درباره تیکت‌ها',
+  tickets_all: 'مشاهده و پیگیری همه تیکت‌ها (ارجاع، یادداشت)',
+  steward: 'مسئول تکمیل و یکدست‌سازی شناسنامه اموال',
+};
+function permSummary(p) {
+  const scope = p.scope_all ? 'همه انبارها' : (p.warehouses.map(whName).filter(Boolean).join('، ') || 'بدون انبار');
+  const list = Object.keys(PERM_LABELS).filter((k) => p[k]);
+  return { scope, list };
+}
+
 function pageAccount(_, __, main) {
   const u = state.user;
-  const managed = u.managed.map(whName).filter(Boolean);
+  const s = permSummary(u.perms);
   main.innerHTML = `<h1>حساب من</h1>
-    <div class="card"><dl class="specs"><dt>نام</dt><dd>${esc(u.full_name)}</dd><dt>نام کاربری</dt><dd dir="ltr" style="text-align:right">${esc(u.username)}</dd>
-      <dt>نقش</dt><dd>${u.role === 'admin' ? 'مدیر کل' : managed.length ? 'مدیر انبار' : 'کاربر عادی'}</dd>
-      ${managed.length ? `<dt>انبارهای من</dt><dd>${managed.map(esc).join('، ')}</dd>` : ''}</dl></div>
+    <div class="card"><dl class="specs"><dt>نام</dt><dd>${esc(u.full_name)}</dd>${u.title ? `<dt>عنوان</dt><dd>${esc(u.title)}</dd>` : ''}
+      <dt>نام کاربری</dt><dd dir="ltr" style="text-align:right">${esc(u.username)}</dd><dt>محدوده</dt><dd>${esc(s.scope)}</dd>
+      <dt>مجوزها</dt><dd>${s.list.map((k) => `<span class="pill" style="margin:2px">${esc(PERM_LABELS[k])}</span>`).join('') || 'فقط مشاهده'}</dd></dl></div>
     <form class="card form" id="pf"><h2>اطلاع‌رسانی بیرونی</h2><p class="form-error" hidden></p>
-      <p style="color:var(--muted);font-size:.86rem">اگر پیامک یا ربات پیام‌رسان روی سامانه فعال شده باشد، اعلان‌های مهم به این شماره یا شناسه هم فرستاده می‌شود.</p>
+      <p style="color:var(--muted);font-size:.86rem">اگر پیامک یا ربات پیام‌رسان روی سامانه فعال باشد، اعلان‌های مهم به این شماره یا شناسه هم فرستاده می‌شود.</p>
       <div class="form-row">${field('شماره همراه', input('phone', { value: u.phone || '', attrs: 'dir="ltr" inputmode="tel"', placeholder: '09xxxxxxxxx' }))}
         ${field('شناسه گفت‌وگو در بله/تلگرام', input('chat_id', { value: u.chat_id || '', attrs: 'dir="ltr"' }))}</div>
       <button class="btn" type="submit">ذخیره</button></form>
@@ -1185,83 +1614,111 @@ function pageAccount(_, __, main) {
   onSubmit($('#pf'), async (d) => { await PUT('/api/me', { phone: toEn(d.phone), chat_id: toEn(d.chat_id) }); Object.assign(state.user, d); toast('ذخیره شد.'); });
   onSubmit($('#cpw'), async (d) => {
     if (d.password !== d.password2) throw new Error('تکرار رمز با رمز جدید یکسان نیست.');
-    await POST('/api/me/password', d); toast('رمز عبور تغییر کرد.'); setTimeout(() => location.reload(), 800);
+    await POST('/api/me/password', { current: toEn(d.current), password: toEn(d.password) });
+    toast('رمز عبور تغییر کرد.'); setTimeout(() => location.reload(), 800);
   });
 }
 
-/* ================================================================ admin */
+/* ================================================================ admin: users & permissions */
 async function pageUsers(_, __, main) {
   const users = await GET('/api/users');
+  users.sort((a, b) => (b.active - a.active) || a.full_name.localeCompare(b.full_name, 'fa'));
   const whs = state.boot.warehouses;
-  main.innerHTML = `<div class="page-head"><h1>کاربران</h1><button class="btn" id="nu">${icon('plus')} کاربر جدید</button></div>
-    <p style="color:var(--muted);font-size:.86rem">ثبت‌نام عمومی وجود ندارد؛ هر نفر باید اینجا حساب جداگانه داشته باشد تا هر عملیات به نام خودش ثبت شود.</p>
-    <div class="card"><div class="list">${users.map((u) => `<div class="row">
-      <span class="grow"><span class="title">${esc(u.full_name)} ${u.active ? '' : '<span class="pill bad">غیرفعال</span>'}</span>
-        <span class="meta"><span dir="ltr">${esc(u.username)}</span> · ${u.role === 'admin' ? 'مدیر کل' : u.managed.length ? 'مدیر: ' + u.managed.map(whName).map(esc).join('، ') : 'کاربر عادی'}</span></span>
-      <span class="btns"><button class="btn sm ghost" data-edit="${u.id}">ویرایش</button><button class="btn sm ghost" data-pw="${u.id}">بازنشانی رمز</button></span></div>`).join('')}</div></div>`;
-  const form = (u) => `<form class="form" id="uf"><p class="form-error" hidden></p>
-    ${field('نام و نام خانوادگی', input('full_name', { value: u?.full_name, required: true }))}
+  main.innerHTML = `<div class="page-head"><h1>کاربران و مجوزها</h1><button class="btn" id="nu">${icon('plus')} کاربر جدید</button></div>
+    <p style="color:var(--muted);font-size:.86rem">هر نفر حساب جداگانه دارد تا هر عملیات به نام خودش ثبت شود. مجوزها مستقل از هم‌اند؛ دسترسی به همه انبارها به معنی اختیار تأیید خروج نیست.</p>
+    <div class="card"><div class="list">${users.map((u) => {
+    const s = permSummary(u.perms);
+    return `<div class="row" style="align-items:flex-start">
+      <span class="grow"><span class="title">${esc(u.full_name)} ${u.active ? '' : '<span class="pill bad">غیرفعال</span>'}${u.must_change_pw ? ' <span class="pill">رمز اولیه</span>' : ''}</span>
+        <span class="meta"><span dir="ltr">${esc(u.username)}</span>${u.title ? ' · ' + esc(u.title) : ''} · ${esc(s.scope)}</span>
+        <span class="pills" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">${u.perms.approve ? '<span class="pill ok">تأیید خروج</span>' : ''}${u.perms.manage_users ? '<span class="pill brand">مدیریت کاربران</span>' : ''}
+          ${u.perms.deliver ? '<span class="pill">تحویل</span>' : ''}${u.perms.tickets_review ? '<span class="pill info">بررسی تیکت</span>' : u.perms.tickets_all ? '<span class="pill info">پیگیری تیکت</span>' : ''}${u.perms.steward ? '<span class="pill brass">مسئول شناسنامه</span>' : ''}</span></span>
+      <span class="btns" style="flex-direction:column;align-items:stretch"><button class="btn sm ghost" data-edit="${u.id}">ویرایش</button><button class="btn sm ghost" data-pw="${u.id}">بازنشانی رمز</button></span></div>`;
+  }).join('')}</div></div>`;
+  const form = (u) => {
+    const p = u?.perms || { scope_all: false, warehouses: [] };
+    return `<form class="form" id="uf"><p class="form-error" hidden></p>
+    <div class="form-row">${field('نام و نام خانوادگی', input('full_name', { value: u?.full_name, required: true }))}${field('عنوان / سمت', input('title', { value: u?.title }))}</div>
     ${u ? '' : `<div class="form-row">${field('نام کاربری (انگلیسی)', input('username', { required: true, attrs: 'dir="ltr" autocapitalize="off" autocomplete="off"' }))}
       ${field('رمز اولیه', input('password', { required: true, attrs: 'dir="ltr" autocomplete="new-password" minlength="6"', value: genPassword() }), 'کاربر در اولین ورود رمز را عوض می‌کند.')}</div>`}
     <div class="form-row">${field('شماره همراه', input('phone', { value: u?.phone, attrs: 'dir="ltr" inputmode="tel"' }))}${field('شناسه بله/تلگرام', input('chat_id', { value: u?.chat_id, attrs: 'dir="ltr"' }))}</div>
-    <div class="field"><span class="label">نقش</span>${radioChips('role', [['user', 'کاربر / مدیر انبار'], ['admin', 'مدیر کل']], u?.role || 'user')}</div>
-    <div class="field"><span class="label">مدیر این انبارها</span><div class="checks">${whs.map((w) => `<label class="check"><input type="checkbox" name="managed" data-multi value="${w.id}" ${u?.managed.includes(w.id) ? 'checked' : ''}>${esc(w.name)}</label>`).join('')}</div>
-      <span class="hint">یک نفر می‌تواند مدیر چند انبار باشد. کاربری که مدیر هیچ انباری نیست فقط مشاهده و درخواست دارد.</span></div>
+    <fieldset class="form perm-box"><legend>محدوده انبارها</legend>
+      ${radioChips('scope', [['all', 'همه انبارها و اموال'], ['some', 'فقط انبارهای انتخاب‌شده']], p.scope_all ? 'all' : 'some')}
+      <div class="checks" id="wh-checks" ${p.scope_all ? 'hidden' : ''}>${whs.map((w) => `<label class="check"><input type="checkbox" name="warehouses" data-multi value="${w.id}" ${p.warehouses.includes(w.id) ? 'checked' : ''}>${esc(w.name)}</label>`).join('')}</div>
+    </fieldset>
+    <fieldset class="form perm-box"><legend>مجوزها</legend>
+      <p class="hint" style="font-size:.8rem;color:var(--muted)">مشاهده اموال در محدوده بالا برای همه حساب‌ها برقرار است.</p>
+      <div class="checks" style="grid-template-columns:1fr">${Object.entries(PERM_LABELS).map(([k, l]) => `<label class="check"><input type="checkbox" name="perm_${k}" ${p[k] ? 'checked' : ''}>${esc(l)}</label>`).join('')}</div>
+    </fieldset>
     ${u ? `<label class="check"><input type="checkbox" name="active" ${u.active ? 'checked' : ''}> حساب فعال است</label>` : ''}
     <button class="btn block" type="submit">${u ? 'ذخیره' : 'ساخت حساب'}</button></form>`;
-  $('#nu').onclick = () => sheet('کاربر جدید', form(null), (root, close) => onSubmit($('#uf', root), async (d) => {
-    await POST('/api/users', { ...d, username: toEn(d.username), phone: toEn(d.phone) });
-    close(); toast(`حساب ساخته شد. رمز اولیه: ${d.password}`); await loadBoot(); reload();
+  };
+  const toBody = (d) => {
+    const perms = { scope_all: d.scope === 'all', warehouses: (d.warehouses || []).map(Number) };
+    for (const k of Object.keys(PERM_LABELS)) perms[k] = !!d[`perm_${k}`];
+    return { full_name: d.full_name, title: d.title, username: toEn(d.username || ''), password: d.password, phone: toEn(d.phone), chat_id: d.chat_id, active: d.active, perms };
+  };
+  const mount = (root) => {
+    root.addEventListener('change', (e) => { if (e.target.name === 'scope') $('#wh-checks', root).hidden = e.target.value === 'all'; });
+  };
+  $('#nu').onclick = () => sheet('کاربر جدید', form(null), (root, close) => {
+    mount(root);
+    onSubmit($('#uf', root), async (d) => {
+      const b = toBody(d);
+      await POST('/api/users', b);
+      close(); toast(`حساب ساخته شد. رمز اولیه: ${b.password}`); await loadBoot(); reload();
+    });
+  });
+  $$('[data-edit]', main).forEach((btn) => btn.addEventListener('click', () => {
+    const u = users.find((x) => x.id === Number(btn.dataset.edit));
+    sheet(`ویرایش ${u.full_name}`, form(u), (root, close) => {
+      mount(root);
+      onSubmit($('#uf', root), async (d) => { await PUT(`/api/users/${u.id}`, toBody(d)); close(); toast('ذخیره شد.'); await loadBoot(); reload(); });
+    });
   }));
-  $$('[data-edit]', main).forEach((b) => b.addEventListener('click', () => {
-    const u = users.find((x) => x.id === Number(b.dataset.edit));
-    sheet(`ویرایش ${u.full_name}`, form(u), (root, close) => onSubmit($('#uf', root), async (d) => {
-      await PUT(`/api/users/${u.id}`, { ...d, phone: toEn(d.phone) });
-      close(); toast('ذخیره شد.'); await loadBoot(); reload();
-    }));
-  }));
-  $$('[data-pw]', main).forEach((b) => b.addEventListener('click', () => {
-    const u = users.find((x) => x.id === Number(b.dataset.pw));
+  $$('[data-pw]', main).forEach((btn) => btn.addEventListener('click', () => {
+    const u = users.find((x) => x.id === Number(btn.dataset.pw));
     sheet(`رمز جدید برای ${u.full_name}`, `<form class="form" id="rp"><p class="form-error" hidden></p>
-      ${field('رمز موقت', input('password', { value: genPassword(), required: true, attrs: 'dir="ltr" minlength="6"' }), 'این رمز را به کاربر بدهید؛ در ورود بعدی باید آن را عوض کند.')}
+      ${field('رمز موقت', input('password', { value: genPassword(), required: true, attrs: 'dir="ltr" minlength="6"' }), 'این رمز را فقط به خود این فرد بدهید؛ در ورود بعدی باید آن را عوض کند.')}
       <button class="btn block" type="submit">بازنشانی</button></form>`, (root, close) => onSubmit($('#rp', root), async (d) => {
-      await POST(`/api/users/${u.id}/reset-password`, d); close(); toast(`رمز موقت: ${d.password}`);
+      await POST(`/api/users/${u.id}/reset-password`, { password: toEn(d.password) }); close(); toast(`رمز موقت: ${toEn(d.password)}`);
     }));
   }));
 }
 function genPassword() {
-  const a = 'abcdefghjkmnpqrstuvwxyz23456789';
-  const r = crypto.getRandomValues(new Uint32Array(8));
-  return [...r].map((x) => a[x % a.length]).join('');
+  const r = crypto.getRandomValues(new Uint32Array(1))[0];
+  return String(10000000 + (r % 90000000));
 }
 
 async function pageWarehouses(_, __, main) {
-  const users = await GET('/api/users');
+  const users = (await GET('/api/users')).filter((u) => u.active && !u.perms.scope_all);
   const whs = state.boot.warehouses;
-  main.innerHTML = `<div class="page-head"><h1>انبارها و مدیران</h1><button class="btn" id="nw">${icon('plus')} انبار جدید</button></div>
+  main.innerHTML = `<div class="page-head"><h1>انبارها</h1><button class="btn" id="nw">${icon('plus')} انبار جدید</button></div>
+    <p style="color:var(--muted);font-size:.86rem">مسئولان دارای دسترسی سراسری به همه انبارها دسترسی دارند. اینجا مسئولانِ محدود هر انبار را تعیین کنید.</p>
     <div class="card"><div class="list">${whs.map((w) => `<div class="row"><span class="grow">
       <span class="title">${esc(w.name)} ${w.archived ? '<span class="pill">بایگانی</span>' : ''}${w.tracks_expiry ? '<span class="pill brass">تاریخ‌دار</span>' : ''}</span>
-      <span class="meta">${fa(w.item_count)} قلم · ${w.managers.length ? 'مدیر: ' + w.managers.map((m) => esc(m.full_name)).join('، ') : 'مدیری تعیین نشده'}</span></span>
+      <span class="meta">${fa(w.item_count)} قلم · ${w.people.length ? 'مسئول: ' + w.people.map((m) => esc(m.full_name)).join('، ') : 'فقط مسئولان سراسری'}</span></span>
       <button class="btn sm ghost" data-w="${w.id}">ویرایش</button></div>`).join('')}</div></div>`;
   const form = (w) => `<form class="form" id="wf"><p class="form-error" hidden></p>
     ${field('نام انبار', input('name', { value: w?.name, required: true }))}
     ${field('توضیحات', input('description', { value: w?.description }))}
-    <label class="check"><input type="checkbox" name="tracks_expiry" ${w?.tracks_expiry ? 'checked' : ''}> اقلام این انبار معمولاً تاریخ‌دار هستند (ثبت سری و انقضا)</label>
-    <div class="field"><span class="label">مدیران این انبار</span><div class="checks">${users.filter((u) => u.active).map((u) => `<label class="check"><input type="checkbox" name="managers" data-multi value="${u.id}" ${w?.managers.some((m) => m.id === u.id) ? 'checked' : ''}>${esc(u.full_name)}</label>`).join('')}</div></div>
-    ${w ? `<label class="check"><input type="checkbox" name="archived" ${w.archived ? 'checked' : ''}> بایگانی انبار (در فهرست‌ها نمایش داده نمی‌شود)</label>` : ''}
+    <label class="check"><input type="checkbox" name="tracks_expiry" ${w?.tracks_expiry ? 'checked' : ''}> اقلام این انبار معمولاً تاریخ‌دار هستند</label>
+    <div class="field"><span class="label">مسئولان محدود این انبار</span><div class="checks">${users.map((u) => `<label class="check"><input type="checkbox" name="people" data-multi value="${u.id}" ${w?.people.some((m) => m.id === u.id) ? 'checked' : ''}>${esc(u.full_name)}</label>`).join('') || '<span class="hint">کاربر محدودی تعریف نشده است.</span>'}</div>
+      <span class="hint">مجوزهای هر فرد از صفحه «کاربران و مجوزها» تعیین می‌شود.</span></div>
+    ${w ? `<label class="check"><input type="checkbox" name="archived" ${w.archived ? 'checked' : ''}> بایگانی انبار</label>` : ''}
     <button class="btn block" type="submit">ذخیره</button></form>`;
   const after = async (close) => { close(); toast('ذخیره شد.'); await loadBoot(); renderShell(); route(); };
-  $('#nw').onclick = () => sheet('انبار جدید', form(null), (root, close) => onSubmit($('#wf', root), async (d) => { await POST('/api/warehouses', d); await after(close); }));
+  $('#nw').onclick = () => sheet('انبار جدید', form(null), (root, close) => onSubmit($('#wf', root), async (d) => { await POST('/api/warehouses', { ...d, people: d.people || [] }); await after(close); }));
   $$('[data-w]', main).forEach((b) => b.addEventListener('click', () => {
     const w = whs.find((x) => x.id === Number(b.dataset.w));
-    sheet(`ویرایش ${w.name}`, form(w), (root, close) => onSubmit($('#wf', root), async (d) => { await PUT(`/api/warehouses/${w.id}`, d); await after(close); }));
+    sheet(`ویرایش ${w.name}`, form(w), (root, close) => onSubmit($('#wf', root), async (d) => { await PUT(`/api/warehouses/${w.id}`, { ...d, people: d.people || [] }); await after(close); }));
   }));
 }
 
 async function pageBackup(_, __, main) {
   const rows = await GET('/api/backups');
   main.innerHTML = `<div class="page-head"><h1>پشتیبان‌گیری</h1><button class="btn" id="bk">${icon('database')} تهیه نسخه پشتیبان الان</button></div>
-    <div class="callout info">سامانه هر روز به‌طور خودکار از اطلاعات انبار یک نسخه پشتیبان می‌گیرد و ۳۰ نسخه آخر را نگه می‌دارد. این نسخه‌ها جایگزین پشتیبان کامل سایت وردپرس (که میزبان یا افزونه پشتیبان‌گیری می‌گیرد) نیستند؛ هر چند وقت یک نسخه را دانلود و جای دیگری نگه دارید.</div>
+    <div class="callout info">سامانه هر روز به‌طور خودکار از اطلاعات انبار پشتیبان می‌گیرد و ۳۰ نسخه آخر را نگه می‌دارد. این نسخه‌ها جای پشتیبان کامل سایت را نمی‌گیرند؛ هر چند وقت یک نسخه را دانلود و جای دیگری نگه دارید.</div>
     <div class="card"><div class="list">${rows.map((b) => `<div class="row"><span class="grow"><span class="title" dir="ltr" style="text-align:right">${esc(b.name)}</span>
       <span class="meta">${jdate(new Date(b.created_at).toISOString().replace('T', ' ').slice(0, 19), { time: true })} · ${fa(Math.round(b.size / 1024))} کیلوبایت</span></span>
       <a class="btn sm ghost" href="${esc(b.url)}">${icon('download')} دانلود</a></div>`).join('') || '<p class="empty">هنوز نسخه‌ای نیست.</p>'}</div></div>`;
@@ -1269,17 +1726,22 @@ async function pageBackup(_, __, main) {
 }
 
 const AUDIT_LABEL = {
-  login: 'ورود به سامانه', change_password: 'تغییر رمز', item_create: 'ثبت کالا', item_update: 'ویرایش کالا', item_archive: 'بایگانی کالا',
-  item_unarchive: 'خروج از بایگانی', user_create: 'ساخت کاربر', user_update: 'ویرایش کاربر', password_reset: 'بازنشانی رمز',
-  warehouse_create: 'ساخت انبار', warehouse_update: 'ویرایش انبار', backup: 'پشتیبان‌گیری',
+  login: 'ورود به سامانه', change_password: 'تغییر رمز', item_create: 'ثبت شناسنامه', item_update: 'ویرایش شناسنامه', item_archive: 'بایگانی کالا',
+  item_unarchive: 'خروج از بایگانی', item_review: 'بررسی شناسنامه', photo_remove: 'حذف عکس', user_create: 'ساخت کاربر', user_update: 'ویرایش کاربر و مجوزها',
+  password_reset: 'بازنشانی رمز', warehouse_create: 'ساخت انبار', warehouse_update: 'ویرایش انبار', backup: 'پشتیبان‌گیری', ...EXIT_ACTION,
 };
 async function pageAudit(_, q, main) {
   const rows = await GET(`/api/audit?${new URLSearchParams(q)}`);
   main.innerHTML = `<div class="page-head"><h1>سوابق تغییرات</h1></div>
-    <p style="color:var(--muted);font-size:.86rem">ورود و خروج کالا در «گزارش ورود و خروج» است. اینجا تغییرات اطلاعات پایه و حساب‌ها ثبت می‌شود.</p>
-    <div class="card"><div class="list">${rows.map((a) => `<div class="row"><span class="grow"><span class="title">${AUDIT_LABEL[a.action] || esc(a.action)}${a.entity === 'item' ? ` · <a href="#/items/${a.entity_id}">کالای ${fa(a.entity_id)}</a>` : ''}</span>
+    <p style="color:var(--muted);font-size:.86rem">ورود و خروج کالا در «گزارش گردش کالا» است. اینجا تغییرات شناسنامه‌ها، حساب‌ها، مجوزها و مراحل درخواست‌های خروج ثبت می‌شود.</p>
+    <div class="card"><div class="list">${rows.map((a) => {
+    const det = a.details ? JSON.parse(a.details) : null;
+    const link = a.entity === 'item' ? ` · <a href="#/items/${a.entity_id}">کالای ${fa(a.entity_id)}</a>` : a.entity === 'exit' ? ` · <a href="#/exits/${a.entity_id}">${exitCode(a.entity_id)}</a>` : '';
+    return `<div class="row"><span class="grow"><span class="title">${AUDIT_LABEL[a.action] || esc(a.action)}${link}</span>
       <span class="meta">${esc(a.actor || '—')} · ${jdate(a.created_at, { time: true })}</span>
-      ${a.details && a.action === 'item_update' ? `<span class="meta">${Object.entries(JSON.parse(a.details)).map(([k, [o, n]]) => `${esc(k)}: ${esc(o ?? '—')} ← ${esc(n ?? '—')}`).join(' · ')}</span>` : ''}</span></div>`).join('') || '<p class="empty">موردی نیست.</p>'}</div></div>`;
+      ${det && a.action === 'item_update' ? `<span class="meta">${Object.entries(det).map(([k, [o, n]]) => `${esc(k)}: ${esc(o ?? '—')} ← ${esc(n ?? '—')}`).join(' · ')}</span>` : ''}
+      ${det && det.note ? `<span class="meta">${esc(det.note)}</span>` : ''}</span></div>`;
+  }).join('') || '<p class="empty">موردی نیست.</p>'}</div></div>`;
 }
 
 /* ================================================================ start */
@@ -1289,14 +1751,10 @@ async function loadBoot() {
   state.unread = state.boot.unread;
 }
 async function start() {
-  if (!A.loggedIn) { renderLogin(); return; }
-  try {
-    await loadBoot();
-  } catch (e) {
-    if (!state.user) renderLogin();
-    return;
+  if (A.loggedIn) {
+    try { await loadBoot(); } catch { state.user = null; }
   }
-  $('#app').innerHTML = '';
+  if (state.user) $('#app').innerHTML = '';
   route();
 }
 start();
