@@ -1,0 +1,11 @@
+{
+  "name": "سامانه انبار شباب",
+  "short_name": "انبار شباب",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f1f4f2",
+  "theme_color": "#0e5f57",
+  "icons": [{ "src": "/logo.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
