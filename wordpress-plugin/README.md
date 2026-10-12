@@ -36,7 +36,7 @@ assets/               رابط کاربری (JS/CSS، فونت وزیرمتن)
 فقط روی یک سایت آزمایشی (اطلاعات انبار پاک و ۱۵ حساب با رمز آزمایشی `test-<username>` ساخته می‌شود):
 
 ```bash
-wp eval-file wordpress-plugin/tests/reset.php
+ANBAR_TEST_RESET=yes wp eval-file wordpress-plugin/tests/reset.php
 WP_URL=http://localhost:8080 node --test wordpress-plugin/tests/api.test.js
 ```
 

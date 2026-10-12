@@ -3,7 +3,7 @@
  * End-to-end tests against a running WordPress with the plugin active, one per acceptance criterion.
  * Prepare a throwaway site first (this wipes app data and recreates the 15 initial accounts
  * with test passwords "test-<username>"):
- *   wp eval-file wordpress-plugin/tests/reset.php
+ *   ANBAR_TEST_RESET=yes wp eval-file wordpress-plugin/tests/reset.php
  * Then: WP_URL=http://127.0.0.1:8080 node --test wordpress-plugin/tests/api.test.js
  */
 const { test } = require('node:test');

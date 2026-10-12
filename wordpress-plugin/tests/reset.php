@@ -1,4 +1,5 @@
 <?php
+if (getenv('ANBAR_TEST_RESET') !== 'yes') { exit("Refusing: this wipes all warehouse data. Run with ANBAR_TEST_RESET=yes on a test site only.\n"); }
 // Test reset: wipe app data and accounts, recreate initial accounts with throwaway test passwords.
 global $wpdb;
 foreach (get_users(['role' => 'anbar_user']) as $u) { wp_delete_user($u->ID); }
