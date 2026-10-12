@@ -1289,7 +1289,7 @@ async function pageExit(id, _, main) {
     </dl></div>
     <div class="card"><h2>سابقه</h2><ol class="timeline">${e.history.map((h) => {
       const det = h.details ? JSON.parse(h.details) : {};
-      return `<li><b>${EXIT_ACTION[h.action] || esc(h.action)}</b> — ${esc(h.actor || '')}<span class="meta"> ${jdate(h.created_at, { time: true })}</span>${det.note ? `<div class="meta">${esc(det.note)}</div>` : ''}</li>`;
+      return `<li><div><b>${EXIT_ACTION[h.action] || esc(h.action)}</b> — ${esc(h.actor || '')}<span class="meta"> ${jdate(h.created_at, { time: true })}</span>${det.note ? `<div class="meta">${esc(det.note)}</div>` : ''}</div></li>`;
     }).join('')}</ol></div>`;
   $$('[data-decide]', main).forEach((b) => b.addEventListener('click', () => {
     const dec = b.dataset.decide;
