@@ -10,6 +10,10 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 
 const SITE = process.env.WP_URL || 'http://127.0.0.1:8080';
+// Standalone build: API_BASE=http://host/index.php?api= APP_PAGE=http://host/
+const API_BASE = process.env.API_BASE || SITE + '/wp-json/anbar/v1';
+const APP_PAGE = process.env.APP_PAGE || SITE + '/anbar/';
+const apiUrl = (url) => API_BASE + (API_BASE.includes('?') ? url.replace('?', '&') : url);
 
 class Client {
   constructor() { this.jar = {}; this.nonce = ''; }
@@ -22,11 +26,11 @@ class Client {
     }
   }
   async refreshNonce() {
-    const html = await (await fetch(SITE + '/anbar/', { headers: { cookie: this.cookie } })).text();
+    const html = await (await fetch(APP_PAGE, { headers: { cookie: this.cookie } })).text();
     this.nonce = /"nonce":"(\w+)"/.exec(html)[1];
   }
   async req(method, url, body) {
-    const res = await fetch(SITE + '/wp-json/anbar/v1' + url, {
+    const res = await fetch(apiUrl(url), {
       method, redirect: 'manual',
       headers: { ...(this.nonce ? { 'X-WP-Nonce': this.nonce } : {}), cookie: this.cookie, ...(body ? { 'content-type': 'application/json' } : {}) },
       body: body ? JSON.stringify(body) : undefined,

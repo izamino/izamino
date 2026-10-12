@@ -870,7 +870,7 @@ function anbar_register_routes()
         anbar_audit($c['user']['id'], 'backup', null, null, ['name' => $name]);
         return ['name' => $name];
     });
-    anbar_route('GET', '/backups/(?P<name>anbar-[\d-]+\.json\.gz)', function ($c) {
+    anbar_route('GET', '/backups/(?P<name>anbar-[\da-f-]+\.json\.gz)', function ($c) {
         anbar_require($c['user'], 'manage_users');
         $path = anbar_private_dir('backups') . '/' . $c['params']['name'];
         if (!is_file($path)) {

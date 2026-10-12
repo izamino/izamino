@@ -101,7 +101,9 @@ function anbar_tx(callable $fn)
 function anbar_install_schema()
 {
     global $wpdb;
-    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    if (!function_exists('dbDelta')) {
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    }
     $c = $wpdb->get_charset_collate();
     $p = $wpdb->prefix . 'anbar_';
     $q = 'DECIMAL(16,3)';
@@ -418,7 +420,8 @@ function anbar_backup_now()
     }
     $dump['users'] = array_map('anbar_user_public', anbar_app_users());
     $dir = anbar_private_dir('backups');
-    $name = 'anbar-' . gmdate('Y-m-d-His') . '.json.gz';
+    // Random suffix: backups stay unguessable even where the web server ignores .htaccess.
+    $name = 'anbar-' . gmdate('Y-m-d-His') . '-' . bin2hex(random_bytes(6)) . '.json.gz';
     file_put_contents($dir . '/' . $name, gzencode(wp_json_encode($dump, JSON_UNESCAPED_UNICODE), 6));
     $files = glob($dir . '/anbar-*.json.gz');
     sort($files);

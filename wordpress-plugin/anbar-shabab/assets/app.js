@@ -1570,7 +1570,7 @@ function pageMore(_, __, main) {
   const link = ([h, i, t]) => `<a href="${h}">${icon(i)}${t}</a>`;
   main.innerHTML = `<h1>بیشتر</h1>
     <div class="card more-menu">${navItems().slice(1).map(link).join('')}${can('steward') || can('edit') ? link(['#/items?card=incomplete', 'clipboard', 'شناسنامه‌های ناقص']) : ''}</div>
-    ${can('manage_users') ? `<div class="card more-menu"><h2 style="padding:4px 10px">مدیریت</h2>${ADMIN_NAV.map(link).join('')}</div>` : ''}
+    ${can('manage_users') ? `<div class="card more-menu"><h2 style="padding:4px 10px">مدیریت</h2>${ADMIN_NAV.map(link).join('')}${A.settingsUrl ? `<a href="${esc(A.settingsUrl)}">${icon('shield')}تنظیمات سامانه (نام مجموعه، پیامک)</a>` : ''}</div>` : ''}
     <div class="card more-menu">${link(['#/account', 'user', 'حساب من و تغییر رمز'])}<button id="lo">${icon('logout')}خروج از حساب</button></div>`;
   $('#lo').onclick = logout;
 }
