@@ -1,7 +1,7 @@
 === سامانه انبار شباب ===
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.0.0
+Stable tag: 2.1.0
 License: GPLv2 or later
 
 مدیریت اموال، انبارها، درخواست وسیله و تأیید خروج کالا — مجتمع مسجد محور شباب، مجموعه تفکر ناب.

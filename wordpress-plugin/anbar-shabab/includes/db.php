@@ -374,6 +374,9 @@ CREATE TABLE {$p}audit (
             }
         }
     }
+    if ((int) get_option('anbar_db_version') < 3) {
+        anbar_grant_steward_to_initial_accounts();
+    }
     update_option('anbar_db_version', ANBAR_DB_VERSION);
 }
 

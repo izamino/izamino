@@ -121,11 +121,12 @@ function anbar_run_scheduled_checks()
             'link' => '#/items/' . $b['item_id'], 'warehouse_id' => (int) $b['warehouse_id'], 'dedupe' => "exp-{$stage}-{$b['id']}",
         ]);
     }
-    $incomplete = (int) anbar_var("SELECT COUNT(*) FROM {items} WHERE archived = 0 AND card_status <> 'reviewed'");
-    if ($incomplete > 0) {
-        anbar_notify(anbar_users_with('steward'), [
-            'kind' => 'card_incomplete', 'title' => "{$incomplete} شناسنامه اموال نیازمند تکمیل یا بررسی است",
-            'link' => '#/items?card=incomplete', 'dedupe' => 'cards-' . $t,
-        ]);
+    foreach (anbar_users_with('steward') as $uid) {
+        $who = anbar_user_public(get_userdata($uid));
+        $n = (int) anbar_var("SELECT COUNT(*) FROM {items} WHERE archived = 0 AND card_status <> 'reviewed'" . anbar_scope_sql($who, 'warehouse_id'));
+        if ($n > 0) {
+            anbar_notify([$uid], ['kind' => 'card_incomplete', 'title' => "{$n} شناسنامه اموال نیازمند تکمیل یا بررسی است",
+                'link' => '#/items?card=incomplete', 'dedupe' => 'cards-' . $t]);
+        }
     }
 }

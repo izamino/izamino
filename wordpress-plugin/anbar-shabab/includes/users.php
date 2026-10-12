@@ -194,9 +194,10 @@ function anbar_users_with($perm, $warehouse_id = null, $except = 0)
  */
 function anbar_initial_accounts()
 {
+    // Everyone completes and reviews asset cards within their own warehouse scope (steward).
     $gm = ['scope_all' => true, 'edit' => true, 'stock_in' => true, 'request_out' => true, 'approve' => true, 'deliver' => true,
-        'manage_users' => true, 'tickets_review' => true, 'tickets_all' => true];
-    $operator = ['edit' => true, 'stock_in' => true, 'request_out' => true, 'deliver' => true];
+        'manage_users' => true, 'tickets_review' => true, 'tickets_all' => true, 'steward' => true];
+    $operator = ['edit' => true, 'stock_in' => true, 'request_out' => true, 'deliver' => true, 'steward' => true];
     $reserve = ['scope_all' => true, 'tickets_all' => true] + $operator;
     return [
         ['mohammadali', 'محمدعلی درویش‌نژاد', 'مدیر کل', $gm, []],
@@ -223,7 +224,7 @@ function anbar_initial_accounts()
  * `$passwords` maps username → password; a missing password gets a random 8-digit one.
  * Returns [[username, full_name, password|null(existing)], ...].
  */
-function anbar_create_initial_accounts($passwords, $force_change = true)
+function anbar_create_initial_accounts($passwords, $force_change = false)
 {
     $out = [];
     foreach (anbar_initial_accounts() as [$login, $name, $title, $perms, $wh_names]) {
@@ -268,3 +269,18 @@ add_filter('wp_authenticate_user', function ($user) {
     }
     return $user;
 });
+
+/** Version 3: every initial account also completes asset cards (steward) within its scope. */
+function anbar_grant_steward_to_initial_accounts()
+{
+    foreach (anbar_initial_accounts() as [$login]) {
+        $u = get_user_by('login', $login);
+        if ($u && user_can($u, 'anbar_access')) {
+            $p = anbar_get_perms($u->ID);
+            if (!$p['steward']) {
+                $p['steward'] = true;
+                anbar_save_perms($u->ID, $p);
+            }
+        }
+    }
+}

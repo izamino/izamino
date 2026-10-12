@@ -78,6 +78,7 @@ test('permissions follow the table; restricted users only see their warehouse', 
   assert.ok(res.scope_all && res.edit && res.deliver && !res.approve && !res.manage_users);
   const mo = await p(U.morteza);
   assert.ok(!mo.scope_all && !mo.approve && mo.warehouses.length === 1 && mo.warehouses[0] === W['انبار صوت مسجد']);
+  assert.ok(mo.steward && gm.steward && ali.steward && res.steward, 'everyone completes cards within their scope');
   assert.equal((await U.morteza.ok('GET', '/bootstrap')).warehouses.length, 1);
   assert.equal((await U.abbasali.ok('GET', '/bootstrap')).warehouses[0].name, 'اموال و انبار کتابخانه');
   assert.equal(await U.ali.status('GET', '/users'), 403);
@@ -96,12 +97,14 @@ test('asset cards: restricted user records in own warehouse only; partial cards 
   assert.equal(it.details.specs.power, '1300W');
   assert.equal(it.card_status, 'draft');
   assert.ok(it.missing.includes('عکس'));
-  assert.equal(it.purchase_price, undefined, 'operators do not see prices');
+  assert.equal(it.purchase_price, null, 'card completers see the price fields; unknown stays empty');
   const gmView = await item(U.mehdi, r.id);
   assert.equal(gmView.purchase_price, null, 'unknown price stays empty, not 0');
   assert.equal(String(gmView.current_value), '45000000');
   assert.equal(await U.morteza.status('POST', '/items', { warehouse_id: W['انبار رسانه'], name: 'x', unit: 'عدد' }), 403);
   assert.equal(await U.amirhossein.status('GET', `/items/${r.id}`), 403);
+  assert.equal(await U.amirhossein.status('POST', `/items/${r.id}/review`, { status: 'reviewed' }), 403, 'steward only within own scope');
+  await U.morteza.ok('POST', `/items/${r.id}/review`, { status: 'incomplete', note: 'عکس لازم است' });
   assert.equal((await U.amirhossein.ok('GET', '/items?q=JBL')).length, 0);
   const minimal = await U.abbasali.ok('POST', '/items', { warehouse_id: W['اموال و انبار کتابخانه'], name: 'نهج‌البلاغه', unit: 'جلد', item_type: 'book', opening_qty: 3 });
   ids.book = minimal.id;

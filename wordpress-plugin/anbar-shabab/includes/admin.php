@@ -109,7 +109,7 @@ function anbar_settings_page()
             هر خط: نام کاربری، فاصله، رمز. می‌توانید کل جدول حساب‌ها را از سند راه‌اندازی همین‌جا بچسبانید.
             حسابی که رمزش وارد نشود، رمز تصادفی ۸ رقمی می‌گیرد. رمزها به‌صورت رمزنگاری‌شده ذخیره می‌شوند و جایی نگه داشته نمی‌شوند.</p>
           <textarea id="anbar_passwords" name="passwords" rows="10" class="large-text code" dir="ltr" placeholder="mohammadali 12345678"></textarea>
-          <p><label><input type="checkbox" name="force_change" value="1" checked> هر فرد در اولین ورود رمز شخصی خودش را تعیین کند</label></p>
+          <p><label><input type="checkbox" name="force_change" value="1"> هر فرد در اولین ورود رمز شخصی خودش را تعیین کند (اختیاری)</label></p>
           <?php submit_button('ساخت ' . $missing . ' حساب باقی‌مانده', 'primary', 'submit', false); ?>
         </form>
       <?php endif; ?>
