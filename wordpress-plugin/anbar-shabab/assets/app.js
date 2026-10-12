@@ -6,6 +6,21 @@ const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const state = { boot: null, user: null, unread: 0 };
+/* Settings printed by WordPress (templates/app.php). */
+const A = window.ANBAR || { root: '/wp-json/anbar/v1/', nonce: '', assets: '', loggedIn: false };
+const LOGO = A.assets + 'logo.svg';
+const ORG = A.org || 'مجتمع مسجد محور شباب';
+const ORG_SUB = A.orgSub || 'مجموعه تفکر ناب';
+/** '/api/items?x=1' → WordPress REST URL (works with pretty and plain permalinks). */
+function apiUrl(u, extra = {}) {
+  const [p, qs = ''] = u.replace(/^\/api\//, '').split('?');
+  const params = new URLSearchParams(qs);
+  for (const [k, v] of Object.entries(extra)) params.set(k, v);
+  const base = A.root + p;
+  const q = params.toString();
+  return q ? base + (base.includes('?') ? '&' : '?') + q : base;
+}
+const downloadUrl = (u) => apiUrl(u, { _wpnonce: A.nonce });
 
 const nf = new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 3 });
 const fa = (n) => (n == null || n === '' ? '' : nf.format(Number(n)));
@@ -149,19 +164,21 @@ const icon = (name) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColo
 
 /* ---------- API */
 async function api(method, url, body) {
-  const res = await fetch(url, {
+  const res = await fetch(apiUrl(url), {
     method, credentials: 'same-origin',
-    headers: { 'x-anbar': '1', ...(body ? { 'content-type': 'application/json' } : {}) },
+    headers: { 'X-WP-Nonce': A.nonce, ...(body ? { 'content-type': 'application/json' } : {}) },
     body: body ? JSON.stringify(body) : undefined,
   });
   let data = null;
   try { data = await res.json(); } catch { /* empty */ }
-  if (res.status === 401 && !url.endsWith('/login')) {
-    state.user = null;
-    renderLogin();
-    throw new Error(data?.error || 'لطفاً دوباره وارد شوید.');
+  const msg = data?.message || data?.error;
+  if ((res.status === 401 || data?.code === 'rest_cookie_invalid_nonce') && !url.endsWith('/login')) {
+    // Session ended or the security token expired: a reload fetches a fresh one (or shows the login form).
+    if (state.user) { location.reload(); }
+    else renderLogin();
+    throw new Error(msg || 'لطفاً دوباره وارد شوید.');
   }
-  if (!res.ok) throw new Error(data?.error || 'ارتباط با سرور برقرار نشد.');
+  if (!res.ok) throw new Error(msg || 'ارتباط با سرور برقرار نشد.');
   return data;
 }
 const GET = (u) => api('GET', u);
@@ -312,7 +329,7 @@ function renderShell() {
   const admin = state.user.role === 'admin';
   $('#app').innerHTML = `<div class="shell">
     <header class="topbar">
-      <a class="brand" href="#/"><img src="/logo.svg" alt=""><span><b>انبار شباب</b><small>مجتمع مسجد محور شباب · مجموعه تفکر ناب</small></span></a>
+      <a class="brand" href="#/"><img src="${LOGO}" alt=""><span><b>انبار شباب</b><small>${esc(ORG)} · ${esc(ORG_SUB)}</small></span></a>
       <a class="icon-btn" href="#/notifications" aria-label="اعلان‌ها">${icon('bell')}<span class="badge-dot" id="unread" hidden></span></a>
     </header>
     <nav class="sidebar" aria-label="منوی اصلی">
@@ -428,8 +445,9 @@ const reload = () => route();
 /* ================================================================ login */
 function renderLogin() {
   $('#app').innerHTML = `<div class="login"><form class="login-card card" id="login" autocomplete="on">
-    <div class="login-head"><img src="/logo.svg" alt=""><h1>سامانه انبار</h1>
-      <span class="org">مجتمع مسجد محور شباب<br>مجموعه تفکر ناب</span></div>
+    <div class="login-head"><img src="${LOGO}" alt=""><h1>سامانه انبار</h1>
+      <span class="org">${esc(ORG)}<br>${esc(ORG_SUB)}</span></div>
+    ${A.wpUser ? `<p class="callout">حساب «${esc(A.wpUser)}» به سامانه انبار دسترسی ندارد. با حساب دیگری وارد شوید یا از مدیر کل دسترسی بگیرید.</p>` : ''}
     <p class="form-error" hidden></p>
     ${field('نام کاربری', input('username', { required: true, attrs: 'autocomplete="username" autocapitalize="off" dir="ltr"' }))}
     ${field('رمز عبور', input('password', { type: 'password', required: true, attrs: 'autocomplete="current-password" dir="ltr"' }))}
@@ -438,13 +456,13 @@ function renderLogin() {
   </form></div>`;
   onSubmit($('#login'), async (d) => {
     await POST('/api/login', { username: toEn(d.username), password: d.password });
-    await start();
+    location.reload();
   });
 }
 
 function pageForcePassword() {
   $('#app').innerHTML = `<div class="login"><form class="login-card card" id="pw">
-    <div class="login-head"><img src="/logo.svg" alt=""><h1>تعیین رمز جدید</h1>
+    <div class="login-head"><img src="${LOGO}" alt=""><h1>تعیین رمز جدید</h1>
       <span class="org">${esc(state.user.full_name)}، برای امنیت حساب، رمز عبور شخصی خودتان را تعیین کنید.</span></div>
     <p class="form-error" hidden></p>
     ${field('رمز فعلی (رمزی که به شما داده شده)', input('current', { type: 'password', required: true, attrs: 'autocomplete="current-password" dir="ltr"' }))}
@@ -457,16 +475,15 @@ function pageForcePassword() {
   onSubmit($('#pw'), async (d) => {
     if (d.password !== d.password2) throw new Error('تکرار رمز با رمز جدید یکسان نیست.');
     await POST('/api/me/password', d);
-    toast('رمز عبور ذخیره شد.');
-    await start();
+    location.hash = '#/';
+    location.reload();
   });
 }
 
 async function logout() {
   try { await POST('/api/logout'); } catch { /* ignore */ }
-  state.user = null;
   location.hash = '#/';
-  renderLogin();
+  location.reload();
 }
 
 /* ================================================================ dashboard */
@@ -890,7 +907,7 @@ async function pageReceipt(id, _, main) {
     <div class="btns no-print"><a class="back" href="#/items/${t.item_id}">${icon('back')} بازگشت به کالا</a><span style="flex:1"></span>
       <button class="btn" onclick="window.print()">${icon('printer')} چاپ رسید</button></div>
     <article class="receipt">
-      <header><div class="org"><img src="/logo.svg" alt=""><div><b>مجتمع مسجد محور شباب</b><small>مجموعه تفکر ناب · ${esc(t.warehouse)}</small></div></div>
+      <header><div class="org"><img src="${LOGO}" alt=""><div><b>${esc(ORG)}</b><small>${esc(ORG_SUB)} · ${esc(t.warehouse)}</small></div></div>
         <div style="text-align:left"><h1>${kind}</h1><small>شماره ${fa(t.id)}</small></div></header>
       <table>
         <tr><th>تاریخ عملیات</th><td>${jdate(t.op_date, { long: true })}</td></tr>
@@ -1121,7 +1138,7 @@ async function pageReports(_, q, main) {
     const r = await GET(`/api/reports/${kind}?${p}`);
     const whLabel = p.get('warehouse') ? whName(p.get('warehouse')) : 'همه انبارها';
     const range = kind === 'inventory' ? `تا ${jdate(t)}` : `${jdate(p.get('from'))} تا ${jdate(p.get('to'))}`;
-    $('#rep').innerHTML = `<div class="print-title"><h2>${esc(r.title)} — ${esc(whLabel)}</h2><p>مجتمع مسجد محور شباب · ${range}</p></div>
+    $('#rep').innerHTML = `<div class="print-title"><h2>${esc(r.title)} — ${esc(whLabel)}</h2><p>${esc(ORG)} · ${range}</p></div>
       <p class="no-print" style="color:var(--muted);font-size:.86rem;margin-bottom:8px">${esc(r.title)} · ${esc(whLabel)} · ${range} · ${fa(r.rows.length)} ردیف</p>
       ${r.rows.length ? `<div class="table-wrap"><table><thead><tr>${r.headers.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead>
       <tbody>${r.rows.map((row) => `<tr>${row.map((c) => `<td>${typeof c === 'number' ? fa(c) : esc(faDigits(c ?? ''))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`
@@ -1129,7 +1146,7 @@ async function pageReports(_, q, main) {
   };
   f.addEventListener('submit', (e) => { e.preventDefault(); show().catch((err) => toast(err.message, { error: true })); });
   $('#xlsx').addEventListener('click', () => {
-    try { location.href = `/api/reports/${kind}?format=xlsx&${params()}`; } catch (e) { toast(e.message, { error: true }); }
+    try { location.href = downloadUrl(`/api/reports/${kind}?format=xlsx&${params()}`); } catch (e) { toast(e.message, { error: true }); }
   });
   await show();
 }
@@ -1141,6 +1158,7 @@ function pageMore(_, __, main) {
   main.innerHTML = `<h1>بیشتر</h1>
     <div class="card more-menu">${NAV.slice(3).map(link).join('')}</div>
     ${admin ? `<div class="card more-menu"><h2 style="padding:4px 10px">مدیریت کل</h2>${ADMIN_NAV.map(link).join('')}</div>` : ''}
+    ${A.wpAdmin ? `<div class="card more-menu"><a href="${esc(A.wpAdmin)}">${icon('shield')}تنظیمات افزونه در پیشخوان وردپرس</a></div>` : ''}
     <div class="card more-menu">${link(['#/account', 'user', 'حساب من و تغییر رمز'])}<button id="lo">${icon('logout')}خروج از حساب</button></div>`;
   $('#lo').onclick = logout;
 }
@@ -1167,7 +1185,7 @@ function pageAccount(_, __, main) {
   onSubmit($('#pf'), async (d) => { await PUT('/api/me', { phone: toEn(d.phone), chat_id: toEn(d.chat_id) }); Object.assign(state.user, d); toast('ذخیره شد.'); });
   onSubmit($('#cpw'), async (d) => {
     if (d.password !== d.password2) throw new Error('تکرار رمز با رمز جدید یکسان نیست.');
-    await POST('/api/me/password', d); $('#cpw').reset(); toast('رمز عبور تغییر کرد.');
+    await POST('/api/me/password', d); toast('رمز عبور تغییر کرد.'); setTimeout(() => location.reload(), 800);
   });
 }
 
@@ -1243,10 +1261,10 @@ async function pageWarehouses(_, __, main) {
 async function pageBackup(_, __, main) {
   const rows = await GET('/api/backups');
   main.innerHTML = `<div class="page-head"><h1>پشتیبان‌گیری</h1><button class="btn" id="bk">${icon('database')} تهیه نسخه پشتیبان الان</button></div>
-    <div class="callout info">سامانه هر روز به‌طور خودکار یک نسخه پشتیبان می‌گیرد و ۳۰ نسخه آخر را نگه می‌دارد. برای اطمینان، هر چند وقت یک نسخه را دانلود و جای دیگری نگه دارید.</div>
+    <div class="callout info">سامانه هر روز به‌طور خودکار از اطلاعات انبار یک نسخه پشتیبان می‌گیرد و ۳۰ نسخه آخر را نگه می‌دارد. این نسخه‌ها جایگزین پشتیبان کامل سایت وردپرس (که میزبان یا افزونه پشتیبان‌گیری می‌گیرد) نیستند؛ هر چند وقت یک نسخه را دانلود و جای دیگری نگه دارید.</div>
     <div class="card"><div class="list">${rows.map((b) => `<div class="row"><span class="grow"><span class="title" dir="ltr" style="text-align:right">${esc(b.name)}</span>
       <span class="meta">${jdate(new Date(b.created_at).toISOString().replace('T', ' ').slice(0, 19), { time: true })} · ${fa(Math.round(b.size / 1024))} کیلوبایت</span></span>
-      <a class="btn sm ghost" href="/api/backups/${encodeURIComponent(b.name)}">${icon('download')} دانلود</a></div>`).join('') || '<p class="empty">هنوز نسخه‌ای نیست.</p>'}</div></div>`;
+      <a class="btn sm ghost" href="${esc(b.url)}">${icon('download')} دانلود</a></div>`).join('') || '<p class="empty">هنوز نسخه‌ای نیست.</p>'}</div></div>`;
   $('#bk').onclick = async () => { try { await POST('/api/backups'); toast('نسخه پشتیبان ساخته شد.'); reload(); } catch (e) { toast(e.message, { error: true }); } };
 }
 
@@ -1271,9 +1289,10 @@ async function loadBoot() {
   state.unread = state.boot.unread;
 }
 async function start() {
+  if (!A.loggedIn) { renderLogin(); return; }
   try {
     await loadBoot();
-  } catch {
+  } catch (e) {
     if (!state.user) renderLogin();
     return;
   }

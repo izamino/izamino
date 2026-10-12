@@ -1,29 +1,39 @@
 'use strict';
-// End-to-end API tests: starts the real server on a temp data dir and walks through the main workflows.
-const { test, before, after } = require('node:test');
+// End-to-end tests against a running WordPress with the plugin active.
+// Usage: WP_URL=http://127.0.0.1:8080 WP_ADMIN_PASS=admin123 node --test wordpress-plugin/tests/api.test.js
+// Uses a fresh install: the test creates users ali / reza / hasan.
+const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { spawn } = require('node:child_process');
-const fs = require('node:fs');
-const os = require('node:os');
-const path = require('node:path');
 
-const PORT = 3400 + Math.floor(Math.random() * 500);
-const BASE = `http://127.0.0.1:${PORT}`;
-let proc;
-let dataDir;
+const SITE = process.env.WP_URL || 'http://127.0.0.1:8080';
+const ADMIN_PASS = process.env.WP_ADMIN_PASS || 'admin123';
 
 class Client {
-  constructor() { this.cookie = ''; }
+  constructor() { this.jar = {}; this.nonce = ''; }
+  get cookie() { return Object.entries(this.jar).map(([k, v]) => `${k}=${v}`).join('; '); }
+  store(res) {
+    for (const c of res.headers.getSetCookie()) {
+      const [kv] = c.split(';');
+      const i = kv.indexOf('=');
+      this.jar[kv.slice(0, i)] = kv.slice(i + 1);
+    }
+  }
+  async refreshNonce() {
+    const res = await fetch(SITE + '/anbar/', { headers: { cookie: this.cookie } });
+    const html = await res.text();
+    this.nonce = /"nonce":"(\w+)"/.exec(html)[1];
+  }
   async req(method, url, body) {
-    const res = await fetch(BASE + url, {
-      method,
-      headers: { 'x-anbar': '1', cookie: this.cookie, ...(body ? { 'content-type': 'application/json' } : {}) },
+    const u = SITE + '/wp-json/anbar/v1' + url.replace(/^\/api/, '');
+    const res = await fetch(u, {
+      method, redirect: 'manual',
+      headers: { ...(this.nonce ? { 'X-WP-Nonce': this.nonce } : {}), cookie: this.cookie, ...(body ? { 'content-type': 'application/json' } : {}) },
       body: body ? JSON.stringify(body) : undefined,
     });
-    const set = res.headers.get('set-cookie');
-    if (set) this.cookie = set.split(';')[0];
+    this.store(res);
     const type = res.headers.get('content-type') || '';
     const data = type.includes('json') ? await res.json() : Buffer.from(await res.arrayBuffer());
+    if (data && data.message && !data.error) data.error = data.message;
     return { status: res.status, data };
   }
   async ok(method, url, body) {
@@ -31,21 +41,13 @@ class Client {
     assert.equal(r.status, 200, `${method} ${url} → ${r.status} ${JSON.stringify(r.data)}`);
     return r.data;
   }
-  async login(username, password) { return this.ok('POST', '/api/login', { username, password }); }
-}
-
-before(async () => {
-  dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'anbar-test-'));
-  proc = spawn(process.execPath, ['--disable-warning=ExperimentalWarning', path.join(__dirname, '..', 'server', 'index.js')], {
-    env: { ...process.env, PORT: String(PORT), ANBAR_DATA_DIR: dataDir, ANBAR_ADMIN_PASSWORD: 'admin123' }, stdio: 'pipe',
-  });
-  for (let i = 0; i < 50; i++) {
-    try { await fetch(BASE + '/'); return; } catch { await new Promise((r) => setTimeout(r, 100)); }
+  async login(username, password) {
+    this.jar = {}; this.nonce = '';
+    const r = await this.ok('POST', '/api/login', { username, password });
+    await this.refreshNonce();
+    return r;
   }
-  throw new Error('server did not start');
-});
-after(() => { proc.kill(); fs.rmSync(dataDir, { recursive: true, force: true }); });
-
+}
 const admin = new Client();
 const kitchenMgr = new Client();
 const mediaMgr = new Client();
@@ -55,7 +57,7 @@ const ids = {};
 test('login is required and wrong passwords are refused', async () => {
   assert.equal((await new Client().req('GET', '/api/bootstrap')).status, 401);
   assert.equal((await new Client().req('POST', '/api/login', { username: 'admin', password: 'nope' })).status, 401);
-  await admin.login('admin', 'admin123');
+  await admin.login('admin', ADMIN_PASS);
   const boot = await admin.ok('GET', '/api/bootstrap');
   assert.equal(boot.user.role, 'admin');
   assert.equal(boot.warehouses.length, 8);
@@ -192,6 +194,6 @@ test('deactivated users are logged out', async () => {
   const users = await admin.ok('GET', '/api/users');
   const hasan = users.find((u) => u.username === 'hasan');
   await admin.ok('PUT', `/api/users/${hasan.id}`, { full_name: hasan.full_name, role: 'user', active: false, managed: [] });
-  assert.equal((await plain.req('GET', '/api/me')).status, 401);
+  assert.ok([401, 403].includes((await plain.req('GET', '/api/me')).status));
   assert.equal((await new Client().req('POST', '/api/login', { username: 'hasan', password: 'secret3' })).status, 403);
 });
