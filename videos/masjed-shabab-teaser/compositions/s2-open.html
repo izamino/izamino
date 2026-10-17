@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="fa">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template id="s2-open-template">
+      <style>
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Medium.woff2") format("woff2"); font-weight: 500; }
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Bold.woff2") format("woff2"); font-weight: 700; }
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Black.woff2") format("woff2"); font-weight: 900; }
+        @font-face { font-family: "Lalezar"; src: url("../assets/fonts/Lalezar-Arabic.woff2") format("woff2"); font-weight: 400; }
+        #s2 {
+          position: absolute;
+          inset: 0;
+          direction: rtl;
+          font-family: "Vazirmatn", sans-serif;
+          color: #f4ecdd;
+        }
+        #s2-world {
+          position: absolute;
+          inset: 0;
+        }
+        #s2-archwrap {
+          position: absolute;
+          left: 280px;
+          top: 560px;
+          width: 520px;
+          height: 760px;
+        }
+        #s2-arch {
+          position: absolute;
+          inset: 0;
+          width: 520px;
+          height: 760px;
+          overflow: visible;
+        }
+        #s2-door-light {
+          opacity: 0;
+        }
+        #s2-phrase {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 800px;
+          text-align: center;
+        }
+        #s2-phrase .small {
+          display: block;
+          font-size: 64px;
+          font-weight: 500;
+          color: #f4ecdd;
+        }
+        #s2-phrase .big {
+          display: block;
+          margin-top: 6px;
+          font-family: "Lalezar", "Vazirmatn", sans-serif;
+          font-size: 124px;
+          line-height: 1.12;
+          color: #0b1f3a;
+        }
+        #s2-phrase .big .w {
+          display: block;
+        }
+        #s2-name {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 1060px;
+          text-align: center;
+        }
+        #s2-name .line {
+          display: block;
+          font-family: "Lalezar", "Vazirmatn", sans-serif;
+          font-size: 150px;
+          line-height: 1.12;
+          color: #f4ecdd;
+        }
+        #s2-name .line.gold {
+          color: #e6c574;
+        }
+        #s2-city {
+          margin-top: 26px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 26px;
+          font-size: 46px;
+          font-weight: 700;
+          color: #1fb5a8;
+        }
+        #s2-city-t {
+          display: block;
+          letter-spacing: 0.02em;
+        }
+        #s2-city .rule {
+          display: block;
+          width: 140px;
+          height: 3px;
+          background: #1fb5a8;
+        }
+      </style>
+      <div id="s2" data-composition-id="s2-open" data-width="1080" data-height="1920" data-duration="5">
+        <div id="s2-world">
+          <div id="s2-archwrap">
+            <svg id="s2-arch" viewBox="0 0 520 760" aria-hidden="true">
+              <defs>
+                <radialGradient id="s2-light" cx="50%" cy="58%" r="62%">
+                  <stop offset="0%" stop-color="#fff3d1" />
+                  <stop offset="45%" stop-color="#e6c574" />
+                  <stop offset="100%" stop-color="#c9a24a" />
+                </radialGradient>
+              </defs>
+              <path id="s2-door-light" fill="url(#s2-light)"
+                d="M62 760 L62 345 C62 205 170 120 260 66 C350 120 458 205 458 345 L458 760 Z" />
+              <path fill="none" stroke="#1fb5a8" stroke-width="7" stroke-linecap="round"
+                d="M20 760 L20 330 C20 170 150 70 260 10 C370 70 500 170 500 330 L500 760" />
+              <path fill="none" stroke="#c9a24a" stroke-width="3" stroke-linecap="round"
+                d="M62 760 L62 345 C62 205 170 120 260 66 C350 120 458 205 458 345 L458 760" />
+            </svg>
+          </div>
+          <div id="s2-phrase">
+            <span class="small" id="s2-ke">که درش</span>
+            <span class="big"><span class="w">همیشه</span><span class="w">بازه.</span></span>
+          </div>
+          <div id="s2-name">
+            <span class="line" id="s2-n1">مسجد شباب</span>
+            <span class="line gold" id="s2-n2">اهل الجنه</span>
+            <div id="s2-city"><span class="rule" id="s2-r1"></span><span id="s2-city-t">آبادان</span><span class="rule" id="s2-r2"></span></div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          const tl = gsap.timeline({ paused: true });
+          // Door fills with light; phrase is dark-on-gold inside the arch
+          tl.fromTo("#s2-door-light", { opacity: 0 }, { opacity: 1, duration: 0.7, ease: "power2.out" }, 0.0);
+          tl.fromTo("#s2-ke", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 0.15);
+          tl.set("#s2-ke", { color: "#0b1f3a" }, 0);
+          tl.fromTo("#s2-phrase .big .w", { opacity: 0, scale: 1.6, filter: "blur(12px)" },
+            { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.55, ease: "expo.out", stagger: 0.18 }, 0.45);
+          tl.fromTo("#s2-archwrap", { scale: 1 }, { scale: 1.04, duration: 1.8, ease: "sine.inOut" }, 0);
+          // Hand-off: arch rises and shrinks to crown the name (titlecard-reveal)
+          tl.to("#s2-phrase", { opacity: 0, y: -40, duration: 0.35, ease: "power2.in" }, 1.85);
+          tl.to("#s2-archwrap", { y: -330, scale: 0.62, duration: 0.8, ease: "power3.inOut" }, 1.9);
+          tl.fromTo("#s2-n1", { opacity: 0, y: 70 }, { opacity: 1, y: 0, duration: 0.6, ease: "power4.out" }, 2.35);
+          tl.fromTo("#s2-n2", { opacity: 0, y: 70 }, { opacity: 1, y: 0, duration: 0.6, ease: "power4.out" }, 2.5);
+          tl.fromTo("#s2-r1", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power2.out" }, 2.85);
+          tl.fromTo("#s2-r2", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power2.out" }, 2.85);
+          tl.fromTo("#s2-city-t", { opacity: 0, scale: 1.4 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" }, 2.9);
+          // Push-through exit (viewport-change)
+          tl.fromTo("#s2-world", { scale: 1, opacity: 1, filter: "blur(0px)" },
+            { scale: 1.35, opacity: 0, filter: "blur(10px)", duration: 0.55, ease: "power2.in", immediateRender: false }, 4.45);
+          window.__timelines["s2-open"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="fa">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template id="s1-dawn-template">
+      <style>
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Medium.woff2") format("woff2"); font-weight: 500; }
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Bold.woff2") format("woff2"); font-weight: 700; }
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Black.woff2") format("woff2"); font-weight: 900; }
+        @font-face { font-family: "Lalezar"; src: url("../assets/fonts/Lalezar-Arabic.woff2") format("woff2"); font-weight: 400; }
+        #s1 {
+          position: absolute;
+          inset: 0;
+          direction: rtl;
+          font-family: "Vazirmatn", sans-serif;
+          color: #f4ecdd;
+        }
+        #s1-bloom {
+          position: absolute;
+          left: 90px;
+          top: 420px;
+          width: 900px;
+          height: 900px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(230, 197, 116, 0.55) 0%, rgba(201, 162, 74, 0.18) 38%, rgba(201, 162, 74, 0) 66%);
+        }
+        #s1-arch {
+          position: absolute;
+          left: 280px;
+          top: 560px;
+          width: 520px;
+          height: 760px;
+          overflow: visible;
+        }
+        #s1-line {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 1400px;
+          text-align: center;
+          font-size: 76px;
+          font-weight: 700;
+          letter-spacing: 0;
+        }
+        #s1-line .w {
+          display: inline-block;
+          margin: 0 10px;
+        }
+        #s1-line .gold {
+          color: #e6c574;
+        }
+        #s1-dot {
+          position: absolute;
+          left: 529px;
+          top: 1310px;
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          background: #1fb5a8;
+          box-shadow: 0 0 30px 10px rgba(31, 181, 168, 0.6);
+        }
+      </style>
+      <div id="s1" data-composition-id="s1-dawn" data-width="1080" data-height="1920" data-duration="3">
+        <div id="s1-bloom"></div>
+        <svg id="s1-arch" viewBox="0 0 520 760" aria-hidden="true">
+          <path id="s1-arch-outer" pathLength="1" fill="none" stroke="#1fb5a8" stroke-width="7" stroke-linecap="round"
+            d="M20 760 L20 330 C20 170 150 70 260 10 C370 70 500 170 500 330 L500 760" />
+          <path id="s1-arch-inner" pathLength="1" fill="none" stroke="#c9a24a" stroke-width="3" stroke-linecap="round"
+            d="M62 760 L62 345 C62 205 170 120 260 66 C350 120 458 205 458 345 L458 760" />
+        </svg>
+        <div id="s1-dot"></div>
+        <div id="s1-line">
+          <span class="w">یه</span><span class="w">جایی</span><span class="w">تو</span><span class="w gold">آبادان</span><span class="w">هست…</span>
+        </div>
+      </div>
+      <script>
+        (function () {
+          const tl = gsap.timeline({ paused: true });
+          // Spark rises, then the arch draws itself from the ground up (svg-path-draw)
+          tl.fromTo("#s1-dot", { opacity: 0, scale: 0.2 }, { opacity: 1, scale: 1, duration: 0.35, ease: "power2.out" }, 0.05);
+          tl.to("#s1-dot", { opacity: 0, scale: 2.4, duration: 0.5, ease: "power2.in" }, 0.45);
+          tl.fromTo("#s1-arch-outer", { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.5, ease: "power2.inOut" }, 0.3);
+          tl.fromTo("#s1-arch-inner", { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.4, ease: "power3.inOut" }, 0.55);
+          // Golden dawn blooms behind it (ambient-glow-bloom)
+          tl.fromTo("#s1-bloom", { opacity: 0, scale: 0.55 }, { opacity: 1, scale: 1, duration: 1.4, ease: "sine.out" }, 0.9);
+          tl.fromTo("#s1-arch", { y: 30 }, { y: 0, duration: 3, ease: "none" }, 0);
+          // Line arrives word by word (never per letter — Persian letters must stay joined)
+          tl.fromTo("#s1-line .w", { opacity: 0, y: 40, filter: "blur(10px)" },
+            { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.5, ease: "power3.out", stagger: 0.12 }, 1.25);
+          tl.to("#s1-line", { opacity: 0, y: -30, duration: 0.3, ease: "power2.in" }, 2.68);
+          window.__timelines["s1-dawn"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

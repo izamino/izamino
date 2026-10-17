@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="fa">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template id="s4-learn-template">
+      <style>
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Medium.woff2") format("woff2"); font-weight: 500; }
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Bold.woff2") format("woff2"); font-weight: 700; }
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Black.woff2") format("woff2"); font-weight: 900; }
+        @font-face { font-family: "Lalezar"; src: url("../assets/fonts/Lalezar-Arabic.woff2") format("woff2"); font-weight: 400; }
+        #s4 {
+          position: absolute;
+          inset: 0;
+          direction: rtl;
+          font-family: "Vazirmatn", sans-serif;
+          color: #f4ecdd;
+        }
+        #s4-head {
+          position: absolute;
+          top: 290px;
+          left: 100px;
+          right: 100px;
+        }
+        #s4-head .t {
+          display: block;
+          font-family: "Lalezar", "Vazirmatn", sans-serif;
+          font-size: 120px;
+          line-height: 1.1;
+        }
+        #s4-head .s {
+          display: block;
+          margin-top: 10px;
+          font-size: 44px;
+          font-weight: 700;
+          color: #1fb5a8;
+        }
+        #s4-list {
+          position: absolute;
+          top: 640px;
+          left: 100px;
+          right: 100px;
+          display: flex;
+          flex-direction: column;
+          gap: 40px;
+        }
+        .s4-row {
+          display: flex;
+          align-items: center;
+          gap: 40px;
+          height: 230px;
+          padding: 0 44px;
+          border-radius: 36px;
+          background: rgba(11, 31, 58, 0.72);
+          border: 3px solid rgba(31, 181, 168, 0.55);
+        }
+        .s4-row .ic {
+          flex: 0 0 140px;
+          width: 140px;
+          height: 140px;
+          border-radius: 50%;
+          background: rgba(201, 162, 74, 0.16);
+          border: 3px solid #c9a24a;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .s4-row .ic svg {
+          width: 84px;
+          height: 84px;
+        }
+        .s4-row .tx .k {
+          display: block;
+          font-family: "Lalezar", "Vazirmatn", sans-serif;
+          font-size: 104px;
+          line-height: 1.05;
+          color: #e6c574;
+        }
+        .s4-row .tx .d {
+          display: block;
+          font-size: 40px;
+          font-weight: 500;
+          color: #f4ecdd;
+        }
+        #s4-foot {
+          position: absolute;
+          top: 1480px;
+          left: 0;
+          right: 0;
+          text-align: center;
+          font-size: 42px;
+          font-weight: 700;
+          color: #f4ecdd;
+        }
+        #s4-foot b {
+          color: #1fb5a8;
+          font-weight: 900;
+        }
+      </style>
+      <div id="s4" data-composition-id="s4-learn" data-width="1080" data-height="1920" data-duration="6">
+        <div id="s4-head">
+          <span class="t" id="s4-t">بچه‌ها میان…</span>
+          <span class="s" id="s4-s">آموزش و تربیت نوجوانان</span>
+        </div>
+        <div id="s4-list">
+          <div class="s4-row" id="s4-r1">
+            <div class="ic">
+              <svg viewBox="0 0 84 84" fill="none" stroke="#e6c574" stroke-width="5" stroke-linejoin="round" aria-hidden="true">
+                <path d="M42 22 C32 14 18 14 8 18 L8 66 C18 62 32 62 42 70 C52 62 66 62 76 66 L76 18 C66 14 52 14 42 22 Z" />
+                <path d="M42 22 L42 70" />
+              </svg>
+            </div>
+            <div class="tx"><span class="k">قرآن</span><span class="d">یاد می‌گیرن</span></div>
+          </div>
+          <div class="s4-row" id="s4-r2">
+            <div class="ic">
+              <svg viewBox="0 0 84 84" fill="none" stroke="#e6c574" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M10 16 H74 V58 H40 L24 72 V58 H10 Z" />
+                <path d="M34 30 C34 22 50 22 50 30 C50 37 42 37 42 44" />
+                <circle cx="42" cy="51" r="1.5" fill="#e6c574" />
+              </svg>
+            </div>
+            <div class="tx"><span class="k">احکام</span><span class="d">می‌پرسن</span></div>
+          </div>
+          <div class="s4-row" id="s4-r3">
+            <div class="ic">
+              <svg viewBox="0 0 84 84" fill="none" stroke="#e6c574" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="42" cy="42" r="12" />
+                <path d="M42 10 V20 M42 64 V74 M10 42 H20 M64 42 H74 M19 19 L26 26 M58 58 L65 65 M19 65 L26 58 M58 26 L65 19" />
+              </svg>
+            </div>
+            <div class="tx"><span class="k">مهارت‌آموزی</span><span class="d">یه مهارت تازه دستشون میاد</span></div>
+          </div>
+        </div>
+        <div id="s4-foot">کلاس‌های <b>قرآن</b>، <b>احکام</b> و <b>مهارت‌آموزی</b></div>
+      </div>
+      <script>
+        (function () {
+          const tl = gsap.timeline({ paused: true });
+          tl.fromTo("#s4-t", { opacity: 0, x: -80 }, { opacity: 1, x: 0, duration: 0.55, ease: "power3.out" }, 0.1);
+          tl.fromTo("#s4-s", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, 0.45);
+          // Rows assemble in a cascade on the pops (grid-card-assemble, vertical list)
+          [["#s4-r1", 1.4], ["#s4-r2", 2.4], ["#s4-r3", 3.4]].forEach(([sel, at], i) => {
+            tl.fromTo(sel, { opacity: 0, x: i % 2 ? -260 : 260, scale: 0.92 }, { opacity: 1, x: 0, scale: 1, duration: 0.55, ease: "back.out(1.6)" }, at);
+            tl.fromTo(sel + " .ic", { rotation: -90, scale: 0.4 }, { rotation: 0, scale: 1, duration: 0.6, ease: "back.out(2.2)" }, at + 0.1);
+            tl.fromTo(sel + " .d", { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "none" }, at + 0.3);
+          });
+          tl.fromTo("#s4-foot", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, 4.2);
+          // gentle drift on the list while it holds
+          tl.fromTo("#s4-list", { y: 0 }, { y: -18, duration: 4.5, ease: "sine.inOut" }, 1.0);
+          // Exit: rows slide off staggered
+          tl.to(["#s4-r1", "#s4-r2", "#s4-r3"], { x: -1100, duration: 0.35, ease: "power3.in", stagger: 0.06 }, 5.45);
+          tl.to(["#s4-head", "#s4-foot"], { opacity: 0, duration: 0.3 }, 5.55);
+          window.__timelines["s4-learn"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

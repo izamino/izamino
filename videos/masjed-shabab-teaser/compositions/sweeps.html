@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fa">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template id="sweeps-template">
+      <style>
+        #sweeps-root {
+          position: absolute;
+          inset: 0;
+        }
+      .sweep {
+        position: absolute;
+        left: -10%;
+        width: 120%;
+        height: 220px;
+        top: 0;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .sweep .core {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 104px;
+        height: 6px;
+        background: linear-gradient(90deg, rgba(230, 197, 116, 0), var(--gold-hi) 30%, #fff6dc 50%, var(--gold-hi) 70%, rgba(230, 197, 116, 0));
+        box-shadow: 0 0 24px 6px rgba(230, 197, 116, 0.55);
+      }
+      .sweep .halo {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(60% 50% at 50% 50%, rgba(31, 181, 168, 0.45), rgba(31, 181, 168, 0));
+      }
+      #fade-out {
+        position: absolute;
+        inset: 0;
+        background: var(--deep);
+        opacity: 0;
+      }
+          </style>
+      <div id="sweeps-root" data-composition-id="sweeps" data-width="1080" data-height="1920" data-duration="45">
+        <div class="sweep" id="sw-1"><div class="halo"></div><div class="core"></div></div>
+        <div class="sweep" id="sw-2"><div class="halo"></div><div class="core"></div></div>
+        <div class="sweep" id="sw-3"><div class="halo"></div><div class="core"></div></div>
+        <div class="sweep" id="sw-4"><div class="halo"></div><div class="core"></div></div>
+        <div class="sweep" id="sw-5"><div class="halo"></div><div class="core"></div></div>
+        <div class="sweep" id="sw-6"><div class="halo"></div><div class="core"></div></div>
+        <div class="sweep" id="sw-7"><div class="halo"></div><div class="core"></div></div>
+        <div class="sweep" id="sw-8"><div class="halo"></div><div class="core"></div></div>
+        <div id="fade-out"></div>
+      </div>
+      <script>
+        (function () {
+          const tl = gsap.timeline({ paused: true });
+          // Seam sweeps: a light bar crosses the frame at every scene seam, alternating direction
+          const seams = [3, 8, 14, 20, 25, 30, 35, 40];
+          seams.forEach((s, i) => {
+            const up = i % 2 === 0;
+            const id = "#sw-" + (i + 1);
+            tl.fromTo(id, { y: up ? 1900 : -200, opacity: 0 }, { y: up ? -200 : 1900, opacity: 1, duration: 0.7, ease: "power2.inOut" }, s - 0.35);
+            tl.to(id, { opacity: 0, duration: 0.15, ease: "none" }, s + 0.2);
+          });
+          // Final breath to dark
+          tl.fromTo("#fade-out", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power1.in" }, 44.4);
+          window.__timelines["sweeps"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

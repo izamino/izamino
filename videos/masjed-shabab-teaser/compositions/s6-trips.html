@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fa">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template id="s6-trips-template">
+      <style>
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Medium.woff2") format("woff2"); font-weight: 500; }
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Bold.woff2") format("woff2"); font-weight: 700; }
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Black.woff2") format("woff2"); font-weight: 900; }
+        @font-face { font-family: "Lalezar"; src: url("../assets/fonts/Lalezar-Arabic.woff2") format("woff2"); font-weight: 400; }
+        #s6 {
+          position: absolute;
+          inset: 0;
+          direction: rtl;
+          font-family: "Vazirmatn", sans-serif;
+          color: #f4ecdd;
+        }
+        #s6-head {
+          position: absolute;
+          top: 290px;
+          left: 100px;
+          right: 100px;
+          text-align: right;
+        }
+        #s6-head .s {
+          display: block;
+          font-size: 56px;
+          font-weight: 700;
+          color: #1fb5a8;
+        }
+        #s6-head .t {
+          display: block;
+          font-family: "Lalezar", "Vazirmatn", sans-serif;
+          font-size: 132px;
+          line-height: 1.15;
+        }
+        #s6-map {
+          position: absolute;
+          left: 60px;
+          top: 640px;
+          width: 960px;
+          height: 760px;
+          overflow: visible;
+        }
+        .s6-pin {
+          position: absolute;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          width: 280px;
+          margin-left: -140px;
+        }
+        .s6-pin .tag {
+          display: block;
+          padding: 10px 34px;
+          border-radius: 18px;
+          background: #f4ecdd;
+          color: #0b1f3a;
+          font-size: 50px;
+          font-weight: 900;
+        }
+        .s6-pin .stem {
+          display: block;
+          width: 4px;
+          height: 34px;
+          background: #f4ecdd;
+        }
+        .s6-pin .dot {
+          display: block;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          background: #e6c574;
+          box-shadow: 0 0 0 10px rgba(230, 197, 116, 0.25);
+        }
+        #s6-label {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 1450px;
+          text-align: center;
+          font-size: 50px;
+          font-weight: 900;
+          color: #e6c574;
+        }
+      </style>
+      <div id="s6" data-composition-id="s6-trips" data-width="1080" data-height="1920" data-duration="5">
+        <div id="s6-head">
+          <span class="s" id="s6-s">یه وقتایی هم</span>
+          <span class="t" id="s6-t">کوله‌ها رو می‌بندیم</span>
+        </div>
+        <svg id="s6-map" viewBox="0 0 960 760" aria-hidden="true">
+          <path id="s6-route-bg" fill="none" stroke="rgba(31,181,168,0.25)" stroke-width="18" stroke-linecap="round"
+            d="M860 700 C700 690 640 560 520 540 C380 515 300 600 190 520 C90 450 120 300 260 250 C400 200 520 230 640 140 C700 95 760 80 820 70" />
+          <path id="s6-route" pathLength="1" fill="none" stroke="#1fb5a8" stroke-width="8" stroke-linecap="round"
+            d="M860 700 C700 690 640 560 520 540 C380 515 300 600 190 520 C90 450 120 300 260 250 C400 200 520 230 640 140 C700 95 760 80 820 70" />
+          <circle id="s6-start" cx="860" cy="700" r="18" fill="#1fb5a8" />
+        </svg>
+        <!-- pins positioned at points along the route (map coords + 60/640 offset) -->
+        <div class="s6-pin" id="s6-p1" style="left: 580px; top: 1046px"><span class="tag">زیارت</span><span class="stem"></span><span class="dot"></span></div>
+        <div class="s6-pin" id="s6-p2" style="left: 250px; top: 856px"><span class="tag">طبیعت</span><span class="stem"></span><span class="dot"></span></div>
+        <div class="s6-pin" id="s6-p3" style="left: 700px; top: 646px"><span class="tag">رفاقت</span><span class="stem"></span><span class="dot"></span></div>
+        <div id="s6-label">اردوهای زیارتی و تفریحی</div>
+      </div>
+      <script>
+        (function () {
+          const tl = gsap.timeline({ paused: true });
+          tl.fromTo("#s6-s", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, 0.05);
+          tl.fromTo("#s6-t", { opacity: 0, x: 120 }, { opacity: 1, x: 0, duration: 0.55, ease: "power4.out" }, 0.3);
+          tl.fromTo("#s6-route-bg", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 0.5);
+          tl.fromTo("#s6-start", { scale: 0, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.4, ease: "back.out(3)" }, 0.6);
+          // Route draws itself (svg-path-draw), pins pop as the line reaches them
+          tl.fromTo("#s6-route", { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 2.8, ease: "power1.inOut" }, 0.75);
+          [["#s6-p1", 1.6], ["#s6-p2", 2.6], ["#s6-p3", 3.4]].forEach(([sel, at]) => {
+            tl.fromTo(sel, { y: -60, opacity: 0, scale: 0.6 }, { y: 0, opacity: 1, scale: 1, duration: 0.45, ease: "back.out(2.4)" }, at);
+          });
+          tl.fromTo("#s6-label", { opacity: 0, scale: 1.25 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" }, 3.6);
+          tl.fromTo("#s6", { y: 0 }, { y: -30, duration: 5, ease: "none" }, 0);
+          tl.to(["#s6-head", "#s6-map", ".s6-pin", "#s6-label"], { opacity: 0, duration: 0.3, ease: "power1.in" }, 4.62);
+          window.__timelines["s6-trips"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

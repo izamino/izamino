@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="fa">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template id="s9-endcard-template">
+      <style>
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Medium.woff2") format("woff2"); font-weight: 500; }
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Bold.woff2") format("woff2"); font-weight: 700; }
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Black.woff2") format("woff2"); font-weight: 900; }
+        @font-face { font-family: "Lalezar"; src: url("../assets/fonts/Lalezar-Arabic.woff2") format("woff2"); font-weight: 400; }
+        #s9 {
+          position: absolute;
+          inset: 0;
+          direction: rtl;
+          font-family: "Vazirmatn", sans-serif;
+          color: #f4ecdd;
+        }
+        #s9-bloom {
+          position: absolute;
+          left: 140px;
+          top: 300px;
+          width: 800px;
+          height: 800px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(230, 197, 116, 0.45) 0%, rgba(201, 162, 74, 0.12) 40%, rgba(201, 162, 74, 0) 66%);
+        }
+        /* LOGO SLOT — replace the placeholder emblem SVG with the mosque's real logo:
+           <img src="assets/logo.png" style="width:100%;height:100%;object-fit:contain"> */
+        #s9-logo {
+          position: absolute;
+          left: 340px;
+          top: 300px;
+          width: 400px;
+          height: 400px;
+        }
+        #s9-logo svg {
+          width: 100%;
+          height: 100%;
+          overflow: visible;
+        }
+        #s9-name {
+          position: absolute;
+          left: 40px;
+          right: 40px;
+          top: 760px;
+          text-align: center;
+          font-family: "Lalezar", "Vazirmatn", sans-serif;
+          font-size: 116px;
+          line-height: 1.15;
+          color: #f4ecdd;
+          white-space: nowrap;
+        }
+        #s9-base {
+          position: absolute;
+          left: 40px;
+          right: 40px;
+          top: 925px;
+          text-align: center;
+          font-size: 46px;
+          font-weight: 700;
+          color: #1fb5a8;
+        }
+        #s9-rule {
+          position: absolute;
+          left: 340px;
+          width: 400px;
+          top: 1030px;
+          height: 4px;
+          background: #c9a24a;
+        }
+        #s9-cta {
+          position: absolute;
+          left: 40px;
+          right: 40px;
+          top: 1090px;
+          text-align: center;
+          font-size: 64px;
+          font-weight: 900;
+          color: #f4ecdd;
+        }
+        #s9-pill {
+          position: absolute;
+          left: 150px;
+          width: 780px;
+          top: 1230px;
+          height: 140px;
+          border-radius: 70px;
+          background: rgba(11, 31, 58, 0.8);
+          border: 4px solid #c9a24a;
+          box-shadow: 0 0 50px rgba(201, 162, 74, 0.35);
+          overflow: hidden;
+        }
+        #s9-handle {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          direction: ltr;
+          font-size: 66px;
+          font-weight: 900;
+          color: #e6c574;
+          letter-spacing: 0.01em;
+        }
+        #s9-sheen {
+          position: absolute;
+          top: -20px;
+          left: 0;
+          width: 160px;
+          height: 180px;
+          background: linear-gradient(90deg, rgba(255, 246, 220, 0), rgba(255, 246, 220, 0.45), rgba(255, 246, 220, 0));
+          transform: skewX(-20deg);
+        }
+        #s9-eitaa {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 1400px;
+          text-align: center;
+          font-size: 38px;
+          font-weight: 500;
+          color: #f4ecdd;
+          opacity: 0.85;
+        }
+      </style>
+      <div id="s9" data-composition-id="s9-endcard" data-width="1080" data-height="1920" data-duration="5">
+        <div id="s9-bloom"></div>
+        <div id="s9-logo">
+          <!-- Placeholder emblem (eight-point girih star) — not the official logo -->
+          <svg viewBox="0 0 400 400" aria-hidden="true">
+            <circle id="s9-ring" pathLength="1" cx="200" cy="200" r="190" fill="none" stroke="#1fb5a8" stroke-width="6" />
+            <rect id="s9-sq1" pathLength="1" x="80" y="80" width="240" height="240" fill="none" stroke="#e6c574" stroke-width="7" />
+            <rect id="s9-sq2" pathLength="1" x="80" y="80" width="240" height="240" fill="none" stroke="#e6c574" stroke-width="7" transform="rotate(45 200 200)" />
+            <circle id="s9-core" cx="200" cy="200" r="70" fill="#c9a24a" />
+            <path id="s9-arch" d="M168 250 L168 196 C168 176 186 160 200 150 C214 160 232 176 232 196 L232 250 Z" fill="#0b1f3a" />
+          </svg>
+        </div>
+        <div id="s9-name">مسجد شباب اهل الجنه</div>
+        <div id="s9-base">پایگاه خادم‌الشهدا حاج احمد یلالی</div>
+        <div id="s9-rule"></div>
+        <div id="s9-cta">«به جمع ما در ایتا بپیوندید»</div>
+        <div id="s9-pill"><div id="s9-sheen" data-layout-allow-overflow></div><div id="s9-handle">@Masjed_Shabab</div></div>
+        <div id="s9-eitaa">جستجو در ایتا: Masjed_Shabab</div>
+      </div>
+      <script>
+        (function () {
+          const tl = gsap.timeline({ paused: true });
+          // Logo assembles on the impact (logo-assemble-lockup)
+          tl.fromTo("#s9-bloom", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 1.0, ease: "expo.out" }, 0.0);
+          tl.fromTo("#s9-ring", { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.9, ease: "power3.inOut" }, 0.0);
+          tl.fromTo("#s9-sq1", { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut" }, 0.1);
+          tl.fromTo("#s9-sq2", { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut" }, 0.2);
+          tl.fromTo("#s9-core", { scale: 0, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.5, ease: "back.out(2.5)" }, 0.55);
+          tl.fromTo("#s9-arch", { scale: 0, opacity: 0, transformOrigin: "50% 100%" }, { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(2)" }, 0.75);
+          tl.fromTo("#s9-logo", { rotation: -30, scale: 0.8 }, { rotation: 0, scale: 1, duration: 1.2, ease: "power3.out" }, 0.0);
+          // Lockup text
+          tl.fromTo("#s9-name", { opacity: 0, y: 50, filter: "blur(10px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6, ease: "power3.out" }, 0.85);
+          tl.fromTo("#s9-base", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 1.25);
+          tl.fromTo("#s9-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power2.inOut" }, 1.5);
+          tl.fromTo("#s9-cta", { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.8)" }, 1.75);
+          tl.fromTo("#s9-pill", { opacity: 0, y: 60, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "back.out(1.8)" }, 2.1);
+          tl.fromTo("#s9-sheen", { x: -200 }, { x: 900, duration: 0.9, ease: "power2.inOut" }, 2.7);
+          tl.fromTo("#s9-eitaa", { opacity: 0 }, { opacity: 0.85, duration: 0.5 }, 2.6);
+          // Hold with a slow breath
+          tl.fromTo("#s9-logo", { y: 0 }, { y: -12, duration: 1.6, ease: "sine.inOut", yoyo: true, repeat: 1, immediateRender: false }, 1.2);
+          window.__timelines["s9-endcard"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

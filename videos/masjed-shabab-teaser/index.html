@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Masjed Shabab — Eitaa Teaser</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Vazirmatn";
+        src: url("assets/fonts/Vazirmatn-Light.woff2") format("woff2");
+        font-weight: 300;
+      }
+      @font-face {
+        font-family: "Vazirmatn";
+        src: url("assets/fonts/Vazirmatn-Medium.woff2") format("woff2");
+        font-weight: 500;
+      }
+      @font-face {
+        font-family: "Vazirmatn";
+        src: url("assets/fonts/Vazirmatn-Bold.woff2") format("woff2");
+        font-weight: 700;
+      }
+      @font-face {
+        font-family: "Vazirmatn";
+        src: url("assets/fonts/Vazirmatn-Black.woff2") format("woff2");
+        font-weight: 900;
+      }
+      @font-face {
+        font-family: "Lalezar";
+        src: url("assets/fonts/Lalezar-Arabic.woff2") format("woff2");
+        font-weight: 400;
+      }
+      :root {
+        --deep: #071528;
+        --navy: #0b1f3a;
+        --teal: #1fb5a8;
+        --gold: #c9a24a;
+        --gold-hi: #e6c574;
+        --cream: #f4ecdd;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: var(--deep);
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: "Vazirmatn", sans-serif;
+        color: var(--cream);
+      }
+      [data-composition-id="root"] > div[data-composition-src] {
+        position: absolute;
+        inset: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="root"
+      data-start="0"
+      data-width="1080"
+      data-height="1920"
+      data-duration="45"
+    >
+      <!-- Persistent background (continuity across every scene) -->
+      <div id="el-bg" data-composition-id="bg" data-composition-src="compositions/bg.html"
+        data-start="0" data-duration="45" data-track-index="0" data-width="1080" data-height="1920"></div>
+
+      <!-- Scenes -->
+      <div id="el-s1" data-composition-id="s1-dawn" data-composition-src="compositions/s1-dawn.html"
+        data-start="0" data-duration="3" data-track-index="1" data-width="1080" data-height="1920"></div>
+      <div id="el-s2" data-composition-id="s2-open" data-composition-src="compositions/s2-open.html"
+        data-start="3" data-duration="5" data-track-index="1" data-width="1080" data-height="1920"></div>
+      <div id="el-s3" data-composition-id="s3-rituals" data-composition-src="compositions/s3-rituals.html"
+        data-start="8" data-duration="6" data-track-index="1" data-width="1080" data-height="1920"></div>
+      <div id="el-s4" data-composition-id="s4-learn" data-composition-src="compositions/s4-learn.html"
+        data-start="14" data-duration="6" data-track-index="1" data-width="1080" data-height="1920"></div>
+      <div id="el-s5" data-composition-id="s5-sport" data-composition-src="compositions/s5-sport.html"
+        data-start="20" data-duration="5" data-track-index="1" data-width="1080" data-height="1920"></div>
+      <div id="el-s6" data-composition-id="s6-trips" data-composition-src="compositions/s6-trips.html"
+        data-start="25" data-duration="5" data-track-index="1" data-width="1080" data-height="1920"></div>
+      <div id="el-s7" data-composition-id="s7-serve" data-composition-src="compositions/s7-serve.html"
+        data-start="30" data-duration="5" data-track-index="1" data-width="1080" data-height="1920"></div>
+      <div id="el-s8" data-composition-id="s8-phone" data-composition-src="compositions/s8-phone.html"
+        data-start="35" data-duration="5" data-track-index="1" data-width="1080" data-height="1920"></div>
+      <div id="el-s9" data-composition-id="s9-endcard" data-composition-src="compositions/s9-endcard.html"
+        data-start="40" data-duration="5" data-track-index="1" data-width="1080" data-height="1920"></div>
+
+      <!-- Light-sweep transitions at every scene seam -->
+      <div id="el-sweeps" data-composition-id="sweeps" data-composition-src="compositions/sweeps.html"
+        data-start="0" data-duration="45" data-track-index="2" data-width="1080" data-height="1920"></div>
+
+      <audio id="el-bed" src="assets/audio/teaser-bed.mp3" data-start="0" data-duration="45"
+        data-track-index="10" data-volume="1"></audio>
+    </div>
+
+    <script>
+      window.__timelines["root"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>

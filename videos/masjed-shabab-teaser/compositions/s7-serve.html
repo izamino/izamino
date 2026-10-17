@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="fa">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template id="s7-serve-template">
+      <style>
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Medium.woff2") format("woff2"); font-weight: 500; }
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Bold.woff2") format("woff2"); font-weight: 700; }
+        @font-face { font-family: "Vazirmatn"; src: url("../assets/fonts/Vazirmatn-Black.woff2") format("woff2"); font-weight: 900; }
+        @font-face { font-family: "Lalezar"; src: url("../assets/fonts/Lalezar-Arabic.woff2") format("woff2"); font-weight: 400; }
+        #s7 {
+          position: absolute;
+          inset: 0;
+          direction: rtl;
+          font-family: "Vazirmatn", sans-serif;
+          color: #f4ecdd;
+        }
+        #s7-top {
+          position: absolute;
+          top: 300px;
+          left: 0;
+          right: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+        #s7-l1 {
+          display: block;
+          font-size: 56px;
+          font-weight: 700;
+        }
+        #s7-l2 {
+          display: block;
+          font-family: "Lalezar", "Vazirmatn", sans-serif;
+          font-size: 190px;
+          line-height: 1.15;
+          color: #e6c574;
+        }
+        #s7-tag1 {
+          display: block;
+          margin-top: 6px;
+          padding: 14px 44px;
+          border-radius: 100px;
+          border: 3px solid #1fb5a8;
+          color: #1fb5a8;
+          font-size: 42px;
+          font-weight: 900;
+        }
+        #s7-mid {
+          position: absolute;
+          top: 900px;
+          left: 0;
+          right: 0;
+          text-align: center;
+          font-size: 62px;
+          font-weight: 900;
+        }
+        #s7-mid .w {
+          display: inline-block;
+          margin: 0 8px;
+        }
+        #s7-mid .em {
+          color: #e6c574;
+        }
+        #s7-wall {
+          position: absolute;
+          left: 190px;
+          top: 1070px;
+          width: 700px;
+          height: 330px;
+        }
+        .s7-brick {
+          position: absolute;
+          width: 220px;
+          height: 96px;
+          border-radius: 10px;
+          background: #c9a24a;
+          border: 3px solid #e6c574;
+        }
+        .s7-brick.t {
+          background: #1fb5a8;
+          border-color: #5fd6cb;
+        }
+        #s7-tag2 {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 1450px;
+          text-align: center;
+          font-size: 48px;
+          font-weight: 900;
+          color: #1fb5a8;
+        }
+      </style>
+      <div id="s7" data-composition-id="s7-serve" data-width="1080" data-height="1920" data-duration="5">
+        <div id="s7-top">
+          <span id="s7-l1">هر جا کاری از دستمون بربیاد</span>
+          <span id="s7-l2">آستینا بالاست</span>
+          <span id="s7-tag1">فعالیت‌های جهادی و اجتماعی</span>
+        </div>
+        <div id="s7-mid">
+          <span class="w">حتی</span><span class="w">واسه</span><span class="w em">ساختن</span><span class="w em">خود</span><span class="w em">مسجد</span>
+        </div>
+        <div id="s7-wall">
+          <!-- bottom row -->
+          <div class="s7-brick" style="left: 0; top: 228px"></div>
+          <div class="s7-brick t" style="left: 240px; top: 228px"></div>
+          <div class="s7-brick" style="left: 480px; top: 228px"></div>
+          <!-- middle row (offset) -->
+          <div class="s7-brick t" style="left: 120px; top: 114px"></div>
+          <div class="s7-brick" style="left: 360px; top: 114px"></div>
+          <!-- top -->
+          <div class="s7-brick t" style="left: 240px; top: 0"></div>
+        </div>
+        <div id="s7-tag2">پروژه‌های عمرانی مسجد</div>
+      </div>
+      <script>
+        (function () {
+          const tl = gsap.timeline({ paused: true });
+          tl.fromTo("#s7-l1", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, 0.1);
+          // آستینا بالاست — rises up like rolled sleeves, slams on impact (local 1.0)
+          tl.fromTo("#s7-l2", { y: 220, opacity: 0, scaleY: 1.6 }, { y: 0, opacity: 1, scaleY: 1, duration: 0.4, ease: "power4.out" }, 0.75);
+          tl.fromTo("#s7-l2", { scale: 1 }, { scale: 1.07, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }, 1.0);
+          tl.fromTo("#s7-tag1", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2.2)" }, 1.4);
+          // حتی واسه ساختن خود مسجد — word by word
+          tl.fromTo("#s7-mid .w", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out", stagger: 0.1 }, 2.05);
+          // Bricks drop and stack on the pops (2.6 / 3.0 / 3.4)
+          const bricks = gsap.utils.toArray("#s7-wall .s7-brick");
+          const drops = [2.6, 2.6, 2.6, 3.0, 3.0, 3.4];
+          bricks.forEach((b, i) => {
+            tl.fromTo(b, { y: -520, opacity: 0, rotation: i % 2 ? 8 : -8 },
+              { y: 0, opacity: 1, rotation: 0, duration: 0.38, ease: "bounce.out" }, drops[i] - 0.3 + (i % 3) * 0.05);
+          });
+          tl.fromTo("#s7-tag2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, 3.75);
+          tl.to(["#s7-top", "#s7-mid", "#s7-wall", "#s7-tag2"], { opacity: 0, y: -40, duration: 0.3, ease: "power2.in", stagger: 0.04 }, 4.55);
+          window.__timelines["s7-serve"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>
