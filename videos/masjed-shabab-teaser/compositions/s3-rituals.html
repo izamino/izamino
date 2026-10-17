@@ -27,14 +27,14 @@
           flex-direction: column;
           align-items: center;
           gap: 18px;
-          font-size: 44px;
-          font-weight: 700;
+          font-size: 30px;
+          font-weight: 500;
           color: #1fb5a8;
         }
         #s3-label .rule {
           display: block;
-          width: 260px;
-          height: 3px;
+          width: 120px;
+          height: 2px;
           background: #c9a24a;
         }
         .s3-beat {
@@ -50,90 +50,41 @@
         .s3-word {
           display: block;
           font-family: "Abar", sans-serif;
-          font-weight: 950;
-          font-size: 270px;
+          font-weight: 900;
+          font-size: 150px;
           line-height: 1;
           color: #f4ecdd;
-        }
-        .s3-ghost {
-          position: absolute;
-          left: 0;
-          right: 0;
-          top: 560px;
-          text-align: center;
-          font-family: "Abar", sans-serif;
-          font-weight: 950;
-          font-size: 620px;
-          line-height: 1;
-          color: transparent;
-          -webkit-text-stroke: 2px rgba(31, 181, 168, 0.32);
-          opacity: 0;
-          white-space: nowrap;
-        }
-        #s3-rows {
-          position: absolute;
-          left: 140px;
-          right: 140px;
-          top: 1240px;
-          height: 60px;
-          display: flex;
-          justify-content: space-between;
-        }
-        #s3-rows i {
-          display: block;
-          width: 6px;
-          height: 60px;
-          background: #1fb5a8;
-          border-radius: 3px;
-        }
-        #s3-sparks i {
-          position: absolute;
-          display: block;
-          width: 14px;
-          height: 14px;
-          border-radius: 50%;
-          background: #e6c574;
-          box-shadow: 0 0 18px 4px rgba(230, 197, 116, 0.6);
         }
         #s3-together {
           position: absolute;
           left: 0;
           right: 0;
-          top: 640px;
+          top: 700px;
           display: flex;
           flex-direction: column;
           align-items: center;
+          gap: 18px;
         }
         #s3-together .w {
           display: block;
           font-family: "Abar", sans-serif;
-          font-weight: 950;
-          font-size: 230px;
+          font-weight: 900;
+          font-size: 130px;
           line-height: 1.02;
           color: #e6c574;
         }
         #s3-together .w.mid {
           color: #f4ecdd;
-          font-size: 150px;
+          font-size: 70px;
         }
       </style>
       <div id="s3" data-composition-id="s3-rituals" data-width="1080" data-height="1920" data-duration="6">
         <div id="s3-label"><span id="s3-label-t">مراسم مذهبی، فرهنگی و مناسبتی</span><span class="rule" id="s3-label-r"></span></div>
 
-        <div class="s3-ghost" id="s3-g1">نماز</div>
-        <div class="s3-ghost" id="s3-g2">عزاداری</div>
-        <div class="s3-ghost" id="s3-g3">جشن</div>
-
         <div class="s3-beat" id="s3-b1"><span class="s3-word">نماز</span></div>
         <div class="s3-beat" id="s3-b2"><span class="s3-word">عزاداری</span></div>
         <div class="s3-beat" id="s3-b3"><span class="s3-word">جشن</span></div>
 
-        <div id="s3-rows"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-        <div id="s3-sparks">
-          <i style="left: 170px; top: 700px"></i><i style="left: 880px; top: 650px"></i><i style="left: 250px; top: 1220px"></i>
-          <i style="left: 820px; top: 1260px"></i><i style="left: 520px; top: 600px"></i><i style="left: 960px; top: 980px"></i>
-          <i style="left: 100px; top: 960px"></i><i style="left: 660px; top: 1320px"></i>
-        </div>
 
         <div id="s3-together">
           <span class="w" id="s3-t1">همه</span>
@@ -149,25 +100,15 @@
 
           // Beat 1 — نماز: scale slam with blur, prayer rows rise beneath
           tl.fromTo("#s3-b1", { scale: 2.4, opacity: 0, filter: "blur(18px)" }, { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.45, ease: "expo.out" }, 0.0);
-          tl.fromTo("#s3-g1", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1.05, duration: 1.2, ease: "sine.out" }, 0.0);
-          tl.fromTo("#s3-rows i", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "back.out(2)", stagger: 0.03 }, 0.25);
           tl.to("#s3-b1", { x: 300, opacity: 0, duration: 0.25, ease: "power2.in" }, 1.25);
-          tl.to("#s3-g1", { opacity: 0, duration: 0.25 }, 1.25);
-          tl.to("#s3-rows", { opacity: 0, duration: 0.25 }, 1.25);
 
           // Beat 2 — عزاداری: side snap from the right
           tl.fromTo("#s3-b2", { x: 700, opacity: 0, skewX: -12 }, { x: 0, opacity: 1, skewX: 0, duration: 0.42, ease: "power4.out" }, 1.4);
-          tl.fromTo("#s3-g2", { opacity: 0, x: 120 }, { opacity: 1, x: -60, duration: 1.0, ease: "none" }, 1.4);
           tl.to("#s3-b2", { y: -160, opacity: 0, duration: 0.25, ease: "power2.in" }, 2.45);
-          tl.to("#s3-g2", { opacity: 0, duration: 0.25 }, 2.45);
 
           // Beat 3 — جشن: rise + rotate, golden sparks pop around it
           tl.fromTo("#s3-b3", { y: 260, rotation: -10, opacity: 0 }, { y: 0, rotation: 0, opacity: 1, duration: 0.5, ease: "back.out(1.8)" }, 2.6);
-          tl.fromTo("#s3-g3", { opacity: 0, scale: 1.2 }, { opacity: 1, scale: 1, duration: 0.95, ease: "sine.out" }, 2.6);
-          tl.fromTo("#s3-sparks i", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(3)", stagger: 0.05 }, 2.75);
-          tl.to("#s3-sparks i", { y: -60, opacity: 0, duration: 0.5, ease: "power1.in", stagger: 0.03 }, 3.35);
           tl.to("#s3-b3", { scale: 0.6, opacity: 0, duration: 0.25, ease: "power2.in" }, 3.6);
-          tl.to("#s3-g3", { opacity: 0, duration: 0.25 }, 3.6);
 
           // Payoff — همه با هم (stacked slam, impact at local 4.35)
           tl.fromTo("#s3-t1", { y: -120, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power4.out" }, 3.85);

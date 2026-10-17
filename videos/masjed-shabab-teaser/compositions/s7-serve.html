@@ -30,14 +30,14 @@
         }
         #s7-l1 {
           display: block;
-          font-size: 56px;
-          font-weight: 700;
+          font-size: 36px;
+          font-weight: 500;
         }
         #s7-l2 {
           display: block;
           font-family: "Abar", sans-serif;
-          font-weight: 950;
-          font-size: 140px;
+          font-weight: 900;
+          font-size: 96px;
           white-space: nowrap;
           line-height: 1.15;
           color: #e6c574;
@@ -45,21 +45,21 @@
         #s7-tag1 {
           display: block;
           margin-top: 6px;
-          padding: 14px 44px;
+          padding: 8px 28px;
           border-radius: 100px;
-          border: 3px solid #1fb5a8;
+          border: 2px solid #1fb5a8;
           color: #1fb5a8;
-          font-size: 42px;
-          font-weight: 900;
+          font-size: 28px;
+          font-weight: 700;
         }
         #s7-mid {
           position: absolute;
-          top: 900px;
+          top: 820px;
           left: 0;
           right: 0;
           text-align: center;
-          font-size: 62px;
-          font-weight: 900;
+          font-size: 42px;
+          font-weight: 700;
         }
         #s7-mid .w {
           display: inline-block;
@@ -70,31 +70,30 @@
         }
         #s7-wall {
           position: absolute;
-          left: 190px;
-          top: 1070px;
-          width: 700px;
-          height: 330px;
+          left: 330px;
+          top: 960px;
+          width: 420px;
+          height: 200px;
         }
         .s7-brick {
           position: absolute;
-          width: 220px;
-          height: 96px;
-          border-radius: 10px;
+          width: 130px;
+          height: 56px;
+          border-radius: 6px;
           background: #c9a24a;
-          border: 3px solid #e6c574;
+          border: 0;
         }
         .s7-brick.t {
           background: #1fb5a8;
-          border-color: #5fd6cb;
         }
         #s7-tag2 {
           position: absolute;
           left: 0;
           right: 0;
-          top: 1450px;
+          top: 1210px;
           text-align: center;
-          font-size: 48px;
-          font-weight: 900;
+          font-size: 30px;
+          font-weight: 700;
           color: #1fb5a8;
         }
       </style>
@@ -109,14 +108,14 @@
         </div>
         <div id="s7-wall">
           <!-- bottom row -->
-          <div class="s7-brick" style="left: 0; top: 228px"></div>
-          <div class="s7-brick t" style="left: 240px; top: 228px"></div>
-          <div class="s7-brick" style="left: 480px; top: 228px"></div>
+          <div class="s7-brick" style="left: 0; top: 136px"></div>
+          <div class="s7-brick t" style="left: 145px; top: 136px"></div>
+          <div class="s7-brick" style="left: 290px; top: 136px"></div>
           <!-- middle row (offset) -->
-          <div class="s7-brick t" style="left: 120px; top: 114px"></div>
-          <div class="s7-brick" style="left: 360px; top: 114px"></div>
+          <div class="s7-brick t" style="left: 72px; top: 68px"></div>
+          <div class="s7-brick" style="left: 217px; top: 68px"></div>
           <!-- top -->
-          <div class="s7-brick t" style="left: 240px; top: 0"></div>
+          <div class="s7-brick t" style="left: 145px; top: 0"></div>
         </div>
         <div id="s7-tag2">پروژه‌های عمرانی مسجد</div>
       </div>
@@ -134,7 +133,7 @@
           const bricks = gsap.utils.toArray("#s7-wall .s7-brick");
           const drops = [2.6, 2.6, 2.6, 3.0, 3.0, 3.4];
           bricks.forEach((b, i) => {
-            tl.fromTo(b, { y: -520, opacity: 0, rotation: i % 2 ? 8 : -8 },
+            tl.fromTo(b, { y: -400, opacity: 0, rotation: i % 2 ? 8 : -8 },
               { y: 0, opacity: 1, rotation: 0, duration: 0.38, ease: "bounce.out" }, drops[i] - 0.3 + (i % 3) * 0.05);
           });
           tl.fromTo("#s7-tag2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, 3.75);
