@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>مسجد شباب اهل الجنه آبادان</title>
+<style>
+@font-face{font-family:Vaz;src:url(fonts/Vazirmatn-Regular.woff2);font-weight:400}
+@font-face{font-family:Vaz;src:url(fonts/Vazirmatn-Bold.woff2);font-weight:700}
+@font-face{font-family:Vaz;src:url(fonts/Vazirmatn-Black.woff2);font-weight:900}
+:root{--teal:#2fd3d0;--gold:#e7b84a;--earth:#c9935e;--ink:#120d09}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#000;font-family:Vaz,sans-serif}
+#stage{position:absolute;inset:0;overflow:hidden;background:var(--ink)}
+#shots{position:absolute;inset:0;z-index:0}
+.shot{position:absolute;inset:0;opacity:0;will-change:transform,opacity}
+.shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+/* warm afternoon grade + vignette over all photos */
+#grade{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 55%,rgba(10,5,0,.55) 100%),
+             linear-gradient(180deg,rgba(255,170,90,.06),rgba(120,60,20,.10));mix-blend-mode:multiply}
+#bottomShade{position:absolute;left:0;right:0;bottom:0;height:420px;pointer-events:none;
+  background:linear-gradient(0deg,rgba(12,7,3,.82) 0%,rgba(12,7,3,.45) 45%,rgba(12,7,3,0) 100%)}
+/* section chip, top right */
+#chip{position:absolute;top:84px;right:120px;display:flex;align-items:center;gap:18px;opacity:0}
+#chip .bar{width:6px;height:46px;background:linear-gradient(var(--gold),var(--teal));border-radius:3px}
+#chip .txt{color:#fff;font-weight:700;font-size:34px;text-shadow:0 2px 14px rgba(0,0,0,.6)}
+#chip .num{color:var(--gold);font-weight:900;font-size:26px;letter-spacing:1px}
+/* caption */
+#cap{position:absolute;right:120px;left:120px;bottom:110px;text-align:right;color:#fff;
+  font-weight:700;font-size:54px;line-height:1.6;text-shadow:0 3px 18px rgba(0,0,0,.7)}
+#cap .w{display:inline-block;opacity:0;white-space:pre}
+#capRule{position:absolute;right:120px;bottom:96px;height:4px;width:0;border-radius:2px;
+  background:linear-gradient(270deg,var(--gold),var(--teal))}
+/* title */
+#title{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding-right:140px;opacity:0;
+  background:linear-gradient(270deg,rgba(12,7,3,.78) 0%,rgba(12,7,3,.35) 38%,rgba(12,7,3,0) 60%)}
+#title .k{color:var(--gold);font-weight:700;font-size:40px;margin-bottom:8px}
+#title .t{color:#fff;font-weight:900;font-size:96px;line-height:1.25;text-shadow:0 6px 30px rgba(0,0,0,.6)}
+#title .s{color:var(--teal);font-weight:700;font-size:46px;margin-top:10px}
+/* end card */
+#end{position:absolute;inset:0;opacity:0;background:radial-gradient(ellipse at 50% 42%,#0f3a3c 0%,#081a1c 45%,#030606 100%)}
+#end canvas{position:absolute;inset:0}
+#logo{position:absolute;left:50%;top:150px;width:380px;margin-left:-190px;mix-blend-mode:screen;opacity:0}
+#end .n1{position:absolute;left:0;right:0;top:640px;text-align:center;color:#fff;font-weight:900;font-size:76px;opacity:0}
+#end .n2{position:absolute;left:0;right:0;top:796px;text-align:center;color:var(--gold);font-weight:700;font-size:46px;opacity:0}
+#end .ln{position:absolute;left:50%;top:768px;height:3px;width:0;transform:translateX(-50%);background:linear-gradient(90deg,var(--teal),var(--gold),var(--teal))}
+#fade{position:absolute;inset:0;background:#000;opacity:1;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="shots"></div>
+  <div id="grade"></div>
+  <div id="bottomShade"></div>
+  <div id="title"><div class="k">آبادان</div><div class="t">مسجد شباب<br>اهل الجنه</div><div class="s">مجموعه فرهنگی هنری تفکرناب</div></div>
+  <div id="chip"><span class="num"></span><span class="bar"></span><span class="txt"></span></div>
+  <div id="capRule"></div>
+  <div id="cap"></div>
+  <div id="end">
+    <canvas id="dust" width="1920" height="1080"></canvas>
+    <img id="logo" src="logo.png">
+    <div class="n1">مسجد شباب اهل الجنه آبادان</div>
+    <div class="ln"></div>
+    <div class="n2">مجموعه فرهنگی هنری تفکرناب</div>
+  </div>
+  <div id="fade"></div>
+</div>
+<script>
+// ---------- timeline data ----------
+// shot: [start, end, frame, zoomFrom, zoomTo, panX(px from->to), panY, focusX%, focusY%]
+const X = 0.9; // crossfade seconds
+const SHOTS = [
+  [0,   7.5, '00-03', 1.12,1.02,  40,-20, 0, 0, 50,35],
+  [7.5, 11.5,'00-09', 1.04,1.14, -30, 30, 0, 0, 60,45],
+  [11.5,15.5,'00-11', 1.14,1.04,  30,-30, 0,10, 50,50],
+  [15.5,19.5,'00-17', 1.04,1.12,   0,  0, 0,-10, 50,40],
+  [19.5,23.5,'00-19', 1.12,1.03, -40, 20, 0, 0, 50,45],
+  [23.5,27.5,'00-21', 1.03,1.12,  30,-30, 0, 0, 50,50],
+  [27.5,31.0,'00-23', 1.12,1.04,   0,-30, 0, 0, 75,35],
+  [31.0,34.5,'00-25', 1.04,1.12, -20, 20, 0, 0, 50,40],
+  [34.5,38.0,'00-29', 1.12,1.04,  20,-20, 0, 0, 55,40],
+  [38.0,42.0,'00-33', 1.04,1.12, -30, 30, 0, 0, 50,45],
+  [42.0,46.0,'00-35', 1.12,1.04,  30,-30, 0, 0, 50,40],
+  [46.0,50.5,'00-43', 1.04,1.14,   0,  0, 0,-15, 50,35],
+  [50.5,54.0,'00-45', 1.14,1.04, -40,  0, 0, 0, 50,50],
+  [54.0,58.0,'00-49', 1.04,1.12,  30, 20, 0, 0, 50,45],
+  [58.0,62.5,'00-53', 1.10,1.02, -30,-20, 0, 0, 50,35],
+  [62.5,66.5,'01-01', 1.03,1.13,  60,-60, 0, 0, 40,50],
+  [66.5,70.0,'01-05', 1.12,1.03, -30, 30, 0, 0, 45,45],
+  [70.0,73.5,'01-07', 1.03,1.12,  30,-40, 0, 0, 60,50],
+  [73.5,77.0,'01-11', 1.12,1.03, -20, 20, 0, 0, 40,55],
+  [77.0,80.5,'01-13', 1.03,1.12,  30,-30, 0, 0, 50,50],
+  [80.5,84.0,'01-15', 1.10,1.02,   0,-30, 0, 0, 50,35],
+  [84.0,88.5,'01-19', 1.02,1.14,  20, 0,  0, 0, 30,55],
+];
+const CAPS = [ // new on-screen narration (suggested_narration.txt) — not the original speaker
+  [5.2, 11.3,'اینجا آبادانه؛ جایی که دور هم بودن، از یک جمع ساده شروع می‌شه.'],
+  [12.0,19.2,'بچه‌ها می‌آن، دوست پیدا می‌کنن، بازی می‌کنن و کنار هم یاد می‌گیرن.'],
+  [20.0,30.7,'گاهی توی پارک و فضای سبز، گاهی پای صحبت و گفت‌وگو، و گاهی وسط یک جشن و برنامه جمعی.'],
+  [31.4,41.7,'تصویرهای این جمع، پر از چهره‌های آشناست؛ نوجوان‌ها، خانواده‌ها و کسانی که برای همراهی کنار هم ایستادن.'],
+  [46.6,57.7,'مسجد شباب اهل الجنه، توی این قاب‌ها با همین آدم‌ها دیده می‌شه؛ با دوستی‌ها، برنامه‌ها و لحظه‌هایی که با هم ساخته شده.'],
+  [62.9,73.2,'بعد، تصویر به زمین و محله می‌رسه؛ به گفت‌وگو کنار ماشین‌آلات، آماده‌سازی محوطه و دست‌هایی که وارد کار می‌شن.'],
+  [73.9,80.2,'سازه هنوز در حال ساخته‌شدنه و راه ادامه داره.'],
+  [80.9,88.0,'این روایتِ جمعیه که کنار هم قدم برمی‌داره؛ از همراهی بچه‌های محله تا تلاش برای ساختن یک خانه برای این جمع.'],
+];
+const CHIPS = [
+  [7.6, 31.0,'۰۱','فعالیت کودکان و نوجوانان'],
+  [31.2,46.0,'۰۲','برنامه‌های جمعی و همراهی مردم'],
+  [46.2,58.0,'۰۳','حلقه گفت‌وگو'],
+  [62.6,73.5,'۰۴','زمین و محله'],
+  [73.7,88.0,'۰۵','سازه در حال ساخت'],
+];
+const END_START = 88.0, DURATION = 94;
+
+// ---------- helpers ----------
+const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;          // inOutCubic
+const eout=t=>1-Math.pow(1-t,3);
+const ramp=(t,a,b)=>clamp((t-a)/(b-a));
+function win(t,a,b,fin=.6,fout=.6){return Math.min(eout(ramp(t,a,a+fin)),1-ease(ramp(t,b-fout,b)))}
+
+// ---------- build DOM ----------
+const shotsEl=document.getElementById('shots');
+const shotEls=SHOTS.map(s=>{const d=document.createElement('div');d.className='shot';
+  const im=document.createElement('img');im.src='frames/'+s[2]+'.jpg';im.style.objectPosition=s[9]+'% '+s[10]+'%';
+  d.appendChild(im);shotsEl.appendChild(d);return d;});
+const cap=document.getElementById('cap'),capRule=document.getElementById('capRule');
+let curCap=-1,words=[];
+function setCap(i){if(i===curCap)return;curCap=i;cap.innerHTML='';words=[];
+  if(i<0)return;CAPS[i][2].split(' ').forEach((w,k,arr)=>{const s=document.createElement('span');s.className='w';
+    s.textContent=w+(k<arr.length-1?' ':'');cap.appendChild(s);words.push(s);});}
+const chip=document.getElementById('chip');let curChip=-1;
+const title=document.getElementById('title');
+const end=document.getElementById('end'),logo=document.getElementById('logo');
+const n1=end.querySelector('.n1'),n2=end.querySelector('.n2'),ln=end.querySelector('.ln');
+const fade=document.getElementById('fade');
+// deterministic dust for end card
+const dust=document.getElementById('dust').getContext('2d');
+let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+const P=Array.from({length:90},()=>({x:rnd()*1920,y:rnd()*1080,r:1+rnd()*2.6,v:8+rnd()*22,ph:rnd()*6.28,g:rnd()<.5}));
+
+// ---------- render(t) — every value is a pure function of time ----------
+window.render=function(t){
+  // shots: crossfade overlap X around each boundary
+  SHOTS.forEach((s,i)=>{const [a,b]=s;const el=shotEls[i];
+    const A=i===0?a:a-X/2, B=i===SHOTS.length-1?b+0.6:b+X/2;
+    if(t<A-0.01||t>B+0.01){el.style.opacity=0;el.style.visibility='hidden';return;}
+    el.style.visibility='visible';
+    const op=i===0?1-ease(ramp(t,B-X,B)):Math.min(ease(ramp(t,A,A+X)),i===SHOTS.length-1?1-ease(ramp(t,B-1.2,B)):1-ease(ramp(t,B-X,B)));
+    const p=ease(ramp(t,A,B));
+    const z=lerp(s[3],s[4],p),px=lerp(s[5],s[6],p),py=lerp(s[7],s[8],p);
+    el.style.opacity=op;el.style.zIndex=i;
+    el.style.transformOrigin=s[9]+'% '+s[10]+'%';
+    el.style.transform=`translate(${px}px,${py}px) scale(${z})`;
+  });
+  // opening title
+  const to=win(t,0.8,5.2,1.2,0.9);title.style.opacity=to;
+  title.style.transform=`translateX(${lerp(-24,0,eout(ramp(t,0.8,2.2)))}px)`;
+  // captions: word-by-word soft reveal, RTL order
+  let ci=CAPS.findIndex(c=>t>=c[0]&&t<c[1]);setCap(ci);
+  if(ci>=0){const [a,b]=CAPS[ci];const n=words.length;const span=Math.min(2.4,(b-a)*0.35);
+    const out=1-ease(ramp(t,b-0.6,b));
+    words.forEach((w,k)=>{const st=a+span*k/n;const p=eout(ramp(t,st,st+0.55));
+      w.style.opacity=p*out;w.style.transform=`translateY(${(1-p)*18}px)`;w.style.filter=`blur(${(1-p)*6}px)`;});
+    capRule.style.width=(lerp(0,260,eout(ramp(t,a,a+1.2)))*out)+'px';
+  } else capRule.style.width='0px';
+  // chips
+  const hi=CHIPS.findIndex(c=>t>=c[0]&&t<c[1]);
+  if(hi!==curChip){curChip=hi;if(hi>=0){chip.querySelector('.num').textContent=CHIPS[hi][2];chip.querySelector('.txt').textContent=CHIPS[hi][3];}}
+  if(hi>=0){const [a,b]=CHIPS[hi];const o=win(t,a,b,.7,.6);chip.style.opacity=o;chip.style.transform=`translateX(${(1-eout(ramp(t,a,a+.8)))*-30}px)`;}
+  else chip.style.opacity=0;
+  // end card
+  const eo=ease(ramp(t,END_START,END_START+1.4));end.style.opacity=eo;
+  if(eo>0){const lp=eout(ramp(t,END_START+0.8,END_START+2.6));logo.style.opacity=lp;
+    logo.style.transform=`translateY(${(1-lp)*30}px) scale(${lerp(.92,1,lp)+0.02*ramp(t,END_START,DURATION)})`;
+    const a1=eout(ramp(t,END_START+1.8,END_START+3.0));n1.style.opacity=a1;n1.style.transform=`translateY(${(1-a1)*20}px)`;
+    ln.style.width=lerp(0,520,ease(ramp(t,END_START+2.4,END_START+3.6)))+'px';
+    const a2=eout(ramp(t,END_START+2.8,END_START+4.0));n2.style.opacity=a2;n2.style.transform=`translateY(${(1-a2)*20}px)`;
+    dust.clearRect(0,0,1920,1080);const tt=t-END_START;
+    P.forEach(p=>{const y=((p.y-p.v*tt)%1080+1080)%1080;const x=p.x+Math.sin(tt*.6+p.ph)*14;
+      dust.globalAlpha=.25+.35*Math.sin(tt*1.3+p.ph)**2;dust.fillStyle=p.g?'#e7b84a':'#2fd3d0';
+      dust.beginPath();dust.arc(x,y,p.r,0,6.283);dust.fill();});
+  }
+  // global fade in/out
+  fade.style.opacity=Math.max(1-ease(ramp(t,0,1.0)),ease(ramp(t,DURATION-1.4,DURATION)));
+};
+window.DURATION=DURATION;
+document.fonts.ready.then(()=>{window.__ready=true;render(0)});
+</script>
+</body>
+</html>
