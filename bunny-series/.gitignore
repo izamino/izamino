@@ -6,3 +6,5 @@ out/*.wav
 out/*.txt
 out/queue.sh
 out/ep*f/
+.tmp/
+dist/
