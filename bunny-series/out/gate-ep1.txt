@@ -1,0 +1,1779 @@
+QUALITY GATE   film "ep1"   adapter "html-player"
+a single self-contained HTML file that plays the film in any browser, offline
+ready: playwright@1.63.0, playwright default, headless: /opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
+
+1. DETERMINISM  the same frame, drawn two different ways, is the same frame
+----------------------------------------------------------
+spectrum harp: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  harp/E1_l2_rr1.flac | -11.34 | -2.10
+  harp/G1_l1_rr1.flac | -7.16 | 5.38
+  harp/G1_l2_rr1.flac | -7.81 | 3.27
+  harp/B1_l1_rr1.flac | -11.04 | 1.27
+  harp/B1_l2_rr1.flac | -11.60 | 0.14
+  harp/D2_l1_rr1.flac | -9.74 | 6.62
+  harp/D2_l2_rr1.flac | -9.74 | 5.20
+  harp/F2_l1_rr1.flac | -11.81 | -4.16
+  harp/F2_l2_rr1.flac | -9.36 | -3.58
+  harp/A2_l1_rr1.flac | -11.45 | -3.28
+  harp/A2_l2_rr1.flac | -11.08 | -5.77
+  harp/C3_l1_rr1.flac | -6.43 | 0.90
+  harp/C3_l2_rr1.flac | -7.38 | -1.27
+  harp/E3_l1_rr1.flac | -6.53 | 0.81
+  harp/E3_l2_rr1.flac | -5.86 | -1.79
+  harp/G3_l1_rr1.flac | -10.52 | -5.10
+  harp/G3_l2_rr1.flac | -7.61 | -3.28
+  harp/B3_l1_rr1.flac | -10.85 | 1.40
+  harp/B3_l2_rr1.flac | -8.88 | 2.65
+  harp/D4_l1_rr1.flac | -6.60 | -3.67
+  harp/D4_l2_rr1.flac | -5.58 | -3.57
+  harp/F4_l1_rr1.flac | -6.71 | 0.14
+  harp/F4_l2_rr1.flac | -6.52 | -2.88
+  harp/A4_l1_rr1.flac | -3.96 | 1.15
+  harp/A4_l2_rr1.flac | -3.51 | 1.02
+  harp/C5_l1_rr1.flac | -2.67 | 0.47
+  harp/C5_l2_rr1.flac | -2.32 | 0.35
+  harp/E5_l1_rr1.flac | -1.22 | 3.25
+  harp/E5_l2_rr1.flac | -1.06 | 1.40
+  harp/G5_l1_rr1.flac | -0.75 | 3.29
+  harp/G5_l2_rr1.flac | -0.63 | 0.47
+  harp/B5_l1_rr1.flac | -0.36 | 7.19
+  harp/B5_l2_rr1.flac | -0.71 | 5.03
+  harp/D6_l1_rr1.flac | -0.39 | 7.09
+  harp/D6_l2_rr1.flac | -0.33 | 4.85
+  harp/F6_l1_rr1.flac | -0.31 | 16.94
+  harp/F6_l2_rr1.flac | -0.49 | 14.15
+  harp/A6_l1_rr1.flac | -0.56 | 14.07
+  harp/A6_l2_rr1.flac | -0.46 | 15.75
+  harp/B6_l1_rr1.flac | -0.46 | 19.34
+  harp/B6_l2_rr1.flac | -0.39 | 16.31
+  harp/D7_l1_rr1.flac | -1.48 | 12.33
+  harp/D7_l2_rr1.flac | -0.85 | 9.36
+  harp/F7_l1_rr1.flac | -0.82 | 20.80
+  harp/F7_l2_rr1.flac | -0.90 | 18.18
+calibration harp: median trim -3.29 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  harp/E1_l2_rr1.flac | 2 | -51.57 | -42.31 | 9.26 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l1_rr1.flac | 1 | -73.09 | -53.16 | 19.92 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l2_rr1.flac | 2 | -52.96 | -42.19 | 10.77 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/B1_l1_rr1.flac | 1 | -58.90 | -55.61 | 3.29 | 3.29 | 6.58
+  harp/B1_l2_rr1.flac | 2 | -45.73 | -41.60 | 4.14 | 4.14 | 7.43
+  harp/D2_l1_rr1.flac | 1 | -58.67 | -53.87 | 4.80 | 4.80 | 8.09
+  harp/D2_l2_rr1.flac | 2 | -43.79 | -41.23 | 2.56 | 2.56 | 5.86
+  harp/F2_l1_rr1.flac | 1 | -56.92 | -56.33 | 0.59 | 0.59 | 3.88
+  harp/F2_l2_rr1.flac | 2 | -46.94 | -44.68 | 2.25 | 2.25 | 5.55
+  harp/A2_l1_rr1.flac | 1 | -51.40 | -56.50 | -5.10 | -5.10 | -1.81
+  harp/A2_l2_rr1.flac | 2 | -43.15 | -43.11 | 0.03 | 0.03 | 3.33
+  harp/C3_l1_rr1.flac | 1 | -55.06 | -55.58 | -0.52 | -0.52 | 2.77
+  harp/C3_l2_rr1.flac | 2 | -41.61 | -44.44 | -2.84 | -2.84 | 0.45
+  harp/E3_l1_rr1.flac | 1 | -53.69 | -56.99 | -3.29 | -3.29 | 0.00
+  harp/E3_l2_rr1.flac | 2 | -47.59 | -45.66 | 1.93 | 1.93 | 5.22
+  harp/G3_l1_rr1.flac | 1 | -45.43 | -54.96 | -9.53 | -9.53 | -6.24 | FLAG applied >9 dB (includes instrument trim)
+  harp/G3_l2_rr1.flac | 2 | -40.12 | -43.42 | -3.30 | -3.30 | -0.00
+  harp/B3_l1_rr1.flac | 1 | -47.28 | -55.11 | -7.83 | -7.83 | -4.54
+  harp/B3_l2_rr1.flac | 2 | -44.81 | -42.71 | 2.11 | 2.11 | 5.40
+  harp/D4_l1_rr1.flac | 1 | -47.76 | -58.66 | -10.90 | -10.90 | -7.61 | FLAG applied >9 dB (includes instrument trim)
+  harp/D4_l2_rr1.flac | 2 | -42.62 | -45.52 | -2.90 | -2.90 | 0.39
+  harp/F4_l1_rr1.flac | 1 | -43.80 | -56.21 | -12.41 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/F4_l2_rr1.flac | 2 | -40.29 | -45.40 | -5.11 | -5.11 | -1.82
+  harp/A4_l1_rr1.flac | 1 | -48.29 | -61.60 | -13.31 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/A4_l2_rr1.flac | 2 | -42.96 | -47.68 | -4.72 | -4.72 | -1.43
+  harp/C5_l1_rr1.flac | 1 | -48.74 | -60.10 | -11.36 | -11.36 | -8.07 | FLAG applied >9 dB (includes instrument trim)
+  harp/C5_l2_rr1.flac | 2 | -43.74 | -45.90 | -2.17 | -2.17 | 1.13
+  harp/E5_l1_rr1.flac | 1 | -45.39 | -63.62 | -18.23 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/E5_l2_rr1.flac | 2 | -41.94 | -49.36 | -7.42 | -7.42 | -4.13
+  harp/G5_l1_rr1.flac | 1 | -55.57 | -63.86 | -8.30 | -8.30 | -5.00
+  harp/G5_l2_rr1.flac | 2 | -51.54 | -48.78 | 2.76 | 2.76 | 6.05
+  harp/B5_l1_rr1.flac | 1 | -52.48 | -65.21 | -12.73 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/B5_l2_rr1.flac | 2 | -53.34 | -52.57 | 0.77 | 0.77 | 4.06
+  harp/D6_l1_rr1.flac | 1 | -52.83 | -65.59 | -12.76 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/D6_l2_rr1.flac | 2 | -45.90 | -53.03 | -7.14 | -7.14 | -3.84
+  harp/F6_l1_rr1.flac | 1 | -59.53 | -66.35 | -6.82 | -6.82 | -3.53
+  harp/F6_l2_rr1.flac | 2 | -49.03 | -53.76 | -4.73 | -4.73 | -1.44
+  harp/A6_l1_rr1.flac | 1 | -58.38 | -66.70 | -8.31 | -8.31 | -5.02
+  harp/A6_l2_rr1.flac | 2 | -52.90 | -54.40 | -1.50 | -1.50 | 1.79
+  harp/B6_l1_rr1.flac | 1 | -61.85 | -67.03 | -5.18 | -5.18 | -1.89
+  harp/B6_l2_rr1.flac | 2 | -48.08 | -54.67 | -6.59 | -6.59 | -3.29
+  harp/D7_l1_rr1.flac | 1 | -78.67 | -67.37 | 11.30 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/D7_l2_rr1.flac | 2 | -54.22 | -54.73 | -0.52 | -0.52 | 2.78
+  harp/F7_l1_rr1.flac | 1 | -74.73 | -67.45 | 7.29 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/F7_l2_rr1.flac | 2 | -50.99 | -54.94 | -3.95 | -3.95 | -0.65
+spectrum vibes: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  vibes/F3_l1_rr1.flac | -0.50 | 17.87
+  vibes/F3_l2_rr1.flac | -0.22 | 18.14
+  vibes/F3_l3_rr1.flac | -0.25 | 18.09
+  vibes/A3_l1_rr1.flac | -6.97 | 7.44
+  vibes/A3_l2_rr1.flac | -0.46 | 13.94
+  vibes/A3_l3_rr1.flac | -0.45 | 13.93
+  vibes/C4_l1_rr2.flac | -11.54 | 0.05
+  vibes/C4_l2_rr1.flac | -3.23 | 8.36
+  vibes/C4_l3_rr1.flac | -1.44 | 10.14
+  vibes/E4_l1_rr2.flac | -8.00 | -0.02
+  vibes/E4_l2_rr1.flac | -4.97 | 3.01
+  vibes/E4_l3_rr1.flac | -4.28 | 3.70
+  vibes/G4_l1_rr1.flac | -5.63 | -0.02
+  vibes/G4_l2_rr1.flac | -5.31 | 0.30
+  vibes/G4_l3_rr1.flac | -5.11 | 0.50
+  vibes/B4_l1_rr1.flac | -3.12 | 0.01
+  vibes/B4_l2_rr1.flac | -3.09 | 0.03
+  vibes/B4_l3_rr1.flac | -2.54 | 0.59
+  vibes/D5_l1_rr1.flac | -1.83 | -0.00
+  vibes/D5_l2_rr1.flac | -1.82 | 0.01
+  vibes/D5_l3_rr1.flac | -1.83 | 0.00
+  vibes/F5_l1_rr1.flac | -1.01 | -0.00
+  vibes/F5_l2_rr1.flac | -1.01 | -0.00
+  vibes/F5_l3_rr1.flac | -1.15 | -0.14
+  vibes/A5_l1_rr1.flac | -0.43 | 0.00
+  vibes/A5_l2_rr1.flac | -0.43 | 0.00
+  vibes/A5_l3_rr1.flac | -0.45 | -0.02
+  vibes/C6_l1_rr1.flac | -0.23 | 0.00
+  vibes/C6_l2_rr1.flac | -0.23 | -0.00
+  vibes/C6_l3_rr1.flac | -0.24 | -0.01
+  vibes/E6_l1_rr1.flac | -0.12 | -0.00
+  vibes/E6_l2_rr1.flac | -0.12 | 0.00
+  vibes/E6_l3_rr1.flac | -0.13 | -0.01
+calibration vibes: median trim 1.82 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  vibes/F3_l1_rr1.flac | 1 | -71.38 | -47.00 | 24.38 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/F3_l2_rr1.flac | 2 | -45.79 | -35.07 | 10.72 | 10.72 | 8.90 | FLAG applied >9 dB (includes instrument trim)
+  vibes/F3_l3_rr1.flac | 3 | -35.88 | -29.52 | 6.36 | 6.36 | 4.54
+  vibes/A3_l1_rr1.flac | 1 | -61.21 | -48.58 | 12.62 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/A3_l2_rr1.flac | 2 | -41.37 | -36.65 | 4.72 | 4.72 | 2.90
+  vibes/A3_l3_rr1.flac | 3 | -32.91 | -31.10 | 1.81 | 1.81 | -0.01
+  vibes/C4_l1_rr2.flac | 1 | -47.45 | -46.71 | 0.74 | 0.74 | -1.08
+  vibes/C4_l2_rr1.flac | 2 | -45.14 | -34.78 | 10.36 | 10.36 | 8.54 | FLAG applied >9 dB (includes instrument trim)
+  vibes/C4_l3_rr1.flac | 3 | -35.70 | -29.23 | 6.47 | 6.47 | 4.65
+  vibes/E4_l1_rr2.flac | 1 | -45.98 | -50.45 | -4.47 | -4.47 | -6.29
+  vibes/E4_l2_rr1.flac | 2 | -41.87 | -37.56 | 4.30 | 4.30 | 2.48
+  vibes/E4_l3_rr1.flac | 3 | -38.15 | -32.01 | 6.14 | 6.14 | 4.32
+  vibes/G4_l1_rr1.flac | 1 | -50.00 | -51.62 | -1.62 | -1.62 | -3.44
+  vibes/G4_l2_rr1.flac | 2 | -45.54 | -37.25 | 8.30 | 8.30 | 6.48
+  vibes/G4_l3_rr1.flac | 3 | -40.32 | -31.70 | 8.62 | 8.62 | 6.80
+  vibes/B4_l1_rr1.flac | 1 | -52.78 | -49.24 | 3.54 | 3.54 | 1.72
+  vibes/B4_l2_rr1.flac | 2 | -42.08 | -37.31 | 4.77 | 4.77 | 2.95
+  vibes/B4_l3_rr1.flac | 3 | -36.82 | -31.76 | 5.06 | 5.06 | 3.24
+  vibes/D5_l1_rr1.flac | 1 | -48.80 | -69.33 | -20.53 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/D5_l2_rr1.flac | 2 | -38.15 | -38.23 | -0.08 | -0.08 | -1.89
+  vibes/D5_l3_rr1.flac | 3 | -30.71 | -32.68 | -1.97 | -1.97 | -3.79
+  vibes/F5_l1_rr1.flac | 1 | -49.82 | -50.04 | -0.22 | -0.22 | -2.04
+  vibes/F5_l2_rr1.flac | 2 | -43.37 | -38.11 | 5.26 | 5.26 | 3.44
+  vibes/F5_l3_rr1.flac | 3 | -31.28 | -32.56 | -1.28 | -1.28 | -3.10
+  vibes/A5_l1_rr1.flac | 1 | -56.41 | -51.13 | 5.29 | 5.29 | 3.47
+  vibes/A5_l2_rr1.flac | 2 | -40.91 | -39.09 | 1.82 | 1.82 | 0.00
+  vibes/A5_l3_rr1.flac | 3 | -34.25 | -33.54 | 0.71 | 0.71 | -1.11
+  vibes/C6_l1_rr1.flac | 1 | -51.34 | -74.53 | -23.19 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/C6_l2_rr1.flac | 2 | -39.52 | -40.02 | -0.50 | -0.50 | -2.32
+  vibes/C6_l3_rr1.flac | 3 | -32.04 | -34.48 | -2.44 | -2.44 | -4.26
+  vibes/E6_l1_rr1.flac | 1 | -57.27 | -57.49 | -0.22 | -0.22 | -2.04
+  vibes/E6_l2_rr1.flac | 2 | -38.49 | -40.28 | -1.79 | -1.79 | -3.61
+  vibes/E6_l3_rr1.flac | 3 | -30.64 | -34.73 | -4.10 | -4.10 | -5.92
+voices   recordings: lead (harp), counter (vibes); modeled: chords (strings), bass (bass), kick (kick), snare (snare), ghost (snare), hat (hat), perc (hat)
+spectrum harp: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  harp/E1_l2_rr1.flac | -11.34 | -2.10
+  harp/G1_l1_rr1.flac | -7.16 | 5.38
+  harp/G1_l2_rr1.flac | -7.81 | 3.27
+  harp/B1_l1_rr1.flac | -11.04 | 1.27
+  harp/B1_l2_rr1.flac | -11.60 | 0.14
+  harp/D2_l1_rr1.flac | -9.74 | 6.62
+  harp/D2_l2_rr1.flac | -9.74 | 5.20
+  harp/F2_l1_rr1.flac | -11.81 | -4.16
+  harp/F2_l2_rr1.flac | -9.36 | -3.58
+  harp/A2_l1_rr1.flac | -11.45 | -3.28
+  harp/A2_l2_rr1.flac | -11.08 | -5.77
+  harp/C3_l1_rr1.flac | -6.43 | 0.90
+  harp/C3_l2_rr1.flac | -7.38 | -1.27
+  harp/E3_l1_rr1.flac | -6.53 | 0.81
+  harp/E3_l2_rr1.flac | -5.86 | -1.79
+  harp/G3_l1_rr1.flac | -10.52 | -5.10
+  harp/G3_l2_rr1.flac | -7.61 | -3.28
+  harp/B3_l1_rr1.flac | -10.85 | 1.40
+  harp/B3_l2_rr1.flac | -8.88 | 2.65
+  harp/D4_l1_rr1.flac | -6.60 | -3.67
+  harp/D4_l2_rr1.flac | -5.58 | -3.57
+  harp/F4_l1_rr1.flac | -6.71 | 0.14
+  harp/F4_l2_rr1.flac | -6.52 | -2.88
+  harp/A4_l1_rr1.flac | -3.96 | 1.15
+  harp/A4_l2_rr1.flac | -3.51 | 1.02
+  harp/C5_l1_rr1.flac | -2.67 | 0.47
+  harp/C5_l2_rr1.flac | -2.32 | 0.35
+  harp/E5_l1_rr1.flac | -1.22 | 3.25
+  harp/E5_l2_rr1.flac | -1.06 | 1.40
+  harp/G5_l1_rr1.flac | -0.75 | 3.29
+  harp/G5_l2_rr1.flac | -0.63 | 0.47
+  harp/B5_l1_rr1.flac | -0.36 | 7.19
+  harp/B5_l2_rr1.flac | -0.71 | 5.03
+  harp/D6_l1_rr1.flac | -0.39 | 7.09
+  harp/D6_l2_rr1.flac | -0.33 | 4.85
+  harp/F6_l1_rr1.flac | -0.31 | 16.94
+  harp/F6_l2_rr1.flac | -0.49 | 14.15
+  harp/A6_l1_rr1.flac | -0.56 | 14.07
+  harp/A6_l2_rr1.flac | -0.46 | 15.75
+  harp/B6_l1_rr1.flac | -0.46 | 19.34
+  harp/B6_l2_rr1.flac | -0.39 | 16.31
+  harp/D7_l1_rr1.flac | -1.48 | 12.33
+  harp/D7_l2_rr1.flac | -0.85 | 9.36
+  harp/F7_l1_rr1.flac | -0.82 | 20.80
+  harp/F7_l2_rr1.flac | -0.90 | 18.18
+calibration harp: median trim -3.29 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  harp/E1_l2_rr1.flac | 2 | -51.57 | -42.31 | 9.26 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l1_rr1.flac | 1 | -73.09 | -53.16 | 19.92 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l2_rr1.flac | 2 | -52.96 | -42.19 | 10.77 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/B1_l1_rr1.flac | 1 | -58.90 | -55.61 | 3.29 | 3.29 | 6.58
+  harp/B1_l2_rr1.flac | 2 | -45.73 | -41.60 | 4.14 | 4.14 | 7.43
+  harp/D2_l1_rr1.flac | 1 | -58.67 | -53.87 | 4.80 | 4.80 | 8.09
+  harp/D2_l2_rr1.flac | 2 | -43.79 | -41.23 | 2.56 | 2.56 | 5.86
+  harp/F2_l1_rr1.flac | 1 | -56.92 | -56.33 | 0.59 | 0.59 | 3.88
+  harp/F2_l2_rr1.flac | 2 | -46.94 | -44.68 | 2.25 | 2.25 | 5.55
+  harp/A2_l1_rr1.flac | 1 | -51.40 | -56.50 | -5.10 | -5.10 | -1.81
+  harp/A2_l2_rr1.flac | 2 | -43.15 | -43.11 | 0.03 | 0.03 | 3.33
+  harp/C3_l1_rr1.flac | 1 | -55.06 | -55.58 | -0.52 | -0.52 | 2.77
+  harp/C3_l2_rr1.flac | 2 | -41.61 | -44.44 | -2.84 | -2.84 | 0.45
+  harp/E3_l1_rr1.flac | 1 | -53.69 | -56.99 | -3.29 | -3.29 | 0.00
+  harp/E3_l2_rr1.flac | 2 | -47.59 | -45.66 | 1.93 | 1.93 | 5.22
+  harp/G3_l1_rr1.flac | 1 | -45.43 | -54.96 | -9.53 | -9.53 | -6.24 | FLAG applied >9 dB (includes instrument trim)
+  harp/G3_l2_rr1.flac | 2 | -40.12 | -43.42 | -3.30 | -3.30 | -0.00
+  harp/B3_l1_rr1.flac | 1 | -47.28 | -55.11 | -7.83 | -7.83 | -4.54
+  harp/B3_l2_rr1.flac | 2 | -44.81 | -42.71 | 2.11 | 2.11 | 5.40
+  harp/D4_l1_rr1.flac | 1 | -47.76 | -58.66 | -10.90 | -10.90 | -7.61 | FLAG applied >9 dB (includes instrument trim)
+  harp/D4_l2_rr1.flac | 2 | -42.62 | -45.52 | -2.90 | -2.90 | 0.39
+  harp/F4_l1_rr1.flac | 1 | -43.80 | -56.21 | -12.41 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/F4_l2_rr1.flac | 2 | -40.29 | -45.40 | -5.11 | -5.11 | -1.82
+  harp/A4_l1_rr1.flac | 1 | -48.29 | -61.60 | -13.31 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/A4_l2_rr1.flac | 2 | -42.96 | -47.68 | -4.72 | -4.72 | -1.43
+  harp/C5_l1_rr1.flac | 1 | -48.74 | -60.10 | -11.36 | -11.36 | -8.07 | FLAG applied >9 dB (includes instrument trim)
+  harp/C5_l2_rr1.flac | 2 | -43.74 | -45.90 | -2.17 | -2.17 | 1.13
+  harp/E5_l1_rr1.flac | 1 | -45.39 | -63.62 | -18.23 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/E5_l2_rr1.flac | 2 | -41.94 | -49.36 | -7.42 | -7.42 | -4.13
+  harp/G5_l1_rr1.flac | 1 | -55.57 | -63.86 | -8.30 | -8.30 | -5.00
+  harp/G5_l2_rr1.flac | 2 | -51.54 | -48.78 | 2.76 | 2.76 | 6.05
+  harp/B5_l1_rr1.flac | 1 | -52.48 | -65.21 | -12.73 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/B5_l2_rr1.flac | 2 | -53.34 | -52.57 | 0.77 | 0.77 | 4.06
+  harp/D6_l1_rr1.flac | 1 | -52.83 | -65.59 | -12.76 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/D6_l2_rr1.flac | 2 | -45.90 | -53.03 | -7.14 | -7.14 | -3.84
+  harp/F6_l1_rr1.flac | 1 | -59.53 | -66.35 | -6.82 | -6.82 | -3.53
+  harp/F6_l2_rr1.flac | 2 | -49.03 | -53.76 | -4.73 | -4.73 | -1.44
+  harp/A6_l1_rr1.flac | 1 | -58.38 | -66.70 | -8.31 | -8.31 | -5.02
+  harp/A6_l2_rr1.flac | 2 | -52.90 | -54.40 | -1.50 | -1.50 | 1.79
+  harp/B6_l1_rr1.flac | 1 | -61.85 | -67.03 | -5.18 | -5.18 | -1.89
+  harp/B6_l2_rr1.flac | 2 | -48.08 | -54.67 | -6.59 | -6.59 | -3.29
+  harp/D7_l1_rr1.flac | 1 | -78.67 | -67.37 | 11.30 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/D7_l2_rr1.flac | 2 | -54.22 | -54.73 | -0.52 | -0.52 | 2.78
+  harp/F7_l1_rr1.flac | 1 | -74.73 | -67.45 | 7.29 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/F7_l2_rr1.flac | 2 | -50.99 | -54.94 | -3.95 | -3.95 | -0.65
+spectrum vibes: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  vibes/F3_l1_rr1.flac | -0.50 | 17.87
+  vibes/F3_l2_rr1.flac | -0.22 | 18.14
+  vibes/F3_l3_rr1.flac | -0.25 | 18.09
+  vibes/A3_l1_rr1.flac | -6.97 | 7.44
+  vibes/A3_l2_rr1.flac | -0.46 | 13.94
+  vibes/A3_l3_rr1.flac | -0.45 | 13.93
+  vibes/C4_l1_rr2.flac | -11.54 | 0.05
+  vibes/C4_l2_rr1.flac | -3.23 | 8.36
+  vibes/C4_l3_rr1.flac | -1.44 | 10.14
+  vibes/E4_l1_rr2.flac | -8.00 | -0.02
+  vibes/E4_l2_rr1.flac | -4.97 | 3.01
+  vibes/E4_l3_rr1.flac | -4.28 | 3.70
+  vibes/G4_l1_rr1.flac | -5.63 | -0.02
+  vibes/G4_l2_rr1.flac | -5.31 | 0.30
+  vibes/G4_l3_rr1.flac | -5.11 | 0.50
+  vibes/B4_l1_rr1.flac | -3.12 | 0.01
+  vibes/B4_l2_rr1.flac | -3.09 | 0.03
+  vibes/B4_l3_rr1.flac | -2.54 | 0.59
+  vibes/D5_l1_rr1.flac | -1.83 | -0.00
+  vibes/D5_l2_rr1.flac | -1.82 | 0.01
+  vibes/D5_l3_rr1.flac | -1.83 | 0.00
+  vibes/F5_l1_rr1.flac | -1.01 | -0.00
+  vibes/F5_l2_rr1.flac | -1.01 | -0.00
+  vibes/F5_l3_rr1.flac | -1.15 | -0.14
+  vibes/A5_l1_rr1.flac | -0.43 | 0.00
+  vibes/A5_l2_rr1.flac | -0.43 | 0.00
+  vibes/A5_l3_rr1.flac | -0.45 | -0.02
+  vibes/C6_l1_rr1.flac | -0.23 | 0.00
+  vibes/C6_l2_rr1.flac | -0.23 | -0.00
+  vibes/C6_l3_rr1.flac | -0.24 | -0.01
+  vibes/E6_l1_rr1.flac | -0.12 | -0.00
+  vibes/E6_l2_rr1.flac | -0.12 | 0.00
+  vibes/E6_l3_rr1.flac | -0.13 | -0.01
+calibration vibes: median trim 1.82 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  vibes/F3_l1_rr1.flac | 1 | -71.38 | -47.00 | 24.38 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/F3_l2_rr1.flac | 2 | -45.79 | -35.07 | 10.72 | 10.72 | 8.90 | FLAG applied >9 dB (includes instrument trim)
+  vibes/F3_l3_rr1.flac | 3 | -35.88 | -29.52 | 6.36 | 6.36 | 4.54
+  vibes/A3_l1_rr1.flac | 1 | -61.21 | -48.58 | 12.62 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/A3_l2_rr1.flac | 2 | -41.37 | -36.65 | 4.72 | 4.72 | 2.90
+  vibes/A3_l3_rr1.flac | 3 | -32.91 | -31.10 | 1.81 | 1.81 | -0.01
+  vibes/C4_l1_rr2.flac | 1 | -47.45 | -46.71 | 0.74 | 0.74 | -1.08
+  vibes/C4_l2_rr1.flac | 2 | -45.14 | -34.78 | 10.36 | 10.36 | 8.54 | FLAG applied >9 dB (includes instrument trim)
+  vibes/C4_l3_rr1.flac | 3 | -35.70 | -29.23 | 6.47 | 6.47 | 4.65
+  vibes/E4_l1_rr2.flac | 1 | -45.98 | -50.45 | -4.47 | -4.47 | -6.29
+  vibes/E4_l2_rr1.flac | 2 | -41.87 | -37.56 | 4.30 | 4.30 | 2.48
+  vibes/E4_l3_rr1.flac | 3 | -38.15 | -32.01 | 6.14 | 6.14 | 4.32
+  vibes/G4_l1_rr1.flac | 1 | -50.00 | -51.62 | -1.62 | -1.62 | -3.44
+  vibes/G4_l2_rr1.flac | 2 | -45.54 | -37.25 | 8.30 | 8.30 | 6.48
+  vibes/G4_l3_rr1.flac | 3 | -40.32 | -31.70 | 8.62 | 8.62 | 6.80
+  vibes/B4_l1_rr1.flac | 1 | -52.78 | -49.24 | 3.54 | 3.54 | 1.72
+  vibes/B4_l2_rr1.flac | 2 | -42.08 | -37.31 | 4.77 | 4.77 | 2.95
+  vibes/B4_l3_rr1.flac | 3 | -36.82 | -31.76 | 5.06 | 5.06 | 3.24
+  vibes/D5_l1_rr1.flac | 1 | -48.80 | -69.33 | -20.53 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/D5_l2_rr1.flac | 2 | -38.15 | -38.23 | -0.08 | -0.08 | -1.89
+  vibes/D5_l3_rr1.flac | 3 | -30.71 | -32.68 | -1.97 | -1.97 | -3.79
+  vibes/F5_l1_rr1.flac | 1 | -49.82 | -50.04 | -0.22 | -0.22 | -2.04
+  vibes/F5_l2_rr1.flac | 2 | -43.37 | -38.11 | 5.26 | 5.26 | 3.44
+  vibes/F5_l3_rr1.flac | 3 | -31.28 | -32.56 | -1.28 | -1.28 | -3.10
+  vibes/A5_l1_rr1.flac | 1 | -56.41 | -51.13 | 5.29 | 5.29 | 3.47
+  vibes/A5_l2_rr1.flac | 2 | -40.91 | -39.09 | 1.82 | 1.82 | 0.00
+  vibes/A5_l3_rr1.flac | 3 | -34.25 | -33.54 | 0.71 | 0.71 | -1.11
+  vibes/C6_l1_rr1.flac | 1 | -51.34 | -74.53 | -23.19 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/C6_l2_rr1.flac | 2 | -39.52 | -40.02 | -0.50 | -0.50 | -2.32
+  vibes/C6_l3_rr1.flac | 3 | -32.04 | -34.48 | -2.44 | -2.44 | -4.26
+  vibes/E6_l1_rr1.flac | 1 | -57.27 | -57.49 | -0.22 | -0.22 | -2.04
+  vibes/E6_l2_rr1.flac | 2 | -38.49 | -40.28 | -1.79 | -1.79 | -3.61
+  vibes/E6_l3_rr1.flac | 3 | -30.64 | -34.73 | -4.10 | -4.10 | -5.92
+voices   recordings: lead (harp), counter (vibes); modeled: chords (strings), bass (bass), kick (kick), snare (snare), ghost (snare), hat (hat), perc (hat)
+        frame 0: PSNR 57.76 dB
+  PASS  hash differences within PSNR tolerance (> 45 dB)   min PSNR 57.76 dB
+spectrum harp: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  harp/E1_l2_rr1.flac | -11.34 | -2.10
+  harp/G1_l1_rr1.flac | -7.16 | 5.38
+  harp/G1_l2_rr1.flac | -7.81 | 3.27
+  harp/B1_l1_rr1.flac | -11.04 | 1.27
+  harp/B1_l2_rr1.flac | -11.60 | 0.14
+  harp/D2_l1_rr1.flac | -9.74 | 6.62
+  harp/D2_l2_rr1.flac | -9.74 | 5.20
+  harp/F2_l1_rr1.flac | -11.81 | -4.16
+  harp/F2_l2_rr1.flac | -9.36 | -3.58
+  harp/A2_l1_rr1.flac | -11.45 | -3.28
+  harp/A2_l2_rr1.flac | -11.08 | -5.77
+  harp/C3_l1_rr1.flac | -6.43 | 0.90
+  harp/C3_l2_rr1.flac | -7.38 | -1.27
+  harp/E3_l1_rr1.flac | -6.53 | 0.81
+  harp/E3_l2_rr1.flac | -5.86 | -1.79
+  harp/G3_l1_rr1.flac | -10.52 | -5.10
+  harp/G3_l2_rr1.flac | -7.61 | -3.28
+  harp/B3_l1_rr1.flac | -10.85 | 1.40
+  harp/B3_l2_rr1.flac | -8.88 | 2.65
+  harp/D4_l1_rr1.flac | -6.60 | -3.67
+  harp/D4_l2_rr1.flac | -5.58 | -3.57
+  harp/F4_l1_rr1.flac | -6.71 | 0.14
+  harp/F4_l2_rr1.flac | -6.52 | -2.88
+  harp/A4_l1_rr1.flac | -3.96 | 1.15
+  harp/A4_l2_rr1.flac | -3.51 | 1.02
+  harp/C5_l1_rr1.flac | -2.67 | 0.47
+  harp/C5_l2_rr1.flac | -2.32 | 0.35
+  harp/E5_l1_rr1.flac | -1.22 | 3.25
+  harp/E5_l2_rr1.flac | -1.06 | 1.40
+  harp/G5_l1_rr1.flac | -0.75 | 3.29
+  harp/G5_l2_rr1.flac | -0.63 | 0.47
+  harp/B5_l1_rr1.flac | -0.36 | 7.19
+  harp/B5_l2_rr1.flac | -0.71 | 5.03
+  harp/D6_l1_rr1.flac | -0.39 | 7.09
+  harp/D6_l2_rr1.flac | -0.33 | 4.85
+  harp/F6_l1_rr1.flac | -0.31 | 16.94
+  harp/F6_l2_rr1.flac | -0.49 | 14.15
+  harp/A6_l1_rr1.flac | -0.56 | 14.07
+  harp/A6_l2_rr1.flac | -0.46 | 15.75
+  harp/B6_l1_rr1.flac | -0.46 | 19.34
+  harp/B6_l2_rr1.flac | -0.39 | 16.31
+  harp/D7_l1_rr1.flac | -1.48 | 12.33
+  harp/D7_l2_rr1.flac | -0.85 | 9.36
+  harp/F7_l1_rr1.flac | -0.82 | 20.80
+  harp/F7_l2_rr1.flac | -0.90 | 18.18
+calibration harp: median trim -3.29 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  harp/E1_l2_rr1.flac | 2 | -51.57 | -42.31 | 9.26 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l1_rr1.flac | 1 | -73.09 | -53.16 | 19.92 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l2_rr1.flac | 2 | -52.96 | -42.19 | 10.77 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/B1_l1_rr1.flac | 1 | -58.90 | -55.61 | 3.29 | 3.29 | 6.58
+  harp/B1_l2_rr1.flac | 2 | -45.73 | -41.60 | 4.14 | 4.14 | 7.43
+  harp/D2_l1_rr1.flac | 1 | -58.67 | -53.87 | 4.80 | 4.80 | 8.09
+  harp/D2_l2_rr1.flac | 2 | -43.79 | -41.23 | 2.56 | 2.56 | 5.86
+  harp/F2_l1_rr1.flac | 1 | -56.92 | -56.33 | 0.59 | 0.59 | 3.88
+  harp/F2_l2_rr1.flac | 2 | -46.94 | -44.68 | 2.25 | 2.25 | 5.55
+  harp/A2_l1_rr1.flac | 1 | -51.40 | -56.50 | -5.10 | -5.10 | -1.81
+  harp/A2_l2_rr1.flac | 2 | -43.15 | -43.11 | 0.03 | 0.03 | 3.33
+  harp/C3_l1_rr1.flac | 1 | -55.06 | -55.58 | -0.52 | -0.52 | 2.77
+  harp/C3_l2_rr1.flac | 2 | -41.61 | -44.44 | -2.84 | -2.84 | 0.45
+  harp/E3_l1_rr1.flac | 1 | -53.69 | -56.99 | -3.29 | -3.29 | 0.00
+  harp/E3_l2_rr1.flac | 2 | -47.59 | -45.66 | 1.93 | 1.93 | 5.22
+  harp/G3_l1_rr1.flac | 1 | -45.43 | -54.96 | -9.53 | -9.53 | -6.24 | FLAG applied >9 dB (includes instrument trim)
+  harp/G3_l2_rr1.flac | 2 | -40.12 | -43.42 | -3.30 | -3.30 | -0.00
+  harp/B3_l1_rr1.flac | 1 | -47.28 | -55.11 | -7.83 | -7.83 | -4.54
+  harp/B3_l2_rr1.flac | 2 | -44.81 | -42.71 | 2.11 | 2.11 | 5.40
+  harp/D4_l1_rr1.flac | 1 | -47.76 | -58.66 | -10.90 | -10.90 | -7.61 | FLAG applied >9 dB (includes instrument trim)
+  harp/D4_l2_rr1.flac | 2 | -42.62 | -45.52 | -2.90 | -2.90 | 0.39
+  harp/F4_l1_rr1.flac | 1 | -43.80 | -56.21 | -12.41 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/F4_l2_rr1.flac | 2 | -40.29 | -45.40 | -5.11 | -5.11 | -1.82
+  harp/A4_l1_rr1.flac | 1 | -48.29 | -61.60 | -13.31 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/A4_l2_rr1.flac | 2 | -42.96 | -47.68 | -4.72 | -4.72 | -1.43
+  harp/C5_l1_rr1.flac | 1 | -48.74 | -60.10 | -11.36 | -11.36 | -8.07 | FLAG applied >9 dB (includes instrument trim)
+  harp/C5_l2_rr1.flac | 2 | -43.74 | -45.90 | -2.17 | -2.17 | 1.13
+  harp/E5_l1_rr1.flac | 1 | -45.39 | -63.62 | -18.23 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/E5_l2_rr1.flac | 2 | -41.94 | -49.36 | -7.42 | -7.42 | -4.13
+  harp/G5_l1_rr1.flac | 1 | -55.57 | -63.86 | -8.30 | -8.30 | -5.00
+  harp/G5_l2_rr1.flac | 2 | -51.54 | -48.78 | 2.76 | 2.76 | 6.05
+  harp/B5_l1_rr1.flac | 1 | -52.48 | -65.21 | -12.73 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/B5_l2_rr1.flac | 2 | -53.34 | -52.57 | 0.77 | 0.77 | 4.06
+  harp/D6_l1_rr1.flac | 1 | -52.83 | -65.59 | -12.76 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/D6_l2_rr1.flac | 2 | -45.90 | -53.03 | -7.14 | -7.14 | -3.84
+  harp/F6_l1_rr1.flac | 1 | -59.53 | -66.35 | -6.82 | -6.82 | -3.53
+  harp/F6_l2_rr1.flac | 2 | -49.03 | -53.76 | -4.73 | -4.73 | -1.44
+  harp/A6_l1_rr1.flac | 1 | -58.38 | -66.70 | -8.31 | -8.31 | -5.02
+  harp/A6_l2_rr1.flac | 2 | -52.90 | -54.40 | -1.50 | -1.50 | 1.79
+  harp/B6_l1_rr1.flac | 1 | -61.85 | -67.03 | -5.18 | -5.18 | -1.89
+  harp/B6_l2_rr1.flac | 2 | -48.08 | -54.67 | -6.59 | -6.59 | -3.29
+  harp/D7_l1_rr1.flac | 1 | -78.67 | -67.37 | 11.30 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/D7_l2_rr1.flac | 2 | -54.22 | -54.73 | -0.52 | -0.52 | 2.78
+  harp/F7_l1_rr1.flac | 1 | -74.73 | -67.45 | 7.29 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/F7_l2_rr1.flac | 2 | -50.99 | -54.94 | -3.95 | -3.95 | -0.65
+spectrum vibes: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  vibes/F3_l1_rr1.flac | -0.50 | 17.87
+  vibes/F3_l2_rr1.flac | -0.22 | 18.14
+  vibes/F3_l3_rr1.flac | -0.25 | 18.09
+  vibes/A3_l1_rr1.flac | -6.97 | 7.44
+  vibes/A3_l2_rr1.flac | -0.46 | 13.94
+  vibes/A3_l3_rr1.flac | -0.45 | 13.93
+  vibes/C4_l1_rr2.flac | -11.54 | 0.05
+  vibes/C4_l2_rr1.flac | -3.23 | 8.36
+  vibes/C4_l3_rr1.flac | -1.44 | 10.14
+  vibes/E4_l1_rr2.flac | -8.00 | -0.02
+  vibes/E4_l2_rr1.flac | -4.97 | 3.01
+  vibes/E4_l3_rr1.flac | -4.28 | 3.70
+  vibes/G4_l1_rr1.flac | -5.63 | -0.02
+  vibes/G4_l2_rr1.flac | -5.31 | 0.30
+  vibes/G4_l3_rr1.flac | -5.11 | 0.50
+  vibes/B4_l1_rr1.flac | -3.12 | 0.01
+  vibes/B4_l2_rr1.flac | -3.09 | 0.03
+  vibes/B4_l3_rr1.flac | -2.54 | 0.59
+  vibes/D5_l1_rr1.flac | -1.83 | -0.00
+  vibes/D5_l2_rr1.flac | -1.82 | 0.01
+  vibes/D5_l3_rr1.flac | -1.83 | 0.00
+  vibes/F5_l1_rr1.flac | -1.01 | -0.00
+  vibes/F5_l2_rr1.flac | -1.01 | -0.00
+  vibes/F5_l3_rr1.flac | -1.15 | -0.14
+  vibes/A5_l1_rr1.flac | -0.43 | 0.00
+  vibes/A5_l2_rr1.flac | -0.43 | 0.00
+  vibes/A5_l3_rr1.flac | -0.45 | -0.02
+  vibes/C6_l1_rr1.flac | -0.23 | 0.00
+  vibes/C6_l2_rr1.flac | -0.23 | -0.00
+  vibes/C6_l3_rr1.flac | -0.24 | -0.01
+  vibes/E6_l1_rr1.flac | -0.12 | -0.00
+  vibes/E6_l2_rr1.flac | -0.12 | 0.00
+  vibes/E6_l3_rr1.flac | -0.13 | -0.01
+calibration vibes: median trim 1.82 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  vibes/F3_l1_rr1.flac | 1 | -71.38 | -47.00 | 24.38 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/F3_l2_rr1.flac | 2 | -45.79 | -35.07 | 10.72 | 10.72 | 8.90 | FLAG applied >9 dB (includes instrument trim)
+  vibes/F3_l3_rr1.flac | 3 | -35.88 | -29.52 | 6.36 | 6.36 | 4.54
+  vibes/A3_l1_rr1.flac | 1 | -61.21 | -48.58 | 12.62 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/A3_l2_rr1.flac | 2 | -41.37 | -36.65 | 4.72 | 4.72 | 2.90
+  vibes/A3_l3_rr1.flac | 3 | -32.91 | -31.10 | 1.81 | 1.81 | -0.01
+  vibes/C4_l1_rr2.flac | 1 | -47.45 | -46.71 | 0.74 | 0.74 | -1.08
+  vibes/C4_l2_rr1.flac | 2 | -45.14 | -34.78 | 10.36 | 10.36 | 8.54 | FLAG applied >9 dB (includes instrument trim)
+  vibes/C4_l3_rr1.flac | 3 | -35.70 | -29.23 | 6.47 | 6.47 | 4.65
+  vibes/E4_l1_rr2.flac | 1 | -45.98 | -50.45 | -4.47 | -4.47 | -6.29
+  vibes/E4_l2_rr1.flac | 2 | -41.87 | -37.56 | 4.30 | 4.30 | 2.48
+  vibes/E4_l3_rr1.flac | 3 | -38.15 | -32.01 | 6.14 | 6.14 | 4.32
+  vibes/G4_l1_rr1.flac | 1 | -50.00 | -51.62 | -1.62 | -1.62 | -3.44
+  vibes/G4_l2_rr1.flac | 2 | -45.54 | -37.25 | 8.30 | 8.30 | 6.48
+  vibes/G4_l3_rr1.flac | 3 | -40.32 | -31.70 | 8.62 | 8.62 | 6.80
+  vibes/B4_l1_rr1.flac | 1 | -52.78 | -49.24 | 3.54 | 3.54 | 1.72
+  vibes/B4_l2_rr1.flac | 2 | -42.08 | -37.31 | 4.77 | 4.77 | 2.95
+  vibes/B4_l3_rr1.flac | 3 | -36.82 | -31.76 | 5.06 | 5.06 | 3.24
+  vibes/D5_l1_rr1.flac | 1 | -48.80 | -69.33 | -20.53 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/D5_l2_rr1.flac | 2 | -38.15 | -38.23 | -0.08 | -0.08 | -1.89
+  vibes/D5_l3_rr1.flac | 3 | -30.71 | -32.68 | -1.97 | -1.97 | -3.79
+  vibes/F5_l1_rr1.flac | 1 | -49.82 | -50.04 | -0.22 | -0.22 | -2.04
+  vibes/F5_l2_rr1.flac | 2 | -43.37 | -38.11 | 5.26 | 5.26 | 3.44
+  vibes/F5_l3_rr1.flac | 3 | -31.28 | -32.56 | -1.28 | -1.28 | -3.10
+  vibes/A5_l1_rr1.flac | 1 | -56.41 | -51.13 | 5.29 | 5.29 | 3.47
+  vibes/A5_l2_rr1.flac | 2 | -40.91 | -39.09 | 1.82 | 1.82 | 0.00
+  vibes/A5_l3_rr1.flac | 3 | -34.25 | -33.54 | 0.71 | 0.71 | -1.11
+  vibes/C6_l1_rr1.flac | 1 | -51.34 | -74.53 | -23.19 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/C6_l2_rr1.flac | 2 | -39.52 | -40.02 | -0.50 | -0.50 | -2.32
+  vibes/C6_l3_rr1.flac | 3 | -32.04 | -34.48 | -2.44 | -2.44 | -4.26
+  vibes/E6_l1_rr1.flac | 1 | -57.27 | -57.49 | -0.22 | -0.22 | -2.04
+  vibes/E6_l2_rr1.flac | 2 | -38.49 | -40.28 | -1.79 | -1.79 | -3.61
+  vibes/E6_l3_rr1.flac | 3 | -30.64 | -34.73 | -4.10 | -4.10 | -5.92
+voices   recordings: lead (harp), counter (vibes); modeled: chords (strings), bass (bass), kick (kick), snare (snare), ghost (snare), hat (hat), perc (hat)
+spectrum harp: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  harp/E1_l2_rr1.flac | -11.34 | -2.10
+  harp/G1_l1_rr1.flac | -7.16 | 5.38
+  harp/G1_l2_rr1.flac | -7.81 | 3.27
+  harp/B1_l1_rr1.flac | -11.04 | 1.27
+  harp/B1_l2_rr1.flac | -11.60 | 0.14
+  harp/D2_l1_rr1.flac | -9.74 | 6.62
+  harp/D2_l2_rr1.flac | -9.74 | 5.20
+  harp/F2_l1_rr1.flac | -11.81 | -4.16
+  harp/F2_l2_rr1.flac | -9.36 | -3.58
+  harp/A2_l1_rr1.flac | -11.45 | -3.28
+  harp/A2_l2_rr1.flac | -11.08 | -5.77
+  harp/C3_l1_rr1.flac | -6.43 | 0.90
+  harp/C3_l2_rr1.flac | -7.38 | -1.27
+  harp/E3_l1_rr1.flac | -6.53 | 0.81
+  harp/E3_l2_rr1.flac | -5.86 | -1.79
+  harp/G3_l1_rr1.flac | -10.52 | -5.10
+  harp/G3_l2_rr1.flac | -7.61 | -3.28
+  harp/B3_l1_rr1.flac | -10.85 | 1.40
+  harp/B3_l2_rr1.flac | -8.88 | 2.65
+  harp/D4_l1_rr1.flac | -6.60 | -3.67
+  harp/D4_l2_rr1.flac | -5.58 | -3.57
+  harp/F4_l1_rr1.flac | -6.71 | 0.14
+  harp/F4_l2_rr1.flac | -6.52 | -2.88
+  harp/A4_l1_rr1.flac | -3.96 | 1.15
+  harp/A4_l2_rr1.flac | -3.51 | 1.02
+  harp/C5_l1_rr1.flac | -2.67 | 0.47
+  harp/C5_l2_rr1.flac | -2.32 | 0.35
+  harp/E5_l1_rr1.flac | -1.22 | 3.25
+  harp/E5_l2_rr1.flac | -1.06 | 1.40
+  harp/G5_l1_rr1.flac | -0.75 | 3.29
+  harp/G5_l2_rr1.flac | -0.63 | 0.47
+  harp/B5_l1_rr1.flac | -0.36 | 7.19
+  harp/B5_l2_rr1.flac | -0.71 | 5.03
+  harp/D6_l1_rr1.flac | -0.39 | 7.09
+  harp/D6_l2_rr1.flac | -0.33 | 4.85
+  harp/F6_l1_rr1.flac | -0.31 | 16.94
+  harp/F6_l2_rr1.flac | -0.49 | 14.15
+  harp/A6_l1_rr1.flac | -0.56 | 14.07
+  harp/A6_l2_rr1.flac | -0.46 | 15.75
+  harp/B6_l1_rr1.flac | -0.46 | 19.34
+  harp/B6_l2_rr1.flac | -0.39 | 16.31
+  harp/D7_l1_rr1.flac | -1.48 | 12.33
+  harp/D7_l2_rr1.flac | -0.85 | 9.36
+  harp/F7_l1_rr1.flac | -0.82 | 20.80
+  harp/F7_l2_rr1.flac | -0.90 | 18.18
+calibration harp: median trim -3.29 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  harp/E1_l2_rr1.flac | 2 | -51.57 | -42.31 | 9.26 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l1_rr1.flac | 1 | -73.09 | -53.16 | 19.92 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l2_rr1.flac | 2 | -52.96 | -42.19 | 10.77 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/B1_l1_rr1.flac | 1 | -58.90 | -55.61 | 3.29 | 3.29 | 6.58
+  harp/B1_l2_rr1.flac | 2 | -45.73 | -41.60 | 4.14 | 4.14 | 7.43
+  harp/D2_l1_rr1.flac | 1 | -58.67 | -53.87 | 4.80 | 4.80 | 8.09
+  harp/D2_l2_rr1.flac | 2 | -43.79 | -41.23 | 2.56 | 2.56 | 5.86
+  harp/F2_l1_rr1.flac | 1 | -56.92 | -56.33 | 0.59 | 0.59 | 3.88
+  harp/F2_l2_rr1.flac | 2 | -46.94 | -44.68 | 2.25 | 2.25 | 5.55
+  harp/A2_l1_rr1.flac | 1 | -51.40 | -56.50 | -5.10 | -5.10 | -1.81
+  harp/A2_l2_rr1.flac | 2 | -43.15 | -43.11 | 0.03 | 0.03 | 3.33
+  harp/C3_l1_rr1.flac | 1 | -55.06 | -55.58 | -0.52 | -0.52 | 2.77
+  harp/C3_l2_rr1.flac | 2 | -41.61 | -44.44 | -2.84 | -2.84 | 0.45
+  harp/E3_l1_rr1.flac | 1 | -53.69 | -56.99 | -3.29 | -3.29 | 0.00
+  harp/E3_l2_rr1.flac | 2 | -47.59 | -45.66 | 1.93 | 1.93 | 5.22
+  harp/G3_l1_rr1.flac | 1 | -45.43 | -54.96 | -9.53 | -9.53 | -6.24 | FLAG applied >9 dB (includes instrument trim)
+  harp/G3_l2_rr1.flac | 2 | -40.12 | -43.42 | -3.30 | -3.30 | -0.00
+  harp/B3_l1_rr1.flac | 1 | -47.28 | -55.11 | -7.83 | -7.83 | -4.54
+  harp/B3_l2_rr1.flac | 2 | -44.81 | -42.71 | 2.11 | 2.11 | 5.40
+  harp/D4_l1_rr1.flac | 1 | -47.76 | -58.66 | -10.90 | -10.90 | -7.61 | FLAG applied >9 dB (includes instrument trim)
+  harp/D4_l2_rr1.flac | 2 | -42.62 | -45.52 | -2.90 | -2.90 | 0.39
+  harp/F4_l1_rr1.flac | 1 | -43.80 | -56.21 | -12.41 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/F4_l2_rr1.flac | 2 | -40.29 | -45.40 | -5.11 | -5.11 | -1.82
+  harp/A4_l1_rr1.flac | 1 | -48.29 | -61.60 | -13.31 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/A4_l2_rr1.flac | 2 | -42.96 | -47.68 | -4.72 | -4.72 | -1.43
+  harp/C5_l1_rr1.flac | 1 | -48.74 | -60.10 | -11.36 | -11.36 | -8.07 | FLAG applied >9 dB (includes instrument trim)
+  harp/C5_l2_rr1.flac | 2 | -43.74 | -45.90 | -2.17 | -2.17 | 1.13
+  harp/E5_l1_rr1.flac | 1 | -45.39 | -63.62 | -18.23 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/E5_l2_rr1.flac | 2 | -41.94 | -49.36 | -7.42 | -7.42 | -4.13
+  harp/G5_l1_rr1.flac | 1 | -55.57 | -63.86 | -8.30 | -8.30 | -5.00
+  harp/G5_l2_rr1.flac | 2 | -51.54 | -48.78 | 2.76 | 2.76 | 6.05
+  harp/B5_l1_rr1.flac | 1 | -52.48 | -65.21 | -12.73 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/B5_l2_rr1.flac | 2 | -53.34 | -52.57 | 0.77 | 0.77 | 4.06
+  harp/D6_l1_rr1.flac | 1 | -52.83 | -65.59 | -12.76 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/D6_l2_rr1.flac | 2 | -45.90 | -53.03 | -7.14 | -7.14 | -3.84
+  harp/F6_l1_rr1.flac | 1 | -59.53 | -66.35 | -6.82 | -6.82 | -3.53
+  harp/F6_l2_rr1.flac | 2 | -49.03 | -53.76 | -4.73 | -4.73 | -1.44
+  harp/A6_l1_rr1.flac | 1 | -58.38 | -66.70 | -8.31 | -8.31 | -5.02
+  harp/A6_l2_rr1.flac | 2 | -52.90 | -54.40 | -1.50 | -1.50 | 1.79
+  harp/B6_l1_rr1.flac | 1 | -61.85 | -67.03 | -5.18 | -5.18 | -1.89
+  harp/B6_l2_rr1.flac | 2 | -48.08 | -54.67 | -6.59 | -6.59 | -3.29
+  harp/D7_l1_rr1.flac | 1 | -78.67 | -67.37 | 11.30 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/D7_l2_rr1.flac | 2 | -54.22 | -54.73 | -0.52 | -0.52 | 2.78
+  harp/F7_l1_rr1.flac | 1 | -74.73 | -67.45 | 7.29 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/F7_l2_rr1.flac | 2 | -50.99 | -54.94 | -3.95 | -3.95 | -0.65
+spectrum vibes: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  vibes/F3_l1_rr1.flac | -0.50 | 17.87
+  vibes/F3_l2_rr1.flac | -0.22 | 18.14
+  vibes/F3_l3_rr1.flac | -0.25 | 18.09
+  vibes/A3_l1_rr1.flac | -6.97 | 7.44
+  vibes/A3_l2_rr1.flac | -0.46 | 13.94
+  vibes/A3_l3_rr1.flac | -0.45 | 13.93
+  vibes/C4_l1_rr2.flac | -11.54 | 0.05
+  vibes/C4_l2_rr1.flac | -3.23 | 8.36
+  vibes/C4_l3_rr1.flac | -1.44 | 10.14
+  vibes/E4_l1_rr2.flac | -8.00 | -0.02
+  vibes/E4_l2_rr1.flac | -4.97 | 3.01
+  vibes/E4_l3_rr1.flac | -4.28 | 3.70
+  vibes/G4_l1_rr1.flac | -5.63 | -0.02
+  vibes/G4_l2_rr1.flac | -5.31 | 0.30
+  vibes/G4_l3_rr1.flac | -5.11 | 0.50
+  vibes/B4_l1_rr1.flac | -3.12 | 0.01
+  vibes/B4_l2_rr1.flac | -3.09 | 0.03
+  vibes/B4_l3_rr1.flac | -2.54 | 0.59
+  vibes/D5_l1_rr1.flac | -1.83 | -0.00
+  vibes/D5_l2_rr1.flac | -1.82 | 0.01
+  vibes/D5_l3_rr1.flac | -1.83 | 0.00
+  vibes/F5_l1_rr1.flac | -1.01 | -0.00
+  vibes/F5_l2_rr1.flac | -1.01 | -0.00
+  vibes/F5_l3_rr1.flac | -1.15 | -0.14
+  vibes/A5_l1_rr1.flac | -0.43 | 0.00
+  vibes/A5_l2_rr1.flac | -0.43 | 0.00
+  vibes/A5_l3_rr1.flac | -0.45 | -0.02
+  vibes/C6_l1_rr1.flac | -0.23 | 0.00
+  vibes/C6_l2_rr1.flac | -0.23 | -0.00
+  vibes/C6_l3_rr1.flac | -0.24 | -0.01
+  vibes/E6_l1_rr1.flac | -0.12 | -0.00
+  vibes/E6_l2_rr1.flac | -0.12 | 0.00
+  vibes/E6_l3_rr1.flac | -0.13 | -0.01
+calibration vibes: median trim 1.82 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  vibes/F3_l1_rr1.flac | 1 | -71.38 | -47.00 | 24.38 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/F3_l2_rr1.flac | 2 | -45.79 | -35.07 | 10.72 | 10.72 | 8.90 | FLAG applied >9 dB (includes instrument trim)
+  vibes/F3_l3_rr1.flac | 3 | -35.88 | -29.52 | 6.36 | 6.36 | 4.54
+  vibes/A3_l1_rr1.flac | 1 | -61.21 | -48.58 | 12.62 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/A3_l2_rr1.flac | 2 | -41.37 | -36.65 | 4.72 | 4.72 | 2.90
+  vibes/A3_l3_rr1.flac | 3 | -32.91 | -31.10 | 1.81 | 1.81 | -0.01
+  vibes/C4_l1_rr2.flac | 1 | -47.45 | -46.71 | 0.74 | 0.74 | -1.08
+  vibes/C4_l2_rr1.flac | 2 | -45.14 | -34.78 | 10.36 | 10.36 | 8.54 | FLAG applied >9 dB (includes instrument trim)
+  vibes/C4_l3_rr1.flac | 3 | -35.70 | -29.23 | 6.47 | 6.47 | 4.65
+  vibes/E4_l1_rr2.flac | 1 | -45.98 | -50.45 | -4.47 | -4.47 | -6.29
+  vibes/E4_l2_rr1.flac | 2 | -41.87 | -37.56 | 4.30 | 4.30 | 2.48
+  vibes/E4_l3_rr1.flac | 3 | -38.15 | -32.01 | 6.14 | 6.14 | 4.32
+  vibes/G4_l1_rr1.flac | 1 | -50.00 | -51.62 | -1.62 | -1.62 | -3.44
+  vibes/G4_l2_rr1.flac | 2 | -45.54 | -37.25 | 8.30 | 8.30 | 6.48
+  vibes/G4_l3_rr1.flac | 3 | -40.32 | -31.70 | 8.62 | 8.62 | 6.80
+  vibes/B4_l1_rr1.flac | 1 | -52.78 | -49.24 | 3.54 | 3.54 | 1.72
+  vibes/B4_l2_rr1.flac | 2 | -42.08 | -37.31 | 4.77 | 4.77 | 2.95
+  vibes/B4_l3_rr1.flac | 3 | -36.82 | -31.76 | 5.06 | 5.06 | 3.24
+  vibes/D5_l1_rr1.flac | 1 | -48.80 | -69.33 | -20.53 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/D5_l2_rr1.flac | 2 | -38.15 | -38.23 | -0.08 | -0.08 | -1.89
+  vibes/D5_l3_rr1.flac | 3 | -30.71 | -32.68 | -1.97 | -1.97 | -3.79
+  vibes/F5_l1_rr1.flac | 1 | -49.82 | -50.04 | -0.22 | -0.22 | -2.04
+  vibes/F5_l2_rr1.flac | 2 | -43.37 | -38.11 | 5.26 | 5.26 | 3.44
+  vibes/F5_l3_rr1.flac | 3 | -31.28 | -32.56 | -1.28 | -1.28 | -3.10
+  vibes/A5_l1_rr1.flac | 1 | -56.41 | -51.13 | 5.29 | 5.29 | 3.47
+  vibes/A5_l2_rr1.flac | 2 | -40.91 | -39.09 | 1.82 | 1.82 | 0.00
+  vibes/A5_l3_rr1.flac | 3 | -34.25 | -33.54 | 0.71 | 0.71 | -1.11
+  vibes/C6_l1_rr1.flac | 1 | -51.34 | -74.53 | -23.19 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/C6_l2_rr1.flac | 2 | -39.52 | -40.02 | -0.50 | -0.50 | -2.32
+  vibes/C6_l3_rr1.flac | 3 | -32.04 | -34.48 | -2.44 | -2.44 | -4.26
+  vibes/E6_l1_rr1.flac | 1 | -57.27 | -57.49 | -0.22 | -0.22 | -2.04
+  vibes/E6_l2_rr1.flac | 2 | -38.49 | -40.28 | -1.79 | -1.79 | -3.61
+  vibes/E6_l3_rr1.flac | 3 | -30.64 | -34.73 | -4.10 | -4.10 | -5.92
+voices   recordings: lead (harp), counter (vibes); modeled: chords (strings), bass (bass), kick (kick), snare (snare), ghost (snare), hat (hat), perc (hat)
+spectrum harp: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  harp/E1_l2_rr1.flac | -11.34 | -2.10
+  harp/G1_l1_rr1.flac | -7.16 | 5.38
+  harp/G1_l2_rr1.flac | -7.81 | 3.27
+  harp/B1_l1_rr1.flac | -11.04 | 1.27
+  harp/B1_l2_rr1.flac | -11.60 | 0.14
+  harp/D2_l1_rr1.flac | -9.74 | 6.62
+  harp/D2_l2_rr1.flac | -9.74 | 5.20
+  harp/F2_l1_rr1.flac | -11.81 | -4.16
+  harp/F2_l2_rr1.flac | -9.36 | -3.58
+  harp/A2_l1_rr1.flac | -11.45 | -3.28
+  harp/A2_l2_rr1.flac | -11.08 | -5.77
+  harp/C3_l1_rr1.flac | -6.43 | 0.90
+  harp/C3_l2_rr1.flac | -7.38 | -1.27
+  harp/E3_l1_rr1.flac | -6.53 | 0.81
+  harp/E3_l2_rr1.flac | -5.86 | -1.79
+  harp/G3_l1_rr1.flac | -10.52 | -5.10
+  harp/G3_l2_rr1.flac | -7.61 | -3.28
+  harp/B3_l1_rr1.flac | -10.85 | 1.40
+  harp/B3_l2_rr1.flac | -8.88 | 2.65
+  harp/D4_l1_rr1.flac | -6.60 | -3.67
+  harp/D4_l2_rr1.flac | -5.58 | -3.57
+  harp/F4_l1_rr1.flac | -6.71 | 0.14
+  harp/F4_l2_rr1.flac | -6.52 | -2.88
+  harp/A4_l1_rr1.flac | -3.96 | 1.15
+  harp/A4_l2_rr1.flac | -3.51 | 1.02
+  harp/C5_l1_rr1.flac | -2.67 | 0.47
+  harp/C5_l2_rr1.flac | -2.32 | 0.35
+  harp/E5_l1_rr1.flac | -1.22 | 3.25
+  harp/E5_l2_rr1.flac | -1.06 | 1.40
+  harp/G5_l1_rr1.flac | -0.75 | 3.29
+  harp/G5_l2_rr1.flac | -0.63 | 0.47
+  harp/B5_l1_rr1.flac | -0.36 | 7.19
+  harp/B5_l2_rr1.flac | -0.71 | 5.03
+  harp/D6_l1_rr1.flac | -0.39 | 7.09
+  harp/D6_l2_rr1.flac | -0.33 | 4.85
+  harp/F6_l1_rr1.flac | -0.31 | 16.94
+  harp/F6_l2_rr1.flac | -0.49 | 14.15
+  harp/A6_l1_rr1.flac | -0.56 | 14.07
+  harp/A6_l2_rr1.flac | -0.46 | 15.75
+  harp/B6_l1_rr1.flac | -0.46 | 19.34
+  harp/B6_l2_rr1.flac | -0.39 | 16.31
+  harp/D7_l1_rr1.flac | -1.48 | 12.33
+  harp/D7_l2_rr1.flac | -0.85 | 9.36
+  harp/F7_l1_rr1.flac | -0.82 | 20.80
+  harp/F7_l2_rr1.flac | -0.90 | 18.18
+calibration harp: median trim -3.29 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  harp/E1_l2_rr1.flac | 2 | -51.57 | -42.31 | 9.26 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l1_rr1.flac | 1 | -73.09 | -53.16 | 19.92 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l2_rr1.flac | 2 | -52.96 | -42.19 | 10.77 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/B1_l1_rr1.flac | 1 | -58.90 | -55.61 | 3.29 | 3.29 | 6.58
+  harp/B1_l2_rr1.flac | 2 | -45.73 | -41.60 | 4.14 | 4.14 | 7.43
+  harp/D2_l1_rr1.flac | 1 | -58.67 | -53.87 | 4.80 | 4.80 | 8.09
+  harp/D2_l2_rr1.flac | 2 | -43.79 | -41.23 | 2.56 | 2.56 | 5.86
+  harp/F2_l1_rr1.flac | 1 | -56.92 | -56.33 | 0.59 | 0.59 | 3.88
+  harp/F2_l2_rr1.flac | 2 | -46.94 | -44.68 | 2.25 | 2.25 | 5.55
+  harp/A2_l1_rr1.flac | 1 | -51.40 | -56.50 | -5.10 | -5.10 | -1.81
+  harp/A2_l2_rr1.flac | 2 | -43.15 | -43.11 | 0.03 | 0.03 | 3.33
+  harp/C3_l1_rr1.flac | 1 | -55.06 | -55.58 | -0.52 | -0.52 | 2.77
+  harp/C3_l2_rr1.flac | 2 | -41.61 | -44.44 | -2.84 | -2.84 | 0.45
+  harp/E3_l1_rr1.flac | 1 | -53.69 | -56.99 | -3.29 | -3.29 | 0.00
+  harp/E3_l2_rr1.flac | 2 | -47.59 | -45.66 | 1.93 | 1.93 | 5.22
+  harp/G3_l1_rr1.flac | 1 | -45.43 | -54.96 | -9.53 | -9.53 | -6.24 | FLAG applied >9 dB (includes instrument trim)
+  harp/G3_l2_rr1.flac | 2 | -40.12 | -43.42 | -3.30 | -3.30 | -0.00
+  harp/B3_l1_rr1.flac | 1 | -47.28 | -55.11 | -7.83 | -7.83 | -4.54
+  harp/B3_l2_rr1.flac | 2 | -44.81 | -42.71 | 2.11 | 2.11 | 5.40
+  harp/D4_l1_rr1.flac | 1 | -47.76 | -58.66 | -10.90 | -10.90 | -7.61 | FLAG applied >9 dB (includes instrument trim)
+  harp/D4_l2_rr1.flac | 2 | -42.62 | -45.52 | -2.90 | -2.90 | 0.39
+  harp/F4_l1_rr1.flac | 1 | -43.80 | -56.21 | -12.41 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/F4_l2_rr1.flac | 2 | -40.29 | -45.40 | -5.11 | -5.11 | -1.82
+  harp/A4_l1_rr1.flac | 1 | -48.29 | -61.60 | -13.31 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/A4_l2_rr1.flac | 2 | -42.96 | -47.68 | -4.72 | -4.72 | -1.43
+  harp/C5_l1_rr1.flac | 1 | -48.74 | -60.10 | -11.36 | -11.36 | -8.07 | FLAG applied >9 dB (includes instrument trim)
+  harp/C5_l2_rr1.flac | 2 | -43.74 | -45.90 | -2.17 | -2.17 | 1.13
+  harp/E5_l1_rr1.flac | 1 | -45.39 | -63.62 | -18.23 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/E5_l2_rr1.flac | 2 | -41.94 | -49.36 | -7.42 | -7.42 | -4.13
+  harp/G5_l1_rr1.flac | 1 | -55.57 | -63.86 | -8.30 | -8.30 | -5.00
+  harp/G5_l2_rr1.flac | 2 | -51.54 | -48.78 | 2.76 | 2.76 | 6.05
+  harp/B5_l1_rr1.flac | 1 | -52.48 | -65.21 | -12.73 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/B5_l2_rr1.flac | 2 | -53.34 | -52.57 | 0.77 | 0.77 | 4.06
+  harp/D6_l1_rr1.flac | 1 | -52.83 | -65.59 | -12.76 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/D6_l2_rr1.flac | 2 | -45.90 | -53.03 | -7.14 | -7.14 | -3.84
+  harp/F6_l1_rr1.flac | 1 | -59.53 | -66.35 | -6.82 | -6.82 | -3.53
+  harp/F6_l2_rr1.flac | 2 | -49.03 | -53.76 | -4.73 | -4.73 | -1.44
+  harp/A6_l1_rr1.flac | 1 | -58.38 | -66.70 | -8.31 | -8.31 | -5.02
+  harp/A6_l2_rr1.flac | 2 | -52.90 | -54.40 | -1.50 | -1.50 | 1.79
+  harp/B6_l1_rr1.flac | 1 | -61.85 | -67.03 | -5.18 | -5.18 | -1.89
+  harp/B6_l2_rr1.flac | 2 | -48.08 | -54.67 | -6.59 | -6.59 | -3.29
+  harp/D7_l1_rr1.flac | 1 | -78.67 | -67.37 | 11.30 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/D7_l2_rr1.flac | 2 | -54.22 | -54.73 | -0.52 | -0.52 | 2.78
+  harp/F7_l1_rr1.flac | 1 | -74.73 | -67.45 | 7.29 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/F7_l2_rr1.flac | 2 | -50.99 | -54.94 | -3.95 | -3.95 | -0.65
+spectrum vibes: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  vibes/F3_l1_rr1.flac | -0.50 | 17.87
+  vibes/F3_l2_rr1.flac | -0.22 | 18.14
+  vibes/F3_l3_rr1.flac | -0.25 | 18.09
+  vibes/A3_l1_rr1.flac | -6.97 | 7.44
+  vibes/A3_l2_rr1.flac | -0.46 | 13.94
+  vibes/A3_l3_rr1.flac | -0.45 | 13.93
+  vibes/C4_l1_rr2.flac | -11.54 | 0.05
+  vibes/C4_l2_rr1.flac | -3.23 | 8.36
+  vibes/C4_l3_rr1.flac | -1.44 | 10.14
+  vibes/E4_l1_rr2.flac | -8.00 | -0.02
+  vibes/E4_l2_rr1.flac | -4.97 | 3.01
+  vibes/E4_l3_rr1.flac | -4.28 | 3.70
+  vibes/G4_l1_rr1.flac | -5.63 | -0.02
+  vibes/G4_l2_rr1.flac | -5.31 | 0.30
+  vibes/G4_l3_rr1.flac | -5.11 | 0.50
+  vibes/B4_l1_rr1.flac | -3.12 | 0.01
+  vibes/B4_l2_rr1.flac | -3.09 | 0.03
+  vibes/B4_l3_rr1.flac | -2.54 | 0.59
+  vibes/D5_l1_rr1.flac | -1.83 | -0.00
+  vibes/D5_l2_rr1.flac | -1.82 | 0.01
+  vibes/D5_l3_rr1.flac | -1.83 | 0.00
+  vibes/F5_l1_rr1.flac | -1.01 | -0.00
+  vibes/F5_l2_rr1.flac | -1.01 | -0.00
+  vibes/F5_l3_rr1.flac | -1.15 | -0.14
+  vibes/A5_l1_rr1.flac | -0.43 | 0.00
+  vibes/A5_l2_rr1.flac | -0.43 | 0.00
+  vibes/A5_l3_rr1.flac | -0.45 | -0.02
+  vibes/C6_l1_rr1.flac | -0.23 | 0.00
+  vibes/C6_l2_rr1.flac | -0.23 | -0.00
+  vibes/C6_l3_rr1.flac | -0.24 | -0.01
+  vibes/E6_l1_rr1.flac | -0.12 | -0.00
+  vibes/E6_l2_rr1.flac | -0.12 | 0.00
+  vibes/E6_l3_rr1.flac | -0.13 | -0.01
+calibration vibes: median trim 1.82 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  vibes/F3_l1_rr1.flac | 1 | -71.38 | -47.00 | 24.38 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/F3_l2_rr1.flac | 2 | -45.79 | -35.07 | 10.72 | 10.72 | 8.90 | FLAG applied >9 dB (includes instrument trim)
+  vibes/F3_l3_rr1.flac | 3 | -35.88 | -29.52 | 6.36 | 6.36 | 4.54
+  vibes/A3_l1_rr1.flac | 1 | -61.21 | -48.58 | 12.62 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/A3_l2_rr1.flac | 2 | -41.37 | -36.65 | 4.72 | 4.72 | 2.90
+  vibes/A3_l3_rr1.flac | 3 | -32.91 | -31.10 | 1.81 | 1.81 | -0.01
+  vibes/C4_l1_rr2.flac | 1 | -47.45 | -46.71 | 0.74 | 0.74 | -1.08
+  vibes/C4_l2_rr1.flac | 2 | -45.14 | -34.78 | 10.36 | 10.36 | 8.54 | FLAG applied >9 dB (includes instrument trim)
+  vibes/C4_l3_rr1.flac | 3 | -35.70 | -29.23 | 6.47 | 6.47 | 4.65
+  vibes/E4_l1_rr2.flac | 1 | -45.98 | -50.45 | -4.47 | -4.47 | -6.29
+  vibes/E4_l2_rr1.flac | 2 | -41.87 | -37.56 | 4.30 | 4.30 | 2.48
+  vibes/E4_l3_rr1.flac | 3 | -38.15 | -32.01 | 6.14 | 6.14 | 4.32
+  vibes/G4_l1_rr1.flac | 1 | -50.00 | -51.62 | -1.62 | -1.62 | -3.44
+  vibes/G4_l2_rr1.flac | 2 | -45.54 | -37.25 | 8.30 | 8.30 | 6.48
+  vibes/G4_l3_rr1.flac | 3 | -40.32 | -31.70 | 8.62 | 8.62 | 6.80
+  vibes/B4_l1_rr1.flac | 1 | -52.78 | -49.24 | 3.54 | 3.54 | 1.72
+  vibes/B4_l2_rr1.flac | 2 | -42.08 | -37.31 | 4.77 | 4.77 | 2.95
+  vibes/B4_l3_rr1.flac | 3 | -36.82 | -31.76 | 5.06 | 5.06 | 3.24
+  vibes/D5_l1_rr1.flac | 1 | -48.80 | -69.33 | -20.53 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/D5_l2_rr1.flac | 2 | -38.15 | -38.23 | -0.08 | -0.08 | -1.89
+  vibes/D5_l3_rr1.flac | 3 | -30.71 | -32.68 | -1.97 | -1.97 | -3.79
+  vibes/F5_l1_rr1.flac | 1 | -49.82 | -50.04 | -0.22 | -0.22 | -2.04
+  vibes/F5_l2_rr1.flac | 2 | -43.37 | -38.11 | 5.26 | 5.26 | 3.44
+  vibes/F5_l3_rr1.flac | 3 | -31.28 | -32.56 | -1.28 | -1.28 | -3.10
+  vibes/A5_l1_rr1.flac | 1 | -56.41 | -51.13 | 5.29 | 5.29 | 3.47
+  vibes/A5_l2_rr1.flac | 2 | -40.91 | -39.09 | 1.82 | 1.82 | 0.00
+  vibes/A5_l3_rr1.flac | 3 | -34.25 | -33.54 | 0.71 | 0.71 | -1.11
+  vibes/C6_l1_rr1.flac | 1 | -51.34 | -74.53 | -23.19 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/C6_l2_rr1.flac | 2 | -39.52 | -40.02 | -0.50 | -0.50 | -2.32
+  vibes/C6_l3_rr1.flac | 3 | -32.04 | -34.48 | -2.44 | -2.44 | -4.26
+  vibes/E6_l1_rr1.flac | 1 | -57.27 | -57.49 | -0.22 | -0.22 | -2.04
+  vibes/E6_l2_rr1.flac | 2 | -38.49 | -40.28 | -1.79 | -1.79 | -3.61
+  vibes/E6_l3_rr1.flac | 3 | -30.64 | -34.73 | -4.10 | -4.10 | -5.92
+voices   recordings: lead (harp), counter (vibes); modeled: chords (strings), bass (bass), kick (kick), snare (snare), ghost (snare), hat (hat), perc (hat)
+spectrum harp: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  harp/E1_l2_rr1.flac | -11.34 | -2.10
+  harp/G1_l1_rr1.flac | -7.16 | 5.38
+  harp/G1_l2_rr1.flac | -7.81 | 3.27
+  harp/B1_l1_rr1.flac | -11.04 | 1.27
+  harp/B1_l2_rr1.flac | -11.60 | 0.14
+  harp/D2_l1_rr1.flac | -9.74 | 6.62
+  harp/D2_l2_rr1.flac | -9.74 | 5.20
+  harp/F2_l1_rr1.flac | -11.81 | -4.16
+  harp/F2_l2_rr1.flac | -9.36 | -3.58
+  harp/A2_l1_rr1.flac | -11.45 | -3.28
+  harp/A2_l2_rr1.flac | -11.08 | -5.77
+  harp/C3_l1_rr1.flac | -6.43 | 0.90
+  harp/C3_l2_rr1.flac | -7.38 | -1.27
+  harp/E3_l1_rr1.flac | -6.53 | 0.81
+  harp/E3_l2_rr1.flac | -5.86 | -1.79
+  harp/G3_l1_rr1.flac | -10.52 | -5.10
+  harp/G3_l2_rr1.flac | -7.61 | -3.28
+  harp/B3_l1_rr1.flac | -10.85 | 1.40
+  harp/B3_l2_rr1.flac | -8.88 | 2.65
+  harp/D4_l1_rr1.flac | -6.60 | -3.67
+  harp/D4_l2_rr1.flac | -5.58 | -3.57
+  harp/F4_l1_rr1.flac | -6.71 | 0.14
+  harp/F4_l2_rr1.flac | -6.52 | -2.88
+  harp/A4_l1_rr1.flac | -3.96 | 1.15
+  harp/A4_l2_rr1.flac | -3.51 | 1.02
+  harp/C5_l1_rr1.flac | -2.67 | 0.47
+  harp/C5_l2_rr1.flac | -2.32 | 0.35
+  harp/E5_l1_rr1.flac | -1.22 | 3.25
+  harp/E5_l2_rr1.flac | -1.06 | 1.40
+  harp/G5_l1_rr1.flac | -0.75 | 3.29
+  harp/G5_l2_rr1.flac | -0.63 | 0.47
+  harp/B5_l1_rr1.flac | -0.36 | 7.19
+  harp/B5_l2_rr1.flac | -0.71 | 5.03
+  harp/D6_l1_rr1.flac | -0.39 | 7.09
+  harp/D6_l2_rr1.flac | -0.33 | 4.85
+  harp/F6_l1_rr1.flac | -0.31 | 16.94
+  harp/F6_l2_rr1.flac | -0.49 | 14.15
+  harp/A6_l1_rr1.flac | -0.56 | 14.07
+  harp/A6_l2_rr1.flac | -0.46 | 15.75
+  harp/B6_l1_rr1.flac | -0.46 | 19.34
+  harp/B6_l2_rr1.flac | -0.39 | 16.31
+  harp/D7_l1_rr1.flac | -1.48 | 12.33
+  harp/D7_l2_rr1.flac | -0.85 | 9.36
+  harp/F7_l1_rr1.flac | -0.82 | 20.80
+  harp/F7_l2_rr1.flac | -0.90 | 18.18
+calibration harp: median trim -3.29 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  harp/E1_l2_rr1.flac | 2 | -51.57 | -42.31 | 9.26 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l1_rr1.flac | 1 | -73.09 | -53.16 | 19.92 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l2_rr1.flac | 2 | -52.96 | -42.19 | 10.77 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/B1_l1_rr1.flac | 1 | -58.90 | -55.61 | 3.29 | 3.29 | 6.58
+  harp/B1_l2_rr1.flac | 2 | -45.73 | -41.60 | 4.14 | 4.14 | 7.43
+  harp/D2_l1_rr1.flac | 1 | -58.67 | -53.87 | 4.80 | 4.80 | 8.09
+  harp/D2_l2_rr1.flac | 2 | -43.79 | -41.23 | 2.56 | 2.56 | 5.86
+  harp/F2_l1_rr1.flac | 1 | -56.92 | -56.33 | 0.59 | 0.59 | 3.88
+  harp/F2_l2_rr1.flac | 2 | -46.94 | -44.68 | 2.25 | 2.25 | 5.55
+  harp/A2_l1_rr1.flac | 1 | -51.40 | -56.50 | -5.10 | -5.10 | -1.81
+  harp/A2_l2_rr1.flac | 2 | -43.15 | -43.11 | 0.03 | 0.03 | 3.33
+  harp/C3_l1_rr1.flac | 1 | -55.06 | -55.58 | -0.52 | -0.52 | 2.77
+  harp/C3_l2_rr1.flac | 2 | -41.61 | -44.44 | -2.84 | -2.84 | 0.45
+  harp/E3_l1_rr1.flac | 1 | -53.69 | -56.99 | -3.29 | -3.29 | 0.00
+  harp/E3_l2_rr1.flac | 2 | -47.59 | -45.66 | 1.93 | 1.93 | 5.22
+  harp/G3_l1_rr1.flac | 1 | -45.43 | -54.96 | -9.53 | -9.53 | -6.24 | FLAG applied >9 dB (includes instrument trim)
+  harp/G3_l2_rr1.flac | 2 | -40.12 | -43.42 | -3.30 | -3.30 | -0.00
+  harp/B3_l1_rr1.flac | 1 | -47.28 | -55.11 | -7.83 | -7.83 | -4.54
+  harp/B3_l2_rr1.flac | 2 | -44.81 | -42.71 | 2.11 | 2.11 | 5.40
+  harp/D4_l1_rr1.flac | 1 | -47.76 | -58.66 | -10.90 | -10.90 | -7.61 | FLAG applied >9 dB (includes instrument trim)
+  harp/D4_l2_rr1.flac | 2 | -42.62 | -45.52 | -2.90 | -2.90 | 0.39
+  harp/F4_l1_rr1.flac | 1 | -43.80 | -56.21 | -12.41 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/F4_l2_rr1.flac | 2 | -40.29 | -45.40 | -5.11 | -5.11 | -1.82
+  harp/A4_l1_rr1.flac | 1 | -48.29 | -61.60 | -13.31 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/A4_l2_rr1.flac | 2 | -42.96 | -47.68 | -4.72 | -4.72 | -1.43
+  harp/C5_l1_rr1.flac | 1 | -48.74 | -60.10 | -11.36 | -11.36 | -8.07 | FLAG applied >9 dB (includes instrument trim)
+  harp/C5_l2_rr1.flac | 2 | -43.74 | -45.90 | -2.17 | -2.17 | 1.13
+  harp/E5_l1_rr1.flac | 1 | -45.39 | -63.62 | -18.23 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/E5_l2_rr1.flac | 2 | -41.94 | -49.36 | -7.42 | -7.42 | -4.13
+  harp/G5_l1_rr1.flac | 1 | -55.57 | -63.86 | -8.30 | -8.30 | -5.00
+  harp/G5_l2_rr1.flac | 2 | -51.54 | -48.78 | 2.76 | 2.76 | 6.05
+  harp/B5_l1_rr1.flac | 1 | -52.48 | -65.21 | -12.73 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/B5_l2_rr1.flac | 2 | -53.34 | -52.57 | 0.77 | 0.77 | 4.06
+  harp/D6_l1_rr1.flac | 1 | -52.83 | -65.59 | -12.76 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/D6_l2_rr1.flac | 2 | -45.90 | -53.03 | -7.14 | -7.14 | -3.84
+  harp/F6_l1_rr1.flac | 1 | -59.53 | -66.35 | -6.82 | -6.82 | -3.53
+  harp/F6_l2_rr1.flac | 2 | -49.03 | -53.76 | -4.73 | -4.73 | -1.44
+  harp/A6_l1_rr1.flac | 1 | -58.38 | -66.70 | -8.31 | -8.31 | -5.02
+  harp/A6_l2_rr1.flac | 2 | -52.90 | -54.40 | -1.50 | -1.50 | 1.79
+  harp/B6_l1_rr1.flac | 1 | -61.85 | -67.03 | -5.18 | -5.18 | -1.89
+  harp/B6_l2_rr1.flac | 2 | -48.08 | -54.67 | -6.59 | -6.59 | -3.29
+  harp/D7_l1_rr1.flac | 1 | -78.67 | -67.37 | 11.30 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/D7_l2_rr1.flac | 2 | -54.22 | -54.73 | -0.52 | -0.52 | 2.78
+  harp/F7_l1_rr1.flac | 1 | -74.73 | -67.45 | 7.29 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/F7_l2_rr1.flac | 2 | -50.99 | -54.94 | -3.95 | -3.95 | -0.65
+spectrum vibes: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  vibes/F3_l1_rr1.flac | -0.50 | 17.87
+  vibes/F3_l2_rr1.flac | -0.22 | 18.14
+  vibes/F3_l3_rr1.flac | -0.25 | 18.09
+  vibes/A3_l1_rr1.flac | -6.97 | 7.44
+  vibes/A3_l2_rr1.flac | -0.46 | 13.94
+  vibes/A3_l3_rr1.flac | -0.45 | 13.93
+  vibes/C4_l1_rr2.flac | -11.54 | 0.05
+  vibes/C4_l2_rr1.flac | -3.23 | 8.36
+  vibes/C4_l3_rr1.flac | -1.44 | 10.14
+  vibes/E4_l1_rr2.flac | -8.00 | -0.02
+  vibes/E4_l2_rr1.flac | -4.97 | 3.01
+  vibes/E4_l3_rr1.flac | -4.28 | 3.70
+  vibes/G4_l1_rr1.flac | -5.63 | -0.02
+  vibes/G4_l2_rr1.flac | -5.31 | 0.30
+  vibes/G4_l3_rr1.flac | -5.11 | 0.50
+  vibes/B4_l1_rr1.flac | -3.12 | 0.01
+  vibes/B4_l2_rr1.flac | -3.09 | 0.03
+  vibes/B4_l3_rr1.flac | -2.54 | 0.59
+  vibes/D5_l1_rr1.flac | -1.83 | -0.00
+  vibes/D5_l2_rr1.flac | -1.82 | 0.01
+  vibes/D5_l3_rr1.flac | -1.83 | 0.00
+  vibes/F5_l1_rr1.flac | -1.01 | -0.00
+  vibes/F5_l2_rr1.flac | -1.01 | -0.00
+  vibes/F5_l3_rr1.flac | -1.15 | -0.14
+  vibes/A5_l1_rr1.flac | -0.43 | 0.00
+  vibes/A5_l2_rr1.flac | -0.43 | 0.00
+  vibes/A5_l3_rr1.flac | -0.45 | -0.02
+  vibes/C6_l1_rr1.flac | -0.23 | 0.00
+  vibes/C6_l2_rr1.flac | -0.23 | -0.00
+  vibes/C6_l3_rr1.flac | -0.24 | -0.01
+  vibes/E6_l1_rr1.flac | -0.12 | -0.00
+  vibes/E6_l2_rr1.flac | -0.12 | 0.00
+  vibes/E6_l3_rr1.flac | -0.13 | -0.01
+calibration vibes: median trim 1.82 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  vibes/F3_l1_rr1.flac | 1 | -71.38 | -47.00 | 24.38 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/F3_l2_rr1.flac | 2 | -45.79 | -35.07 | 10.72 | 10.72 | 8.90 | FLAG applied >9 dB (includes instrument trim)
+  vibes/F3_l3_rr1.flac | 3 | -35.88 | -29.52 | 6.36 | 6.36 | 4.54
+  vibes/A3_l1_rr1.flac | 1 | -61.21 | -48.58 | 12.62 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/A3_l2_rr1.flac | 2 | -41.37 | -36.65 | 4.72 | 4.72 | 2.90
+  vibes/A3_l3_rr1.flac | 3 | -32.91 | -31.10 | 1.81 | 1.81 | -0.01
+  vibes/C4_l1_rr2.flac | 1 | -47.45 | -46.71 | 0.74 | 0.74 | -1.08
+  vibes/C4_l2_rr1.flac | 2 | -45.14 | -34.78 | 10.36 | 10.36 | 8.54 | FLAG applied >9 dB (includes instrument trim)
+  vibes/C4_l3_rr1.flac | 3 | -35.70 | -29.23 | 6.47 | 6.47 | 4.65
+  vibes/E4_l1_rr2.flac | 1 | -45.98 | -50.45 | -4.47 | -4.47 | -6.29
+  vibes/E4_l2_rr1.flac | 2 | -41.87 | -37.56 | 4.30 | 4.30 | 2.48
+  vibes/E4_l3_rr1.flac | 3 | -38.15 | -32.01 | 6.14 | 6.14 | 4.32
+  vibes/G4_l1_rr1.flac | 1 | -50.00 | -51.62 | -1.62 | -1.62 | -3.44
+  vibes/G4_l2_rr1.flac | 2 | -45.54 | -37.25 | 8.30 | 8.30 | 6.48
+  vibes/G4_l3_rr1.flac | 3 | -40.32 | -31.70 | 8.62 | 8.62 | 6.80
+  vibes/B4_l1_rr1.flac | 1 | -52.78 | -49.24 | 3.54 | 3.54 | 1.72
+  vibes/B4_l2_rr1.flac | 2 | -42.08 | -37.31 | 4.77 | 4.77 | 2.95
+  vibes/B4_l3_rr1.flac | 3 | -36.82 | -31.76 | 5.06 | 5.06 | 3.24
+  vibes/D5_l1_rr1.flac | 1 | -48.80 | -69.33 | -20.53 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/D5_l2_rr1.flac | 2 | -38.15 | -38.23 | -0.08 | -0.08 | -1.89
+  vibes/D5_l3_rr1.flac | 3 | -30.71 | -32.68 | -1.97 | -1.97 | -3.79
+  vibes/F5_l1_rr1.flac | 1 | -49.82 | -50.04 | -0.22 | -0.22 | -2.04
+  vibes/F5_l2_rr1.flac | 2 | -43.37 | -38.11 | 5.26 | 5.26 | 3.44
+  vibes/F5_l3_rr1.flac | 3 | -31.28 | -32.56 | -1.28 | -1.28 | -3.10
+  vibes/A5_l1_rr1.flac | 1 | -56.41 | -51.13 | 5.29 | 5.29 | 3.47
+  vibes/A5_l2_rr1.flac | 2 | -40.91 | -39.09 | 1.82 | 1.82 | 0.00
+  vibes/A5_l3_rr1.flac | 3 | -34.25 | -33.54 | 0.71 | 0.71 | -1.11
+  vibes/C6_l1_rr1.flac | 1 | -51.34 | -74.53 | -23.19 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/C6_l2_rr1.flac | 2 | -39.52 | -40.02 | -0.50 | -0.50 | -2.32
+  vibes/C6_l3_rr1.flac | 3 | -32.04 | -34.48 | -2.44 | -2.44 | -4.26
+  vibes/E6_l1_rr1.flac | 1 | -57.27 | -57.49 | -0.22 | -0.22 | -2.04
+  vibes/E6_l2_rr1.flac | 2 | -38.49 | -40.28 | -1.79 | -1.79 | -3.61
+  vibes/E6_l3_rr1.flac | 3 | -30.64 | -34.73 | -4.10 | -4.10 | -5.92
+voices   recordings: lead (harp), counter (vibes); modeled: chords (strings), bass (bass), kick (kick), snare (snare), ghost (snare), hat (hat), perc (hat)
+spectrum harp: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  harp/E1_l2_rr1.flac | -11.34 | -2.10
+  harp/G1_l1_rr1.flac | -7.16 | 5.38
+  harp/G1_l2_rr1.flac | -7.81 | 3.27
+  harp/B1_l1_rr1.flac | -11.04 | 1.27
+  harp/B1_l2_rr1.flac | -11.60 | 0.14
+  harp/D2_l1_rr1.flac | -9.74 | 6.62
+  harp/D2_l2_rr1.flac | -9.74 | 5.20
+  harp/F2_l1_rr1.flac | -11.81 | -4.16
+  harp/F2_l2_rr1.flac | -9.36 | -3.58
+  harp/A2_l1_rr1.flac | -11.45 | -3.28
+  harp/A2_l2_rr1.flac | -11.08 | -5.77
+  harp/C3_l1_rr1.flac | -6.43 | 0.90
+  harp/C3_l2_rr1.flac | -7.38 | -1.27
+  harp/E3_l1_rr1.flac | -6.53 | 0.81
+  harp/E3_l2_rr1.flac | -5.86 | -1.79
+  harp/G3_l1_rr1.flac | -10.52 | -5.10
+  harp/G3_l2_rr1.flac | -7.61 | -3.28
+  harp/B3_l1_rr1.flac | -10.85 | 1.40
+  harp/B3_l2_rr1.flac | -8.88 | 2.65
+  harp/D4_l1_rr1.flac | -6.60 | -3.67
+  harp/D4_l2_rr1.flac | -5.58 | -3.57
+  harp/F4_l1_rr1.flac | -6.71 | 0.14
+  harp/F4_l2_rr1.flac | -6.52 | -2.88
+  harp/A4_l1_rr1.flac | -3.96 | 1.15
+  harp/A4_l2_rr1.flac | -3.51 | 1.02
+  harp/C5_l1_rr1.flac | -2.67 | 0.47
+  harp/C5_l2_rr1.flac | -2.32 | 0.35
+  harp/E5_l1_rr1.flac | -1.22 | 3.25
+  harp/E5_l2_rr1.flac | -1.06 | 1.40
+  harp/G5_l1_rr1.flac | -0.75 | 3.29
+  harp/G5_l2_rr1.flac | -0.63 | 0.47
+  harp/B5_l1_rr1.flac | -0.36 | 7.19
+  harp/B5_l2_rr1.flac | -0.71 | 5.03
+  harp/D6_l1_rr1.flac | -0.39 | 7.09
+  harp/D6_l2_rr1.flac | -0.33 | 4.85
+  harp/F6_l1_rr1.flac | -0.31 | 16.94
+  harp/F6_l2_rr1.flac | -0.49 | 14.15
+  harp/A6_l1_rr1.flac | -0.56 | 14.07
+  harp/A6_l2_rr1.flac | -0.46 | 15.75
+  harp/B6_l1_rr1.flac | -0.46 | 19.34
+  harp/B6_l2_rr1.flac | -0.39 | 16.31
+  harp/D7_l1_rr1.flac | -1.48 | 12.33
+  harp/D7_l2_rr1.flac | -0.85 | 9.36
+  harp/F7_l1_rr1.flac | -0.82 | 20.80
+  harp/F7_l2_rr1.flac | -0.90 | 18.18
+calibration harp: median trim -3.29 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  harp/E1_l2_rr1.flac | 2 | -51.57 | -42.31 | 9.26 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l1_rr1.flac | 1 | -73.09 | -53.16 | 19.92 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l2_rr1.flac | 2 | -52.96 | -42.19 | 10.77 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/B1_l1_rr1.flac | 1 | -58.90 | -55.61 | 3.29 | 3.29 | 6.58
+  harp/B1_l2_rr1.flac | 2 | -45.73 | -41.60 | 4.14 | 4.14 | 7.43
+  harp/D2_l1_rr1.flac | 1 | -58.67 | -53.87 | 4.80 | 4.80 | 8.09
+  harp/D2_l2_rr1.flac | 2 | -43.79 | -41.23 | 2.56 | 2.56 | 5.86
+  harp/F2_l1_rr1.flac | 1 | -56.92 | -56.33 | 0.59 | 0.59 | 3.88
+  harp/F2_l2_rr1.flac | 2 | -46.94 | -44.68 | 2.25 | 2.25 | 5.55
+  harp/A2_l1_rr1.flac | 1 | -51.40 | -56.50 | -5.10 | -5.10 | -1.81
+  harp/A2_l2_rr1.flac | 2 | -43.15 | -43.11 | 0.03 | 0.03 | 3.33
+  harp/C3_l1_rr1.flac | 1 | -55.06 | -55.58 | -0.52 | -0.52 | 2.77
+  harp/C3_l2_rr1.flac | 2 | -41.61 | -44.44 | -2.84 | -2.84 | 0.45
+  harp/E3_l1_rr1.flac | 1 | -53.69 | -56.99 | -3.29 | -3.29 | 0.00
+  harp/E3_l2_rr1.flac | 2 | -47.59 | -45.66 | 1.93 | 1.93 | 5.22
+  harp/G3_l1_rr1.flac | 1 | -45.43 | -54.96 | -9.53 | -9.53 | -6.24 | FLAG applied >9 dB (includes instrument trim)
+  harp/G3_l2_rr1.flac | 2 | -40.12 | -43.42 | -3.30 | -3.30 | -0.00
+  harp/B3_l1_rr1.flac | 1 | -47.28 | -55.11 | -7.83 | -7.83 | -4.54
+  harp/B3_l2_rr1.flac | 2 | -44.81 | -42.71 | 2.11 | 2.11 | 5.40
+  harp/D4_l1_rr1.flac | 1 | -47.76 | -58.66 | -10.90 | -10.90 | -7.61 | FLAG applied >9 dB (includes instrument trim)
+  harp/D4_l2_rr1.flac | 2 | -42.62 | -45.52 | -2.90 | -2.90 | 0.39
+  harp/F4_l1_rr1.flac | 1 | -43.80 | -56.21 | -12.41 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/F4_l2_rr1.flac | 2 | -40.29 | -45.40 | -5.11 | -5.11 | -1.82
+  harp/A4_l1_rr1.flac | 1 | -48.29 | -61.60 | -13.31 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/A4_l2_rr1.flac | 2 | -42.96 | -47.68 | -4.72 | -4.72 | -1.43
+  harp/C5_l1_rr1.flac | 1 | -48.74 | -60.10 | -11.36 | -11.36 | -8.07 | FLAG applied >9 dB (includes instrument trim)
+  harp/C5_l2_rr1.flac | 2 | -43.74 | -45.90 | -2.17 | -2.17 | 1.13
+  harp/E5_l1_rr1.flac | 1 | -45.39 | -63.62 | -18.23 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/E5_l2_rr1.flac | 2 | -41.94 | -49.36 | -7.42 | -7.42 | -4.13
+  harp/G5_l1_rr1.flac | 1 | -55.57 | -63.86 | -8.30 | -8.30 | -5.00
+  harp/G5_l2_rr1.flac | 2 | -51.54 | -48.78 | 2.76 | 2.76 | 6.05
+  harp/B5_l1_rr1.flac | 1 | -52.48 | -65.21 | -12.73 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/B5_l2_rr1.flac | 2 | -53.34 | -52.57 | 0.77 | 0.77 | 4.06
+  harp/D6_l1_rr1.flac | 1 | -52.83 | -65.59 | -12.76 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/D6_l2_rr1.flac | 2 | -45.90 | -53.03 | -7.14 | -7.14 | -3.84
+  harp/F6_l1_rr1.flac | 1 | -59.53 | -66.35 | -6.82 | -6.82 | -3.53
+  harp/F6_l2_rr1.flac | 2 | -49.03 | -53.76 | -4.73 | -4.73 | -1.44
+  harp/A6_l1_rr1.flac | 1 | -58.38 | -66.70 | -8.31 | -8.31 | -5.02
+  harp/A6_l2_rr1.flac | 2 | -52.90 | -54.40 | -1.50 | -1.50 | 1.79
+  harp/B6_l1_rr1.flac | 1 | -61.85 | -67.03 | -5.18 | -5.18 | -1.89
+  harp/B6_l2_rr1.flac | 2 | -48.08 | -54.67 | -6.59 | -6.59 | -3.29
+  harp/D7_l1_rr1.flac | 1 | -78.67 | -67.37 | 11.30 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/D7_l2_rr1.flac | 2 | -54.22 | -54.73 | -0.52 | -0.52 | 2.78
+  harp/F7_l1_rr1.flac | 1 | -74.73 | -67.45 | 7.29 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/F7_l2_rr1.flac | 2 | -50.99 | -54.94 | -3.95 | -3.95 | -0.65
+spectrum vibes: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  vibes/F3_l1_rr1.flac | -0.50 | 17.87
+  vibes/F3_l2_rr1.flac | -0.22 | 18.14
+  vibes/F3_l3_rr1.flac | -0.25 | 18.09
+  vibes/A3_l1_rr1.flac | -6.97 | 7.44
+  vibes/A3_l2_rr1.flac | -0.46 | 13.94
+  vibes/A3_l3_rr1.flac | -0.45 | 13.93
+  vibes/C4_l1_rr2.flac | -11.54 | 0.05
+  vibes/C4_l2_rr1.flac | -3.23 | 8.36
+  vibes/C4_l3_rr1.flac | -1.44 | 10.14
+  vibes/E4_l1_rr2.flac | -8.00 | -0.02
+  vibes/E4_l2_rr1.flac | -4.97 | 3.01
+  vibes/E4_l3_rr1.flac | -4.28 | 3.70
+  vibes/G4_l1_rr1.flac | -5.63 | -0.02
+  vibes/G4_l2_rr1.flac | -5.31 | 0.30
+  vibes/G4_l3_rr1.flac | -5.11 | 0.50
+  vibes/B4_l1_rr1.flac | -3.12 | 0.01
+  vibes/B4_l2_rr1.flac | -3.09 | 0.03
+  vibes/B4_l3_rr1.flac | -2.54 | 0.59
+  vibes/D5_l1_rr1.flac | -1.83 | -0.00
+  vibes/D5_l2_rr1.flac | -1.82 | 0.01
+  vibes/D5_l3_rr1.flac | -1.83 | 0.00
+  vibes/F5_l1_rr1.flac | -1.01 | -0.00
+  vibes/F5_l2_rr1.flac | -1.01 | -0.00
+  vibes/F5_l3_rr1.flac | -1.15 | -0.14
+  vibes/A5_l1_rr1.flac | -0.43 | 0.00
+  vibes/A5_l2_rr1.flac | -0.43 | 0.00
+  vibes/A5_l3_rr1.flac | -0.45 | -0.02
+  vibes/C6_l1_rr1.flac | -0.23 | 0.00
+  vibes/C6_l2_rr1.flac | -0.23 | -0.00
+  vibes/C6_l3_rr1.flac | -0.24 | -0.01
+  vibes/E6_l1_rr1.flac | -0.12 | -0.00
+  vibes/E6_l2_rr1.flac | -0.12 | 0.00
+  vibes/E6_l3_rr1.flac | -0.13 | -0.01
+calibration vibes: median trim 1.82 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  vibes/F3_l1_rr1.flac | 1 | -71.38 | -47.00 | 24.38 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/F3_l2_rr1.flac | 2 | -45.79 | -35.07 | 10.72 | 10.72 | 8.90 | FLAG applied >9 dB (includes instrument trim)
+  vibes/F3_l3_rr1.flac | 3 | -35.88 | -29.52 | 6.36 | 6.36 | 4.54
+  vibes/A3_l1_rr1.flac | 1 | -61.21 | -48.58 | 12.62 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/A3_l2_rr1.flac | 2 | -41.37 | -36.65 | 4.72 | 4.72 | 2.90
+  vibes/A3_l3_rr1.flac | 3 | -32.91 | -31.10 | 1.81 | 1.81 | -0.01
+  vibes/C4_l1_rr2.flac | 1 | -47.45 | -46.71 | 0.74 | 0.74 | -1.08
+  vibes/C4_l2_rr1.flac | 2 | -45.14 | -34.78 | 10.36 | 10.36 | 8.54 | FLAG applied >9 dB (includes instrument trim)
+  vibes/C4_l3_rr1.flac | 3 | -35.70 | -29.23 | 6.47 | 6.47 | 4.65
+  vibes/E4_l1_rr2.flac | 1 | -45.98 | -50.45 | -4.47 | -4.47 | -6.29
+  vibes/E4_l2_rr1.flac | 2 | -41.87 | -37.56 | 4.30 | 4.30 | 2.48
+  vibes/E4_l3_rr1.flac | 3 | -38.15 | -32.01 | 6.14 | 6.14 | 4.32
+  vibes/G4_l1_rr1.flac | 1 | -50.00 | -51.62 | -1.62 | -1.62 | -3.44
+  vibes/G4_l2_rr1.flac | 2 | -45.54 | -37.25 | 8.30 | 8.30 | 6.48
+  vibes/G4_l3_rr1.flac | 3 | -40.32 | -31.70 | 8.62 | 8.62 | 6.80
+  vibes/B4_l1_rr1.flac | 1 | -52.78 | -49.24 | 3.54 | 3.54 | 1.72
+  vibes/B4_l2_rr1.flac | 2 | -42.08 | -37.31 | 4.77 | 4.77 | 2.95
+  vibes/B4_l3_rr1.flac | 3 | -36.82 | -31.76 | 5.06 | 5.06 | 3.24
+  vibes/D5_l1_rr1.flac | 1 | -48.80 | -69.33 | -20.53 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/D5_l2_rr1.flac | 2 | -38.15 | -38.23 | -0.08 | -0.08 | -1.89
+  vibes/D5_l3_rr1.flac | 3 | -30.71 | -32.68 | -1.97 | -1.97 | -3.79
+  vibes/F5_l1_rr1.flac | 1 | -49.82 | -50.04 | -0.22 | -0.22 | -2.04
+  vibes/F5_l2_rr1.flac | 2 | -43.37 | -38.11 | 5.26 | 5.26 | 3.44
+  vibes/F5_l3_rr1.flac | 3 | -31.28 | -32.56 | -1.28 | -1.28 | -3.10
+  vibes/A5_l1_rr1.flac | 1 | -56.41 | -51.13 | 5.29 | 5.29 | 3.47
+  vibes/A5_l2_rr1.flac | 2 | -40.91 | -39.09 | 1.82 | 1.82 | 0.00
+  vibes/A5_l3_rr1.flac | 3 | -34.25 | -33.54 | 0.71 | 0.71 | -1.11
+  vibes/C6_l1_rr1.flac | 1 | -51.34 | -74.53 | -23.19 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/C6_l2_rr1.flac | 2 | -39.52 | -40.02 | -0.50 | -0.50 | -2.32
+  vibes/C6_l3_rr1.flac | 3 | -32.04 | -34.48 | -2.44 | -2.44 | -4.26
+  vibes/E6_l1_rr1.flac | 1 | -57.27 | -57.49 | -0.22 | -0.22 | -2.04
+  vibes/E6_l2_rr1.flac | 2 | -38.49 | -40.28 | -1.79 | -1.79 | -3.61
+  vibes/E6_l3_rr1.flac | 3 | -30.64 | -34.73 | -4.10 | -4.10 | -5.92
+voices   recordings: lead (harp), counter (vibes); modeled: chords (strings), bass (bass), kick (kick), snare (snare), ghost (snare), hat (hat), perc (hat)
+spectrum harp: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  harp/E1_l2_rr1.flac | -11.34 | -2.10
+  harp/G1_l1_rr1.flac | -7.16 | 5.38
+  harp/G1_l2_rr1.flac | -7.81 | 3.27
+  harp/B1_l1_rr1.flac | -11.04 | 1.27
+  harp/B1_l2_rr1.flac | -11.60 | 0.14
+  harp/D2_l1_rr1.flac | -9.74 | 6.62
+  harp/D2_l2_rr1.flac | -9.74 | 5.20
+  harp/F2_l1_rr1.flac | -11.81 | -4.16
+  harp/F2_l2_rr1.flac | -9.36 | -3.58
+  harp/A2_l1_rr1.flac | -11.45 | -3.28
+  harp/A2_l2_rr1.flac | -11.08 | -5.77
+  harp/C3_l1_rr1.flac | -6.43 | 0.90
+  harp/C3_l2_rr1.flac | -7.38 | -1.27
+  harp/E3_l1_rr1.flac | -6.53 | 0.81
+  harp/E3_l2_rr1.flac | -5.86 | -1.79
+  harp/G3_l1_rr1.flac | -10.52 | -5.10
+  harp/G3_l2_rr1.flac | -7.61 | -3.28
+  harp/B3_l1_rr1.flac | -10.85 | 1.40
+  harp/B3_l2_rr1.flac | -8.88 | 2.65
+  harp/D4_l1_rr1.flac | -6.60 | -3.67
+  harp/D4_l2_rr1.flac | -5.58 | -3.57
+  harp/F4_l1_rr1.flac | -6.71 | 0.14
+  harp/F4_l2_rr1.flac | -6.52 | -2.88
+  harp/A4_l1_rr1.flac | -3.96 | 1.15
+  harp/A4_l2_rr1.flac | -3.51 | 1.02
+  harp/C5_l1_rr1.flac | -2.67 | 0.47
+  harp/C5_l2_rr1.flac | -2.32 | 0.35
+  harp/E5_l1_rr1.flac | -1.22 | 3.25
+  harp/E5_l2_rr1.flac | -1.06 | 1.40
+  harp/G5_l1_rr1.flac | -0.75 | 3.29
+  harp/G5_l2_rr1.flac | -0.63 | 0.47
+  harp/B5_l1_rr1.flac | -0.36 | 7.19
+  harp/B5_l2_rr1.flac | -0.71 | 5.03
+  harp/D6_l1_rr1.flac | -0.39 | 7.09
+  harp/D6_l2_rr1.flac | -0.33 | 4.85
+  harp/F6_l1_rr1.flac | -0.31 | 16.94
+  harp/F6_l2_rr1.flac | -0.49 | 14.15
+  harp/A6_l1_rr1.flac | -0.56 | 14.07
+  harp/A6_l2_rr1.flac | -0.46 | 15.75
+  harp/B6_l1_rr1.flac | -0.46 | 19.34
+  harp/B6_l2_rr1.flac | -0.39 | 16.31
+  harp/D7_l1_rr1.flac | -1.48 | 12.33
+  harp/D7_l2_rr1.flac | -0.85 | 9.36
+  harp/F7_l1_rr1.flac | -0.82 | 20.80
+  harp/F7_l2_rr1.flac | -0.90 | 18.18
+calibration harp: median trim -3.29 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  harp/E1_l2_rr1.flac | 2 | -51.57 | -42.31 | 9.26 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l1_rr1.flac | 1 | -73.09 | -53.16 | 19.92 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l2_rr1.flac | 2 | -52.96 | -42.19 | 10.77 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/B1_l1_rr1.flac | 1 | -58.90 | -55.61 | 3.29 | 3.29 | 6.58
+  harp/B1_l2_rr1.flac | 2 | -45.73 | -41.60 | 4.14 | 4.14 | 7.43
+  harp/D2_l1_rr1.flac | 1 | -58.67 | -53.87 | 4.80 | 4.80 | 8.09
+  harp/D2_l2_rr1.flac | 2 | -43.79 | -41.23 | 2.56 | 2.56 | 5.86
+  harp/F2_l1_rr1.flac | 1 | -56.92 | -56.33 | 0.59 | 0.59 | 3.88
+  harp/F2_l2_rr1.flac | 2 | -46.94 | -44.68 | 2.25 | 2.25 | 5.55
+  harp/A2_l1_rr1.flac | 1 | -51.40 | -56.50 | -5.10 | -5.10 | -1.81
+  harp/A2_l2_rr1.flac | 2 | -43.15 | -43.11 | 0.03 | 0.03 | 3.33
+  harp/C3_l1_rr1.flac | 1 | -55.06 | -55.58 | -0.52 | -0.52 | 2.77
+  harp/C3_l2_rr1.flac | 2 | -41.61 | -44.44 | -2.84 | -2.84 | 0.45
+  harp/E3_l1_rr1.flac | 1 | -53.69 | -56.99 | -3.29 | -3.29 | 0.00
+  harp/E3_l2_rr1.flac | 2 | -47.59 | -45.66 | 1.93 | 1.93 | 5.22
+  harp/G3_l1_rr1.flac | 1 | -45.43 | -54.96 | -9.53 | -9.53 | -6.24 | FLAG applied >9 dB (includes instrument trim)
+  harp/G3_l2_rr1.flac | 2 | -40.12 | -43.42 | -3.30 | -3.30 | -0.00
+  harp/B3_l1_rr1.flac | 1 | -47.28 | -55.11 | -7.83 | -7.83 | -4.54
+  harp/B3_l2_rr1.flac | 2 | -44.81 | -42.71 | 2.11 | 2.11 | 5.40
+  harp/D4_l1_rr1.flac | 1 | -47.76 | -58.66 | -10.90 | -10.90 | -7.61 | FLAG applied >9 dB (includes instrument trim)
+  harp/D4_l2_rr1.flac | 2 | -42.62 | -45.52 | -2.90 | -2.90 | 0.39
+  harp/F4_l1_rr1.flac | 1 | -43.80 | -56.21 | -12.41 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/F4_l2_rr1.flac | 2 | -40.29 | -45.40 | -5.11 | -5.11 | -1.82
+  harp/A4_l1_rr1.flac | 1 | -48.29 | -61.60 | -13.31 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/A4_l2_rr1.flac | 2 | -42.96 | -47.68 | -4.72 | -4.72 | -1.43
+  harp/C5_l1_rr1.flac | 1 | -48.74 | -60.10 | -11.36 | -11.36 | -8.07 | FLAG applied >9 dB (includes instrument trim)
+  harp/C5_l2_rr1.flac | 2 | -43.74 | -45.90 | -2.17 | -2.17 | 1.13
+  harp/E5_l1_rr1.flac | 1 | -45.39 | -63.62 | -18.23 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/E5_l2_rr1.flac | 2 | -41.94 | -49.36 | -7.42 | -7.42 | -4.13
+  harp/G5_l1_rr1.flac | 1 | -55.57 | -63.86 | -8.30 | -8.30 | -5.00
+  harp/G5_l2_rr1.flac | 2 | -51.54 | -48.78 | 2.76 | 2.76 | 6.05
+  harp/B5_l1_rr1.flac | 1 | -52.48 | -65.21 | -12.73 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/B5_l2_rr1.flac | 2 | -53.34 | -52.57 | 0.77 | 0.77 | 4.06
+  harp/D6_l1_rr1.flac | 1 | -52.83 | -65.59 | -12.76 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/D6_l2_rr1.flac | 2 | -45.90 | -53.03 | -7.14 | -7.14 | -3.84
+  harp/F6_l1_rr1.flac | 1 | -59.53 | -66.35 | -6.82 | -6.82 | -3.53
+  harp/F6_l2_rr1.flac | 2 | -49.03 | -53.76 | -4.73 | -4.73 | -1.44
+  harp/A6_l1_rr1.flac | 1 | -58.38 | -66.70 | -8.31 | -8.31 | -5.02
+  harp/A6_l2_rr1.flac | 2 | -52.90 | -54.40 | -1.50 | -1.50 | 1.79
+  harp/B6_l1_rr1.flac | 1 | -61.85 | -67.03 | -5.18 | -5.18 | -1.89
+  harp/B6_l2_rr1.flac | 2 | -48.08 | -54.67 | -6.59 | -6.59 | -3.29
+  harp/D7_l1_rr1.flac | 1 | -78.67 | -67.37 | 11.30 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/D7_l2_rr1.flac | 2 | -54.22 | -54.73 | -0.52 | -0.52 | 2.78
+  harp/F7_l1_rr1.flac | 1 | -74.73 | -67.45 | 7.29 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/F7_l2_rr1.flac | 2 | -50.99 | -54.94 | -3.95 | -3.95 | -0.65
+spectrum vibes: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  vibes/F3_l1_rr1.flac | -0.50 | 17.87
+  vibes/F3_l2_rr1.flac | -0.22 | 18.14
+  vibes/F3_l3_rr1.flac | -0.25 | 18.09
+  vibes/A3_l1_rr1.flac | -6.97 | 7.44
+  vibes/A3_l2_rr1.flac | -0.46 | 13.94
+  vibes/A3_l3_rr1.flac | -0.45 | 13.93
+  vibes/C4_l1_rr2.flac | -11.54 | 0.05
+  vibes/C4_l2_rr1.flac | -3.23 | 8.36
+  vibes/C4_l3_rr1.flac | -1.44 | 10.14
+  vibes/E4_l1_rr2.flac | -8.00 | -0.02
+  vibes/E4_l2_rr1.flac | -4.97 | 3.01
+  vibes/E4_l3_rr1.flac | -4.28 | 3.70
+  vibes/G4_l1_rr1.flac | -5.63 | -0.02
+  vibes/G4_l2_rr1.flac | -5.31 | 0.30
+  vibes/G4_l3_rr1.flac | -5.11 | 0.50
+  vibes/B4_l1_rr1.flac | -3.12 | 0.01
+  vibes/B4_l2_rr1.flac | -3.09 | 0.03
+  vibes/B4_l3_rr1.flac | -2.54 | 0.59
+  vibes/D5_l1_rr1.flac | -1.83 | -0.00
+  vibes/D5_l2_rr1.flac | -1.82 | 0.01
+  vibes/D5_l3_rr1.flac | -1.83 | 0.00
+  vibes/F5_l1_rr1.flac | -1.01 | -0.00
+  vibes/F5_l2_rr1.flac | -1.01 | -0.00
+  vibes/F5_l3_rr1.flac | -1.15 | -0.14
+  vibes/A5_l1_rr1.flac | -0.43 | 0.00
+  vibes/A5_l2_rr1.flac | -0.43 | 0.00
+  vibes/A5_l3_rr1.flac | -0.45 | -0.02
+  vibes/C6_l1_rr1.flac | -0.23 | 0.00
+  vibes/C6_l2_rr1.flac | -0.23 | -0.00
+  vibes/C6_l3_rr1.flac | -0.24 | -0.01
+  vibes/E6_l1_rr1.flac | -0.12 | -0.00
+  vibes/E6_l2_rr1.flac | -0.12 | 0.00
+  vibes/E6_l3_rr1.flac | -0.13 | -0.01
+calibration vibes: median trim 1.82 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  vibes/F3_l1_rr1.flac | 1 | -71.38 | -47.00 | 24.38 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/F3_l2_rr1.flac | 2 | -45.79 | -35.07 | 10.72 | 10.72 | 8.90 | FLAG applied >9 dB (includes instrument trim)
+  vibes/F3_l3_rr1.flac | 3 | -35.88 | -29.52 | 6.36 | 6.36 | 4.54
+  vibes/A3_l1_rr1.flac | 1 | -61.21 | -48.58 | 12.62 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/A3_l2_rr1.flac | 2 | -41.37 | -36.65 | 4.72 | 4.72 | 2.90
+  vibes/A3_l3_rr1.flac | 3 | -32.91 | -31.10 | 1.81 | 1.81 | -0.01
+  vibes/C4_l1_rr2.flac | 1 | -47.45 | -46.71 | 0.74 | 0.74 | -1.08
+  vibes/C4_l2_rr1.flac | 2 | -45.14 | -34.78 | 10.36 | 10.36 | 8.54 | FLAG applied >9 dB (includes instrument trim)
+  vibes/C4_l3_rr1.flac | 3 | -35.70 | -29.23 | 6.47 | 6.47 | 4.65
+  vibes/E4_l1_rr2.flac | 1 | -45.98 | -50.45 | -4.47 | -4.47 | -6.29
+  vibes/E4_l2_rr1.flac | 2 | -41.87 | -37.56 | 4.30 | 4.30 | 2.48
+  vibes/E4_l3_rr1.flac | 3 | -38.15 | -32.01 | 6.14 | 6.14 | 4.32
+  vibes/G4_l1_rr1.flac | 1 | -50.00 | -51.62 | -1.62 | -1.62 | -3.44
+  vibes/G4_l2_rr1.flac | 2 | -45.54 | -37.25 | 8.30 | 8.30 | 6.48
+  vibes/G4_l3_rr1.flac | 3 | -40.32 | -31.70 | 8.62 | 8.62 | 6.80
+  vibes/B4_l1_rr1.flac | 1 | -52.78 | -49.24 | 3.54 | 3.54 | 1.72
+  vibes/B4_l2_rr1.flac | 2 | -42.08 | -37.31 | 4.77 | 4.77 | 2.95
+  vibes/B4_l3_rr1.flac | 3 | -36.82 | -31.76 | 5.06 | 5.06 | 3.24
+  vibes/D5_l1_rr1.flac | 1 | -48.80 | -69.33 | -20.53 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/D5_l2_rr1.flac | 2 | -38.15 | -38.23 | -0.08 | -0.08 | -1.89
+  vibes/D5_l3_rr1.flac | 3 | -30.71 | -32.68 | -1.97 | -1.97 | -3.79
+  vibes/F5_l1_rr1.flac | 1 | -49.82 | -50.04 | -0.22 | -0.22 | -2.04
+  vibes/F5_l2_rr1.flac | 2 | -43.37 | -38.11 | 5.26 | 5.26 | 3.44
+  vibes/F5_l3_rr1.flac | 3 | -31.28 | -32.56 | -1.28 | -1.28 | -3.10
+  vibes/A5_l1_rr1.flac | 1 | -56.41 | -51.13 | 5.29 | 5.29 | 3.47
+  vibes/A5_l2_rr1.flac | 2 | -40.91 | -39.09 | 1.82 | 1.82 | 0.00
+  vibes/A5_l3_rr1.flac | 3 | -34.25 | -33.54 | 0.71 | 0.71 | -1.11
+  vibes/C6_l1_rr1.flac | 1 | -51.34 | -74.53 | -23.19 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/C6_l2_rr1.flac | 2 | -39.52 | -40.02 | -0.50 | -0.50 | -2.32
+  vibes/C6_l3_rr1.flac | 3 | -32.04 | -34.48 | -2.44 | -2.44 | -4.26
+  vibes/E6_l1_rr1.flac | 1 | -57.27 | -57.49 | -0.22 | -0.22 | -2.04
+  vibes/E6_l2_rr1.flac | 2 | -38.49 | -40.28 | -1.79 | -1.79 | -3.61
+  vibes/E6_l3_rr1.flac | 3 | -30.64 | -34.73 | -4.10 | -4.10 | -5.92
+voices   recordings: lead (harp), counter (vibes); modeled: chords (strings), bass (bass), kick (kick), snare (snare), ghost (snare), hat (hat), perc (hat)
+spectrum harp: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  harp/E1_l2_rr1.flac | -11.34 | -2.10
+  harp/G1_l1_rr1.flac | -7.16 | 5.38
+  harp/G1_l2_rr1.flac | -7.81 | 3.27
+  harp/B1_l1_rr1.flac | -11.04 | 1.27
+  harp/B1_l2_rr1.flac | -11.60 | 0.14
+  harp/D2_l1_rr1.flac | -9.74 | 6.62
+  harp/D2_l2_rr1.flac | -9.74 | 5.20
+  harp/F2_l1_rr1.flac | -11.81 | -4.16
+  harp/F2_l2_rr1.flac | -9.36 | -3.58
+  harp/A2_l1_rr1.flac | -11.45 | -3.28
+  harp/A2_l2_rr1.flac | -11.08 | -5.77
+  harp/C3_l1_rr1.flac | -6.43 | 0.90
+  harp/C3_l2_rr1.flac | -7.38 | -1.27
+  harp/E3_l1_rr1.flac | -6.53 | 0.81
+  harp/E3_l2_rr1.flac | -5.86 | -1.79
+  harp/G3_l1_rr1.flac | -10.52 | -5.10
+  harp/G3_l2_rr1.flac | -7.61 | -3.28
+  harp/B3_l1_rr1.flac | -10.85 | 1.40
+  harp/B3_l2_rr1.flac | -8.88 | 2.65
+  harp/D4_l1_rr1.flac | -6.60 | -3.67
+  harp/D4_l2_rr1.flac | -5.58 | -3.57
+  harp/F4_l1_rr1.flac | -6.71 | 0.14
+  harp/F4_l2_rr1.flac | -6.52 | -2.88
+  harp/A4_l1_rr1.flac | -3.96 | 1.15
+  harp/A4_l2_rr1.flac | -3.51 | 1.02
+  harp/C5_l1_rr1.flac | -2.67 | 0.47
+  harp/C5_l2_rr1.flac | -2.32 | 0.35
+  harp/E5_l1_rr1.flac | -1.22 | 3.25
+  harp/E5_l2_rr1.flac | -1.06 | 1.40
+  harp/G5_l1_rr1.flac | -0.75 | 3.29
+  harp/G5_l2_rr1.flac | -0.63 | 0.47
+  harp/B5_l1_rr1.flac | -0.36 | 7.19
+  harp/B5_l2_rr1.flac | -0.71 | 5.03
+  harp/D6_l1_rr1.flac | -0.39 | 7.09
+  harp/D6_l2_rr1.flac | -0.33 | 4.85
+  harp/F6_l1_rr1.flac | -0.31 | 16.94
+  harp/F6_l2_rr1.flac | -0.49 | 14.15
+  harp/A6_l1_rr1.flac | -0.56 | 14.07
+  harp/A6_l2_rr1.flac | -0.46 | 15.75
+  harp/B6_l1_rr1.flac | -0.46 | 19.34
+  harp/B6_l2_rr1.flac | -0.39 | 16.31
+  harp/D7_l1_rr1.flac | -1.48 | 12.33
+  harp/D7_l2_rr1.flac | -0.85 | 9.36
+  harp/F7_l1_rr1.flac | -0.82 | 20.80
+  harp/F7_l2_rr1.flac | -0.90 | 18.18
+calibration harp: median trim -3.29 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  harp/E1_l2_rr1.flac | 2 | -51.57 | -42.31 | 9.26 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l1_rr1.flac | 1 | -73.09 | -53.16 | 19.92 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l2_rr1.flac | 2 | -52.96 | -42.19 | 10.77 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/B1_l1_rr1.flac | 1 | -58.90 | -55.61 | 3.29 | 3.29 | 6.58
+  harp/B1_l2_rr1.flac | 2 | -45.73 | -41.60 | 4.14 | 4.14 | 7.43
+  harp/D2_l1_rr1.flac | 1 | -58.67 | -53.87 | 4.80 | 4.80 | 8.09
+  harp/D2_l2_rr1.flac | 2 | -43.79 | -41.23 | 2.56 | 2.56 | 5.86
+  harp/F2_l1_rr1.flac | 1 | -56.92 | -56.33 | 0.59 | 0.59 | 3.88
+  harp/F2_l2_rr1.flac | 2 | -46.94 | -44.68 | 2.25 | 2.25 | 5.55
+  harp/A2_l1_rr1.flac | 1 | -51.40 | -56.50 | -5.10 | -5.10 | -1.81
+  harp/A2_l2_rr1.flac | 2 | -43.15 | -43.11 | 0.03 | 0.03 | 3.33
+  harp/C3_l1_rr1.flac | 1 | -55.06 | -55.58 | -0.52 | -0.52 | 2.77
+  harp/C3_l2_rr1.flac | 2 | -41.61 | -44.44 | -2.84 | -2.84 | 0.45
+  harp/E3_l1_rr1.flac | 1 | -53.69 | -56.99 | -3.29 | -3.29 | 0.00
+  harp/E3_l2_rr1.flac | 2 | -47.59 | -45.66 | 1.93 | 1.93 | 5.22
+  harp/G3_l1_rr1.flac | 1 | -45.43 | -54.96 | -9.53 | -9.53 | -6.24 | FLAG applied >9 dB (includes instrument trim)
+  harp/G3_l2_rr1.flac | 2 | -40.12 | -43.42 | -3.30 | -3.30 | -0.00
+  harp/B3_l1_rr1.flac | 1 | -47.28 | -55.11 | -7.83 | -7.83 | -4.54
+  harp/B3_l2_rr1.flac | 2 | -44.81 | -42.71 | 2.11 | 2.11 | 5.40
+  harp/D4_l1_rr1.flac | 1 | -47.76 | -58.66 | -10.90 | -10.90 | -7.61 | FLAG applied >9 dB (includes instrument trim)
+  harp/D4_l2_rr1.flac | 2 | -42.62 | -45.52 | -2.90 | -2.90 | 0.39
+  harp/F4_l1_rr1.flac | 1 | -43.80 | -56.21 | -12.41 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/F4_l2_rr1.flac | 2 | -40.29 | -45.40 | -5.11 | -5.11 | -1.82
+  harp/A4_l1_rr1.flac | 1 | -48.29 | -61.60 | -13.31 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/A4_l2_rr1.flac | 2 | -42.96 | -47.68 | -4.72 | -4.72 | -1.43
+  harp/C5_l1_rr1.flac | 1 | -48.74 | -60.10 | -11.36 | -11.36 | -8.07 | FLAG applied >9 dB (includes instrument trim)
+  harp/C5_l2_rr1.flac | 2 | -43.74 | -45.90 | -2.17 | -2.17 | 1.13
+  harp/E5_l1_rr1.flac | 1 | -45.39 | -63.62 | -18.23 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/E5_l2_rr1.flac | 2 | -41.94 | -49.36 | -7.42 | -7.42 | -4.13
+  harp/G5_l1_rr1.flac | 1 | -55.57 | -63.86 | -8.30 | -8.30 | -5.00
+  harp/G5_l2_rr1.flac | 2 | -51.54 | -48.78 | 2.76 | 2.76 | 6.05
+  harp/B5_l1_rr1.flac | 1 | -52.48 | -65.21 | -12.73 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/B5_l2_rr1.flac | 2 | -53.34 | -52.57 | 0.77 | 0.77 | 4.06
+  harp/D6_l1_rr1.flac | 1 | -52.83 | -65.59 | -12.76 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/D6_l2_rr1.flac | 2 | -45.90 | -53.03 | -7.14 | -7.14 | -3.84
+  harp/F6_l1_rr1.flac | 1 | -59.53 | -66.35 | -6.82 | -6.82 | -3.53
+  harp/F6_l2_rr1.flac | 2 | -49.03 | -53.76 | -4.73 | -4.73 | -1.44
+  harp/A6_l1_rr1.flac | 1 | -58.38 | -66.70 | -8.31 | -8.31 | -5.02
+  harp/A6_l2_rr1.flac | 2 | -52.90 | -54.40 | -1.50 | -1.50 | 1.79
+  harp/B6_l1_rr1.flac | 1 | -61.85 | -67.03 | -5.18 | -5.18 | -1.89
+  harp/B6_l2_rr1.flac | 2 | -48.08 | -54.67 | -6.59 | -6.59 | -3.29
+  harp/D7_l1_rr1.flac | 1 | -78.67 | -67.37 | 11.30 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/D7_l2_rr1.flac | 2 | -54.22 | -54.73 | -0.52 | -0.52 | 2.78
+  harp/F7_l1_rr1.flac | 1 | -74.73 | -67.45 | 7.29 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/F7_l2_rr1.flac | 2 | -50.99 | -54.94 | -3.95 | -3.95 | -0.65
+spectrum vibes: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  vibes/F3_l1_rr1.flac | -0.50 | 17.87
+  vibes/F3_l2_rr1.flac | -0.22 | 18.14
+  vibes/F3_l3_rr1.flac | -0.25 | 18.09
+  vibes/A3_l1_rr1.flac | -6.97 | 7.44
+  vibes/A3_l2_rr1.flac | -0.46 | 13.94
+  vibes/A3_l3_rr1.flac | -0.45 | 13.93
+  vibes/C4_l1_rr2.flac | -11.54 | 0.05
+  vibes/C4_l2_rr1.flac | -3.23 | 8.36
+  vibes/C4_l3_rr1.flac | -1.44 | 10.14
+  vibes/E4_l1_rr2.flac | -8.00 | -0.02
+  vibes/E4_l2_rr1.flac | -4.97 | 3.01
+  vibes/E4_l3_rr1.flac | -4.28 | 3.70
+  vibes/G4_l1_rr1.flac | -5.63 | -0.02
+  vibes/G4_l2_rr1.flac | -5.31 | 0.30
+  vibes/G4_l3_rr1.flac | -5.11 | 0.50
+  vibes/B4_l1_rr1.flac | -3.12 | 0.01
+  vibes/B4_l2_rr1.flac | -3.09 | 0.03
+  vibes/B4_l3_rr1.flac | -2.54 | 0.59
+  vibes/D5_l1_rr1.flac | -1.83 | -0.00
+  vibes/D5_l2_rr1.flac | -1.82 | 0.01
+  vibes/D5_l3_rr1.flac | -1.83 | 0.00
+  vibes/F5_l1_rr1.flac | -1.01 | -0.00
+  vibes/F5_l2_rr1.flac | -1.01 | -0.00
+  vibes/F5_l3_rr1.flac | -1.15 | -0.14
+  vibes/A5_l1_rr1.flac | -0.43 | 0.00
+  vibes/A5_l2_rr1.flac | -0.43 | 0.00
+  vibes/A5_l3_rr1.flac | -0.45 | -0.02
+  vibes/C6_l1_rr1.flac | -0.23 | 0.00
+  vibes/C6_l2_rr1.flac | -0.23 | -0.00
+  vibes/C6_l3_rr1.flac | -0.24 | -0.01
+  vibes/E6_l1_rr1.flac | -0.12 | -0.00
+  vibes/E6_l2_rr1.flac | -0.12 | 0.00
+  vibes/E6_l3_rr1.flac | -0.13 | -0.01
+calibration vibes: median trim 1.82 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  vibes/F3_l1_rr1.flac | 1 | -71.38 | -47.00 | 24.38 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/F3_l2_rr1.flac | 2 | -45.79 | -35.07 | 10.72 | 10.72 | 8.90 | FLAG applied >9 dB (includes instrument trim)
+  vibes/F3_l3_rr1.flac | 3 | -35.88 | -29.52 | 6.36 | 6.36 | 4.54
+  vibes/A3_l1_rr1.flac | 1 | -61.21 | -48.58 | 12.62 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/A3_l2_rr1.flac | 2 | -41.37 | -36.65 | 4.72 | 4.72 | 2.90
+  vibes/A3_l3_rr1.flac | 3 | -32.91 | -31.10 | 1.81 | 1.81 | -0.01
+  vibes/C4_l1_rr2.flac | 1 | -47.45 | -46.71 | 0.74 | 0.74 | -1.08
+  vibes/C4_l2_rr1.flac | 2 | -45.14 | -34.78 | 10.36 | 10.36 | 8.54 | FLAG applied >9 dB (includes instrument trim)
+  vibes/C4_l3_rr1.flac | 3 | -35.70 | -29.23 | 6.47 | 6.47 | 4.65
+  vibes/E4_l1_rr2.flac | 1 | -45.98 | -50.45 | -4.47 | -4.47 | -6.29
+  vibes/E4_l2_rr1.flac | 2 | -41.87 | -37.56 | 4.30 | 4.30 | 2.48
+  vibes/E4_l3_rr1.flac | 3 | -38.15 | -32.01 | 6.14 | 6.14 | 4.32
+  vibes/G4_l1_rr1.flac | 1 | -50.00 | -51.62 | -1.62 | -1.62 | -3.44
+  vibes/G4_l2_rr1.flac | 2 | -45.54 | -37.25 | 8.30 | 8.30 | 6.48
+  vibes/G4_l3_rr1.flac | 3 | -40.32 | -31.70 | 8.62 | 8.62 | 6.80
+  vibes/B4_l1_rr1.flac | 1 | -52.78 | -49.24 | 3.54 | 3.54 | 1.72
+  vibes/B4_l2_rr1.flac | 2 | -42.08 | -37.31 | 4.77 | 4.77 | 2.95
+  vibes/B4_l3_rr1.flac | 3 | -36.82 | -31.76 | 5.06 | 5.06 | 3.24
+  vibes/D5_l1_rr1.flac | 1 | -48.80 | -69.33 | -20.53 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/D5_l2_rr1.flac | 2 | -38.15 | -38.23 | -0.08 | -0.08 | -1.89
+  vibes/D5_l3_rr1.flac | 3 | -30.71 | -32.68 | -1.97 | -1.97 | -3.79
+  vibes/F5_l1_rr1.flac | 1 | -49.82 | -50.04 | -0.22 | -0.22 | -2.04
+  vibes/F5_l2_rr1.flac | 2 | -43.37 | -38.11 | 5.26 | 5.26 | 3.44
+  vibes/F5_l3_rr1.flac | 3 | -31.28 | -32.56 | -1.28 | -1.28 | -3.10
+  vibes/A5_l1_rr1.flac | 1 | -56.41 | -51.13 | 5.29 | 5.29 | 3.47
+  vibes/A5_l2_rr1.flac | 2 | -40.91 | -39.09 | 1.82 | 1.82 | 0.00
+  vibes/A5_l3_rr1.flac | 3 | -34.25 | -33.54 | 0.71 | 0.71 | -1.11
+  vibes/C6_l1_rr1.flac | 1 | -51.34 | -74.53 | -23.19 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/C6_l2_rr1.flac | 2 | -39.52 | -40.02 | -0.50 | -0.50 | -2.32
+  vibes/C6_l3_rr1.flac | 3 | -32.04 | -34.48 | -2.44 | -2.44 | -4.26
+  vibes/E6_l1_rr1.flac | 1 | -57.27 | -57.49 | -0.22 | -0.22 | -2.04
+  vibes/E6_l2_rr1.flac | 2 | -38.49 | -40.28 | -1.79 | -1.79 | -3.61
+  vibes/E6_l3_rr1.flac | 3 | -30.64 | -34.73 | -4.10 | -4.10 | -5.92
+voices   recordings: lead (harp), counter (vibes); modeled: chords (strings), bass (bass), kick (kick), snare (snare), ghost (snare), hat (hat), perc (hat)
+spectrum harp: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  harp/E1_l2_rr1.flac | -11.34 | -2.10
+  harp/G1_l1_rr1.flac | -7.16 | 5.38
+  harp/G1_l2_rr1.flac | -7.81 | 3.27
+  harp/B1_l1_rr1.flac | -11.04 | 1.27
+  harp/B1_l2_rr1.flac | -11.60 | 0.14
+  harp/D2_l1_rr1.flac | -9.74 | 6.62
+  harp/D2_l2_rr1.flac | -9.74 | 5.20
+  harp/F2_l1_rr1.flac | -11.81 | -4.16
+  harp/F2_l2_rr1.flac | -9.36 | -3.58
+  harp/A2_l1_rr1.flac | -11.45 | -3.28
+  harp/A2_l2_rr1.flac | -11.08 | -5.77
+  harp/C3_l1_rr1.flac | -6.43 | 0.90
+  harp/C3_l2_rr1.flac | -7.38 | -1.27
+  harp/E3_l1_rr1.flac | -6.53 | 0.81
+  harp/E3_l2_rr1.flac | -5.86 | -1.79
+  harp/G3_l1_rr1.flac | -10.52 | -5.10
+  harp/G3_l2_rr1.flac | -7.61 | -3.28
+  harp/B3_l1_rr1.flac | -10.85 | 1.40
+  harp/B3_l2_rr1.flac | -8.88 | 2.65
+  harp/D4_l1_rr1.flac | -6.60 | -3.67
+  harp/D4_l2_rr1.flac | -5.58 | -3.57
+  harp/F4_l1_rr1.flac | -6.71 | 0.14
+  harp/F4_l2_rr1.flac | -6.52 | -2.88
+  harp/A4_l1_rr1.flac | -3.96 | 1.15
+  harp/A4_l2_rr1.flac | -3.51 | 1.02
+  harp/C5_l1_rr1.flac | -2.67 | 0.47
+  harp/C5_l2_rr1.flac | -2.32 | 0.35
+  harp/E5_l1_rr1.flac | -1.22 | 3.25
+  harp/E5_l2_rr1.flac | -1.06 | 1.40
+  harp/G5_l1_rr1.flac | -0.75 | 3.29
+  harp/G5_l2_rr1.flac | -0.63 | 0.47
+  harp/B5_l1_rr1.flac | -0.36 | 7.19
+  harp/B5_l2_rr1.flac | -0.71 | 5.03
+  harp/D6_l1_rr1.flac | -0.39 | 7.09
+  harp/D6_l2_rr1.flac | -0.33 | 4.85
+  harp/F6_l1_rr1.flac | -0.31 | 16.94
+  harp/F6_l2_rr1.flac | -0.49 | 14.15
+  harp/A6_l1_rr1.flac | -0.56 | 14.07
+  harp/A6_l2_rr1.flac | -0.46 | 15.75
+  harp/B6_l1_rr1.flac | -0.46 | 19.34
+  harp/B6_l2_rr1.flac | -0.39 | 16.31
+  harp/D7_l1_rr1.flac | -1.48 | 12.33
+  harp/D7_l2_rr1.flac | -0.85 | 9.36
+  harp/F7_l1_rr1.flac | -0.82 | 20.80
+  harp/F7_l2_rr1.flac | -0.90 | 18.18
+calibration harp: median trim -3.29 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  harp/E1_l2_rr1.flac | 2 | -51.57 | -42.31 | 9.26 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l1_rr1.flac | 1 | -73.09 | -53.16 | 19.92 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l2_rr1.flac | 2 | -52.96 | -42.19 | 10.77 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/B1_l1_rr1.flac | 1 | -58.90 | -55.61 | 3.29 | 3.29 | 6.58
+  harp/B1_l2_rr1.flac | 2 | -45.73 | -41.60 | 4.14 | 4.14 | 7.43
+  harp/D2_l1_rr1.flac | 1 | -58.67 | -53.87 | 4.80 | 4.80 | 8.09
+  harp/D2_l2_rr1.flac | 2 | -43.79 | -41.23 | 2.56 | 2.56 | 5.86
+  harp/F2_l1_rr1.flac | 1 | -56.92 | -56.33 | 0.59 | 0.59 | 3.88
+  harp/F2_l2_rr1.flac | 2 | -46.94 | -44.68 | 2.25 | 2.25 | 5.55
+  harp/A2_l1_rr1.flac | 1 | -51.40 | -56.50 | -5.10 | -5.10 | -1.81
+  harp/A2_l2_rr1.flac | 2 | -43.15 | -43.11 | 0.03 | 0.03 | 3.33
+  harp/C3_l1_rr1.flac | 1 | -55.06 | -55.58 | -0.52 | -0.52 | 2.77
+  harp/C3_l2_rr1.flac | 2 | -41.61 | -44.44 | -2.84 | -2.84 | 0.45
+  harp/E3_l1_rr1.flac | 1 | -53.69 | -56.99 | -3.29 | -3.29 | 0.00
+  harp/E3_l2_rr1.flac | 2 | -47.59 | -45.66 | 1.93 | 1.93 | 5.22
+  harp/G3_l1_rr1.flac | 1 | -45.43 | -54.96 | -9.53 | -9.53 | -6.24 | FLAG applied >9 dB (includes instrument trim)
+  harp/G3_l2_rr1.flac | 2 | -40.12 | -43.42 | -3.30 | -3.30 | -0.00
+  harp/B3_l1_rr1.flac | 1 | -47.28 | -55.11 | -7.83 | -7.83 | -4.54
+  harp/B3_l2_rr1.flac | 2 | -44.81 | -42.71 | 2.11 | 2.11 | 5.40
+  harp/D4_l1_rr1.flac | 1 | -47.76 | -58.66 | -10.90 | -10.90 | -7.61 | FLAG applied >9 dB (includes instrument trim)
+  harp/D4_l2_rr1.flac | 2 | -42.62 | -45.52 | -2.90 | -2.90 | 0.39
+  harp/F4_l1_rr1.flac | 1 | -43.80 | -56.21 | -12.41 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/F4_l2_rr1.flac | 2 | -40.29 | -45.40 | -5.11 | -5.11 | -1.82
+  harp/A4_l1_rr1.flac | 1 | -48.29 | -61.60 | -13.31 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/A4_l2_rr1.flac | 2 | -42.96 | -47.68 | -4.72 | -4.72 | -1.43
+  harp/C5_l1_rr1.flac | 1 | -48.74 | -60.10 | -11.36 | -11.36 | -8.07 | FLAG applied >9 dB (includes instrument trim)
+  harp/C5_l2_rr1.flac | 2 | -43.74 | -45.90 | -2.17 | -2.17 | 1.13
+  harp/E5_l1_rr1.flac | 1 | -45.39 | -63.62 | -18.23 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/E5_l2_rr1.flac | 2 | -41.94 | -49.36 | -7.42 | -7.42 | -4.13
+  harp/G5_l1_rr1.flac | 1 | -55.57 | -63.86 | -8.30 | -8.30 | -5.00
+  harp/G5_l2_rr1.flac | 2 | -51.54 | -48.78 | 2.76 | 2.76 | 6.05
+  harp/B5_l1_rr1.flac | 1 | -52.48 | -65.21 | -12.73 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/B5_l2_rr1.flac | 2 | -53.34 | -52.57 | 0.77 | 0.77 | 4.06
+  harp/D6_l1_rr1.flac | 1 | -52.83 | -65.59 | -12.76 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/D6_l2_rr1.flac | 2 | -45.90 | -53.03 | -7.14 | -7.14 | -3.84
+  harp/F6_l1_rr1.flac | 1 | -59.53 | -66.35 | -6.82 | -6.82 | -3.53
+  harp/F6_l2_rr1.flac | 2 | -49.03 | -53.76 | -4.73 | -4.73 | -1.44
+  harp/A6_l1_rr1.flac | 1 | -58.38 | -66.70 | -8.31 | -8.31 | -5.02
+  harp/A6_l2_rr1.flac | 2 | -52.90 | -54.40 | -1.50 | -1.50 | 1.79
+  harp/B6_l1_rr1.flac | 1 | -61.85 | -67.03 | -5.18 | -5.18 | -1.89
+  harp/B6_l2_rr1.flac | 2 | -48.08 | -54.67 | -6.59 | -6.59 | -3.29
+  harp/D7_l1_rr1.flac | 1 | -78.67 | -67.37 | 11.30 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/D7_l2_rr1.flac | 2 | -54.22 | -54.73 | -0.52 | -0.52 | 2.78
+  harp/F7_l1_rr1.flac | 1 | -74.73 | -67.45 | 7.29 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/F7_l2_rr1.flac | 2 | -50.99 | -54.94 | -3.95 | -3.95 | -0.65
+spectrum vibes: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  vibes/F3_l1_rr1.flac | -0.50 | 17.87
+  vibes/F3_l2_rr1.flac | -0.22 | 18.14
+  vibes/F3_l3_rr1.flac | -0.25 | 18.09
+  vibes/A3_l1_rr1.flac | -6.97 | 7.44
+  vibes/A3_l2_rr1.flac | -0.46 | 13.94
+  vibes/A3_l3_rr1.flac | -0.45 | 13.93
+  vibes/C4_l1_rr2.flac | -11.54 | 0.05
+  vibes/C4_l2_rr1.flac | -3.23 | 8.36
+  vibes/C4_l3_rr1.flac | -1.44 | 10.14
+  vibes/E4_l1_rr2.flac | -8.00 | -0.02
+  vibes/E4_l2_rr1.flac | -4.97 | 3.01
+  vibes/E4_l3_rr1.flac | -4.28 | 3.70
+  vibes/G4_l1_rr1.flac | -5.63 | -0.02
+  vibes/G4_l2_rr1.flac | -5.31 | 0.30
+  vibes/G4_l3_rr1.flac | -5.11 | 0.50
+  vibes/B4_l1_rr1.flac | -3.12 | 0.01
+  vibes/B4_l2_rr1.flac | -3.09 | 0.03
+  vibes/B4_l3_rr1.flac | -2.54 | 0.59
+  vibes/D5_l1_rr1.flac | -1.83 | -0.00
+  vibes/D5_l2_rr1.flac | -1.82 | 0.01
+  vibes/D5_l3_rr1.flac | -1.83 | 0.00
+  vibes/F5_l1_rr1.flac | -1.01 | -0.00
+  vibes/F5_l2_rr1.flac | -1.01 | -0.00
+  vibes/F5_l3_rr1.flac | -1.15 | -0.14
+  vibes/A5_l1_rr1.flac | -0.43 | 0.00
+  vibes/A5_l2_rr1.flac | -0.43 | 0.00
+  vibes/A5_l3_rr1.flac | -0.45 | -0.02
+  vibes/C6_l1_rr1.flac | -0.23 | 0.00
+  vibes/C6_l2_rr1.flac | -0.23 | -0.00
+  vibes/C6_l3_rr1.flac | -0.24 | -0.01
+  vibes/E6_l1_rr1.flac | -0.12 | -0.00
+  vibes/E6_l2_rr1.flac | -0.12 | 0.00
+  vibes/E6_l3_rr1.flac | -0.13 | -0.01
+calibration vibes: median trim 1.82 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  vibes/F3_l1_rr1.flac | 1 | -71.38 | -47.00 | 24.38 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/F3_l2_rr1.flac | 2 | -45.79 | -35.07 | 10.72 | 10.72 | 8.90 | FLAG applied >9 dB (includes instrument trim)
+  vibes/F3_l3_rr1.flac | 3 | -35.88 | -29.52 | 6.36 | 6.36 | 4.54
+  vibes/A3_l1_rr1.flac | 1 | -61.21 | -48.58 | 12.62 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/A3_l2_rr1.flac | 2 | -41.37 | -36.65 | 4.72 | 4.72 | 2.90
+  vibes/A3_l3_rr1.flac | 3 | -32.91 | -31.10 | 1.81 | 1.81 | -0.01
+  vibes/C4_l1_rr2.flac | 1 | -47.45 | -46.71 | 0.74 | 0.74 | -1.08
+  vibes/C4_l2_rr1.flac | 2 | -45.14 | -34.78 | 10.36 | 10.36 | 8.54 | FLAG applied >9 dB (includes instrument trim)
+  vibes/C4_l3_rr1.flac | 3 | -35.70 | -29.23 | 6.47 | 6.47 | 4.65
+  vibes/E4_l1_rr2.flac | 1 | -45.98 | -50.45 | -4.47 | -4.47 | -6.29
+  vibes/E4_l2_rr1.flac | 2 | -41.87 | -37.56 | 4.30 | 4.30 | 2.48
+  vibes/E4_l3_rr1.flac | 3 | -38.15 | -32.01 | 6.14 | 6.14 | 4.32
+  vibes/G4_l1_rr1.flac | 1 | -50.00 | -51.62 | -1.62 | -1.62 | -3.44
+  vibes/G4_l2_rr1.flac | 2 | -45.54 | -37.25 | 8.30 | 8.30 | 6.48
+  vibes/G4_l3_rr1.flac | 3 | -40.32 | -31.70 | 8.62 | 8.62 | 6.80
+  vibes/B4_l1_rr1.flac | 1 | -52.78 | -49.24 | 3.54 | 3.54 | 1.72
+  vibes/B4_l2_rr1.flac | 2 | -42.08 | -37.31 | 4.77 | 4.77 | 2.95
+  vibes/B4_l3_rr1.flac | 3 | -36.82 | -31.76 | 5.06 | 5.06 | 3.24
+  vibes/D5_l1_rr1.flac | 1 | -48.80 | -69.33 | -20.53 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/D5_l2_rr1.flac | 2 | -38.15 | -38.23 | -0.08 | -0.08 | -1.89
+  vibes/D5_l3_rr1.flac | 3 | -30.71 | -32.68 | -1.97 | -1.97 | -3.79
+  vibes/F5_l1_rr1.flac | 1 | -49.82 | -50.04 | -0.22 | -0.22 | -2.04
+  vibes/F5_l2_rr1.flac | 2 | -43.37 | -38.11 | 5.26 | 5.26 | 3.44
+  vibes/F5_l3_rr1.flac | 3 | -31.28 | -32.56 | -1.28 | -1.28 | -3.10
+  vibes/A5_l1_rr1.flac | 1 | -56.41 | -51.13 | 5.29 | 5.29 | 3.47
+  vibes/A5_l2_rr1.flac | 2 | -40.91 | -39.09 | 1.82 | 1.82 | 0.00
+  vibes/A5_l3_rr1.flac | 3 | -34.25 | -33.54 | 0.71 | 0.71 | -1.11
+  vibes/C6_l1_rr1.flac | 1 | -51.34 | -74.53 | -23.19 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/C6_l2_rr1.flac | 2 | -39.52 | -40.02 | -0.50 | -0.50 | -2.32
+  vibes/C6_l3_rr1.flac | 3 | -32.04 | -34.48 | -2.44 | -2.44 | -4.26
+  vibes/E6_l1_rr1.flac | 1 | -57.27 | -57.49 | -0.22 | -0.22 | -2.04
+  vibes/E6_l2_rr1.flac | 2 | -38.49 | -40.28 | -1.79 | -1.79 | -3.61
+  vibes/E6_l3_rr1.flac | 3 | -30.64 | -34.73 | -4.10 | -4.10 | -5.92
+voices   recordings: lead (harp), counter (vibes); modeled: chords (strings), bass (bass), kick (kick), snare (snare), ghost (snare), hat (hat), perc (hat)
+spectrum harp: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  harp/E1_l2_rr1.flac | -11.34 | -2.10
+  harp/G1_l1_rr1.flac | -7.16 | 5.38
+  harp/G1_l2_rr1.flac | -7.81 | 3.27
+  harp/B1_l1_rr1.flac | -11.04 | 1.27
+  harp/B1_l2_rr1.flac | -11.60 | 0.14
+  harp/D2_l1_rr1.flac | -9.74 | 6.62
+  harp/D2_l2_rr1.flac | -9.74 | 5.20
+  harp/F2_l1_rr1.flac | -11.81 | -4.16
+  harp/F2_l2_rr1.flac | -9.36 | -3.58
+  harp/A2_l1_rr1.flac | -11.45 | -3.28
+  harp/A2_l2_rr1.flac | -11.08 | -5.77
+  harp/C3_l1_rr1.flac | -6.43 | 0.90
+  harp/C3_l2_rr1.flac | -7.38 | -1.27
+  harp/E3_l1_rr1.flac | -6.53 | 0.81
+  harp/E3_l2_rr1.flac | -5.86 | -1.79
+  harp/G3_l1_rr1.flac | -10.52 | -5.10
+  harp/G3_l2_rr1.flac | -7.61 | -3.28
+  harp/B3_l1_rr1.flac | -10.85 | 1.40
+  harp/B3_l2_rr1.flac | -8.88 | 2.65
+  harp/D4_l1_rr1.flac | -6.60 | -3.67
+  harp/D4_l2_rr1.flac | -5.58 | -3.57
+  harp/F4_l1_rr1.flac | -6.71 | 0.14
+  harp/F4_l2_rr1.flac | -6.52 | -2.88
+  harp/A4_l1_rr1.flac | -3.96 | 1.15
+  harp/A4_l2_rr1.flac | -3.51 | 1.02
+  harp/C5_l1_rr1.flac | -2.67 | 0.47
+  harp/C5_l2_rr1.flac | -2.32 | 0.35
+  harp/E5_l1_rr1.flac | -1.22 | 3.25
+  harp/E5_l2_rr1.flac | -1.06 | 1.40
+  harp/G5_l1_rr1.flac | -0.75 | 3.29
+  harp/G5_l2_rr1.flac | -0.63 | 0.47
+  harp/B5_l1_rr1.flac | -0.36 | 7.19
+  harp/B5_l2_rr1.flac | -0.71 | 5.03
+  harp/D6_l1_rr1.flac | -0.39 | 7.09
+  harp/D6_l2_rr1.flac | -0.33 | 4.85
+  harp/F6_l1_rr1.flac | -0.31 | 16.94
+  harp/F6_l2_rr1.flac | -0.49 | 14.15
+  harp/A6_l1_rr1.flac | -0.56 | 14.07
+  harp/A6_l2_rr1.flac | -0.46 | 15.75
+  harp/B6_l1_rr1.flac | -0.46 | 19.34
+  harp/B6_l2_rr1.flac | -0.39 | 16.31
+  harp/D7_l1_rr1.flac | -1.48 | 12.33
+  harp/D7_l2_rr1.flac | -0.85 | 9.36
+  harp/F7_l1_rr1.flac | -0.82 | 20.80
+  harp/F7_l2_rr1.flac | -0.90 | 18.18
+calibration harp: median trim -3.29 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  harp/E1_l2_rr1.flac | 2 | -51.57 | -42.31 | 9.26 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l1_rr1.flac | 1 | -73.09 | -53.16 | 19.92 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/G1_l2_rr1.flac | 2 | -52.96 | -42.19 | 10.77 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/B1_l1_rr1.flac | 1 | -58.90 | -55.61 | 3.29 | 3.29 | 6.58
+  harp/B1_l2_rr1.flac | 2 | -45.73 | -41.60 | 4.14 | 4.14 | 7.43
+  harp/D2_l1_rr1.flac | 1 | -58.67 | -53.87 | 4.80 | 4.80 | 8.09
+  harp/D2_l2_rr1.flac | 2 | -43.79 | -41.23 | 2.56 | 2.56 | 5.86
+  harp/F2_l1_rr1.flac | 1 | -56.92 | -56.33 | 0.59 | 0.59 | 3.88
+  harp/F2_l2_rr1.flac | 2 | -46.94 | -44.68 | 2.25 | 2.25 | 5.55
+  harp/A2_l1_rr1.flac | 1 | -51.40 | -56.50 | -5.10 | -5.10 | -1.81
+  harp/A2_l2_rr1.flac | 2 | -43.15 | -43.11 | 0.03 | 0.03 | 3.33
+  harp/C3_l1_rr1.flac | 1 | -55.06 | -55.58 | -0.52 | -0.52 | 2.77
+  harp/C3_l2_rr1.flac | 2 | -41.61 | -44.44 | -2.84 | -2.84 | 0.45
+  harp/E3_l1_rr1.flac | 1 | -53.69 | -56.99 | -3.29 | -3.29 | 0.00
+  harp/E3_l2_rr1.flac | 2 | -47.59 | -45.66 | 1.93 | 1.93 | 5.22
+  harp/G3_l1_rr1.flac | 1 | -45.43 | -54.96 | -9.53 | -9.53 | -6.24 | FLAG applied >9 dB (includes instrument trim)
+  harp/G3_l2_rr1.flac | 2 | -40.12 | -43.42 | -3.30 | -3.30 | -0.00
+  harp/B3_l1_rr1.flac | 1 | -47.28 | -55.11 | -7.83 | -7.83 | -4.54
+  harp/B3_l2_rr1.flac | 2 | -44.81 | -42.71 | 2.11 | 2.11 | 5.40
+  harp/D4_l1_rr1.flac | 1 | -47.76 | -58.66 | -10.90 | -10.90 | -7.61 | FLAG applied >9 dB (includes instrument trim)
+  harp/D4_l2_rr1.flac | 2 | -42.62 | -45.52 | -2.90 | -2.90 | 0.39
+  harp/F4_l1_rr1.flac | 1 | -43.80 | -56.21 | -12.41 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/F4_l2_rr1.flac | 2 | -40.29 | -45.40 | -5.11 | -5.11 | -1.82
+  harp/A4_l1_rr1.flac | 1 | -48.29 | -61.60 | -13.31 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/A4_l2_rr1.flac | 2 | -42.96 | -47.68 | -4.72 | -4.72 | -1.43
+  harp/C5_l1_rr1.flac | 1 | -48.74 | -60.10 | -11.36 | -11.36 | -8.07 | FLAG applied >9 dB (includes instrument trim)
+  harp/C5_l2_rr1.flac | 2 | -43.74 | -45.90 | -2.17 | -2.17 | 1.13
+  harp/E5_l1_rr1.flac | 1 | -45.39 | -63.62 | -18.23 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/E5_l2_rr1.flac | 2 | -41.94 | -49.36 | -7.42 | -7.42 | -4.13
+  harp/G5_l1_rr1.flac | 1 | -55.57 | -63.86 | -8.30 | -8.30 | -5.00
+  harp/G5_l2_rr1.flac | 2 | -51.54 | -48.78 | 2.76 | 2.76 | 6.05
+  harp/B5_l1_rr1.flac | 1 | -52.48 | -65.21 | -12.73 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/B5_l2_rr1.flac | 2 | -53.34 | -52.57 | 0.77 | 0.77 | 4.06
+  harp/D6_l1_rr1.flac | 1 | -52.83 | -65.59 | -12.76 | -12.29 | -9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference
+  harp/D6_l2_rr1.flac | 2 | -45.90 | -53.03 | -7.14 | -7.14 | -3.84
+  harp/F6_l1_rr1.flac | 1 | -59.53 | -66.35 | -6.82 | -6.82 | -3.53
+  harp/F6_l2_rr1.flac | 2 | -49.03 | -53.76 | -4.73 | -4.73 | -1.44
+  harp/A6_l1_rr1.flac | 1 | -58.38 | -66.70 | -8.31 | -8.31 | -5.02
+  harp/A6_l2_rr1.flac | 2 | -52.90 | -54.40 | -1.50 | -1.50 | 1.79
+  harp/B6_l1_rr1.flac | 1 | -61.85 | -67.03 | -5.18 | -5.18 | -1.89
+  harp/B6_l2_rr1.flac | 2 | -48.08 | -54.67 | -6.59 | -6.59 | -3.29
+  harp/D7_l1_rr1.flac | 1 | -78.67 | -67.37 | 11.30 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/D7_l2_rr1.flac | 2 | -54.22 | -54.73 | -0.52 | -0.52 | 2.78
+  harp/F7_l1_rr1.flac | 1 | -74.73 | -67.45 | 7.29 | 5.71 | 9.00 | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  harp/F7_l2_rr1.flac | 2 | -50.99 | -54.94 | -3.95 | -3.95 | -0.65
+spectrum vibes: zone | 500 Hz-4 kHz fraction dB | excess over modeled dB
+  vibes/F3_l1_rr1.flac | -0.50 | 17.87
+  vibes/F3_l2_rr1.flac | -0.22 | 18.14
+  vibes/F3_l3_rr1.flac | -0.25 | 18.09
+  vibes/A3_l1_rr1.flac | -6.97 | 7.44
+  vibes/A3_l2_rr1.flac | -0.46 | 13.94
+  vibes/A3_l3_rr1.flac | -0.45 | 13.93
+  vibes/C4_l1_rr2.flac | -11.54 | 0.05
+  vibes/C4_l2_rr1.flac | -3.23 | 8.36
+  vibes/C4_l3_rr1.flac | -1.44 | 10.14
+  vibes/E4_l1_rr2.flac | -8.00 | -0.02
+  vibes/E4_l2_rr1.flac | -4.97 | 3.01
+  vibes/E4_l3_rr1.flac | -4.28 | 3.70
+  vibes/G4_l1_rr1.flac | -5.63 | -0.02
+  vibes/G4_l2_rr1.flac | -5.31 | 0.30
+  vibes/G4_l3_rr1.flac | -5.11 | 0.50
+  vibes/B4_l1_rr1.flac | -3.12 | 0.01
+  vibes/B4_l2_rr1.flac | -3.09 | 0.03
+  vibes/B4_l3_rr1.flac | -2.54 | 0.59
+  vibes/D5_l1_rr1.flac | -1.83 | -0.00
+  vibes/D5_l2_rr1.flac | -1.82 | 0.01
+  vibes/D5_l3_rr1.flac | -1.83 | 0.00
+  vibes/F5_l1_rr1.flac | -1.01 | -0.00
+  vibes/F5_l2_rr1.flac | -1.01 | -0.00
+  vibes/F5_l3_rr1.flac | -1.15 | -0.14
+  vibes/A5_l1_rr1.flac | -0.43 | 0.00
+  vibes/A5_l2_rr1.flac | -0.43 | 0.00
+  vibes/A5_l3_rr1.flac | -0.45 | -0.02
+  vibes/C6_l1_rr1.flac | -0.23 | 0.00
+  vibes/C6_l2_rr1.flac | -0.23 | -0.00
+  vibes/C6_l3_rr1.flac | -0.24 | -0.01
+  vibes/E6_l1_rr1.flac | -0.12 | -0.00
+  vibes/E6_l2_rr1.flac | -0.12 | 0.00
+  vibes/E6_l3_rr1.flac | -0.13 | -0.01
+calibration vibes: median trim 1.82 dB; zone | layer | measured dB | modeled dB | requested dB | applied dB | deviation dB
+  vibes/F3_l1_rr1.flac | 1 | -71.38 | -47.00 | 24.38 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/F3_l2_rr1.flac | 2 | -45.79 | -35.07 | 10.72 | 10.72 | 8.90 | FLAG applied >9 dB (includes instrument trim)
+  vibes/F3_l3_rr1.flac | 3 | -35.88 | -29.52 | 6.36 | 6.36 | 4.54
+  vibes/A3_l1_rr1.flac | 1 | -61.21 | -48.58 | 12.62 | 10.82 | 9.00 | FLAG applied >9 dB (includes instrument trim) | FLAG >9 dB deviation: capped, inspect zone/reference | prefer louder layer
+  vibes/A3_l2_rr1.flac | 2 | -41.37 | -36.65 | 4.72 | 4.72 | 2.90
+  vibes/A3_l3_rr1.flac | 3 | -32.91 | -31.10 | 1.81 | 1.81 | -0.01
+  vibes/C4_l1_rr2.flac | 1 | -47.45 | -46.71 | 0.74 | 0.74 | -1.08
+  vibes/C4_l2_rr1.flac | 2 | -45.14 | -34.78 | 10.36 | 10.36 | 8.54 | FLAG applied >9 dB (includes instrument trim)
+  vibes/C4_l3_rr1.flac | 3 | -35.70 | -29.23 | 6.47 | 6.47 | 4.65
+  vibes/E4_l1_rr2.flac | 1 | -45.98 | -50.45 | -4.47 | -4.47 | -6.29
+  vibes/E4_l2_rr1.flac | 2 | -41.87 | -37.56 | 4.30 | 4.30 | 2.48
+  vibes/E4_l3_rr1.flac | 3 | -38.15 | -32.01 | 6.14 | 6.14 | 4.32
+  vibes/G4_l1_rr1.flac | 1 | -50.00 | -51.62 | -1.62 | -1.62 | -3.44
+  vibes/G4_l2_rr1.flac | 2 | -45.54 | -37.25 | 8.30 | 8.30 | 6.48
+  vibes/G4_l3_rr1.flac | 3 | -40.32 | -31.70 | 8.62 | 8.62 | 6.80
+  vibes/B4_l1_rr1.flac | 1 | -52.78 | -49.24 | 3.54 | 3.54 | 1.72
+  vibes/B4_l2_rr1.flac | 2 | -42.08 | -37.31 | 4.77 | 4.77 | 2.95
+  vibes/B4_l3_rr1.flac | 3 | -36.82 | -31.76 | 5.06 | 5.06 | 3.24
+  vibes/D5_l1_rr1.flac | 1 | -48.80 | -69.33 | -20.53 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/D5_l2_rr1.flac | 2 | -38.15 | -38.23 | -0.08 | -0.08 | -1.89
+  vibes/D5_l3_rr1.flac | 3 | -30.71 | -32.68 | -1.97 | -1.97 | -3.79
+  vibes/F5_l1_rr1.flac | 1 | -49.82 | -50.04 | -0.22 | -0.22 | -2.04
+  vibes/F5_l2_rr1.flac | 2 | -43.37 | -38.11 | 5.26 | 5.26 | 3.44
+  vibes/F5_l3_rr1.flac | 3 | -31.28 | -32.56 | -1.28 | -1.28 | -3.10
+  vibes/A5_l1_rr1.flac | 1 | -56.41 | -51.13 | 5.29 | 5.29 | 3.47
+  vibes/A5_l2_rr1.flac | 2 | -40.91 | -39.09 | 1.82 | 1.82 | 0.00
+  vibes/A5_l3_rr1.flac | 3 | -34.25 | -33.54 | 0.71 | 0.71 | -1.11
+  vibes/C6_l1_rr1.flac | 1 | -51.34 | -74.53 | -23.19 | -7.18 | -9.00 | FLAG >9 dB deviation: capped, inspect zone/reference
+  vibes/C6_l2_rr1.flac | 2 | -39.52 | -40.02 | -0.50 | -0.50 | -2.32
+  vibes/C6_l3_rr1.flac | 3 | -32.04 | -34.48 | -2.44 | -2.44 | -4.26
+  vibes/E6_l1_rr1.flac | 1 | -57.27 | -57.49 | -0.22 | -0.22 | -2.04
+  vibes/E6_l2_rr1.flac | 2 | -38.49 | -40.28 | -1.79 | -1.79 | -3.61
+  vibes/E6_l3_rr1.flac | 3 | -30.64 | -34.73 | -4.10 | -4.10 | -5.92
+voices   recordings: lead (harp), counter (vibes); modeled: chords (strings), bass (bass), kick (kick), snare (snare), ghost (snare), hat (hat), perc (hat)

@@ -155,7 +155,28 @@ export const drawPip = (g: Gfx, p: PipPose) => {
   g.group("paint", () => { g.form(F(nearEar), FUR.coat, FUR.coatShade, { seed: sd + 80, light: L }); g.wash(F(nearIn), FUR.ear, { alpha: 0.85, seed: sd + 81, dx: 0, dy: 0, shrink: 0.96, rim: true }); });
   g.group("ink", () => { g.pen(F(nearEar), { closed: true, w: 2.1, seed: sd + 82, wobble: 0.5, boil: 0.4, taper: 0.6 }); g.pen(F(nearIn.slice(1, 8)), { w: 1, color: FUR.earShade, seed: sd + 83, wobble: 0.4, opacity: 0.7, retrace: false }); });
   g.pop();
+  const W = (q: P): P => [p.x + F([q])[0][0] * p.s, p.y + q[1] * p.s];
+  return { paw: W(nl[5]), nose: W(hd([[138, -186]])[0]), head: W(hd([[80, -210]])[0]) };
 };
 
 export const PIP_VERSION = 1;
 export { GRAPHITE, TINT };
+
+// ---------------------------------------------------------------- motion helpers (pure functions of the frame)
+/** a blink every ~3 s, on its own phase */
+export const blinkAt = (f: number, ph = 0) => { const k = (f + ph) % 74; return k < 2 ? 0.6 : k < 5 ? 1 : 0; };
+/** breathing: a slow rise of the shoulders, expressed as a tiny lean */
+export const breath = (f: number) => Math.sin(f * 0.18) * 1.2;
+/** one hop of `period` frames at phase u in [0,1): crouch, push, fly, land. Returns the pose deltas and travel 0..1. */
+export const hop = (u: number) => {
+  if (u < 0.15) { const k = u / 0.15; return { stretch: 0, lift: 0, lean: 6 * k, travel: 0, earBack: 6 * k }; }
+  if (u < 0.75) { const k = (u - 0.15) / 0.6; return { stretch: Math.sin(k * Math.PI) * 0.95, lift: Math.sin(k * Math.PI) * 60, lean: 6 - 14 * k, travel: k, earBack: 30 * Math.sin(k * Math.PI) }; }
+  const k = (u - 0.75) / 0.25; return { stretch: 0, lift: 0, lean: -8 * (1 - k), travel: 1, earBack: 10 * (1 - k) };
+};
+/** hop from x0 to x1 over [a, b) frames in hops of `period` frames; returns x and the pose deltas */
+export const hopAlong = (f: number, a: number, b: number, x0: number, x1: number, period = 18) => {
+  if (f < a) return { x: x0, stretch: 0, lift: 0, lean: 0, earBack: 0 };
+  if (f >= b) return { x: x1, stretch: 0, lift: 0, lean: 0, earBack: 0 };
+  const n = Math.max(1, Math.round((b - a) / period)), t = (f - a) / ((b - a) / n), i = Math.floor(t), h = hop(t - i);
+  return { x: x0 + ((x1 - x0) * (i + h.travel)) / n, stretch: h.stretch, lift: h.lift, lean: h.lean, earBack: h.earBack };
+};
