@@ -45,30 +45,31 @@ const world = (g: Gfx, f: number, o: { pip?: boolean; wave?: number; sleep?: num
   }
   grass(g, "#3b6152", f, 0.4, true);
   glaze(g, "night");
+  fireflies(g, f, 18, [60, 700, 1000, 1600], 1);
 };
 const bigMoon = (g: Gfx, k = 1) => moon(g, MOON_SCREEN, MOON_R * k, 1.2);
 
 const s1 = (ctx: Ctx, l: number, env: Env) => sheet(ctx, env, l, (g) => {
-  const up = ramp(l, 60, 200);
-  cam(g, env, [PATCH[0] + 60, mix(PATCH[1] - 260, PATCH[1] - 480, up)], 1.25, () => { world(g, l); });
+  const up = l / 216;
+  cam(g, env, [PATCH[0] + 60, mix(PATCH[1] - 260, PATCH[1] - 480, up)], mix(1.2, 1.32, up), () => { world(g, l); });
   stars(g, l, 30, 0.6);
   titleCard(g, l, 30, 4, "The Climb", CREAM, 200);
 });
 
 const s2 = (ctx: Ctx, l: number, env: Env) => sheet(ctx, env, l, (g) => {
   const f = 216 + l;
-  cam(g, env, [PATCH[0] + 60, mix(PATCH[1] - 330, PATCH[1] - 420, ramp(l, 30, 120))], 1.4, () => world(g, f));
+  cam(g, env, [PATCH[0] + 60, mix(PATCH[1] - 320, PATCH[1] - 440, l / 216)], mix(1.36, 1.5, l / 216), () => world(g, f));
   caption(g, l, 20, "The plant had grown taller than the hedge.", { y: 300, color: CREAM, seed: 941 });
 });
 
 const s3 = (ctx: Ctx, l: number, env: Env) => sheet(ctx, env, l, (g) => {
   const f = 432 + l, c = climber(f), look = mixP([PATCH[0] + 40, c.p[1] - 120], [PATCH[0] + 40, TOP[1] - 140], ramp(l, 230, 288));
-  cam(g, env, [look[0], mix(PATCH[1] - 420, look[1], ramp(l, 0, 60))], 1.5, () => world(g, f));
+  cam(g, env, [look[0], mix(PATCH[1] - 440, look[1], ramp(l, 0, 60))], mix(1.5, 1.7, l / 288), () => world(g, f));
   caption(g, l, 30, "Up and up went Pip!", { y: 1700, color: CREAM, seed: 942 });
 });
 
 const s4 = (ctx: Ctx, l: number, env: Env) => sheet(ctx, env, l, (g) => {
-  const f = 720 + l, back = ramp(l, 20, 200), z = Math.pow(2, mix(Math.log2(1.6), Math.log2(0.62), back));
+  const f = 720 + l, back = l / 288, z = Math.pow(2, mix(Math.log2(1.6), Math.log2(0.62), back));
   const c: P = mixP([TOP[0], TOP[1] - 120], [560, 960], back);
   cam(g, env, c, z, () => { world(g, f); fireflies(g, f, 14, [100, 1300, 1000, 1700], back); });
   bigMoon(g, mix(0.75, 1, back)); stars(g, f, 60, 0.8);
@@ -77,15 +78,15 @@ const s4 = (ctx: Ctx, l: number, env: Env) => sheet(ctx, env, l, (g) => {
 
 const s5 = (ctx: Ctx, l: number, env: Env) => sheet(ctx, env, l, (g) => {
   const f = 1008 + l, wave = ramp(l, 20, 40) * (1 - ramp(l, 120, 140)), glowB = Math.max(0, Math.sin(clamp01((l - 160) / 90) * Math.PI));
-  const c: P = [TOP[0] - 120, mix(TOP[1] + 120, TOP[1] + 40, ramp(l, 0, 288))];
-  cam(g, env, c, 1.2, () => world(g, f, { wave, bud: glowB }));
+  const c: P = [TOP[0] - 120, mix(TOP[1] + 140, TOP[1] + 20, l / 288)];
+  cam(g, env, c, mix(1.15, 1.35, l / 288), () => world(g, f, { wave, bud: glowB }));
   bigMoon(g); stars(g, f, 60, 0.8);
   caption(g, l, 30, "\"Goodnight, Hazel!\" Pip called down.", { y: 1700, color: CREAM, seed: 944 });
 });
 
 const s6 = (ctx: Ctx, l: number, env: Env) => sheet(ctx, env, l, (g) => {
   const f = 1296 + l, sl = ramp(l, 10, 60);
-  const c: P = [TOP[0] - 60, TOP[1] - 80], z = mix(1.8, 1.95, ramp(l, 0, 144));
+  const c: P = [TOP[0] - 60, TOP[1] - 80], z = mix(1.75, 2.0, l / 144);
   cam(g, env, c, z, () => world(g, f, { sleep: sl, bud: 0.25 + 0.15 * Math.sin(f * 0.1) }));
   bigMoon(g); stars(g, f, 60, 0.8);
   words(g, "Next time: The Flower", 540, 1700, 34, CREAM, 947, clamp01((l - 60) / 30));

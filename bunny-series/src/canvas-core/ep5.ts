@@ -46,19 +46,19 @@ const scene = (g: Gfx, f: number, sky: "dusk" | "night", o: { bloom?: number; jo
 };
 
 const s1 = (ctx: Ctx, l: number, env: Env) => sheet(ctx, env, l, (g) => {
-  cam(g, env, [PATCH[0] + 20, mix(PATCH[1] - 300, PATCH[1] - 420, ramp(l, 40, 216))], 1.2, () => scene(g, l, "dusk"));
+  cam(g, env, [PATCH[0] + 20, mix(PATCH[1] - 280, PATCH[1] - 420, l / 216)], mix(1.15, 1.25, l / 216), () => scene(g, l, "dusk"));
   titleCard(g, l, 30, 5, "The Flower", INK, 200);
 });
 
 const s2 = (ctx: Ctx, l: number, env: Env) => sheet(ctx, env, l, (g) => {
   const f = 216 + l, budGlow = 0.15 + 0.25 * ramp(l, 60, 216) * (0.7 + 0.3 * Math.sin(f * 0.15));
-  cam(g, env, [PATCH[0] + 20, PATCH[1] - 420], 1.2, () => { scene(g, f, "night", { bloom: budGlow }); fireflies(g, f, 12, [80, 1150, 1000, 1550], ramp(l, 20, 120)); });
+  cam(g, env, [PATCH[0] + 20, mix(PATCH[1] - 420, PATCH[1] - 500, l / 216)], mix(1.25, 1.4, l / 216), () => { scene(g, f, "night", { bloom: budGlow }); fireflies(g, f, 12, [80, 1150, 1000, 1550], ramp(l, 20, 120)); });
   moon(g, [880, 300], 80, 1); stars(g, f, 40, 0.8);
   caption(g, l, 30, "On the night of the full moon, the bud began to glow.", { y: 1700, color: CREAM, seed: 951 });
 });
 
 const s3 = (ctx: Ctx, l: number, env: Env) => sheet(ctx, env, l, (g) => {
-  const f = 432 + l, open = ramp(l, 48, 168), push = ramp(l, 0, 200), top = topAt(stage(f));
+  const f = 432 + l, open = ramp(l, 48, 168), push = l / 288, top = topAt(stage(f));
   cam(g, env, [PATCH[0], mix(PATCH[1] - 420, top[1] + 120, push)], mix(1.2, 1.6, push), () => {
     scene(g, f, "night", { bloom: 0.4 + open * 0.6 }); fireflies(g, f, 14, [80, 1100, 1000, 1550], 1);
     burst(g, [top[0], top[1] - 20], clamp01((l - 160) / 50));
@@ -68,7 +68,7 @@ const s3 = (ctx: Ctx, l: number, env: Env) => sheet(ctx, env, l, (g) => {
 });
 
 const s4 = (ctx: Ctx, l: number, env: Env) => sheet(ctx, env, l, (g) => {
-  const f = 720 + l, back = ramp(l, 0, 160);
+  const f = 720 + l, back = l / 288;
   cam(g, env, [PATCH[0] + 20, mix(PATCH[1] - 560, PATCH[1] - 360, back)], mix(1.4, 1.1, back), () => { scene(g, f, "night", { bloom: 1, joy: l > 60 && l < 250 ? 1 : 0 }); fireflies(g, f, 20, [40, 1050, 1040, 1600], 1); });
   moon(g, [880, 300], 80, 1); stars(g, f, 40, 0.6);
   caption(g, l, 30, "It filled the whole meadow with light.", { y: 1700, color: CREAM, seed: 953 });
@@ -76,7 +76,7 @@ const s4 = (ctx: Ctx, l: number, env: Env) => sheet(ctx, env, l, (g) => {
 
 const s5 = (ctx: Ctx, l: number, env: Env) => sheet(ctx, env, l, (g) => {
   const f = 1008 + l, wave = ramp(l, 120, 140) * (1 - ramp(l, 250, 270));
-  cam(g, env, [PATCH[0] - 40, mix(PATCH[1] - 420, PATCH[1] - 700, ramp(l, 40, 288))], 1.0, () => { scene(g, f, "night", { bloom: 0.85, wave, seeds: true }); fireflies(g, f, 16, [40, 1100, 1040, 1600], 1); });
+  cam(g, env, [PATCH[0] - 40, mix(PATCH[1] - 400, PATCH[1] - 700, l / 288)], mix(1.1, 1.0, l / 288), () => { scene(g, f, "night", { bloom: 0.85, wave, seeds: true }); fireflies(g, f, 16, [40, 1100, 1040, 1600], 1); });
   moon(g, [880, 300], 80, 1); stars(g, f, 40, 0.7);
   caption(g, l, 40, "Pip let the new seeds fly, for someone else to find.", { y: 1700, color: CREAM, seed: 954 });
 });
