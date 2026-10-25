@@ -3,3 +3,6 @@ node_modules/
 out/*.png
 out/*.mp4
 out/*.wav
+out/*.txt
+out/queue.sh
+out/ep*f/
