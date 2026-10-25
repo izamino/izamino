@@ -2,3 +2,4 @@ node_modules/
 .cache/
 out/*.png
 out/*.mp4
+out/*.wav
