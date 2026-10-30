@@ -292,6 +292,7 @@ const PERMS = [
   ['admin.backup', 'پشتیبان‌گیری و بازیابی', 'مدیریت سامانه']
 ];
 /* مجوزهای حساس: فقط امام جماعت می‌تواند آن‌ها را اعطا کند و هیچ‌کس نمی‌تواند به خودش بدهد */
+const LABEL_BAD = /[<>"'`&]/;
 const SENSITIVE_PERMS = ['view.all', 'orders.issue', 'finance.view', 'hr.view', 'letters.secret', 'admin.panel', 'admin.users', 'admin.passwords', 'admin.perms', 'admin.signups', 'admin.logs', 'admin.approve', 'admin.settings', 'admin.data', 'admin.backup'];
 const isSensitivePerm = k => SENSITIVE_PERMS.includes(k);
 const isSensitivePos = p => !!p && (p.role === 'imam' || ['view.all', 'orders.issue', 'admin.users', 'admin.passwords', 'admin.perms', 'admin.settings', 'admin.data', 'admin.backup', 'admin.approve'].some(k => permOf(p, k)));

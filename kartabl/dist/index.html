@@ -892,6 +892,7 @@ const PERMS = [
   ['admin.backup', 'پشتیبان‌گیری و بازیابی', 'مدیریت سامانه']
 ];
 /* مجوزهای حساس: فقط امام جماعت می‌تواند آن‌ها را اعطا کند و هیچ‌کس نمی‌تواند به خودش بدهد */
+const LABEL_BAD = /[<>"'`&]/;
 const SENSITIVE_PERMS = ['view.all', 'orders.issue', 'finance.view', 'hr.view', 'letters.secret', 'admin.panel', 'admin.users', 'admin.passwords', 'admin.perms', 'admin.signups', 'admin.logs', 'admin.approve', 'admin.settings', 'admin.data', 'admin.backup'];
 const isSensitivePerm = k => SENSITIVE_PERMS.includes(k);
 const isSensitivePos = p => !!p && (p.role === 'imam' || ['view.all', 'orders.issue', 'admin.users', 'admin.passwords', 'admin.perms', 'admin.settings', 'admin.data', 'admin.backup', 'admin.approve'].some(k => permOf(p, k)));
@@ -1882,6 +1883,16 @@ function migrate(D) {
   const OLD = { fateheh: 'hosseinieh', religious: 'hosseinieh', rahian: '', ziarat: '' };
   (D.reservations || []).forEach(r => { if (r.program === undefined) { if (r.space in OLD) { r.program = r.space; r.space = OLD[r.space]; } else r.program = r.space === 'zaersara' || r.space === 'guest' ? 'lodging' : 'general'; } });
   if (s.spaces) s.spaces = s.spaces.filter(x => !(x.id in OLD));
+  /* پاک‌سازی نام‌های ساختاری قدیمی از نویسه‌های نشانه‌گذاری */
+  const cl = t => (typeof t === 'string' ? t.replace(/[<>"'`&]/g, '') : t);
+  (D.positions || []).forEach(p => (p.title = cl(p.title)));
+  (D.users || []).forEach(u => (u.name = cl(u.name)));
+  (D.warehouses || []).forEach(w => (w.name = cl(w.name)));
+  Object.values(s.units || {}).forEach(u => { u.name = cl(u.name); u.short = cl(u.short); });
+  (s.extraUnits || []).forEach(u => { u.name = cl(u.name); u.short = cl(u.short); });
+  Object.keys(s.services || {}).forEach(k => (s.services[k] = s.services[k].map(cl)));
+  (s.spaces || []).forEach(x => (x.name = cl(x.name)));
+  ['letterCats', 'leaveTypes'].forEach(k => { if (s[k]) s[k] = s[k].map(cl); });
   return D;
 }
 function applySettings() {
@@ -2082,6 +2093,8 @@ class OpError extends Error {}
 const need = (cond, msg) => { if (!cond) throw new OpError(msg); };
 function rec(col, id) { const r = (DB[col] || []).find(x => x.id === id); need(r, 'این مورد یافت نشد یا حذف شده است.'); return r; }
 const str = (v, max = 4000) => String(v == null ? '' : v).slice(0, max);
+/* نام‌های ساختاری (مدیریت، جایگاه، فضا، کاربر، انبار، فهرست‌ها) در همه صفحه‌ها نمایش داده می‌شوند؛ نویسه‌های نشانه‌گذاری HTML در آن‌ها پذیرفته نمی‌شود */
+const label = (v, what) => { const s = str(v, 200).trim(); need(s, what + ' را بنویسید.'); need(!LABEL_BAD.test(s), `${what} نباید شامل نویسه‌های < > " ' \` & باشد.`); return s; };
 const SAFE_DATA_COLS = ['letters', 'orders', 'tasks', 'requests', 'reservations', 'meetings', 'assets', 'movements', 'warehouses', 'tx', 'payreqs', 'budgets', 'commitments', 'leaves', 'missions', 'decrees', 'contracts', 'notifs', 'sms'];
 const BACKUP_COLS = ['positions', 'users', 'posHistory', 'letters', 'orders', 'tasks', 'requests', 'reservations', 'meetings', 'warehouses', 'assets', 'movements', 'tx', 'payreqs', 'budgets', 'commitments', 'decrees', 'leaves', 'missions', 'contracts', 'notifs', 'sms', 'audit', 'logins', 'sessions', 'signups'];
 
@@ -2127,7 +2140,7 @@ const OPS = {
   createMovement: (id, v) => createMovement(rec('assets', id), v),
   decideMovement: (id, ok, note) => decideMovement(rec('movements', id), !!ok, str(note)),
   assetHealth: (id, health, note) => { const a = rec('assets', id); need(canManageAsset(a), 'تغییر وضعیت این کالا برای جایگاه شما مجاز نیست.'); need(ASSET_HEALTH.includes(health), 'وضعیت نامعتبر است.'); a.health = health; hist(a, 'تغییر وضعیت سلامت به «' + health + '»', str(note)); audit('تغییر وضعیت کالا', 'asset', a.id, a.code); return a; },
-  addWarehouse: v => { need(isImam() || isMgrOrOffice(U_INTERNAL), 'تعریف انبار با مدیریت داخلی است.'); need(str(v.name).trim(), 'نام انبار را بنویسید.'); need(UNITS.some(u => u.id === +v.unitId), 'واحد را انتخاب کنید.'); const w = { id: 'w' + uid().slice(0, 6), name: str(v.name, 200), unitId: +v.unitId }; DB.warehouses.push(w); audit('تعریف انبار', 'warehouse', w.id, w.name); return w; },
+  addWarehouse: v => { need(isImam() || isMgrOrOffice(U_INTERNAL), 'تعریف انبار با مدیریت داخلی است.'); v.name = label(v.name, 'نام انبار'); need(UNITS.some(u => u.id === +v.unitId), 'واحد را انتخاب کنید.'); const w = { id: 'w' + uid().slice(0, 6), name: str(v.name, 200), unitId: +v.unitId }; DB.warehouses.push(w); audit('تعریف انبار', 'warehouse', w.id, w.name); return w; },
   /* مالی */
   addTx: v => { need(v.kind !== 'هزینه', 'هزینه فقط از مسیر «درخواست پرداخت» و پس از طی مراحل تأیید ثبت می‌شود.'); return addTx(v); },
   createPay: v => createPay(v),
@@ -2158,12 +2171,12 @@ const OPS = {
   },
 
   /* ---------- کاربران و دسترسی‌ها ---------- */
-  createUser: v => createUser2(v),
-  updateUser: (id, v) => updateUser(rec('users', id), v),
+  createUser: v => { v.name = label(v.name, 'نام کاربر'); return createUser2(v); },
+  updateUser: (id, v) => { v.name = label(v.name, 'نام کاربر'); return updateUser(rec('users', id), v); },
   deleteUser: id => deleteUser(rec('users', id)),
   setPassword: (id, pass, mustChange) => setPassword(rec('users', id), pass, !!mustChange, false),
   assignHolder: (posId, userId) => assignHolder(posId, userId),
-  addPosition: v => { need(UNITS.some(u => u.id === +v.unitId), 'مدیریت را انتخاب کنید.'); return addPosition(v); },
+  addPosition: v => { need(UNITS.some(u => u.id === +v.unitId), 'مدیریت را انتخاب کنید.'); v.title = label(v.title, 'عنوان جایگاه'); return addPosition(v); },
   deletePosition: id => { need(can('admin.users'), 'حذف جایگاه مجاز نیست.'); const p = posById(id); need(p, 'جایگاه یافت نشد.'); need(p.role === 'staff', 'فقط جایگاه‌های کارشناسی قابل حذف‌اند.'); need(!holderOf(p.id), 'ابتدا متصدی این جایگاه را تغییر دهید.'); need(!isSensitivePos(p) || isImam(), 'حذف جایگاه حساس فقط با امام جماعت است.'); DB.positions = DB.positions.filter(x => x.id !== id); audit('حذف جایگاه', 'position', id, posLabel(id)); return {}; },
   setPosPerm: (posId, k, val) => { const p = posById(posId); need(p, 'جایگاه یافت نشد.'); return setPosPerm(p, k, val); },
   setRolePerm: (role, k, val) => setRolePerm(role, k, val),
@@ -2202,7 +2215,7 @@ const OPS = {
     else if (section === 'security') { Object.assign(s.security, { minLen: num(v.minLen, 6, 64, 'حداقل طول رمز'), maxFails: num(v.maxFails, 2, 20, 'تعداد تلاش'), lockMin: num(v.lockMin, 1, 1440, 'مدت قفل'), sessionMin: num(v.sessionMin, 5, 1440, 'مهلت بی‌فعالیتی') }); s.showDemo = !!v.showDemo; s.maintenance = !!v.maintenance; }
     else if (section === 'maintenance') { s.maintenance = !!v.on; }
     else if (section === 'sms') { const sm = s.sms; sm.enabled = !!v.enabled; sm.provider = ['none', 'kavenegar', 'webhook'].includes(v.provider) ? v.provider : 'none'; sm.sender = str(v.sender, 30); if (v.apiKey) sm.apiKey = str(v.apiKey, 200); if (v.webhook !== undefined) sm.webhook = str(v.webhook, 500); Object.keys(sm.events).forEach(k => (sm.events[k] = (v.events || []).includes(k))); sm.roles = (v.roles || []).filter(r => ROLES[r]); }
-    else if (section === 'lists') { const L = t => str(t, 4000).split('\n').map(x => x.trim()).filter(Boolean); need(L(v.letterCats).length && L(v.leaveTypes).length, 'فهرست‌ها نباید خالی باشند.'); s.letterCats = L(v.letterCats); s.leaveTypes = L(v.leaveTypes); }
+    else if (section === 'lists') { const L = t => str(t, 4000).split('\n').map(x => x.trim()).filter(Boolean).map(x => label(x, 'مورد فهرست')); need(L(v.letterCats).length && L(v.leaveTypes).length, 'فهرست‌ها نباید خالی باشند.'); s.letterCats = L(v.letterCats); s.leaveTypes = L(v.leaveTypes); }
     else throw new OpError('بخش تنظیمات نامعتبر است.');
     audit('تغییر تنظیمات: ' + section, 'settings', section, '');
     applySettings();
@@ -2210,8 +2223,8 @@ const OPS = {
   },
   saveUnit: (id, v) => {
     need(can('admin.settings'), 'تغییر ساختار سازمانی مجاز نیست.');
-    need(str(v.name).trim() && str(v.short).trim(), 'نام کامل و کوتاه لازم است.');
-    const sv = str(v.services, 4000).split('\n').map(x => x.trim()).filter(Boolean); need(sv.length, 'دست‌کم یک خدمت لازم است.');
+    v.name = label(v.name, 'نام کامل مدیریت'); v.short = label(v.short, 'نام کوتاه مدیریت');
+    const sv = str(v.services, 4000).split('\n').map(x => x.trim()).filter(Boolean).map(x => label(x, 'نام خدمت')); need(sv.length, 'دست‌کم یک خدمت لازم است.');
     const s = DB.settings; s.services = s.services || {};
     let uidN = +id;
     if (!uidN) { uidN = Math.max(...UNITS.map(u => u.id)) + 1; s.extraUnits = s.extraUnits || []; s.extraUnits.push({ id: uidN, name: str(v.name, 200), short: str(v.short, 60), ic: 'building' }); ['manager', 'office', 'secretary'].forEach((r, i) => DB.positions.push({ id: `P${uidN}-${'mos'[i]}`, unitId: uidN, role: r, title: ['مدیر', 'مسئول دفتر', 'منشی'][i] })); DB.budgets.push({ unitId: uidN, year: jYearNow(), amount: 0 }); }
@@ -2225,7 +2238,7 @@ const OPS = {
   toggleUnit: id => { need(can('admin.settings'), 'تغییر ساختار سازمانی مجاز نیست.'); const s = DB.settings; s.unitsOff = s.unitsOff || []; const i = s.unitsOff.indexOf(+id); if (i >= 0) s.unitsOff.splice(i, 1); else s.unitsOff.push(+id); audit(i >= 0 ? 'فعال‌سازی مدیریت' : 'غیرفعال‌سازی مدیریت', 'settings', 'unit-' + id, unitName(+id)); applySettings(); return {}; },
   saveSpace: (id, v) => {
     need(can('admin.settings'), 'تغییر فضاها مجاز نیست.');
-    need(str(v.name).trim(), 'نام فضا را بنویسید.'); need(UNITS.some(u => u.id === +v.unit), 'مدیریت تأییدکننده را انتخاب کنید.');
+    v.name = label(v.name, 'نام فضا'); need(UNITS.some(u => u.id === +v.unit), 'مدیریت تأییدکننده را انتخاب کنید.');
     const cap = Number(en(v.cap)); need(Number.isInteger(cap) && cap >= 1 && cap <= 100000, 'ظرفیت باید عدد صحیح مثبت باشد.');
     const list = SPACES.map(s => ({ ...s }));
     if (id) { const x = list.find(s => s.id === id); need(x, 'فضا یافت نشد.'); Object.assign(x, { name: str(v.name, 200), unit: +v.unit, cap, excl: !!v.excl }); }
@@ -2251,7 +2264,7 @@ const OPS = {
 function endUserSessions(userId) { let n = 0; DB.sessions.forEach(s => { if (s.uid === userId && s.active) { s.active = false; s.end = stamp(); n++; } }); return n; }
 
 /* عملیات بدون ورود */
-const PUBLIC_OPS = { createSignup: v => createSignup(v) };
+const PUBLIC_OPS = { createSignup: v => { v.name = label(v.name, 'نام'); v.title = label(v.title, 'سمت درخواستی'); return createSignup(v); } };
 
 /* ---------- اعتبارسنجی کامل نسخه پشتیبان پیش از جایگزینی ---------- */
 function validateBackup(d, actorId) {

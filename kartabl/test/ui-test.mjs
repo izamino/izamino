@@ -53,8 +53,10 @@ try {
     ['createReservation', [{ program: 'general', space: 'amphi', kind: 'برنامه ' + XSS, applicant: XSS, phone: '09120000000', date: day, start: '10:00', end: '11:00', people: 10, equip: XSS, desc: XSS }]]
   ]);
   const r3 = await apiCall('m4', [['createTask', [{ unitId: 4, title: 'وظیفه ' + XSS, desc: XSS, assignee: 'P4-o', start: day, due: day, priority: 'فوری' }]], ['addRecord', [4, 'media', { title: XSS, kind: 'عکس', date: day, event: XSS, place: XSS }]]]);
-  await api.evaluate(x => fetch('/api/signup', { method: 'POST', headers: { 'X-Kartabl': '1', 'Content-Type': 'application/json' }, body: JSON.stringify({ v: { name: 'متقاضی ' + x, username: 'xss.user', phone: '09121234567', unitId: 4, title: x, pass: 'abcdef1234', note: x } }) }), XSS);
-  console.log('آماده‌سازی داده آلوده:', [...r1, ...r2, ...r3].every(x => x === 'ok') ? 'انجام شد' : JSON.stringify([...r1, ...r2, ...r3]));
+  const su1 = await api.evaluate(x => fetch('/api/signup', { method: 'POST', headers: { 'X-Kartabl': '1', 'Content-Type': 'application/json' }, body: JSON.stringify({ v: { name: 'متقاضی ' + x, username: 'xss.user', phone: '09121234567', unitId: 4, title: 'منشی', pass: 'abcdef1234', note: x } }) }).then(r => r.status), XSS);
+  const su2 = await api.evaluate(x => fetch('/api/signup', { method: 'POST', headers: { 'X-Kartabl': '1', 'Content-Type': 'application/json' }, body: JSON.stringify({ v: { name: 'متقاضی آزمون', username: 'xss.user2', phone: '09121234567', unitId: 4, title: 'منشی', pass: 'abcdef1234', note: x } }) }).then(r => r.status), XSS);
+  ok(r1[0] !== 'ok' && r1[1] !== 'ok' && su1 === 400, 'نشانه‌گذاری HTML در نام جایگاه، نام مدیریت و نام متقاضی پذیرفته نمی‌شود', JSON.stringify([r1[0], r1[1], su1]));
+  ok([r1[2], r1[3], ...r2, ...r3].every(x => x === 'ok') && su2 === 200, 'متن مخرب در ۱۵ فیلد متنی آزاد (عنوان، شرح، یادداشت، متقاضی، اطلاعیه…) ذخیره شد تا نمایش امن آن آزموده شود', JSON.stringify([...r1, ...r2, ...r3, su2]));
 
   /* پیمایش کامل با چند نقش روی سرور */
   const crawl = async (label, ctxOpts, users) => {

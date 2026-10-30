@@ -21,6 +21,16 @@ function migrate(D) {
   const OLD = { fateheh: 'hosseinieh', religious: 'hosseinieh', rahian: '', ziarat: '' };
   (D.reservations || []).forEach(r => { if (r.program === undefined) { if (r.space in OLD) { r.program = r.space; r.space = OLD[r.space]; } else r.program = r.space === 'zaersara' || r.space === 'guest' ? 'lodging' : 'general'; } });
   if (s.spaces) s.spaces = s.spaces.filter(x => !(x.id in OLD));
+  /* پاک‌سازی نام‌های ساختاری قدیمی از نویسه‌های نشانه‌گذاری */
+  const cl = t => (typeof t === 'string' ? t.replace(/[<>"'`&]/g, '') : t);
+  (D.positions || []).forEach(p => (p.title = cl(p.title)));
+  (D.users || []).forEach(u => (u.name = cl(u.name)));
+  (D.warehouses || []).forEach(w => (w.name = cl(w.name)));
+  Object.values(s.units || {}).forEach(u => { u.name = cl(u.name); u.short = cl(u.short); });
+  (s.extraUnits || []).forEach(u => { u.name = cl(u.name); u.short = cl(u.short); });
+  Object.keys(s.services || {}).forEach(k => (s.services[k] = s.services[k].map(cl)));
+  (s.spaces || []).forEach(x => (x.name = cl(x.name)));
+  ['letterCats', 'leaveTypes'].forEach(k => { if (s[k]) s[k] = s[k].map(cl); });
   return D;
 }
 function applySettings() {
