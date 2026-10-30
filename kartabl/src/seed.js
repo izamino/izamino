@@ -14,6 +14,7 @@ function seed() {
     }
   };
   DB = D;
+  migrate(D);
   const prevME = ME;
   const at = (off, hm = '10:00') => { SEED_TS = new Date(addDays(T, off) + 'T' + hm + ':00+03:30').toISOString(); };
   const as = pid => { ME = { user: D.users.find(u => u.posId === pid), pos: D.positions.find(p => p.id === pid) }; };
@@ -265,6 +266,16 @@ function seed() {
     { title: 'بازسازی وضوخانه', contractor: 'پیمانکاری سازه‌گستر', start: addDays(T, -60), end: addDays(T, 20), progress: 85, budget: 1800000000, spent: 1520000000 },
     { title: 'عایق‌کاری بام حسینیه', contractor: '—', start: addDays(T, 15), end: addDays(T, 45), progress: 0, budget: 900000000, spent: 0 }]);
 
+  /* نمونه ورودها و درخواست عضویت */
+  [['imam', 'u1', true, 'ورود موفق', -1, '07:42'], ['m16', null, false, 'رمز نادرست', -1, '08:03'], ['m16', null, true, 'ورود موفق', -1, '08:04'], ['o3', null, true, 'ورود موفق', 0, '08:12'], ['admin', null, false, 'نام کاربری ناموجود', 0, '02:17'], ['admin', null, false, 'نام کاربری ناموجود', 0, '02:18'], ['s9', null, false, 'رمز نادرست', 0, '09:31'], ['s9', null, true, 'ورود موفق', 0, '09:32']].forEach(([un, id, ok, reason, d, hm]) => {
+    at(d, hm); const u = D.users.find(x => x.username === un);
+    D.logins.push({ id: uid(), ts: SEED_TS, username: un, uid: u ? u.id : '', ok, reason, agent: 'Chrome' });
+    if (ok && u) u.lastLogin = SEED_TS;
+  });
+  ME = null; at(-1, '21:40');
+  createSignup({ name: 'محمدحسین اکبری', username: 'mh.akbari', phone: '09127654321', unitId: 4, title: 'تدوینگر', pass: 'akbari123', note: 'نیروی داوطلب واحد رسانه از ماه گذشته' });
+  at(0, '07:55');
+  createSignup({ name: 'ریحانه موسوی', username: 'r.mousavi', phone: '09351112233', unitId: 11, title: 'کتابدار', pass: 'mousavi99', note: '' });
   SEED_TS = null;
   ME = prevME;
   D.notifs.forEach((n, i) => { if (i % 3 === 0) n.read = true; });

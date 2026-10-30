@@ -10,10 +10,10 @@ const LETTER_CATS = ['اداری', 'مالی', 'فرهنگی', 'آموزشی', '
 const PRIORITIES = ['عادی', 'فوری', 'خیلی فوری'];
 const CONF = ['عادی', 'محرمانه', 'سری'];
 function canSeeLetter(l) {
-  if (isImam()) return true;
+  if (isAll()) return true;
   const mine = inUnit(l.unitId) || l.refs.some(r => inUnit(r.unitId)) || l.toUnit === myUnit();
   if (!mine) return false;
-  if (l.conf === 'سری') return myRole() === 'manager';
+  if (l.conf === 'سری') return can('letters.secret');
   if (l.conf === 'محرمانه') return myRole() !== 'staff';
   return true;
 }
@@ -52,9 +52,9 @@ function archiveLetter(l) { l.status = 'بایگانی'; hist(l, 'بایگانی
 /* ---------- دستورات امام جماعت ---------- */
 const ORDER_ST = ['جدید', 'در حال بررسی', 'در حال انجام', 'منتظر تأیید', 'تکمیل‌شده'];
 const orderStatus = o => (o.status !== 'تکمیل‌شده' && o.due && o.due < todayISO() ? 'معوق' : o.status);
-const canSeeOrder = o => isImam() || o.units.includes(myUnit());
+const canSeeOrder = o => isAll() || o.units.includes(myUnit());
 function createOrder(v) {
-  if (!isImam()) return fail('صدور دستور فقط برای امام جماعت مجاز است.');
+  if (!isImam() && !can('orders.issue')) return fail('صدور دستور فقط برای امام جماعت یا جایگاه دارای مجوز است.');
   if (!v.title) return fail('عنوان دستور را بنویسید.');
   const units = (v.units || []).map(Number);
   if (!units.length) return fail('دست‌کم یک مدیریت مسئول انتخاب کنید.');
@@ -95,13 +95,13 @@ function orderDecide(o, ok, note) {
 const TASK_ST = ['جدید', 'در حال انجام', 'منتظر تأیید', 'تکمیل‌شده'];
 const taskStatus = t => (t.status !== 'تکمیل‌شده' && t.due && t.due < todayISO() ? 'معوق' : t.status);
 function canSeeTask(t) {
-  if (isImam()) return true;
+  if (isAll()) return true;
   if (!inUnit(t.unitId)) return false;
   return myRole() !== 'staff' || t.assignee === ME.pos.id;
 }
 function createTask(v) {
   const u = +v.unitId;
-  if (!isMgrOrOffice(u)) return fail('تعریف وظیفه برای مدیر و مسئول دفتر همان مدیریت مجاز است.');
+  if (!(isMgrOrOffice(u) || (inUnit(u) && can('tasks.create')))) return fail('تعریف وظیفه برای مدیر و مسئول دفتر همان مدیریت مجاز است.');
   if (!v.title) return fail('عنوان وظیفه را بنویسید.');
   if (!v.assignee) return fail('مسئول انجام را انتخاب کنید.');
   if (v.due && v.start && v.due < v.start) return fail('مهلت نمی‌تواند پیش از تاریخ شروع باشد.');
@@ -152,7 +152,7 @@ function taskAct(t, act, note, extra) {
 const REQ_STAGES = ['ثبت درخواست', 'ارجاع به مدیریت مسئول', 'بررسی و هماهنگی', 'تأیید', 'اجرا', 'گزارش نهایی', 'بایگانی'];
 const reqLabel = r => (r.status === 'ردشده' ? 'ردشده' : r.status === 'لغوشده' ? 'لغوشده' : REQ_STAGES[r.stage]);
 function canSeeReq(r) {
-  if (isImam()) return true;
+  if (isAll()) return true;
   const u = myUnit();
   const related = r.fromUnit === u || r.toUnit === u || r.coops.includes(u);
   if (!related) return false;
@@ -272,9 +272,9 @@ function resDecide(r, status, note) {
 }
 
 /* ---------- جلسات ---------- */
-const canSeeMeeting = m => isImam() || m.invitees.includes(ME.pos.id) || m.byPos === ME.pos.id || (m.unitId === myUnit() && myRole() !== 'staff');
+const canSeeMeeting = m => isAll() || m.invitees.includes(ME.pos.id) || m.byPos === ME.pos.id || (m.unitId === myUnit() && myRole() !== 'staff');
 function createMeeting(v) {
-  if (myRole() === 'staff') return fail('ثبت جلسه برای منشی، مسئول دفتر و مدیران مجاز است.');
+  if (!can('meetings.create')) return fail('ثبت جلسه برای منشی، مسئول دفتر و مدیران مجاز است.');
   if (!v.title || !v.date || !v.start) return fail('عنوان، تاریخ و ساعت جلسه لازم است.');
   if (v.end && v.end <= v.start) return fail('ساعت پایان باید بعد از شروع باشد.');
   const m = { id: uid(), no: nextNo('meet'), title: v.title, date: v.date, start: v.start, end: v.end || '', place: v.place || '', invitees: v.invitees || [],
@@ -307,7 +307,7 @@ function resolutionUpdate(m, x, status, note) {
 /* ---------- اموال و انبار ---------- */
 const ASSET_HEALTH = ['سالم', 'نیازمند تعمیر', 'خراب', 'اسقاط'];
 const MOVE_TYPES = ['ورود', 'خروج', 'امانت', 'عودت', 'جابه‌جایی'];
-const canSeeAsset = a => isImam() || inUnit(a.unitId) || (inUnit(U_INTERNAL) && myRole() !== 'staff');
+const canSeeAsset = a => isAll() || inUnit(a.unitId) || (inUnit(U_INTERNAL) && myRole() !== 'staff');
 const canManageAsset = a => isImam() || isMgrOrOffice(a.unitId) || isMgrOrOffice(U_INTERNAL);
 function createAsset(v) {
   const u = +v.unitId;
@@ -365,7 +365,7 @@ const TX_KINDS = ['درآمد', 'هزینه', 'نذورات'];
 const PAY_ST = ['ثبت درخواست', 'تأیید مدیر واحد', 'بررسی امور مالی', 'تصویب امام جماعت', 'پرداخت'];
 const payLabel = p => (p.status === 'ردشده' ? 'ردشده' : p.stage === 4 ? 'پرداخت‌شده' : 'در انتظار ' + PAY_ST[nextPayStage(p)]);
 const nextPayStage = p => (p.stage === 2 && !p.needImam ? 4 : p.stage + 1);
-const canSeePay = p => canFinance() || (inUnit(p.unitId) && myRole() !== 'staff');
+const canSeePay = p => canFinance() || isAll() || (inUnit(p.unitId) && myRole() !== 'staff');
 function addTx(v) {
   if (!(isImam() || isClerk(U_FIN))) return fail('ثبت سند مالی فقط در مدیریت امور مالی انجام می‌شود.');
   if (!v.kind || !(+v.amount > 0)) return fail('نوع و مبلغ معتبر لازم است.');
@@ -375,7 +375,7 @@ function addTx(v) {
   return t;
 }
 function createPay(v) {
-  if (myRole() === 'staff' && !isImam()) return fail('درخواست پرداخت توسط مسئولان واحد ثبت می‌شود.');
+  if (!can('finance.request')) return fail('درخواست پرداخت توسط مسئولان واحد ثبت می‌شود.');
   if (!v.title || !(+v.amount > 0)) return fail('عنوان و مبلغ معتبر لازم است.');
   const p = { id: uid(), no: nextNo('pay'), unitId: myUnit() === 0 ? U_FIN : myUnit(), title: v.title, amount: +v.amount, payee: v.payee || '', desc: v.desc || '', files: v.files || [],
     stage: 0, status: 'جاری', needImam: +v.amount > DB.settings.payThreshold, byPos: ME.pos.id, created: stamp() };

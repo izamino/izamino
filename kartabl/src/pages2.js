@@ -75,7 +75,7 @@ function showRes(id) {
       detail && ['نام متقاضی', esc(r.applicant)], detail && ['شماره تماس', `<span class="code">${fa(r.phone)}</span>`], detail && ['تجهیزات موردنیاز', esc(r.equip || '—')], detail && ['توضیحات', esc(r.desc || '—')]])}
     ${!detail ? '<div class="hint">مشخصات متقاضی فقط برای مدیریت متولی و ثبت‌کننده نمایش داده می‌شود.</div>' : ''}
     <div><h3>سابقه</h3>${histHTML(r.history)}</div>`,
-    foot: `${r.status === 'در انتظار تأیید' && canDecideRes(r) ? btn('تأیید رزرو', 'resDo', { id, s: 'تأییدشده' }) + btn('رد', 'resDo', { id, s: 'ردشده' }, 'danger') : ''}${['در انتظار تأیید', 'تأییدشده'].includes(r.status) && (r.by === ME.user.id || canDecideRes(r)) ? btn('لغو رزرو', 'resDo', { id, s: 'لغوشده' }, 'ghost') : ''}`
+    foot: `${editBtn('res', r)}${r.status === 'در انتظار تأیید' && canDecideRes(r) ? btn('تأیید رزرو', 'resDo', { id, s: 'تأییدشده' }) + btn('رد', 'resDo', { id, s: 'ردشده' }, 'danger') : ''}${['در انتظار تأیید', 'تأییدشده'].includes(r.status) && (r.by === ME.user.id || canDecideRes(r)) ? btn('لغو رزرو', 'resDo', { id, s: 'لغوشده' }, 'ghost') : ''}`
   });
 }
 A.resDo = d => { const r = DB.reservations.find(x => x.id === d.id); actModal(d.s === 'تأییدشده' ? 'تأیید رزرو' : d.s === 'ردشده' ? 'رد رزرو' : 'لغو رزرو', v => resDecide(r, d.s, v.note), { noteReq: d.s === 'ردشده', reopen: () => showRes(r.id) }); };
@@ -134,7 +134,7 @@ function showMeeting(id) {
     <div><h3>صورت‌جلسه</h3><div class="box">${esc(m.minutes || 'هنوز صورت‌جلسه بارگذاری نشده است.')}</div>${files(m.minutesFiles)}</div>
     <div><h3>مصوبات</h3>${table([['مصوبه', x => esc(x.text)], ['مسئول اجرا', x => esc(posWho(x.owner))], ['مهلت', x => dueTxt(x.status === 'انجام‌شده' ? '' : x.due)], ['وضعیت', x => pill(x.status)], ['', x => (x.owner === ME.pos.id || ed) && x.status !== 'انجام‌شده' ? btn('پیگیری', 'resolUp', { id: m.id, x: x.id }, 'sm ghost') : '']], m.resolutions, { empty: 'مصوبه‌ای ثبت نشده است.' })}</div>
     <div><h3>سابقه</h3>${histHTML(m.history)}</div>`,
-    foot: ed ? btn('ثبت صورت‌جلسه', 'minutes', { id }, '', 'file') + btn('افزودن مصوبه', 'resolAdd', { id }, 'ghost', 'plus') : ''
+    foot: (ed ? btn('ثبت صورت‌جلسه', 'minutes', { id }, '', 'file') + btn('افزودن مصوبه', 'resolAdd', { id }, 'ghost', 'plus') : '') + editBtn('meet', m)
   });
 }
 A.minutes = d => { const m = DB.meetings.find(x => x.id === d.id); formModal('صورت‌جلسه', [{ k: 'minutes', l: 'متن صورت‌جلسه', t: 'textarea', req: true }, { k: 'files', l: 'بارگذاری فایل صورت‌جلسه', t: 'file' }], { minutes: m.minutes }, v => { m.minutes = v.minutes; m.minutesFiles.push(...v.files); hist(m, 'ثبت صورت‌جلسه'); audit('ثبت صورت‌جلسه', 'meeting', m.id, m.no); return m; }, { reopen: () => showMeeting(m.id) }); };
@@ -154,7 +154,7 @@ PAGES.assets = () => {
   let body = '';
   if (v.tab === 'list') {
     const rows = vis.filter(a => textMatch(v.q, a.code, a.name, a.serial, a.cat) && (!v.h || a.health === v.h) && (!v.w || a.whId === v.w) && (!v.u || a.unitId === +v.u));
-    body = `<section class="card">${filterBar('assets', [{ k: 'q', t: 'search', l: 'جست‌وجو در کد، نام، شماره سریال…' }, { k: 'h', l: 'وضعیت سلامت', o: ASSET_HEALTH }, { k: 'w', l: 'انبار', o: DB.warehouses.map(w => [w.id, w.name]) }, ...(isImam() || inUnit(U_INTERNAL) ? [{ k: 'u', l: 'واحد مالک', o: unitOpts() }] : [])])}<div class="cb flush">${assetTable(rows)}</div></section>`;
+    body = `<section class="card">${filterBar('assets', [{ k: 'q', t: 'search', l: 'جست‌وجو در کد، نام، شماره سریال…' }, { k: 'h', l: 'وضعیت سلامت', o: ASSET_HEALTH }, { k: 'w', l: 'انبار', o: DB.warehouses.map(w => [w.id, w.name]) }, ...(isAll() || inUnit(U_INTERNAL) ? [{ k: 'u', l: 'واحد مالک', o: unitOpts() }] : [])])}<div class="cb flush">${assetTable(rows)}</div></section>`;
   }
   if (v.tab === 'moves') {
     const ms = DB.movements.filter(m => canSeeAsset(DB.assets.find(a => a.id === m.assetId))).sort(by('created', -1));
@@ -191,7 +191,7 @@ function showAsset(id) {
       <div style="text-align:center"><div id="qrbox" style="display:inline-block;background:#fff;padding:8px;border-radius:8px"></div><div class="code">${esc(a.code)}</div><div class="hint">برچسب QR برای الصاق روی کالا</div></div></div>
     <div><h3>تاریخچه جابه‌جایی‌ها</h3>${table([['شماره', m => `<span class="code">${esc(m.no)}</span>`], ['عملیات', m => esc(m.type)], ['تاریخ', m => jd(m.date)], ['شرح', m => esc([m.person, m.toWh && 'به ' + whName(m.toWh), m.note].filter(Boolean).join(' — '))], ['وضعیت', m => pill(m.status)]], ms, { empty: 'گردشی ثبت نشده است.' })}</div>
     <div><h3>سابقه کالا</h3>${histHTML(a.history)}</div>`,
-    foot: canManageAsset(a) ? btn('ثبت گردش (ورود، خروج، امانت، عودت، جابه‌جایی)', 'newMove', { id }, '', 'send') + btn('تغییر وضعیت سلامت', 'assetHealth', { id }, 'ghost') : ''
+    foot: editBtn('asset', a) + (canManageAsset(a) ? btn('ثبت گردش (ورود، خروج، امانت، عودت، جابه‌جایی)', 'newMove', { id }, '', 'send') + btn('تغییر وضعیت سلامت', 'assetHealth', { id }, 'ghost') : '')
   });
   if (window.QRCode) try { new QRCode($('#qrbox'), { text: `SHABAB-ASSET:${a.code}`, width: 112, height: 112 }); } catch (e) {}
   else $('#qrbox').innerHTML = `<div style="width:112px;height:112px;display:grid;place-items:center;color:#333">${ic('qr')}</div>`;

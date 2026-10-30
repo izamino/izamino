@@ -59,6 +59,7 @@ function jToIso(str) {
   return jToIsoN(y, m, d);
 }
 const todayISO = () => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+const nowHMS = () => new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(new Date());
 const nowHM = () => new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
 let SEED_TS = null;
 const stamp = () => SEED_TS || new Date().toISOString();
@@ -196,6 +197,14 @@ const IC = {
   crane: 'M4 21h8M7 21V4l12 3M7 4l-3 4h3M17 7v6M15 13h4v3h-4z',
   sms: 'M4 4h16v12H8l-4 4zM8 9h8M8 12h5',
   history: 'M3 12a9 9 0 103-6.7L3 8M3 3v5h5M12 7v5l3 2',
+  eye: 'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 100-6 3 3 0 000 6z',
+  edit: 'M4 20h4L19 9l-4-4L4 16zM14 6l4 4',
+  trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6',
+  key: 'M15 7a4 4 0 11-3.9 5H9v2H7v2H4v-3l6.1-6A4 4 0 0115 7zM16 7h.01',
+  palette: 'M12 3a9 9 0 100 18c1.5 0 2-1 2-2s-1-2 0-3 2-1 3-1a4 4 0 004-4c0-4-4-8-9-8zM7.5 11h.01M10 7h.01M15 7h.01',
+  db: 'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
+  pulse: 'M3 12h4l3-8 4 16 3-8h4',
+  unlock: 'M5 11h14v10H5zM8 11V7a4 4 0 017.5-2',
   qr: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM18 18h3v3h-3zM6 6h1M17 6h1M6 17h1'
 };
 const ic = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[n] || IC.file}"/></svg>`;
@@ -247,32 +256,75 @@ const inUnit = u => myUnit() === +u;
 const isMgr = u => isImam() || (inUnit(u) && myRole() === 'manager');
 const isMgrOrOffice = u => isImam() || (inUnit(u) && ['manager', 'office'].includes(myRole()));
 const isClerk = u => isImam() || (inUnit(u) && ['manager', 'office', 'secretary'].includes(myRole()));
-const canSeeUnit = u => isImam() || inUnit(u);
-const canFinance = () => isImam() || inUnit(U_FIN);
-const canHR = () => isImam() || (inUnit(U_ADMIN) && ['manager', 'office'].includes(myRole()));
-const canAdminUsers = () => isImam() || (inUnit(U_IT) && myRole() === 'manager') || (inUnit(U_ADMIN) && myRole() === 'manager');
-const canSettings = () => isImam() || (inUnit(U_IT) && myRole() === 'manager');
-const canAssets = () => isImam() || myRole() !== 'staff';
 
-/* جدول مجوزها برای نمایش در صفحه مدیریت دسترسی */
-const PERM_MATRIX = [
-  ['مشاهده همه مدیریت‌ها و گزارش نظارتی', ['imam']],
-  ['صدور دستور امام جماعت', ['imam']],
-  ['تصویب نهایی موارد نیازمند مدیریت عالی', ['imam']],
-  ['تعریف و ارجاع وظیفه در واحد', ['imam', 'manager', 'office']],
-  ['تأیید درخواست در حدود اختیارات واحد', ['imam', 'manager']],
-  ['پیگیری دستور و ثبت گزارش پیشرفت', ['manager', 'office']],
-  ['ثبت نامه وارده و صادره', ['manager', 'office', 'secretary']],
-  ['ثبت جلسه و ملاقات', ['imam', 'manager', 'office', 'secretary']],
-  ['ثبت درخواست داخلی و همکاری', ['imam', 'manager', 'office', 'secretary', 'staff']],
-  ['مشاهده وظایف ارجاع‌شده به خود', ['imam', 'manager', 'office', 'secretary', 'staff']]
+/* ---------- مجوزها: پیش‌فرض نقش ← ماتریس قابل ویرایش نقش‌ها ← استثنای هر جایگاه ---------- */
+const PERMS = [
+  ['view.all', 'مشاهده و بازبینی همه بخش‌ها و همه مدیریت‌ها', 'نظارت'],
+  ['reports.view', 'گزارش‌گیری و داشبورد نظارتی', 'نظارت'],
+  ['orders.issue', 'صدور دستور در بخش دستورات امام جماعت', 'گردش کار'],
+  ['tasks.create', 'تعریف و ارجاع وظیفه در واحد خود', 'گردش کار'],
+  ['letters.create', 'ثبت نامه وارده، صادره و داخلی', 'دبیرخانه'],
+  ['letters.secret', 'مشاهده نامه‌های «سری» واحد خود', 'دبیرخانه'],
+  ['meetings.create', 'ثبت جلسه و ملاقات', 'تقویم'],
+  ['assets.view', 'دسترسی به سامانه اموال و انبار', 'اموال'],
+  ['finance.view', 'مشاهده کامل امور مالی همه واحدها', 'مالی'],
+  ['finance.request', 'ثبت درخواست پرداخت', 'مالی'],
+  ['hr.view', 'مشاهده پرونده‌های پرسنلی و قراردادها', 'منابع انسانی'],
+  ['admin.panel', 'ورود به پنل مدیریت سامانه', 'مدیریت سامانه'],
+  ['admin.users', 'افزودن، حذف و ویرایش کاربران و جایگاه‌ها', 'مدیریت سامانه'],
+  ['admin.passwords', 'تعیین و بازنشانی رمز عبور کاربران', 'مدیریت سامانه'],
+  ['admin.perms', 'دادن و گرفتن سطح دسترسی', 'مدیریت سامانه'],
+  ['admin.signups', 'تأیید یا رد درخواست‌های عضویت', 'مدیریت سامانه'],
+  ['admin.logs', 'مشاهده ورودها، نشست‌ها و رویدادهای سیستمی', 'مدیریت سامانه'],
+  ['admin.approve', 'تأیید یا رد مدیریتی همه موارد معلق', 'مدیریت سامانه'],
+  ['admin.settings', 'تغییر تنظیمات، ظاهر و ساختار سامانه', 'مدیریت سامانه'],
+  ['admin.data', 'ویرایش و حذف مستقیم داده‌ها', 'مدیریت سامانه'],
+  ['admin.backup', 'پشتیبان‌گیری و بازیابی', 'مدیریت سامانه']
 ];
+const permLabel = k => (PERMS.find(p => p[0] === k) || [k, k])[1];
+/* پیش‌فرض بر اساس نقش و مدیریت (مدیر فناوری اطلاعات همه اختیارات مدیریت سامانه را دارد) */
+function permDefault(pos, k) {
+  const r = pos.role, u = pos.unitId;
+  const itMgr = u === U_IT && r === 'manager';
+  if (r === 'imam') return true;
+  if (k.startsWith('admin.') || k === 'view.all') return itMgr || (k === 'admin.users' && u === U_ADMIN && r === 'manager');
+  switch (k) {
+    case 'reports.view': return ['manager', 'office'].includes(r);
+    case 'orders.issue': return false;
+    case 'tasks.create': return ['manager', 'office'].includes(r);
+    case 'letters.create': return ['manager', 'office', 'secretary'].includes(r);
+    case 'letters.secret': return r === 'manager';
+    case 'meetings.create': case 'assets.view': case 'finance.request': return r !== 'staff';
+    case 'finance.view': return u === U_FIN;
+    case 'hr.view': return u === U_ADMIN && ['manager', 'office'].includes(r);
+  }
+  return false;
+}
+function permOf(pos, k) {
+  if (!pos) return false;
+  const o = (pos.perms || {})[k];
+  if (o === 'allow') return true;
+  if (o === 'deny') return false;
+  const rp = ((DB.settings.rolePerms || {})[pos.role] || {})[k];
+  if (rp === 'allow') return true;
+  if (rp === 'deny') return false;
+  return permDefault(pos, k);
+}
+const can = k => !!ME && permOf(ME.pos, k);
+const isAll = () => isImam() || can('view.all');
+const canSeeUnit = u => isAll() || inUnit(u);
+const canFinance = () => can('finance.view');
+const canHR = () => can('hr.view');
+const canAdminUsers = () => can('admin.users');
+const canSettings = () => can('admin.settings');
+const canAssets = () => can('assets.view');
+const canAdminPanel = () => can('admin.panel') || can('admin.users') || can('admin.settings') || can('admin.logs');
 
 /* ---------- ثبت رویداد (زنجیره غیرقابل‌ویرایش) ---------- */
 function hash(s) { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(16).padStart(8, '0'); }
 function audit(act, ent, id, note = '') {
   const prev = DB.audit.length ? DB.audit[DB.audit.length - 1].h : '00000000';
-  const e = { ts: stamp(), uid: ME ? ME.user.id : 'system', pos: ME ? ME.pos.id : '', unit: ME ? ME.pos.unitId : -1, act, ent, id, note };
+  const e = { ts: stamp(), uid: ME ? ME.user.id : 'system', pos: ME ? (ME.realPos || ME.pos.id) : '', unit: ME ? ME.pos.unitId : -1, act: ME && ME.override ? act + ' (مدیریتی)' : act, ent, id, note };
   e.h = hash(prev + JSON.stringify(e));
   DB.audit.push(e);
 }
@@ -287,7 +339,8 @@ function verifyAudit() {
 }
 function hist(obj, action, note = '') {
   obj.history = obj.history || [];
-  obj.history.push({ ts: stamp(), uid: ME ? ME.user.id : 'system', pos: ME ? ME.pos.id : '', action, note });
+  if (ME && ME.override) note = (note ? note + ' — ' : '') + 'اقدام مدیریتی به‌جای ' + posLabel(ME.pos.id);
+  obj.history.push({ ts: stamp(), uid: ME ? ME.user.id : 'system', pos: ME ? (ME.realPos || ME.pos.id) : '', action, note });
 }
 const histHTML = h => (h && h.length ? `<div class="hist">${h.slice().reverse().map(x => `<div><b>${esc(x.action)}</b>${x.note ? ` — ${esc(x.note)}` : ''}<small>${jdt(x.ts)} · ${esc(x.uid === 'system' ? 'سامانه' : (userById(x.uid) || {}).name || '—')}${x.pos ? ' · ' + esc(posLabel(x.pos)) : ''}</small></div>`).join('')}</div>` : '<div class="empty">سابقه‌ای ثبت نشده است.</div>');
 

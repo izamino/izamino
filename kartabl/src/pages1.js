@@ -35,7 +35,7 @@ const queueList = (q, n = 8) => q.length ? `<div class="list">${q.slice(0, n).ma
 A.open_leave = d => showLeave(d.id);
 
 /* دامنه داده بر اساس جایگاه */
-const scopeUnits = () => (isImam() ? UNITS.map(u => u.id).concat([0]) : [myUnit()]);
+const scopeUnits = () => (isAll() ? UNITS.map(u => u.id).concat([0]) : [myUnit()]);
 const inScope = u => scopeUnits().includes(+u);
 
 function monthlyChart(unitFilter) {
@@ -69,10 +69,10 @@ PAGES.dashboard = () => {
   const today = [...DB.meetings.filter(m => canSeeMeeting(m) && m.date === T).map(m => ({ t: m.start, title: m.title, sub: m.place, k: 'meet', id: m.id, tag: m.kind })),
     ...DB.reservations.filter(r => r.date === T && r.status === 'تأییدشده').map(r => ({ t: r.start, title: r.kind, sub: spaceOf(r.space).name + ' · ' + r.applicant, k: 'res', id: r.id, tag: 'رزرو' }))].sort(by('t'));
   const notifs = DB.notifs.filter(n => n.pos === ME.pos.id && !n.read).slice(-6).reverse();
-  const acts = DB.audit.filter(a => isImam() || a.unit === myUnit()).slice(-8).reverse();
+  const acts = DB.audit.filter(a => isAll() || a.unit === myUnit()).slice(-8).reverse();
   const role = myRole();
   return `
-  ${head(`سلام، ${esc(ME.user.name)}`, `${esc(posLabel(ME.pos.id))} · ${jdLong(T)}`, `${role !== 'staff' ? btn('ثبت درخواست', 'newReq', {}, 'soft', 'plus') : ''}${isClerk(myUnit()) ? btn('ثبت نامه', 'newLetter', {}, 'ghost', 'mail') : ''}${isImam() ? btn('صدور دستور', 'newOrder', {}, '', 'flag') : ''}`)}
+  ${heroHTML()}
   <div class="tiles">
     ${tile('نامه‌های وارده / صادره', fa(L.filter(l => l.type === 'in').length) + ' / ' + fa(L.filter(l => l.type === 'out').length), J_MONTHS[jm - 1] + ' · ' + fa(L.filter(l => l.type === 'internal').length) + ' مکاتبه داخلی', '', 'letters')}
     ${tile('درخواست‌های جدید', reqNew.length, 'در مرحله ارجاع', reqNew.length ? 'warn' : '', 'requests')}
@@ -91,7 +91,7 @@ PAGES.dashboard = () => {
     ${card('اعلان‌های مهم', notifs.length ? `<div class="list">${notifs.map(n => `<a class="li" data-a="notif" data-id="${n.id}"><div class="k">${ic('bell')}</div><div class="t"><b>${esc(n.text)}</b><small>${jdt(n.ts)}</small></div></a>`).join('')}</div>` : empty('اعلان خوانده‌نشده‌ای ندارید.'), `<a class="btn sm ghost" href="#notifications">همه</a>`, { flush: true })}
   </div>
   <div class="grid g-main">
-    ${card('نمودار عملکرد ماهانه', monthlyChart(inScope), `<small>وظایف و درخواست‌های ${isImam() ? 'همه مدیریت‌ها' : esc(unitShort(myUnit()))}</small>`)}
+    ${card('نمودار عملکرد ماهانه', monthlyChart(inScope), `<small>وظایف و درخواست‌های ${isAll() ? 'همه مدیریت‌ها' : esc(unitShort(myUnit()))}</small>`)}
     ${card('آخرین اقدامات انجام‌شده', acts.length ? `<div class="list">${acts.map(a => `<div class="li"><div class="t"><b>${esc(a.act)}</b><small>${esc((userById(a.uid) || {}).name || 'سامانه')} · ${esc(a.note)} · ${jdt(a.ts)}</small></div></div>`).join('')}</div>` : empty('اقدامی ثبت نشده است.'), '', { flush: true })}
   </div>`;
 };
@@ -116,7 +116,7 @@ function unitStats(u, f, t) {
   };
 }
 PAGES.imam = () => {
-  if (!isImam()) return denied();
+  if (!isAll()) return denied();
   const q = myQueue();
   const stats = UNITS.map(u => ({ id: u.id, u, ...unitStats(u.id) }));
   const lateOrders = DB.orders.filter(o => orderStatus(o) === 'معوق');
@@ -227,9 +227,9 @@ PAGES.letters = () => {
   if (v.tab !== 'all') rows = v.tab === 'archive' ? rows.filter(l => l.status === 'بایگانی') : rows.filter(l => l.type === v.tab && l.status !== 'بایگانی');
   rows = rows.filter(l => textMatch(v.q, l.no, fa(l.no), l.subject, l.sender, l.receiver, l.body) && (!v.cat || l.cat === v.cat) && (!v.pr || l.priority === v.pr) && (!v.conf || l.conf === v.conf) && (!v.st || l.status === v.st) && (v.u === undefined || v.u === '' || l.unitId === +v.u) && inRange(l.date, v.f, v.t));
   const all = DB.letters.filter(canSeeLetter);
-  return `${head('دبیرخانه و مکاتبات', 'ثبت نامه‌های وارده، صادره و داخلی با شماره‌گذاری خودکار، ارجاع، پاسخ و آرشیو دائمی', isClerk(myUnit()) || isImam() ? btn('ثبت نامه', 'newLetter', {}, '', 'plus') : '')}
+  return `${head('دبیرخانه و مکاتبات', 'ثبت نامه‌های وارده، صادره و داخلی با شماره‌گذاری خودکار، ارجاع، پاسخ و آرشیو دائمی', can('letters.create') ? btn('ثبت نامه', 'newLetter', {}, '', 'plus') : '')}
   ${tabs('letters', [['all', `همه (${fa(all.length)})`], ['in', 'وارده'], ['out', 'صادره'], ['internal', 'داخلی'], ['archive', 'آرشیو']], v.tab)}
-  <section class="card">${filterBar('letters', [{ k: 'q', t: 'search', l: 'جست‌وجو در شماره، موضوع، فرستنده، متن…' }, { k: 'cat', l: 'طبقه‌بندی', o: LETTER_CATS }, { k: 'pr', l: 'اهمیت', o: PRIORITIES }, { k: 'conf', l: 'محرمانگی', o: CONF }, { k: 'st', l: 'وضعیت', o: ['ثبت‌شده', 'ارجاع‌شده', 'پاسخ داده‌شده', 'بایگانی'] }, ...(isImam() ? [{ k: 'u', l: 'مدیریت', o: unitOpts() }] : []), { k: 'f', t: 'date', l: 'از تاریخ' }, { k: 't', t: 'date', l: 'تا تاریخ' }])}
+  <section class="card">${filterBar('letters', [{ k: 'q', t: 'search', l: 'جست‌وجو در شماره، موضوع، فرستنده، متن…' }, { k: 'cat', l: 'طبقه‌بندی', o: LETTER_CATS }, { k: 'pr', l: 'اهمیت', o: PRIORITIES }, { k: 'conf', l: 'محرمانگی', o: CONF }, { k: 'st', l: 'وضعیت', o: ['ثبت‌شده', 'ارجاع‌شده', 'پاسخ داده‌شده', 'بایگانی'] }, ...(isAll() ? [{ k: 'u', l: 'مدیریت', o: unitOpts() }] : []), { k: 'f', t: 'date', l: 'از تاریخ' }, { k: 't', t: 'date', l: 'تا تاریخ' }])}
   <div class="cb flush">${letterTable(rows)}</div></section>`;
 };
 A.letter = d => showLetter(d.id);
@@ -280,7 +280,7 @@ function showLetter(id) {
     <div class="grid g2"><div><h3>ارجاعات</h3>${l.refs.length ? `<div class="list">${l.refs.map(r => `<div class="li" style="padding:6px 0"><div class="t"><b>${esc(unitName(r.unitId))}</b><small>${jdt(r.ts)} · ${esc(userById(r.by)?.name || '')}${r.note ? ' — ' + esc(r.note) : ''}</small></div></div>`).join('')}</div>` : empty('ارجاع نشده است.')}</div>
     <div><h3>پاسخ‌ها</h3>${l.replies.length ? l.replies.map(r => `<div class="box">${esc(r.text)}<div class="hint">${esc(userById(r.by)?.name)} · ${jdt(r.ts)}</div></div>`).join('') : empty(l.needReply ? 'در انتظار پاسخ' : 'پاسخی ثبت نشده است.')}</div></div>
     <div><h3>سابقه اقدامات</h3>${histHTML(l.history)}</div>`,
-    foot: `${can && l.status !== 'بایگانی' ? btn('ارجاع', 'letterRefer', { id }, '', 'send') + btn('ثبت پاسخ', 'letterReply', { id }, 'ghost') + btn('بایگانی', 'letterArchive', { id }, 'ghost', 'archive') : ''}${CAN_PRINT ? btn('چاپ / PDF', 'print', {}, 'ghost', 'print') : '<span class="hint" style="align-self:center">چاپ و خروجی PDF در نسخه مستقر روی سرور فعال است.</span>'}`
+    foot: `${editBtn('letter', l)}${can && l.status !== 'بایگانی' ? btn('ارجاع', 'letterRefer', { id }, '', 'send') + btn('ثبت پاسخ', 'letterReply', { id }, 'ghost') + btn('بایگانی', 'letterArchive', { id }, 'ghost', 'archive') : ''}${CAN_PRINT ? btn('چاپ / PDF', 'print', {}, 'ghost', 'print') : '<span class="hint" style="align-self:center">چاپ و خروجی PDF در نسخه مستقر روی سرور فعال است.</span>'}`
   });
   MODAL_REOPEN = () => showLetter(id);
 }
@@ -302,9 +302,9 @@ PAGES.orders = () => {
   const v = vs('orders');
   const rows = DB.orders.filter(o => canSeeOrder(o) && (!v.st || orderStatus(o) === v.st) && (!v.u || o.units.includes(+v.u)) && (!v.pr || o.priority === v.pr) && textMatch(v.q, o.no, o.title, o.desc));
   const all = DB.orders.filter(canSeeOrder);
-  return `${head('دستورات امام جماعت', 'دستورات مستقیم مدیریت عالی با تعیین مسئول، مهلت، اولویت و پیگیری تا تأیید نهایی', isImam() ? btn('صدور دستور جدید', 'newOrder', {}, '', 'flag') : '')}
+  return `${head('دستورات امام جماعت', 'دستورات مستقیم مدیریت عالی با تعیین مسئول، مهلت، اولویت و پیگیری تا تأیید نهایی', isImam() || can('orders.issue') ? btn('صدور دستور جدید', 'newOrder', {}, '', 'flag') : '')}
   <div class="tiles">${['جدید', 'در حال بررسی', 'در حال انجام', 'منتظر تأیید', 'تکمیل‌شده', 'معوق'].map(s => tile(s, all.filter(o => orderStatus(o) === s).length, '', s === 'معوق' ? 'bad' : s === 'منتظر تأیید' ? 'warn' : s === 'تکمیل‌شده' ? 'ok' : '')).join('')}</div>
-  <section class="card">${filterBar('orders', [{ k: 'q', t: 'search', l: 'جست‌وجو در دستورات…' }, { k: 'st', l: 'وضعیت', o: [...ORDER_ST, 'معوق'] }, { k: 'pr', l: 'اهمیت', o: PRIORITIES }, ...(isImam() ? [{ k: 'u', l: 'مدیریت', o: unitOpts() }] : [])])}<div class="cb flush">${orderTable(rows)}</div></section>`;
+  <section class="card">${filterBar('orders', [{ k: 'q', t: 'search', l: 'جست‌وجو در دستورات…' }, { k: 'st', l: 'وضعیت', o: [...ORDER_ST, 'معوق'] }, { k: 'pr', l: 'اهمیت', o: PRIORITIES }, ...(isAll() ? [{ k: 'u', l: 'مدیریت', o: unitOpts() }] : [])])}<div class="cb flush">${orderTable(rows)}</div></section>`;
 };
 A.order = d => showOrder(d.id);
 A.newOrder = () => formModal('صدور دستور امام جماعت', [
@@ -332,7 +332,7 @@ function showOrder(id) {
     ${kv([['مدیریت‌های مسئول', o.units.map(unitName).join('، ')], ['مسئول اصلی اقدام', esc(posWho(o.respPos))], ['تاریخ صدور', jd(o.issued)], ['مهلت انجام', dueTxt(o.status === 'تکمیل‌شده' ? '' : o.due)], ['پیشرفت', `<div class="row">${bar(o.progress)}<span>${fa(o.progress)}٪</span></div>`], o.files.length && ['ضمایم', files(o.files)]])}
     <div><h3>گزارش‌های پیشرفت</h3>${o.reports.length ? o.reports.slice().reverse().map(r => `<div class="box" style="margin-bottom:6px">${esc(r.note || '—')}<div class="hint">${esc(userById(r.by)?.name)} · ${esc(posLabel(r.pos))} · ${jdt(r.ts)} · ${fa(r.progress)}٪</div>${files(r.files)}</div>`).join('') : empty('هنوز گزارشی ثبت نشده است.')}</div>
     <div><h3>سابقه</h3>${histHTML(o.history)}</div>`,
-    foot: `${canRep ? btn('ثبت گزارش پیشرفت', 'orderRep', { id }, '', 'send') : ''}${isImam() && o.status === 'منتظر تأیید' ? btn('تأیید و تکمیل', 'orderOk', { id }) + btn('بازگشت برای اصلاح', 'orderBack', { id }, 'danger') : ''}`
+    foot: `${editBtn('order', o)}${canRep ? btn('ثبت گزارش پیشرفت', 'orderRep', { id }, '', 'send') : ''}${isImam() && o.status === 'منتظر تأیید' ? btn('تأیید و تکمیل', 'orderOk', { id }) + btn('بازگشت برای اصلاح', 'orderBack', { id }, 'danger') : ''}`
   });
 }
 A.orderRep = d => { const o = DB.orders.find(x => x.id === d.id); actModal('گزارش پیشرفت دستور', v => orderReport(o, v), { fields: [{ k: 'status', l: 'وضعیت', t: 'select', o: ['در حال بررسی', 'در حال انجام', 'منتظر تأیید'], blank: false }, { k: 'progress', l: 'درصد پیشرفت', t: 'number' }, { k: 'files', l: 'پیوست گزارش', t: 'file' }], init: { status: o.status === 'جدید' ? 'در حال بررسی' : o.status, progress: o.progress }, noteLabel: 'شرح گزارش (برای ارسال نهایی، گزارش نهایی را بنویسید)', reopen: () => showOrder(o.id) }); };
@@ -357,7 +357,7 @@ PAGES.tasks = () => {
   rows = rows.filter(t => (!v.st || taskStatus(t) === v.st) && (!v.u || t.unitId === +v.u) && (!v.pr || t.priority === v.pr) && textMatch(v.q, t.no, t.title, t.desc));
   return `${head('ارجاع وظایف', 'تعریف وظیفه با شماره پیگیری، مسئول، مهلت و ثبت کامل تاریخچه تغییر وضعیت؛ ارجاع بین مدیریت‌ها فقط از مسیر درخواست همکاری', `${isMgrOrOffice(myUnit()) && !isImam() ? btn('وظیفه جدید', 'newTask', { u: myUnit() }, '', 'plus') : ''}${btn('درخواست همکاری از مدیریت دیگر', 'newReq', { cat: 'همکاری میان‌بخشی' }, 'ghost')}`)}
   ${tabs('tasks', [['all', `همه (${fa(all.length)})`], ['mine', `ارجاع‌شده به من (${fa(all.filter(t => t.assignee === ME.pos.id && t.status !== 'تکمیل‌شده').length)})`], ['approve', 'منتظر تأیید'], ['late', `معوق (${fa(all.filter(t => taskStatus(t) === 'معوق').length)})`]], v.tab)}
-  <section class="card">${filterBar('tasks', [{ k: 'q', t: 'search', l: 'جست‌وجو در شماره یا عنوان…' }, { k: 'st', l: 'وضعیت', o: [...TASK_ST, 'معوق'] }, { k: 'pr', l: 'اولویت', o: PRIORITIES }, ...(isImam() ? [{ k: 'u', l: 'مدیریت', o: unitOpts() }] : [])])}<div class="cb flush">${taskTable(rows)}</div></section>`;
+  <section class="card">${filterBar('tasks', [{ k: 'q', t: 'search', l: 'جست‌وجو در شماره یا عنوان…' }, { k: 'st', l: 'وضعیت', o: [...TASK_ST, 'معوق'] }, { k: 'pr', l: 'اولویت', o: PRIORITIES }, ...(isAll() ? [{ k: 'u', l: 'مدیریت', o: unitOpts() }] : [])])}<div class="cb flush">${taskTable(rows)}</div></section>`;
 };
 A.task = d => showTask(d.id);
 A.newTask = d => {
@@ -379,7 +379,7 @@ function showTask(id) {
     ${t.desc ? `<div class="box">${esc(t.desc)}</div>` : ''}
     ${kv([['مدیریت', esc(unitName(t.unitId))], ['مسئول انجام', esc(posWho(t.assignee))], ['تاریخ شروع', jd(t.start)], ['مهلت', dueTxt(t.status === 'تکمیل‌شده' ? '' : t.due)], ['ثبت‌کننده', esc(userById(t.by)?.name || 'سامانه')], t.files.length && ['ضمایم', files(t.files)]])}
     <div><h3>تاریخچه اقدامات</h3>${histHTML(t.history)}</div>`,
-    foot: acts.map(([k, l]) => btn(l, 'taskAct', { id, act: k }, k === 'return' ? 'danger' : k === 'note' || k === 'reassign' ? 'ghost' : '')).join('')
+    foot: acts.map(([k, l]) => btn(l, 'taskAct', { id, act: k }, k === 'return' ? 'danger' : k === 'note' || k === 'reassign' ? 'ghost' : '')).join('') + editBtn('task', t)
   });
 }
 A.taskAct = d => {
@@ -409,7 +409,7 @@ PAGES.requests = () => {
   rows = rows.filter(r => (!v.st || reqLabel(r) === v.st) && (!v.cat || r.cat === v.cat) && (!v.uu || r.toUnit === +v.uu) && textMatch(v.q, r.no, r.title, r.desc));
   return `${head('درخواست‌های داخلی', 'گردش استاندارد: ثبت ← شماره پیگیری ← ارجاع ← بررسی و هماهنگی میان‌بخشی ← تأیید ← اجرا ← گزارش نهایی ← بایگانی', btn('ثبت درخواست', 'newReq', {}, '', 'plus'))}
   ${tabs('requests', isImam() ? [['all', 'همه'], ['imam', 'نیازمند تصویب امام']] : [['in', `واردشده به مدیریت (${fa(cnt.in)})`], ['out', `ارسالی (${fa(cnt.out)})`], ['coop', `درخواست همکاری (${fa(cnt.coop)})`]], v.tab)}
-  <section class="card">${filterBar('requests', [{ k: 'q', t: 'search', l: 'جست‌وجو در کد پیگیری یا عنوان…' }, { k: 'st', l: 'مرحله', o: [...REQ_STAGES.slice(1), 'ردشده', 'لغوشده'] }, ...(v.cat ? [{ k: 'cat', l: 'خدمت', o: [v.cat] }] : []), ...(isImam() ? [{ k: 'uu', l: 'مدیریت مسئول', o: unitOpts() }] : [])])}<div class="cb flush">${reqTable(rows)}</div></section>`;
+  <section class="card">${filterBar('requests', [{ k: 'q', t: 'search', l: 'جست‌وجو در کد پیگیری یا عنوان…' }, { k: 'st', l: 'مرحله', o: [...REQ_STAGES.slice(1), 'ردشده', 'لغوشده'] }, ...(v.cat ? [{ k: 'cat', l: 'خدمت', o: [v.cat] }] : []), ...(isAll() ? [{ k: 'uu', l: 'مدیریت مسئول', o: unitOpts() }] : [])])}<div class="cb flush">${reqTable(rows)}</div></section>`;
 };
 A.req = d => showReq(d.id);
 A.newReq = d => {

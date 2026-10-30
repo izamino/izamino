@@ -81,12 +81,13 @@ function barChart(groups, series) {
 
 /* ---------- مودال و فرم ---------- */
 let MODAL_REOPEN = null;
-function modal({ title, body, foot = '', wide = false }) {
+function modal({ title, body, foot = '', wide = false, locked = false }) {
   closeModal(true);
   const bg = document.createElement('div');
   bg.className = 'modal-bg';
-  bg.innerHTML = `<div class="modal ${wide ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="mh"><h2>${title}</h2><button class="ibtn" data-a="close" aria-label="بستن">${ic('x')}</button></div><div class="mb">${body}</div>${foot ? `<div class="mf">${foot}</div>` : ''}</div>`;
-  bg.addEventListener('mousedown', e => { if (e.target === bg) closeModal(); });
+  bg.innerHTML = `<div class="modal ${wide ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="mh"><h2>${title}</h2>${locked ? '' : `<button class="ibtn" data-a="close" aria-label="بستن">${ic('x')}</button>`}</div><div class="mb">${body}</div>${foot ? `<div class="mf">${foot}</div>` : ''}</div>`;
+  if (locked) bg.dataset.locked = '1';
+  else bg.addEventListener('mousedown', e => { if (e.target === bg) closeModal(); });
   document.body.appendChild(bg);
   const f = bg.querySelector('input:not([type=hidden]),select,textarea');
   if (f) setTimeout(() => f.focus(), 30);
@@ -138,9 +139,9 @@ async function readForm(form, fields) {
 }
 function formModal(title, fields, init, onSave, opts = {}) {
   const bg = modal({
-    title, wide: opts.wide,
+    title, wide: opts.wide, locked: opts.locked,
     body: `${opts.pre || ''}<form class="form" id="mform" novalidate>${fields.map(f => fieldHTML(f, init[f.k])).join('')}</form><div class="err" id="merr" role="alert"></div>`,
-    foot: `<button class="btn" type="submit" form="mform">${opts.submit || 'ثبت'}</button><button class="btn ghost" data-a="close">انصراف</button>`
+    foot: `<button class="btn" type="submit" form="mform">${opts.submit || 'ثبت'}</button>${opts.locked ? '' : '<button class="btn ghost" data-a="close">انصراف</button>'}`
   });
   const form = $('#mform', bg);
   form.addEventListener('submit', async e => {
@@ -178,42 +179,95 @@ const allPosChecks = () => DB.positions.map(p => [p.id, posLabel(p.id) + ' — '
 const serviceOpts = () => UNITS.map(u => ({ group: u.name, items: [...SERVICES[u.id].map(s => [`${u.id}|${s}`, s]), [`${u.id}|همکاری میان‌بخشی`, 'درخواست همکاری میان‌بخشی']] }));
 
 /* ---------- ورود ---------- */
-function renderLogin(err = '') {
+const SEC = () => DB.settings.security;
+function renderLogin(err = '', mode = 'login') {
+  const st = DB.settings;
   const groups = [['P0']].concat(UNITS.map(u => unitPositions(u.id).map(p => p.id)));
+  const pane = mode === 'signup' ? `<form id="signf" novalidate>
+      <div><h1>درخواست ایجاد حساب کاربری</h1><p class="muted">درخواست شما پس از بررسی مدیر فناوری اطلاعات فعال می‌شود.</p></div>
+      <div class="form">${fieldHTML({ k: 'name', l: 'نام و نام خانوادگی', req: true }, '')}${fieldHTML({ k: 'username', l: 'نام کاربری دلخواه', req: true, hint: 'حروف انگلیسی و عدد' }, '')}
+      ${fieldHTML({ k: 'phone', l: 'تلفن همراه', t: 'tel', req: true }, '')}${fieldHTML({ k: 'unitId', l: 'مدیریت محل خدمت', t: 'select', o: unitOpts(), req: true }, '')}
+      ${fieldHTML({ k: 'title', l: 'سمت درخواستی', req: true, ph: 'مثلاً: منشی، کارشناس، معاون' }, '')}${fieldHTML({ k: 'pass', l: 'رمز عبور', t: 'password', req: true, hint: 'دست‌کم ' + fa(SEC().minLen) + ' نویسه' }, '')}
+      ${fieldHTML({ k: 'note', l: 'توضیح', t: 'textarea' }, '')}</div>
+      <div class="err" id="serr" role="alert"></div>
+      <button class="btn lg" type="submit">${ic('send')}ارسال درخواست</button>
+      <button class="btn ghost" type="button" data-a="loginMode" data-m="login">بازگشت به ورود</button>
+    </form>` : `<form id="loginf" novalidate>
+      <div><h1>ورود به سامانه</h1><p class="muted">دسترسی شما بر اساس جایگاه سازمانی تعیین می‌شود.</p></div>
+      ${st.maintenance ? `<div class="notice warn">${ic('alert')} سامانه در حال به‌روزرسانی است؛ فقط مدیران سامانه امکان ورود دارند.</div>` : ''}
+      <div class="fld"><label for="lu">نام کاربری</label><input id="lu" name="u" autocomplete="username" dir="ltr"></div>
+      <div class="fld"><label for="lp">رمز عبور</label><div class="pw"><input id="lp" name="p" type="password" autocomplete="current-password" dir="ltr"><button type="button" class="ibtn sm" data-a="pwShow" data-t="lp" aria-label="نمایش رمز">${ic('eye')}</button></div></div>
+      ${err ? `<div class="notice warn" role="alert">${err}</div>` : ''}
+      <button class="btn lg" type="submit">${ic('lock')}ورود امن</button>
+      <button class="btn ghost" type="button" data-a="loginMode" data-m="signup">${ic('user')}درخواست ایجاد حساب کاربری</button>
+      ${st.showDemo ? `<details class="demo-wrap"><summary>حساب‌های نمونه (رمز همه <b class="code">1234</b>)</summary><div class="demo">${groups.flat().map(pid => { const u = holderOf(pid); if (!u) return ''; return `<button type="button" data-a="quick" data-u="${esc(u.username)}"><span>${esc(u.name)}</span><small>${esc(posLabel(pid))} · <span class="code">${esc(u.username)}</span></small></button>`; }).join('')}</div></details>` : ''}
+    </form>`;
   $('#root').innerHTML = `
   <div class="login">
     <div class="art"><canvas id="geo" aria-hidden="true"></canvas>
-      <div><div class="bs">بسم الله الرحمن الرحیم</div><h1>کارتابل اداری<br>${esc(DB.settings.orgName)}</h1>
-      <p>سامانه یکپارچه مکاتبات، دستورات، ارجاع وظایف، درخواست‌ها، رزروها، اموال، امور مالی و منابع انسانی ۱۷ مدیریت مستقل زیر نظر امام جماعت.</p></div>
-      <div class="facts"><div><b>${fa(17)}</b><span>مدیریت مستقل</span></div><div><b>${fa(DB.positions.length)}</b><span>جایگاه سازمانی</span></div><div><b>${jd(todayISO())}</b><span>${J_WEEK[weekday(todayISO())]}</span></div></div>
+      <div><div class="bs">بسم الله الرحمن الرحیم</div><h1>${esc(st.loginTitle)}<br>${esc(st.orgName)}</h1><p>${esc(st.loginText)}</p></div>
+      <div class="login-clock"><b id="lclock">${fa(nowHMS())}</b><span>${jdLong(todayISO())}</span></div>
+      <div class="facts"><div><b>${fa(UNITS.length)}</b><span>مدیریت مستقل</span></div><div><b>${fa(DB.positions.length)}</b><span>جایگاه سازمانی</span></div><div><b>${fa(DB.users.filter(u => u.active && !u.deleted).length)}</b><span>کاربر فعال</span></div></div>
     </div>
-    <div class="pane"><form id="loginf" novalidate>
-      <div><h1>ورود به سامانه</h1><p style="color:var(--muted);margin:4px 0 0">دسترسی شما بر اساس جایگاه سازمانی تعیین می‌شود.</p></div>
-      <div class="fld"><label for="lu">نام کاربری</label><input id="lu" name="u" autocomplete="username" dir="ltr" value=""></div>
-      <div class="fld"><label for="lp">رمز عبور</label><input id="lp" name="p" type="password" autocomplete="current-password" dir="ltr"></div>
-      ${err ? `<div class="notice warn" role="alert">${err}</div>` : ''}
-      <button class="btn" type="submit" style="justify-content:center;padding:10px">${ic('lock')}ورود امن</button>
-      <div class="notice">نسخه نمونه: هر جایگاه را از فهرست زیر انتخاب کنید (رمز همه حساب‌ها <b class="code">1234</b>). امام جماعت: <b class="code">imam</b> · مدیران: <b class="code">m1…m17</b> · مسئولان دفتر: <b class="code">o1…o17</b> · منشی‌ها: <b class="code">s1…s17</b></div>
-      <div class="demo">${groups.flat().map(pid => { const u = holderOf(pid); if (!u) return ''; return `<button type="button" data-a="quick" data-u="${esc(u.username)}"><span>${esc(u.name)}</span><small>${esc(posLabel(pid))} · <span class="code">${esc(u.username)}</span></small></button>`; }).join('')}</div>
-    </form></div>
+    <div class="pane">${pane}</div>
   </div>`;
-  $('#loginf').addEventListener('submit', e => { e.preventDefault(); doLogin($('#lu').value.trim(), $('#lp').value); });
+  if (mode === 'login') $('#loginf').addEventListener('submit', e => { e.preventDefault(); doLogin($('#lu').value.trim(), $('#lp').value); });
+  else $('#signf').addEventListener('submit', async e => {
+    e.preventDefault();
+    const F = [{ k: 'name', req: 1 }, { k: 'username', req: 1 }, { k: 'phone', req: 1 }, { k: 'unitId', req: 1 }, { k: 'title', req: 1 }, { k: 'pass', req: 1 }, { k: 'note' }];
+    const { out } = await readForm(e.target, F);
+    const r = createSignup(out);
+    if (r.error) { $('#serr').textContent = r.error; return; }
+    Store.save(); renderLogin('درخواست شما با کد ' + fa(r.no) + ' ثبت شد. پس از تأیید، با همان نام کاربری و رمز وارد شوید.');
+  });
   drawGeo();
 }
+A.loginMode = d => renderLogin('', d.m);
+A.pwShow = d => { const i = document.getElementById(d.t); if (i) i.type = i.type === 'password' ? 'text' : 'password'; };
+function logLogin(username, u, ok, reason) {
+  DB.logins.push({ id: uid(), ts: stamp(), username, uid: u ? u.id : '', ok, reason, agent: navigator.userAgent.replace(/\(.*?\)/g, '').slice(0, 60) });
+  if (DB.logins.length > 3000) DB.logins = DB.logins.slice(-3000);
+}
 function doLogin(username, pass) {
-  const u = DB.users.find(x => x.username === en(username));
-  if (!u || u.pass !== hash('shabab:' + en(pass))) { DB.loginFails = (DB.loginFails || 0) + 1; Store.save(); return renderLogin('نام کاربری یا رمز عبور درست نیست.'); }
-  if (!u.active) return renderLogin('این حساب کاربری غیرفعال شده است. با مدیریت فناوری اطلاعات تماس بگیرید.');
-  if (!u.posId) return renderLogin('برای این حساب جایگاه سازمانی تعریف نشده است.');
+  username = en(username);
+  const u = DB.users.find(x => x.username === username && !x.deleted);
+  const deny = (msg, reason) => { logLogin(username, u, false, reason); Store.save(); renderLogin(msg); };
+  if (!u) return deny('نام کاربری یا رمز عبور درست نیست.', 'نام کاربری ناموجود');
+  if (u.lockedUntil && new Date(u.lockedUntil) > new Date()) return deny(`حساب به دلیل تلاش‌های ناموفق تا ساعت ${fa(new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit' }).format(new Date(u.lockedUntil)))} قفل است. مدیر فناوری اطلاعات می‌تواند آن را باز کند.`, 'حساب قفل');
+  if (u.pass !== hash('shabab:' + en(pass))) {
+    u.fails = (u.fails || 0) + 1;
+    if (u.fails >= SEC().maxFails) { u.lockedUntil = new Date(Date.now() + SEC().lockMin * 60000).toISOString(); u.fails = 0; notify(adminPositions(), 'request', `حساب ${u.name} پس از ${fa(SEC().maxFails)} تلاش ناموفق قفل شد.`, 'admin', u.username); return deny(`به دلیل ${fa(SEC().maxFails)} تلاش ناموفق، حساب برای ${fa(SEC().lockMin)} دقیقه قفل شد. مدیر فناوری اطلاعات می‌تواند قفل را زودتر باز کند.`, 'قفل‌شدن حساب'); }
+    return deny('نام کاربری یا رمز عبور درست نیست.' + (u.fails ? ` (${fa(SEC().maxFails - u.fails)} تلاش دیگر تا قفل‌شدن حساب)` : ''), 'رمز نادرست');
+  }
+  if (!u.active) return deny('این حساب کاربری غیرفعال شده است. با مدیریت فناوری اطلاعات تماس بگیرید.', 'حساب غیرفعال');
+  if (!u.posId) return deny('برای این حساب جایگاه سازمانی تعریف نشده است.', 'بدون جایگاه');
+  if (DB.settings.maintenance && !permOf(posById(u.posId), 'admin.settings')) return deny('سامانه در حالت به‌روزرسانی است و فعلاً فقط مدیران سامانه وارد می‌شوند.', 'حالت به‌روزرسانی');
+  u.fails = 0; u.lockedUntil = ''; u.lastLogin = stamp();
+  logLogin(username, u, true, 'ورود موفق');
   setMe(u);
+  const ses = { id: uid(), uid: u.id, start: stamp(), last: stamp(), active: true, agent: navigator.userAgent.replace(/\(.*?\)/g, '').slice(0, 60) };
+  DB.sessions.push(ses); if (DB.sessions.length > 500) DB.sessions = DB.sessions.slice(-500);
+  sess.set(u.id + '|' + ses.id);
   audit('ورود به سامانه', 'session', u.id, '');
   Store.save();
-  sess.set(u.id);
   renderShell();
+  if (u.mustChange) forcePassChange();
 }
 function setMe(u) { ME = { user: u, pos: posById(u.posId) }; }
+const mySession = () => { const s = (sess.get() || '').split('|')[1]; return DB.sessions.find(x => x.id === s); };
 A.quick = d => doLogin(d.u, '1234');
-A.logout = () => { audit('خروج از سامانه', 'session', ME.user.id, ''); Store.save(); ME = null; sess.set(null); location.hash = ''; renderLogin(); };
+function endSession(msg) {
+  const s = mySession(); if (s) { s.active = false; s.end = stamp(); }
+  if (ME) audit('خروج از سامانه', 'session', ME.user.id, msg || '');
+  Store.save(); ME = null; sess.set(null); closeModal(); location.hash = ''; renderLogin(msg || '');
+}
+A.logout = () => endSession();
+function forcePassChange() {
+  formModal('تغییر رمز عبور الزامی است', [{ k: 'p1', l: 'رمز جدید', t: 'password', req: true, hint: 'دست‌کم ' + fa(SEC().minLen) + ' نویسه' }, { k: 'p2', l: 'تکرار رمز جدید', t: 'password', req: true }], {}, v => {
+    if (v.p1 !== v.p2) return fail('رمز و تکرار آن یکسان نیست.');
+    return setPassword(ME.user, v.p1, false, true);
+  }, { submit: 'ذخیره رمز', done: 'رمز عبور تغییر کرد.', locked: true, pre: '<div class="notice">مدیر سامانه برای حساب شما تغییر رمز را الزامی کرده است.</div>' });
+}
 
 /* نقش هندسی گره اسلامی در پس‌زمینه صفحه ورود */
 function drawGeo() {
@@ -240,7 +294,7 @@ function navItems() {
   return [
     ['grp', 'کارتابل'],
     ['dashboard', 'داشبورد', 'home', true, q],
-    ['imam', 'کارتابل امام جماعت', 'dome', isImam()],
+    ['imam', 'کارتابل امام جماعت', 'dome', isAll()],
     ['units', 'فهرست ۱۷ مدیریت', 'building', true],
     [`unit-${u}`, 'کارتابل ' + unitShort(u), UNITS.find(x => x.id === u)?.ic || 'building', u > 0],
     ['grp', 'مکاتبات و گردش کار'],
@@ -255,9 +309,10 @@ function navItems() {
     ['finance', 'امور مالی', 'wallet', canFinance() || myRole() !== 'staff'],
     ['hr', 'منابع انسانی و امور اداری', 'users', true],
     ['grp', 'نظارت و سامانه'],
-    ['reports', 'گزارش‌گیری و نظارت', 'chart', isImam() || ['manager', 'office'].includes(myRole())],
+    ['reports', 'گزارش‌گیری و نظارت', 'chart', can('reports.view')],
     ['notifications', 'اعلان‌ها', 'bell', true, unread],
-    ['users', 'کاربران و دسترسی‌ها', 'lock', canAdminUsers()],
+    ['admin', 'پنل مدیریت سامانه', 'shield', canAdminPanel(), adminAlerts()],
+    ['profile', 'حساب کاربری من', 'user', true],
     ['system', 'تنظیمات و آرشیو', 'gear', true]
   ];
 }
@@ -265,7 +320,7 @@ function renderShell() {
   $('#root').innerHTML = `
   <div class="app" id="app">
     <aside class="side" id="side" aria-label="منوی اصلی">
-      <div class="brand"><div class="mark">${ic('dome')}</div><div><b>کارتابل شباب اهل‌الجنه</b><small>مجتمع مسجدمحور</small></div></div>
+      <div class="brand"><div class="mark">${ic('dome')}</div><div><b>${esc(DB.settings.loginTitle)}</b><small>${esc(DB.settings.subtitle)} · ${esc(DB.settings.orgName.replace(/^مجتمع مسجدمحور\s*/, ''))}</small></div></div>
       <nav class="nav" id="nav"></nav>
       <div class="foot">${MEMORY_ONLY ? 'ذخیره‌سازی مرورگر در دسترس نیست؛ داده‌ها پس از بستن صفحه حفظ نمی‌شوند.' : 'داده‌ها در این مرورگر ذخیره می‌شوند.'}<br>نسخه ۱٫۰ · ${fa(DB.audit.length)} رویداد ثبت‌شده</div>
     </aside>
@@ -275,10 +330,10 @@ function renderShell() {
         <button class="ibtn menu" data-a="menu" aria-label="منو">${ic('menu')}</button>
         <div class="search">${ic('search')}<input id="gsearch" type="search" placeholder="جست‌وجوی سراسری: شماره، عنوان، نام…" autocomplete="off" aria-label="جست‌وجوی سراسری"><div class="res" id="gres" hidden></div></div>
         <div class="spacer"></div>
-        <div class="clock" id="clock"></div>
+        <div class="clock" id="clock" aria-live="off"></div>
         <button class="ibtn" data-a="theme" aria-label="تغییر حالت روشن و تاریک" id="themebtn"></button>
         <a class="ibtn" href="#notifications" aria-label="اعلان‌ها" id="bell">${ic('bell')}</a>
-        <div class="who"><div class="av">${esc(ME.user.name.replace('حجت‌الاسلام ', '').replace('سید ', '').trim()[0])}</div><div><b>${esc(ME.user.name)}</b><small>${esc(posLabel(ME.pos.id))}</small></div></div>
+        <a class="who" href="#profile" title="حساب کاربری من">${av(ME.user.name)}<div><b>${esc(ME.user.name)}</b><small>${esc(posLabel(ME.pos.id))}</small></div></a>
         <button class="ibtn" data-a="logout" aria-label="خروج">${ic('logout')}</button>
       </header>
       <main id="main"></main>
@@ -298,9 +353,17 @@ function renderChrome() {
   $('#themebtn').innerHTML = ic(curTheme() === 'dark' ? 'sun' : 'moon');
 }
 function tick() {
-  const c = $('#clock'); if (!c) return;
-  const t = todayISO();
-  c.innerHTML = `<b>${fa(nowHM())}</b>${jdLong(t)}`;
+  const lc = $('#lclock'); if (lc) lc.textContent = fa(nowHMS());
+  if (!ME) return;
+  const c = $('#clock');
+  if (c) c.innerHTML = `<b>${fa(nowHMS())}</b>${jdLong(todayISO())}`;
+  liveWidgets();
+  /* کنترل نشست: خروج اجباری توسط مدیر یا پایان مهلت بی‌فعالیتی */
+  const s = mySession();
+  if (s && !s.active) return endSession('نشست شما توسط مدیر سامانه پایان یافت.');
+  if (!ME.user.active || ME.user.deleted) return endSession('حساب شما غیرفعال شد.');
+  const to = SEC().sessionMin;
+  if (s && to && Date.now() - new Date(s.last) > to * 60000) return endSession('به دلیل ' + fa(to) + ' دقیقه بی‌فعالیتی، از سامانه خارج شدید.');
 }
 const curTheme = () => document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 A.theme = () => { const t = curTheme() === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = t; pref.set('theme', t); renderChrome(); };
@@ -317,12 +380,13 @@ function route() {
   const active = document.activeElement && document.activeElement.id;
   const pos = active && document.activeElement.selectionStart;
   $('#main').innerHTML = fn();
+  liveWidgets();
   renderChrome();
   $('#app').classList.remove('open');
   if (active && active.startsWith('flt-')) { const el = document.getElementById(active); if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch (e) {} } }
 }
 let LAST_HASH = '';
-function refresh() { Store.save(); if (ME) { const h = location.hash; if (h !== LAST_HASH) { LAST_HASH = h; window.scrollTo(0, 0); } route(); } }
+function refresh() { const ss = ME && mySession(); if (ss) ss.last = stamp(); Store.save(); if (ME) { const h = location.hash; if (h !== LAST_HASH) { LAST_HASH = h; window.scrollTo(0, 0); } route(); } }
 
 /* فیلترها */
 let FT;
@@ -337,7 +401,7 @@ document.addEventListener('click', e => {
   const fn = A[el.dataset.a]; if (!fn) return;
   e.preventDefault(); fn(el.dataset, el);
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('.modal-bg')) closeModal(); });
+document.addEventListener('keydown', e => { const m = $('.modal-bg'); if (e.key === 'Escape' && m && !m.dataset.locked) closeModal(); });
 
 /* جست‌وجوی سراسری در محدوده مجاز کاربر */
 function globalSearch(q) {

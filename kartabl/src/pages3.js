@@ -4,19 +4,19 @@
 
 /* ---------- گزارش‌گیری و نظارت ---------- */
 PAGES.reports = () => {
-  if (!(isImam() || ['manager', 'office'].includes(myRole()))) return denied();
+  if (!can('reports.view')) return denied();
   const v = vs('rep', { type: '' });
   const [jy, jm] = isoToJ(todayISO());
   if (v.f === undefined) { v.f = fa(`${jy}/${pad(jm)}/01`); v.t = jd(todayISO()); }
-  const units = UNITS.filter(u => (isImam() ? !v.u || u.id === +v.u : u.id === myUnit()));
+  const units = UNITS.filter(u => (isAll() ? !v.u || u.id === +v.u : u.id === myUnit()));
   const F = v.f, T = v.t;
   const stats = units.map(u => ({ id: u.id, u, ...unitStats(u.id, F, T) }));
   const tot = k => sum(stats, s => s[k]);
   const pct = tot('tasks') ? Math.round((tot('done') / tot('tasks')) * 100) : 0;
   const uIds = units.map(u => u.id);
-  const resv = DB.reservations.filter(r => inRange(r.date, F, T) && (isImam() ? !v.u || spaceOf(r.space).unit === +v.u : spaceOf(r.space).unit === myUnit() || r.fromUnit === myUnit()));
+  const resv = DB.reservations.filter(r => inRange(r.date, F, T) && (isAll() ? !v.u || spaceOf(r.space).unit === +v.u : spaceOf(r.space).unit === myUnit() || r.fromUnit === myUnit()));
   const pays = DB.payreqs.filter(p => uIds.includes(p.unitId) && inRange(isoOfStamp(p.created), F, T));
-  const proj = isImam() || inUnit(U_CIVIL) ? reg(U_CIVIL, 'projects') : [];
+  const proj = isAll() || inUnit(U_CIVIL) ? reg(U_CIVIL, 'projects') : [];
   const st = v.st;
   /* فهرست جزئیات بر اساس نوع فعالیت و وضعیت */
   let detail = [];
@@ -29,8 +29,8 @@ PAGES.reports = () => {
   const cult = DB.requests.filter(r => r.toUnit === U_CULTURE && inRange(isoOfStamp(r.created), F, T)).length + reg(5, 'prog').filter(x => inRange(x.date, F, T)).length + reg(11, 'events').filter(x => inRange(x.date, F, T)).length;
   const chartRows = stats.slice().sort((a, b) => b.pct - a.pct);
   const hb = `<div class="chart"><svg viewBox="0 0 560 ${chartRows.length * 26 + 10}" role="img" aria-label="درصد تکمیل وظایف">${chartRows.map((s, i) => { const w = (s.pct / 100) * 330; return `<text x="552" y="${i * 26 + 20}" text-anchor="end">${esc(s.u.short)}</text><rect x="${430 - w}" y="${i * 26 + 8}" width="${w}" height="16" rx="3" class="b1"/><rect x="100" y="${i * 26 + 8}" width="330" height="16" rx="3" fill="none" stroke="var(--line)"/><text x="${Math.max(30, 422 - w)}" y="${i * 26 + 20}" text-anchor="end">${fa(s.pct)}٪</text>`; }).join('')}</svg></div>`;
-  return `${head('گزارش‌گیری و نظارت', isImam() ? 'داشبورد نظارتی امام جماعت بر عملکرد ۱۷ مدیریت' : 'گزارش عملکرد ' + esc(unitName(myUnit())))}
-  <section class="card">${filterBar('rep', [{ k: 'f', t: 'date', l: 'از تاریخ' }, { k: 't', t: 'date', l: 'تا تاریخ' }, ...(isImam() ? [{ k: 'u', l: 'همه مدیریت‌ها', o: unitOpts() }] : []), { k: 'type', l: 'همه انواع فعالیت', o: ['وظیفه', 'درخواست', 'دستور', 'نامه'] }, { k: 'st', l: 'همه وضعیت‌ها', o: ['جدید', 'در حال انجام', 'منتظر تأیید', 'تکمیل‌شده', 'معوق', 'بایگانی', 'ردشده', 'ارجاع‌شده'] }])}
+  return `${head('گزارش‌گیری و نظارت', isAll() ? 'داشبورد نظارتی بر عملکرد ۱۷ مدیریت' : 'گزارش عملکرد ' + esc(unitName(myUnit())))}
+  <section class="card">${filterBar('rep', [{ k: 'f', t: 'date', l: 'از تاریخ' }, { k: 't', t: 'date', l: 'تا تاریخ' }, ...(isAll() ? [{ k: 'u', l: 'همه مدیریت‌ها', o: unitOpts() }] : []), { k: 'type', l: 'همه انواع فعالیت', o: ['وظیفه', 'درخواست', 'دستور', 'نامه'] }, { k: 'st', l: 'همه وضعیت‌ها', o: ['جدید', 'در حال انجام', 'منتظر تأیید', 'تکمیل‌شده', 'معوق', 'بایگانی', 'ردشده', 'ارجاع‌شده'] }])}
   <div class="cb row">${btn('امروز', 'repRange', { r: 'd' }, 'sm ghost')}${btn('این هفته', 'repRange', { r: 'w' }, 'sm ghost')}${btn('این ماه', 'repRange', { r: 'm' }, 'sm ghost')}${btn('امسال', 'repRange', { r: 'y' }, 'sm ghost')}<span class="hint">بازه: ${esc(F || '—')} تا ${esc(T || '—')}</span></div></section>
   <div class="tiles">${tile('وظایف در بازه', tot('tasks'))}${tile('درصد تکمیل', fa(pct) + '٪', fa(tot('done')) + ' مورد', pct >= 70 ? 'ok' : 'warn')}${tile('وظایف معوق', tot('late'), '', tot('late') ? 'bad' : 'ok')}${tile('درخواست‌های معوق', tot('reqLate'), '', tot('reqLate') ? 'bad' : '')}${tile('میانگین زمان رسیدگی', (() => { const a = stats.filter(s => s.avg != null); return a.length ? fa((sum(a, s => s.avg) / a.length).toFixed(1)) + ' روز' : '—'; })())}${tile('مکاتبات', tot('letters'))}${tile('فعالیت‌های فرهنگی', cult, 'درخواست، برنامه پایگاه و کتابخانه')}</div>
   <div class="grid g-main">
@@ -144,19 +144,7 @@ A.backup = () => {
   route();
 };
 A.copyBk = () => { const t = $('#bk'); navigator.clipboard.writeText(t.value).then(() => toast('نسخه پشتیبان کپی شد.'), () => { t.select(); toast('متن انتخاب شد؛ با Ctrl+C کپی کنید.'); }); };
-A.restore = () => formModal('بازیابی از نسخه پشتیبان', [{ k: 'json', l: 'متن نسخه پشتیبان (JSON)', t: 'textarea', req: true }], {}, v => { try { const d = JSON.parse(v.json); if (d.ver !== 1 || !d.audit) return fail('نسخه پشتیبان معتبر نیست.'); const me = ME.user.id; DB = d; const u = userById(me); if (u) setMe(u); audit('بازیابی نسخه پشتیبان', 'backup', '', ''); return d; } catch (e) { return fail('متن واردشده JSON معتبر نیست.'); } }, { done: 'اطلاعات بازیابی شد.' });
+A.restore = () => formModal('بازیابی از نسخه پشتیبان', [{ k: 'json', l: 'متن نسخه پشتیبان (JSON)', t: 'textarea', req: true }], {}, v => { try { const d = JSON.parse(v.json); if (d.ver !== 1 || !d.audit) return fail('نسخه پشتیبان معتبر نیست.'); const me = ME.user.id; DB = migrate(d); applySettings(); const u = userById(me); if (u) setMe(u); audit('بازیابی نسخه پشتیبان', 'backup', '', ''); return d; } catch (e) { return fail('متن واردشده JSON معتبر نیست.'); } }, { done: 'اطلاعات بازیابی شد.' });
 A.resetDemo = () => modal({ title: 'بازنشانی داده‌ها', body: '<p>همه داده‌های فعلی حذف و داده‌های نمونه آغازین جایگزین می‌شوند. این کار برگشت‌پذیر نیست؛ ابتدا نسخه پشتیبان تهیه کنید.</p>', foot: btn('بله، بازنشانی شود', 'resetGo', {}, 'danger') + btn('انصراف', 'close', {}, 'ghost') });
-A.resetGo = () => { const name = ME.user.username; Store.reset(); closeModal(); const u = DB.users.find(x => x.username === name); if (u) { setMe(u); renderShell(); } else A.logout(); toast('داده‌های نمونه بازنشانی شد.'); };
+A.resetGo = () => { const name = ME.user.username; Store.reset(); migrate(DB); applySettings(); closeModal(); const u = DB.users.find(x => x.username === name); if (u) { setMe(u); renderShell(); } else A.logout(); toast('داده‌های نمونه بازنشانی شد.'); };
 
-/* ---------- راه‌اندازی ---------- */
-function boot() {
-  const t = pref.get('theme', ''); if (t) document.documentElement.dataset.theme = t;
-  Store.load();
-  sweepDeadlines(); Store.save();
-  const sid = sess.get();
-  const u = sid && userById(sid);
-  if (u && u.active && u.posId) { setMe(u); renderShell(); } else renderLogin();
-  window.addEventListener('hashchange', () => { closeModal(); route(); window.scrollTo(0, 0); });
-  setInterval(() => { tick(); }, 20000);
-}
-boot();
