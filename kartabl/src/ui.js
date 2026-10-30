@@ -34,7 +34,7 @@ const tile = (label, val, sub = '', cls = '', href = '') => `<${href ? `a href="
 const head = (title, sub = '', actions = '', crumb = '') => `<div class="phead"><div>${crumb ? `<div class="crumb">${crumb}</div>` : ''}<h1>${title}</h1>${sub ? `<p>${sub}</p>` : ''}</div><div class="row">${actions}</div></div>`;
 const btn = (label, a, data = {}, cls = '', icon = '') => `<button class="btn ${cls}" data-a="${a}" ${Object.entries(data).map(([k, v]) => `data-${k}="${esc(v)}"`).join(' ')}>${icon ? ic(icon) : ''}${label}</button>`;
 const bar = (pct, cls = '') => `<div class="bar ${cls}" title="${fa(Math.round(pct))}٪"><i style="width:${Math.max(0, Math.min(100, pct))}%"></i></div>`;
-const files = fs => (fs && fs.length ? `<div class="row">${fs.map(f => `<span class="att">${ic('clip')}${esc(f.name)} <small class="code">${fa(Math.ceil(f.size / 1024))}KB</small></span>`).join('')}</div>` : '');
+const files = fs => (fs && fs.length ? `<div class="row">${fs.map(f => `<span class="att">${ic('clip')}${f.url ? `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.name)}</a>` : esc(f.name)} <small class="code">${fa(Math.ceil(f.size / 1024))}KB</small>${!f.url && !f.data ? ' <small class="hint">فقط مشخصات</small>' : ''}</span>`).join('')}</div>` : '');
 const kv = rows => `<dl class="kv">${rows.filter(Boolean).map(([k, v]) => `<dt>${k}</dt><dd>${v ?? '—'}</dd>`).join('')}</dl>`;
 const tabs = (key, list, cur) => `<div class="tabs" role="tablist">${list.map(([k, l]) => `<button role="tab" data-a="tab" data-key="${key}" data-v="${k}" class="${k === cur ? 'on' : ''}">${l}</button>`).join('')}</div>`;
 const steps = (names, cur, done = false) => `<div class="steps">${names.map((n, i) => `<div class="step ${i < cur || (done && i === cur) ? 'done' : i === cur ? 'cur' : ''}"><i>${i < cur || (done && i === cur) ? '✓' : fa(i + 1)}</i>${esc(n)}</div>`).join('')}</div>`;
@@ -93,7 +93,7 @@ function modal({ title, body, foot = '', wide = false, locked = false }) {
   if (f) setTimeout(() => f.focus(), 30);
   return bg;
 }
-function closeModal(keep) { $$('.modal-bg').forEach(m => m.remove()); if (!keep) MODAL_REOPEN = null; }
+function closeModal(keep) { $$('.modal-bg').forEach(m => m.remove()); if (!keep) MODAL_REOPEN = null; if (!keep && typeof Sync !== 'undefined') setTimeout(() => { if (!$('.modal-bg')) Sync.flushPending(); }, 0); }
 
 function fieldHTML(f, v) {
   const id = 'f_' + f.k;
@@ -112,15 +112,18 @@ function fieldHTML(f, v) {
     case 'check': inp = `<label class="row" style="font-weight:500;color:var(--fg)"><input type="checkbox" id="${id}" name="${f.k}" ${v ? 'checked' : ''}> ${esc(f.cl || 'بله')}</label>`; break;
     case 'date': inp = `<input type="text" inputmode="numeric" id="${id}" name="${f.k}" value="${v ? jd(v) : ''}" placeholder="۱۴۰۵/۰۸/۰۸" autocomplete="off">`; break;
     case 'time': inp = `<input type="time" id="${id}" name="${f.k}" value="${esc(v || '')}">`; break;
-    case 'file': inp = `<input type="file" id="${id}" name="${f.k}" multiple>`; break;
+    case 'file': inp = `<input type="file" id="${id}" name="${f.k}" multiple>`; f.hint = f.hint || (typeof Sync !== 'undefined' && Sync.assets ? 'فایل‌ها تا ۲۰ مگابایت در مخزن فایل سامانه ذخیره می‌شوند.' : 'فایل‌های تا ۱۵۰ کیلوبایت کامل ذخیره می‌شوند؛ از فایل‌های بزرگ‌تر فقط مشخصات ثبت می‌شود.'); break;
     case 'number': inp = `<input type="text" inputmode="numeric" id="${id}" name="${f.k}" value="${v != null && v !== '' ? esc(v) : ''}" placeholder="${esc(f.ph || '')}">`; break;
     default: inp = `<input type="${f.t || 'text'}" id="${id}" name="${f.k}" value="${esc(v ?? '')}" placeholder="${esc(f.ph || '')}" ${f.ro ? 'readonly' : ''}>`;
   }
   return `<div class="fld ${full}">${f.t === 'check' ? `<label>${f.l}</label>` : lab}${inp}${f.hint ? `<div class="hint">${f.hint}</div>` : ''}<div class="err" data-err="${f.k}"></div></div>`;
 }
-const readFile = file => new Promise(res => {
+const readFile = file => new Promise(async res => {
   const meta = { name: file.name, size: file.size, type: file.type };
-  if (file.size > 400 * 1024) return res(meta); // فایل بزرگ: فقط مشخصات (در نسخه سروری به مخزن فایل می‌رود)
+  if (typeof Sync !== 'undefined' && Sync.assets && file.size <= 20 * 1024 * 1024) {
+    try { const a = await Sync.assets.upload(file); return res({ ...meta, url: a.url, aid: a.id }); } catch (e) { /* در صورت خطا، روش جایگزین */ }
+  }
+  if (file.size > 150 * 1024) return res(meta); // فایل بزرگ: فقط مشخصات (در نسخه سروری به مخزن فایل می‌رود)
   const r = new FileReader(); r.onload = () => res({ ...meta, data: r.result }); r.onerror = () => res(meta); r.readAsDataURL(file);
 });
 async function readForm(form, fields) {
@@ -254,6 +257,7 @@ function doLogin(username, pass) {
   if (u.mustChange) forcePassChange();
 }
 function setMe(u) { ME = { user: u, pos: posById(u.posId) }; }
+function touchSession() { const s = ME && mySession(); if (s && Date.now() - new Date(s.last) > 60000) { s.last = stamp(); Store.save(); } }
 const mySession = () => { const s = (sess.get() || '').split('|')[1]; return DB.sessions.find(x => x.id === s); };
 A.quick = d => doLogin(d.u, '1234');
 function endSession(msg) {
@@ -322,7 +326,7 @@ function renderShell() {
     <aside class="side" id="side" aria-label="منوی اصلی">
       <div class="brand"><div class="mark">${ic('dome')}</div><div><b>${esc(DB.settings.loginTitle)}</b><small>${esc(DB.settings.subtitle)} · ${esc(DB.settings.orgName.replace(/^مجتمع مسجدمحور\s*/, ''))}</small></div></div>
       <nav class="nav" id="nav"></nav>
-      <div class="foot">${MEMORY_ONLY ? 'ذخیره‌سازی مرورگر در دسترس نیست؛ داده‌ها پس از بستن صفحه حفظ نمی‌شوند.' : 'داده‌ها در این مرورگر ذخیره می‌شوند.'}<br>نسخه ۱٫۰ · ${fa(DB.audit.length)} رویداد ثبت‌شده</div>
+      <div class="foot"><span id="syncst" class="syncst"></span><br>نسخه ۲٫۱ · زمان رسمی: تهران</div>
     </aside>
     <div class="scrim" data-a="menu"></div>
     <div class="mainwrap">
@@ -344,6 +348,7 @@ function renderShell() {
   gs.addEventListener('blur', () => setTimeout(() => ($('#gres').hidden = true), 200));
   tick();
   route();
+  showSync();
 }
 function renderChrome() {
   const h = location.hash.slice(1) || 'dashboard';
@@ -358,6 +363,9 @@ function tick() {
   const c = $('#clock');
   if (c) c.innerHTML = `<b>${fa(nowHMS())}</b>${jdLong(todayISO())}`;
   liveWidgets();
+  if (Date.now() - (tick.sweep || 0) > 60000) { tick.sweep = Date.now(); const n = DB.notifs.length; sweepDeadlines(); if (DB.notifs.length !== n) { Store.save(); renderChrome(); } }
+  if (tick.day && tick.day !== todayISO() && !$('.modal-bg')) route();
+  tick.day = todayISO();
   /* کنترل نشست: خروج اجباری توسط مدیر یا پایان مهلت بی‌فعالیتی */
   const s = mySession();
   if (s && !s.active) return endSession('نشست شما توسط مدیر سامانه پایان یافت.');
@@ -381,6 +389,7 @@ function route() {
   const pos = active && document.activeElement.selectionStart;
   $('#main').innerHTML = fn();
   liveWidgets();
+  touchSession();
   renderChrome();
   $('#app').classList.remove('open');
   if (active && active.startsWith('flt-')) { const el = document.getElementById(active); if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch (e) {} } }

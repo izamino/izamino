@@ -261,7 +261,7 @@ td .sub { display: block; color: var(--muted); font-size: .74rem; }
 .week .ev { white-space: normal; font-size: .74rem; padding: 4px 6px; cursor: pointer; }
 
 /* ---------- chart ---------- */
-.chart svg { width: 100%; height: auto; display: block; }
+.chart svg { width: 100%; height: auto; display: block; direction: ltr; }
 .chart text { fill: var(--muted); font-family: var(--font); font-size: 11px; }
 .chart .gl { stroke: var(--line); stroke-width: 1; }
 .chart .b1 { fill: var(--teal); }
@@ -303,6 +303,11 @@ a.unit:hover { border-color: var(--teal); }
 
 
 /* ================= نسخه ۲: پوسته زیباتر ================= */
+.syncst { display: inline-flex; align-items: center; gap: 6px; }
+.syncst::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--side-muted); }
+.syncst.ok::before { background: #6fdc9c; }
+.syncst.busy::before { background: #f0c46c; }
+.syncst.ro::before { background: #f28b82; }
 body { font-size: 1rem; }
 .side { background-color: var(--side); background-image: var(--pattern); }
 .brand .mark { background: linear-gradient(145deg, var(--side-2), color-mix(in srgb, var(--side-2) 60%, var(--glow))); color: var(--glow); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
@@ -687,7 +692,7 @@ const Store = {
     try { const s = localStorage.getItem(STORE_KEY); if (s) { DB = JSON.parse(s); if (DB && DB.ver === 1) return; } } catch (e) { MEMORY_ONLY = true; }
     DB = seed(); this.save();
   },
-  save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(DB)); } catch (e) { MEMORY_ONLY = true; } },
+  save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(DB)); } catch (e) { MEMORY_ONLY = true; } if (typeof Sync !== 'undefined') Sync.schedule(); },
   reset() { try { localStorage.removeItem(STORE_KEY); } catch (e) {} DB = seed(); this.save(); }
 };
 const pref = {
@@ -1680,7 +1685,7 @@ const tile = (label, val, sub = '', cls = '', href = '') => `<${href ? `a href="
 const head = (title, sub = '', actions = '', crumb = '') => `<div class="phead"><div>${crumb ? `<div class="crumb">${crumb}</div>` : ''}<h1>${title}</h1>${sub ? `<p>${sub}</p>` : ''}</div><div class="row">${actions}</div></div>`;
 const btn = (label, a, data = {}, cls = '', icon = '') => `<button class="btn ${cls}" data-a="${a}" ${Object.entries(data).map(([k, v]) => `data-${k}="${esc(v)}"`).join(' ')}>${icon ? ic(icon) : ''}${label}</button>`;
 const bar = (pct, cls = '') => `<div class="bar ${cls}" title="${fa(Math.round(pct))}٪"><i style="width:${Math.max(0, Math.min(100, pct))}%"></i></div>`;
-const files = fs => (fs && fs.length ? `<div class="row">${fs.map(f => `<span class="att">${ic('clip')}${esc(f.name)} <small class="code">${fa(Math.ceil(f.size / 1024))}KB</small></span>`).join('')}</div>` : '');
+const files = fs => (fs && fs.length ? `<div class="row">${fs.map(f => `<span class="att">${ic('clip')}${f.url ? `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.name)}</a>` : esc(f.name)} <small class="code">${fa(Math.ceil(f.size / 1024))}KB</small>${!f.url && !f.data ? ' <small class="hint">فقط مشخصات</small>' : ''}</span>`).join('')}</div>` : '');
 const kv = rows => `<dl class="kv">${rows.filter(Boolean).map(([k, v]) => `<dt>${k}</dt><dd>${v ?? '—'}</dd>`).join('')}</dl>`;
 const tabs = (key, list, cur) => `<div class="tabs" role="tablist">${list.map(([k, l]) => `<button role="tab" data-a="tab" data-key="${key}" data-v="${k}" class="${k === cur ? 'on' : ''}">${l}</button>`).join('')}</div>`;
 const steps = (names, cur, done = false) => `<div class="steps">${names.map((n, i) => `<div class="step ${i < cur || (done && i === cur) ? 'done' : i === cur ? 'cur' : ''}"><i>${i < cur || (done && i === cur) ? '✓' : fa(i + 1)}</i>${esc(n)}</div>`).join('')}</div>`;
@@ -1739,7 +1744,7 @@ function modal({ title, body, foot = '', wide = false, locked = false }) {
   if (f) setTimeout(() => f.focus(), 30);
   return bg;
 }
-function closeModal(keep) { $$('.modal-bg').forEach(m => m.remove()); if (!keep) MODAL_REOPEN = null; }
+function closeModal(keep) { $$('.modal-bg').forEach(m => m.remove()); if (!keep) MODAL_REOPEN = null; if (!keep && typeof Sync !== 'undefined') setTimeout(() => { if (!$('.modal-bg')) Sync.flushPending(); }, 0); }
 
 function fieldHTML(f, v) {
   const id = 'f_' + f.k;
@@ -1758,15 +1763,18 @@ function fieldHTML(f, v) {
     case 'check': inp = `<label class="row" style="font-weight:500;color:var(--fg)"><input type="checkbox" id="${id}" name="${f.k}" ${v ? 'checked' : ''}> ${esc(f.cl || 'بله')}</label>`; break;
     case 'date': inp = `<input type="text" inputmode="numeric" id="${id}" name="${f.k}" value="${v ? jd(v) : ''}" placeholder="۱۴۰۵/۰۸/۰۸" autocomplete="off">`; break;
     case 'time': inp = `<input type="time" id="${id}" name="${f.k}" value="${esc(v || '')}">`; break;
-    case 'file': inp = `<input type="file" id="${id}" name="${f.k}" multiple>`; break;
+    case 'file': inp = `<input type="file" id="${id}" name="${f.k}" multiple>`; f.hint = f.hint || (typeof Sync !== 'undefined' && Sync.assets ? 'فایل‌ها تا ۲۰ مگابایت در مخزن فایل سامانه ذخیره می‌شوند.' : 'فایل‌های تا ۱۵۰ کیلوبایت کامل ذخیره می‌شوند؛ از فایل‌های بزرگ‌تر فقط مشخصات ثبت می‌شود.'); break;
     case 'number': inp = `<input type="text" inputmode="numeric" id="${id}" name="${f.k}" value="${v != null && v !== '' ? esc(v) : ''}" placeholder="${esc(f.ph || '')}">`; break;
     default: inp = `<input type="${f.t || 'text'}" id="${id}" name="${f.k}" value="${esc(v ?? '')}" placeholder="${esc(f.ph || '')}" ${f.ro ? 'readonly' : ''}>`;
   }
   return `<div class="fld ${full}">${f.t === 'check' ? `<label>${f.l}</label>` : lab}${inp}${f.hint ? `<div class="hint">${f.hint}</div>` : ''}<div class="err" data-err="${f.k}"></div></div>`;
 }
-const readFile = file => new Promise(res => {
+const readFile = file => new Promise(async res => {
   const meta = { name: file.name, size: file.size, type: file.type };
-  if (file.size > 400 * 1024) return res(meta); // فایل بزرگ: فقط مشخصات (در نسخه سروری به مخزن فایل می‌رود)
+  if (typeof Sync !== 'undefined' && Sync.assets && file.size <= 20 * 1024 * 1024) {
+    try { const a = await Sync.assets.upload(file); return res({ ...meta, url: a.url, aid: a.id }); } catch (e) { /* در صورت خطا، روش جایگزین */ }
+  }
+  if (file.size > 150 * 1024) return res(meta); // فایل بزرگ: فقط مشخصات (در نسخه سروری به مخزن فایل می‌رود)
   const r = new FileReader(); r.onload = () => res({ ...meta, data: r.result }); r.onerror = () => res(meta); r.readAsDataURL(file);
 });
 async function readForm(form, fields) {
@@ -1900,6 +1908,7 @@ function doLogin(username, pass) {
   if (u.mustChange) forcePassChange();
 }
 function setMe(u) { ME = { user: u, pos: posById(u.posId) }; }
+function touchSession() { const s = ME && mySession(); if (s && Date.now() - new Date(s.last) > 60000) { s.last = stamp(); Store.save(); } }
 const mySession = () => { const s = (sess.get() || '').split('|')[1]; return DB.sessions.find(x => x.id === s); };
 A.quick = d => doLogin(d.u, '1234');
 function endSession(msg) {
@@ -1968,7 +1977,7 @@ function renderShell() {
     <aside class="side" id="side" aria-label="منوی اصلی">
       <div class="brand"><div class="mark">${ic('dome')}</div><div><b>${esc(DB.settings.loginTitle)}</b><small>${esc(DB.settings.subtitle)} · ${esc(DB.settings.orgName.replace(/^مجتمع مسجدمحور\s*/, ''))}</small></div></div>
       <nav class="nav" id="nav"></nav>
-      <div class="foot">${MEMORY_ONLY ? 'ذخیره‌سازی مرورگر در دسترس نیست؛ داده‌ها پس از بستن صفحه حفظ نمی‌شوند.' : 'داده‌ها در این مرورگر ذخیره می‌شوند.'}<br>نسخه ۱٫۰ · ${fa(DB.audit.length)} رویداد ثبت‌شده</div>
+      <div class="foot"><span id="syncst" class="syncst"></span><br>نسخه ۲٫۱ · زمان رسمی: تهران</div>
     </aside>
     <div class="scrim" data-a="menu"></div>
     <div class="mainwrap">
@@ -1990,6 +1999,7 @@ function renderShell() {
   gs.addEventListener('blur', () => setTimeout(() => ($('#gres').hidden = true), 200));
   tick();
   route();
+  showSync();
 }
 function renderChrome() {
   const h = location.hash.slice(1) || 'dashboard';
@@ -2004,6 +2014,9 @@ function tick() {
   const c = $('#clock');
   if (c) c.innerHTML = `<b>${fa(nowHMS())}</b>${jdLong(todayISO())}`;
   liveWidgets();
+  if (Date.now() - (tick.sweep || 0) > 60000) { tick.sweep = Date.now(); const n = DB.notifs.length; sweepDeadlines(); if (DB.notifs.length !== n) { Store.save(); renderChrome(); } }
+  if (tick.day && tick.day !== todayISO() && !$('.modal-bg')) route();
+  tick.day = todayISO();
   /* کنترل نشست: خروج اجباری توسط مدیر یا پایان مهلت بی‌فعالیتی */
   const s = mySession();
   if (s && !s.active) return endSession('نشست شما توسط مدیر سامانه پایان یافت.');
@@ -2027,6 +2040,7 @@ function route() {
   const pos = active && document.activeElement.selectionStart;
   $('#main').innerHTML = fn();
   liveWidgets();
+  touchSession();
   renderChrome();
   $('#app').classList.remove('open');
   if (active && active.startsWith('flt-')) { const el = document.getElementById(active); if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch (e) {} } }
@@ -2351,7 +2365,7 @@ function showLetter(id) {
     title: `نامه ${LETTER_TYPES[l.type]} ${fa(l.no)}`, wide: true,
     body: `<div class="row">${pill(l.status)} ${prio(l.priority)} ${l.conf !== 'عادی' ? pill(l.conf) : ''} ${pill(l.cat, 'mute')}</div>
     ${letterSheet(l)}
-    ${l.files.length ? `<div><h3>ضمایم</h3>${files(l.files)}${l.conf === 'عادی' || isMgrOrOffice(l.unitId) ? l.files.filter(f => f.data && f.type.startsWith('image/')).map(f => `<img src="${f.data}" alt="${esc(f.name)}" style="max-height:200px;border-radius:8px;margin-top:8px">`).join('') : '<div class="hint">مشاهده ضمایم محرمانه فقط برای مدیر و مسئول دفتر مجاز است.</div>'}</div>` : ''}
+    ${l.files.length ? `<div><h3>ضمایم</h3>${files(l.files)}${l.conf === 'عادی' || isMgrOrOffice(l.unitId) ? l.files.filter(f => (f.data || f.url) && (f.type || '').startsWith('image/')).map(f => `<img src="${esc(f.data || f.url)}" alt="${esc(f.name)}" style="max-height:200px;border-radius:8px;margin-top:8px">`).join('') : '<div class="hint">مشاهده ضمایم محرمانه فقط برای مدیر و مسئول دفتر مجاز است.</div>'}</div>` : ''}
     <div class="grid g2"><div><h3>ارجاعات</h3>${l.refs.length ? `<div class="list">${l.refs.map(r => `<div class="li" style="padding:6px 0"><div class="t"><b>${esc(unitName(r.unitId))}</b><small>${jdt(r.ts)} · ${esc(userById(r.by)?.name || '')}${r.note ? ' — ' + esc(r.note) : ''}</small></div></div>`).join('')}</div>` : empty('ارجاع نشده است.')}</div>
     <div><h3>پاسخ‌ها</h3>${l.replies.length ? l.replies.map(r => `<div class="box">${esc(r.text)}<div class="hint">${esc(userById(r.by)?.name)} · ${jdt(r.ts)}</div></div>`).join('') : empty(l.needReply ? 'در انتظار پاسخ' : 'پاسخی ثبت نشده است.')}</div></div>
     <div><h3>سابقه اقدامات</h3>${histHTML(l.history)}</div>`,
@@ -3571,6 +3585,179 @@ PAGES.system = () => {
   return _systemPage().replace(/<div class="tabs"[\s\S]*?<\/div>/, tabs('sys', [['archive', 'آرشیو سامانه'], ['audit', 'رویدادهای واحد من']], v.tab) + (canAdminPanel() ? `<div class="notice">تنظیمات، پیامک و پشتیبان‌گیری به <a href="#admin">پنل مدیریت سامانه</a> منتقل شده است.</div>` : ''));
 };
 
+/* =====================================================================
+   همگام‌سازی با پایگاه داده مشترک
+   هر بخش پایگاه داده (کاربران، نامه‌ها، رویدادها…) یک سند جدا در مجموعه «kartabl» است؛
+   سندهای بزرگ به قطعه‌های کوچک‌تر شکسته می‌شوند. اگر پایگاه مشترک در دسترس نباشد
+   (نسخه مستقل یا کاربر واردنشده)، داده فقط در همین مرورگر می‌ماند.
+   ===================================================================== */
+const Sync = {
+  db: null, col: null, mode: 'local', busy: false, readonly: false,
+  last: {}, base: {}, baseJs: {}, mine: {}, counts: {}, timer: null, pending: null, queued: false,
+  CHUNK: 60000,
+  label() {
+    if (this.mode === 'local') return 'ذخیره فقط در همین مرورگر';
+    if (this.readonly) return 'دسترسی فقط مشاهده؛ تغییرات ذخیره نمی‌شود';
+    return this.busy ? 'در حال ذخیره در پایگاه داده مشترک…' : 'همگام با پایگاه داده مشترک';
+  },
+  async init() {
+    if (!window.claude || typeof window.claude.use !== 'function') return;
+    let db = null;
+    try { db = await window.claude.use('db'); } catch (e) { db = null; }
+    if (!db) return;
+    try { this.assets = await window.claude.use('assets'); } catch (e) { this.assets = null; }
+    this.db = db; this.col = db.collection('kartabl');
+    let snap;
+    try { snap = await this.col.get(); } catch (e) { return this.fail(e); }
+    const remote = this.assemble(snap.docs);
+    this.mode = 'shared';
+    if (!Object.keys(remote).length) await this.pushAll();
+    else this.apply(remote);
+    this.col.onSnapshot(s => { const r = this.assemble(s.docs); if ($('.modal-bg')) this.pending = r; else this.apply(r); }, e => this.fail(e));
+    showSync();
+  },
+  assemble(docs) {
+    const g = {};
+    docs.forEach(d => { const x = d.data(); if (!x || typeof x.k !== 'string') return; (g[x.k] = g[x.k] || []).push(x); });
+    const out = {};
+    for (const k in g) {
+      const parts = g[k];
+      const head = parts.find(p => p.i === 0); if (!head) continue;
+      const set = parts.filter(p => p.rev === head.rev).sort((a, b) => a.i - b.i);
+      if (set.length !== head.n) continue; // نوشتن هنوز کامل نشده است
+      this.counts[k] = Math.max(this.counts[k] || 0, parts.length);
+      out[k] = set.map(p => p.s).join('');
+    }
+    return out;
+  },
+  /* دفتر تغییرات محلی: هر مورد افزوده، ویرایش یا حذف‌شده تا زمانی که نسخه مشترک دقیقاً همان را
+     داشته باشد دوباره اعمال می‌شود؛ بنابراین تغییرات هم‌زمان چند کاربر از بین نمی‌رود */
+  key(k, x) {
+    if (!x || typeof x !== 'object') return JSON.stringify(x);
+    if (k === 'audit') return x.ts + '|' + x.uid + '|' + x.act + '|' + x.id;
+    return x.id || (x.posId && x.userId ? x.posId + '|' + x.userId + '|' + x.from : x.unitId != null && x.year ? x.unitId + '|' + x.year : JSON.stringify(x));
+  },
+  norm(k, x) { if (k === 'audit' && x) { const { h, ...r } = x; return JSON.stringify(r); } return JSON.stringify(x); },
+  record(k) {
+    const base = this.base[k], cur = DB[k];
+    if (base === undefined) return;
+    const M = (this.mine[k] = this.mine[k] || new Map());
+    if (Array.isArray(cur) && Array.isArray(base)) {
+      const B = new Map(base.map(x => [this.key(k, x), x]));
+      const C = new Map(cur.map(x => [this.key(k, x), x]));
+      C.forEach((x, kx) => { if (!B.has(kx) || this.norm(k, B.get(kx)) !== this.norm(k, x)) M.set(kx, x); });
+      B.forEach((x, kx) => { if (!C.has(kx)) M.set(kx, null); });
+    } else if (cur && base && typeof cur === 'object' && typeof base === 'object' && !Array.isArray(cur)) {
+      Object.keys(cur).forEach(f => { if (JSON.stringify(cur[f]) !== JSON.stringify(base[f])) M.set(f, cur[f]); });
+      Object.keys(base).forEach(f => { if (!(f in cur)) M.set(f, undefined); });
+    } else if (JSON.stringify(cur) !== JSON.stringify(base)) M.set('$', cur);
+  },
+  rebase(k, r) {
+    const M = this.mine[k];
+    if (!M || !M.size) return r;
+    if (Array.isArray(r)) {
+      const out = r.slice(); const idx = new Map(out.map((x, i) => [this.key(k, x), i]));
+      const appended = [];
+      M.forEach((v, kx) => {
+        const i = idx.get(kx);
+        if (v === null) { if (i === undefined) M.delete(kx); else out[i] = undefined; return; }
+        if (i !== undefined && this.norm(k, out[i]) === this.norm(k, v)) { M.delete(kx); return; }
+        if (i !== undefined) out[i] = v; else appended.push(v);
+      });
+      const res = out.filter(x => x !== undefined);
+      /* شماره پیگیری تکراری (ثبت هم‌زمان در دو دستگاه): مورد محلی شماره آزاد بعدی را می‌گیرد */
+      const nos = new Set(r.map(x => x && x.no).filter(Boolean));
+      appended.forEach(v => {
+        if (!v || !v.no || !nos.has(v.no)) return;
+        const m = String(v.no).match(/^(.*[\/-])(\d+)$/); if (!m) return;
+        let max = 0; res.concat(appended).forEach(x => { const mm = x && String(x.no || '').match(/^(.*[\/-])(\d+)$/); if (mm && mm[1] === m[1]) max = Math.max(max, +mm[2]); });
+        const old = v.no; v.no = m[1] + pad(max + 1, m[2].length); nos.add(v.no);
+        Object.keys(DB.seq).forEach(sk => { if (DB.seq[sk] < max + 1 && old.includes(sk.split('-').pop())) DB.seq[sk] = Math.max(DB.seq[sk], max + 1); });
+        (v.history = v.history || []).push({ ts: stamp(), uid: 'system', pos: '', action: 'اصلاح شماره', note: `شماره ${fa(old)} هم‌زمان در دستگاه دیگری ثبت شده بود؛ شماره جدید ${fa(v.no)}` });
+      });
+      if (k === 'audit') {
+        let prev = res.length ? res[res.length - 1].h : '00000000';
+        appended.sort((x, y) => (x.ts > y.ts ? 1 : -1)).forEach(e => { const { h, ...rest } = e; const ne = { ...rest }; ne.h = hash(prev + JSON.stringify(rest)); prev = ne.h; res.push(ne); });
+        return res;
+      }
+      return res.concat(appended);
+    }
+    if (r && typeof r === 'object') {
+      const out = { ...r };
+      M.forEach((v, f) => { if (JSON.stringify(r[f]) === JSON.stringify(v)) M.delete(f); else if (v === undefined) delete out[f]; else out[f] = v; });
+      return out;
+    }
+    const v = M.get('$'); if (JSON.stringify(v) === JSON.stringify(r)) { M.delete('$'); return r; } return v;
+  },
+  apply(remote) {
+    let changed = false, ahead = false;
+    for (const k in remote) {
+      if (remote[k] === this.baseJs[k]) continue;
+      let r; try { r = JSON.parse(remote[k]); } catch (e) { continue; } // قطعه ناقص؛ در دریافت بعدی کامل می‌شود
+      if (DB[k] !== undefined && JSON.stringify(DB[k]) !== this.last[k]) this.record(k); // تغییر محلیِ هنوز ارسال‌نشده
+      const merged = this.rebase(k, r);
+      DB[k] = merged; this.base[k] = r; this.baseJs[k] = remote[k];
+      this.last[k] = remote[k];
+      if (JSON.stringify(merged) !== remote[k]) ahead = true;
+      changed = true;
+    }
+    if (ahead) this.schedule();
+    if (!changed) return;
+    migrate(DB); applySettings();
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(DB)); } catch (e) {}
+    if (ME) {
+      const u = userById(ME.user.id);
+      if (u && u.posId) setMe(u);
+      if (!$('.modal-bg')) route();
+    }
+  },
+  flushPending() { if (this.pending) { const r = this.pending; this.pending = null; this.apply(r); } },
+  schedule() {
+    if (this.mode !== 'shared' || this.readonly) return;
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => this.push(), 350);
+  },
+  async push() {
+    if (this.busy) { this.queued = true; return; }
+    this.busy = true; showSync();
+    try {
+      for (const k of Object.keys(DB)) {
+        const js = JSON.stringify(DB[k]);
+        if (js === this.last[k]) continue;
+        this.record(k);
+        await this.write(k, js);
+      }
+    } catch (e) { this.fail(e); }
+    this.busy = false; showSync();
+    if (this.queued) { this.queued = false; this.push(); }
+  },
+  async pushAll() { this.last = {}; await this.push(); Object.keys(DB).forEach(k => { this.base[k] = JSON.parse(JSON.stringify(DB[k])); this.baseJs[k] = JSON.stringify(DB[k]); }); this.mine = {}; },
+  async write(k, js) {
+    const rev = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const n = Math.max(1, Math.ceil(js.length / this.CHUNK));
+    for (let i = n - 1; i >= 0; i--) {
+      const body = { k, i, n, rev, s: js.slice(i * this.CHUNK, (i + 1) * this.CHUNK) };
+      try { await this.col.doc(`${k}~${i}`).set(body); }
+      catch (e) { if (e && e.code === 'unavailable') { await new Promise(r => setTimeout(r, 400 + Math.random() * 600)); await this.col.doc(`${k}~${i}`).set(body); } else throw e; }
+    }
+    for (let i = n; i < (this.counts[k] || 0); i++) { try { await this.col.doc(`${k}~${i}`).delete(); } catch (e) {} }
+    this.counts[k] = n;
+    this.last[k] = js;
+  },
+  fail(e) {
+    const c = e && e.code;
+    if (c === 'not_granted' || c === 'revoked' || c === 'capability_disabled' || c === 'capability_removed') { this.readonly = this.mode === 'shared'; if (!this.readonly) this.mode = 'local'; }
+    if (c === 'quota_exceeded') toast('ظرفیت پایگاه داده پر شده است؛ مدیر سامانه باید سوابق قدیمی را بایگانی کند.');
+    else if (this.readonly) toast('شما دسترسی ویرایش این سامانه را ندارید؛ تغییرات ذخیره نمی‌شود.');
+    showSync();
+  }
+};
+function showSync() {
+  const el = $('#syncst'); if (!el) return;
+  el.textContent = Sync.label();
+  el.className = 'syncst ' + (Sync.mode === 'local' ? 'local' : Sync.readonly ? 'ro' : Sync.busy ? 'busy' : 'ok');
+}
+
 /* ---------- راه‌اندازی ---------- */
 function boot() {
   const t = pref.get('theme', ''); if (t) document.documentElement.dataset.theme = t;
@@ -3583,6 +3770,8 @@ function boot() {
   if (u && u.active && !u.deleted && u.posId && s && s.active) { setMe(u); renderShell(); } else { sess.set(null); renderLogin(); }
   window.addEventListener('hashchange', () => { closeModal(); route(); window.scrollTo(0, 0); });
   setInterval(tick, 1000);
+  document.addEventListener('click', () => touchSession(), true);
+  Sync.init();
 }
 boot();
 

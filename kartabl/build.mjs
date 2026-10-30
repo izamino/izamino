@@ -2,7 +2,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 const src = f => readFileSync(new URL('./src/' + f, import.meta.url), 'utf8');
 const css = src('styles.css');
-const js = ['core.js', 'domain.js', 'seed.js', 'ui.js', 'pages1.js', 'pages2.js', 'pages3.js', 'admin.js', 'boot.js'].map(src).join('\n');
+const js = ['core.js', 'domain.js', 'seed.js', 'ui.js', 'pages1.js', 'pages2.js', 'pages3.js', 'admin.js', 'sync.js', 'boot.js'].map(src).join('\n');
 const headTags = `<title>کارتابل شباب اهل‌الجنه</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">

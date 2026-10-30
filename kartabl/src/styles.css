@@ -255,7 +255,7 @@ td .sub { display: block; color: var(--muted); font-size: .74rem; }
 .week .ev { white-space: normal; font-size: .74rem; padding: 4px 6px; cursor: pointer; }
 
 /* ---------- chart ---------- */
-.chart svg { width: 100%; height: auto; display: block; }
+.chart svg { width: 100%; height: auto; display: block; direction: ltr; }
 .chart text { fill: var(--muted); font-family: var(--font); font-size: 11px; }
 .chart .gl { stroke: var(--line); stroke-width: 1; }
 .chart .b1 { fill: var(--teal); }
@@ -297,6 +297,11 @@ a.unit:hover { border-color: var(--teal); }
 
 
 /* ================= نسخه ۲: پوسته زیباتر ================= */
+.syncst { display: inline-flex; align-items: center; gap: 6px; }
+.syncst::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--side-muted); }
+.syncst.ok::before { background: #6fdc9c; }
+.syncst.busy::before { background: #f0c46c; }
+.syncst.ro::before { background: #f28b82; }
 body { font-size: 1rem; }
 .side { background-color: var(--side); background-image: var(--pattern); }
 .brand .mark { background: linear-gradient(145deg, var(--side-2), color-mix(in srgb, var(--side-2) 60%, var(--glow))); color: var(--glow); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
