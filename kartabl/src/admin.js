@@ -240,7 +240,7 @@ PAGES.admin = () => {
   const pend = can('admin.approve') ? pendingAll().length : 0;
   const nav = `<nav class="admnav" aria-label="بخش‌های پنل مدیریت">${tabsOk.map(t => `<button data-a="tab" data-key="adm" data-v="${t[0]}" class="${v.tab === t[0] ? 'on' : ''}">${ic(t[2])}<span>${t[1]}</span>${t[0] === 'signups' && sg ? `<i>${fa(sg)}</i>` : t[0] === 'approvals' && pend ? `<i>${fa(pend)}</i>` : t[0] === 'users' && lockedUsers().length ? `<i>${fa(lockedUsers().length)}</i>` : ''}</button>`).join('')}</nav>`;
   const body = (ADMIN_VIEWS[v.tab] || ADMIN_VIEWS.overview)();
-  return `${head('پنل مدیریت سامانه', 'کنترل کامل کاربران، رمزها، ورودها، دسترسی‌ها، تأییدها، ظاهر و داده‌های سامانه', `${btn('کاربر جدید', 'admNewUser', {}, '', 'plus')}`)}
+  return `${head('پنل مدیریت سامانه', 'کنترل کامل کاربران، رمزها، ورودها، دسترسی‌ها، تأییدها، ظاهر و داده‌های سامانه', v.tab === 'users' ? '' : btn('کاربر جدید', 'admNewUser', {}, '', 'plus'))}
   <div class="admin-wrap">${nav}<div class="admin-body">${body}</div></div>`;
 };
 PAGES.users = () => { vs('adm').tab = 'users'; return PAGES.admin(); };

@@ -41,11 +41,13 @@ const steps = (names, cur, done = false) => `<div class="steps">${names.map((n, 
 
 function table(cols, rows, opts = {}) {
   if (!rows.length) return empty(opts.empty || 'موردی یافت نشد.');
-  return `<div class="tbl-wrap"><table><thead><tr>${cols.map(c => `<th>${c[0]}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr ${opts.click ? `class="click" data-a="${opts.click}" data-id="${r.id}"` : ''}>${cols.map(c => `<td>${c[1](r)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  return `<div class="tbl-wrap"><table><thead><tr>${cols.map(c => `<th>${c[0]}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr ${opts.click ? `class="click" data-a="${opts.click}" data-id="${r.id}"` : ''}>${cols.map(c => `<td data-l="${esc(String(c[0]).replace(/<[^>]+>/g, ''))}">${c[1](r)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
 function filterBar(key, items) {
   const v = vs(key);
-  return `<div class="filters">${items.map(it => {
+  const active = items.filter(it => it.t !== 'search' && v[it.k]).length;
+  const extra = items.some(it => it.t !== 'search');
+  return `<div class="filters ${v._fopen || active ? 'open' : ''}">${extra ? `<button type="button" class="ftog" data-a="ftog" data-key="${key}">${ic('menu')}فیلترها${active ? ` <b>${fa(active)}</b>` : ''}</button>` : ''}${items.map(it => {
     const id = `flt-${key}-${it.k}`;
     if (it.t === 'search') return `<input type="search" id="${id}" data-f="${key}:${it.k}" placeholder="${it.l}" value="${esc(v[it.k] || '')}" aria-label="${it.l}">`;
     if (it.t === 'date') return `<input type="text" id="${id}" data-f="${key}:${it.k}" placeholder="${it.l}" value="${esc(v[it.k] || '')}" aria-label="${it.l}" size="11">`;
@@ -81,11 +83,11 @@ function barChart(groups, series) {
 
 /* ---------- مودال و فرم ---------- */
 let MODAL_REOPEN = null;
-function modal({ title, body, foot = '', wide = false, locked = false }) {
+function modal({ title, body, foot = '', wide = false, locked = false, sheet = false }) {
   closeModal(true);
   const bg = document.createElement('div');
   bg.className = 'modal-bg';
-  bg.innerHTML = `<div class="modal ${wide ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="mh"><h2>${title}</h2>${locked ? '' : `<button class="ibtn" data-a="close" aria-label="بستن">${ic('x')}</button>`}</div><div class="mb">${body}</div>${foot ? `<div class="mf">${foot}</div>` : ''}</div>`;
+  bg.innerHTML = `<div class="modal ${wide ? 'wide' : ''} ${sheet ? 'sheet' : ''}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="mh"><h2>${title}</h2>${locked ? '' : `<button class="ibtn" data-a="close" aria-label="بستن">${ic('x')}</button>`}</div><div class="mb">${body}</div>${foot ? `<div class="mf">${foot}</div>` : ''}</div>`;
   if (locked) bg.dataset.locked = '1';
   else bg.addEventListener('mousedown', e => { if (e.target === bg) closeModal(); });
   document.body.appendChild(bg);
@@ -297,7 +299,8 @@ function navItems() {
   const u = myUnit();
   return [
     ['grp', 'کارتابل'],
-    ['dashboard', 'داشبورد', 'home', true, q],
+    ['dashboard', 'داشبورد', 'home', true],
+    ['inbox', 'کارتابل من', 'inbox', true, q],
     ['imam', 'کارتابل امام جماعت', 'dome', isAll()],
     ['units', 'فهرست ۱۷ مدیریت', 'building', true],
     [`unit-${u}`, 'کارتابل ' + unitShort(u), UNITS.find(x => x.id === u)?.ic || 'building', u > 0],
@@ -342,6 +345,7 @@ function renderShell() {
       </header>
       <main id="main"></main>
     </div>
+    <nav class="tabbar" id="tabbar" aria-label="ناوبری پایین صفحه"></nav>
   </div>`;
   const gs = $('#gsearch');
   gs.addEventListener('input', () => globalSearch(gs.value));
@@ -356,6 +360,11 @@ function renderChrome() {
   const unread = DB.notifs.filter(n => n.pos === ME.pos.id && !n.read).length;
   $('#bell').innerHTML = ic('bell') + (unread ? `<span class="dot">${fa(unread > 99 ? '99+' : unread)}</span>` : '');
   $('#themebtn').innerHTML = ic(curTheme() === 'dark' ? 'sun' : 'moon');
+  const q = myQueue().length;
+  const tb = (href, icon, label, n) => `<a href="#${href}" class="${h === href ? 'on' : ''}">${ic(icon)}<span>${label}</span>${n ? `<i>${fa(n > 99 ? '99+' : n)}</i>` : ''}</a>`;
+  $('#tabbar').innerHTML = tb('dashboard', 'home', 'خانه') + tb('inbox', 'inbox', 'کارتابل', q)
+    + `<button class="fab" data-a="quickAdd" aria-label="ثبت سریع">${ic('plus')}</button>`
+    + tb('notifications', 'bell', 'اعلان‌ها', unread) + `<button data-a="menu" class="${$('#app').classList.contains('open') ? 'on' : ''}">${ic('menu')}<span>منو</span></button>`;
 }
 function tick() {
   const lc = $('#lclock'); if (lc) lc.textContent = fa(nowHMS());
@@ -375,7 +384,8 @@ function tick() {
 }
 const curTheme = () => document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 A.theme = () => { const t = curTheme() === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = t; pref.set('theme', t); renderChrome(); };
-A.menu = () => $('#app').classList.toggle('open');
+A.ftog = d => { const v = vs(d.key); v._fopen = !v._fopen; route(); };
+A.menu = () => { $('#app').classList.toggle('open'); renderChrome(); };
 A.close = () => closeModal();
 A.tab = d => { vs(d.key).tab = d.v; refresh(); };
 A.go = d => { location.hash = d.h; };
@@ -390,8 +400,8 @@ function route() {
   $('#main').innerHTML = fn();
   liveWidgets();
   touchSession();
-  renderChrome();
   $('#app').classList.remove('open');
+  renderChrome();
   if (active && active.startsWith('flt-')) { const el = document.getElementById(active); if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch (e) {} } }
 }
 let LAST_HASH = '';

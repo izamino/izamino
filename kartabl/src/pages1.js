@@ -34,6 +34,35 @@ function myQueue() {
 const queueList = (q, n = 8) => q.length ? `<div class="list">${q.slice(0, n).map(x => `<a class="li" data-a="open" data-k="${x.k === 'leave' ? 'leave' : x.k === 'move' ? 'move' : x.k}" data-id="${x.id}"><div class="k">${ic({ req: 'inbox', task: 'check', order: 'flag', pay: 'wallet', res: 'door', leave: 'user', move: 'box', letter: 'mail', meet: 'cal' }[x.k])}</div><div class="t"><b>${esc(x.title)}</b><small>${x.t} · <span class="${x.k === 'letter' ? 'lno' : 'code'}">${esc(x.no)}</span>${x.due ? ' · مهلت ' + jd(x.due) : ''}</small></div>${pill(x.st)}</a>`).join('')}</div>` : empty('کاری در انتظار اقدام شما نیست.');
 A.open_leave = d => showLeave(d.id);
 
+/* ---------- کارتابل من (همه کارهای منتظر اقدام) ---------- */
+PAGES.inbox = () => {
+  const v = vs('inbox');
+  const all = myQueue();
+  const kinds = [...new Set(all.map(x => x.t))];
+  const rows = all.filter(x => !v.t || x.t === v.t);
+  return `${head('کارتابل من', `${fa(all.length)} مورد منتظر اقدام شما · ${esc(posLabel(ME.pos.id))}`)}
+  ${kinds.length > 1 ? `<div class="chips">${['', ...kinds].map(k => `<button class="chip ${(v.t || '') === k ? 'on' : ''}" data-a="inboxF" data-v="${esc(k)}">${k || 'همه'} <b>${fa(k ? all.filter(x => x.t === k).length : all.length)}</b></button>`).join('')}</div>` : ''}
+  <section class="card"><div class="cb flush">${queueList(rows, 500)}</div></section>`;
+};
+A.inboxF = d => { vs('inbox').t = d.v; route(); };
+
+/* ---------- ثبت سریع (دکمه + در گوشی) ---------- */
+A.quickAdd = () => {
+  const items = [
+    [myRole() !== 'staff', 'newReq', 'ثبت درخواست', 'inbox', {}],
+    [can('letters.create'), 'newLetter', 'ثبت نامه', 'mail', {}],
+    [isMgrOrOffice(myUnit()) && myUnit() > 0, 'newTask', 'وظیفه جدید', 'check', { u: myUnit() }],
+    [isImam() || can('orders.issue'), 'newOrder', 'صدور دستور', 'flag', {}],
+    [can('meetings.create'), 'newMeeting', 'ثبت جلسه', 'cal', {}],
+    [true, 'newRes', 'درخواست رزرو', 'door', {}],
+    [true, 'newLeave', 'درخواست مرخصی', 'user', {}],
+    [can('finance.request') && !isImam(), 'newPay', 'درخواست پرداخت', 'wallet', {}],
+    [can('admin.users'), 'admNewUser', 'کاربر جدید', 'users', {}]
+  ].filter(x => x[0]);
+  modal({ title: 'ثبت سریع', sheet: true, body: `<div class="quick big">${items.map(([, a, l, i, d]) => `<button class="qa" data-a="qaGo" data-go="${a}" ${Object.entries(d).map(([k, v]) => `data-${k}="${v}"`).join(' ')}>${ic(i)}<span>${l}</span></button>`).join('')}</div>` });
+};
+A.qaGo = d => { closeModal(); A[d.go](d); };
+
 /* دامنه داده بر اساس جایگاه */
 const scopeUnits = () => (isAll() ? UNITS.map(u => u.id).concat([0]) : [myUnit()]);
 const inScope = u => scopeUnits().includes(+u);

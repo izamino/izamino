@@ -59,7 +59,7 @@
   --shadow: 0 1px 2px rgba(0, 0, 0, .3); color-scheme: dark;
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; }
 body { margin: 0; overflow-x: hidden; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 14px; line-height: 1.75; direction: rtl; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
@@ -470,6 +470,106 @@ textarea.json { width: 100%; height: 340px; direction: ltr; text-align: left; fo
   body.printing .modal .mh, body.printing .modal .mf, body.printing .noprint { display: none !important; }
   body.printing { background: #fff; }
   body.printing .letter { border: 0; }
+}
+
+/* ================= نسخه گوشی ================= */
+.tabbar { display: none; }
+.ftog { display: none; }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 6px 14px; white-space: nowrap; cursor: pointer; font-size: .84rem; color: var(--fg); }
+.chip b { color: var(--muted); font-weight: 600; margin-inline-start: 4px; }
+.chip.on { background: var(--teal-soft); border-color: transparent; color: var(--accent); font-weight: 700; }
+.quick.big { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.quick.big .qa { padding: 18px 6px; font-size: .84rem; }
+.quick.big .qa svg { width: 26px; height: 26px; }
+
+@media (max-width: 900px) {
+  .tabbar { display: grid; grid-template-columns: repeat(5, 1fr); align-items: end; position: fixed; inset: auto 0 0 0; z-index: 35;
+    background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: saturate(1.4) blur(10px); border-top: 1px solid var(--line);
+    padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
+  .tabbar a, .tabbar button { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: var(--muted); font-size: .7rem; background: none; border: 0; padding: 4px 0; min-height: 48px; justify-content: center; position: relative; cursor: pointer; }
+  .tabbar svg { width: 22px; height: 22px; }
+  .tabbar .on { color: var(--accent); font-weight: 700; }
+  .tabbar i { position: absolute; top: 0; left: calc(50% - 22px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 99px; background: var(--bad); color: #fff; font-size: .64rem; font-style: normal; display: grid; place-items: center; }
+  .tabbar .fab { justify-self: center; width: 56px; height: 56px; min-height: 56px; border-radius: 18px; background: var(--btn); color: var(--btn-fg); margin-top: -22px; box-shadow: 0 6px 18px color-mix(in srgb, var(--btn) 40%, transparent); }
+  .tabbar .fab svg { width: 26px; height: 26px; }
+  main { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .toast { bottom: calc(86px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); }
+  .top .menu, #bell { display: none; }
+  .side { z-index: 40; }
+}
+
+@media (max-width: 640px) {
+  body { font-size: 1rem; }
+  input, select, textarea { font-size: 16px !important; }
+  .btn { min-height: 44px; padding: 8px 16px; }
+  .btn.sm { min-height: 36px; }
+  .ibtn { width: 42px; height: 42px; }
+  .ibtn.sm { width: 38px; height: 38px; }
+  h1 { font-size: 1.25rem; }
+  .phead p { font-size: .82rem; }
+  .phead > .row { width: 100%; }
+  .phead > .row > .btn, .phead > .row > a.btn { flex: 1 1 auto; justify-content: center; }
+  .top { padding-block: 8px; }
+  .who div { display: none; }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .tile { padding: 10px 12px; }
+  .tile b { font-size: 1.4rem; }
+  .filters { padding: 10px 12px; }
+  .ftog { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 0 12px; min-height: 42px; cursor: pointer; color: var(--fg); order: 2; }
+  .ftog svg { width: 16px; height: 16px; }
+  .ftog b { background: var(--teal); color: #fff; border-radius: 99px; padding: 0 7px; font-size: .72rem; }
+  .filters:has(.ftog) input[type="search"] { flex: 1 1 0; order: 1; }
+  .filters:not(.open) > select, .filters:not(.open) > input[type="text"] { display: none; }
+  .filters.open > select, .filters.open > input[type="text"] { order: 3; }
+  .modal-bg:has(> .modal.sheet) { align-items: flex-end; }
+  .modal.sheet { min-height: 0; border-radius: 20px 20px 0 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .modal.sheet .mh { padding-top: 12px; border-radius: 20px 20px 0 0; }
+  .filters input[type="search"] { flex: 1 1 100%; }
+  .filters select, .filters input[type="text"] { flex: 1 1 calc(50% - 8px); padding: 8px 10px; }
+  .tabs button { padding: 10px 14px; }
+  .li { padding: 12px 14px; }
+
+  /* جدول‌ها به کارت تبدیل می‌شوند */
+  .tbl-wrap { overflow: visible; }
+  .tbl-wrap table:not(.matrix), .tbl-wrap table:not(.matrix) tbody { display: block; width: 100%; }
+  .tbl-wrap table:not(.matrix) thead { display: none; }
+  .tbl-wrap table:not(.matrix) tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .tbl-wrap table:not(.matrix) tr:last-child { border-bottom: 0; }
+  .tbl-wrap table:not(.matrix) td { display: block; padding: 0; border: 0; min-width: 0; overflow-wrap: anywhere; }
+  .tbl-wrap table:not(.matrix) td::before { content: attr(data-l); display: block; font-size: .7rem; color: var(--muted); margin-bottom: 1px; }
+  .tbl-wrap table:not(.matrix) td[data-l=""]::before { display: none; }
+  .tbl-wrap table:not(.matrix) td:has(> b:first-child), .tbl-wrap table:not(.matrix) td:has(> .who2), .tbl-wrap table:not(.matrix) td:has(> .acts), .tbl-wrap table:not(.matrix) td[data-l=""] { grid-column: 1 / -1; }
+  .tbl-wrap table:not(.matrix) td:has(> b:first-child) { order: -1; font-size: 1rem; }
+  .tbl-wrap table:not(.matrix) td:has(> b:first-child)::before, .tbl-wrap table:not(.matrix) td:has(> .who2)::before { display: none; }
+  .tbl-wrap table:not(.matrix) td:has(> .who2) { order: -1; }
+  tr.click:hover td { background: none; }
+  tr.click:active { background: var(--surface-2); }
+  .matrix select.pm { font-size: 13px !important; }
+
+  /* پنجره‌ها به صورت برگه تمام‌صفحه */
+  .modal-bg { padding: 0; align-items: stretch; }
+  .modal, .modal.wide { width: 100%; min-height: 100%; border-radius: 0; border: 0; display: flex; flex-direction: column; }
+  .modal .mh { position: sticky; top: 0; z-index: 2; background: var(--surface); padding-top: calc(12px + env(safe-area-inset-top, 0px)); }
+  .modal .mb { flex: 1; padding-inline: 16px; }
+  .modal .mf { position: sticky; bottom: 0; z-index: 2; border-radius: 0; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+  .modal .mf > .btn { flex: 1 1 auto; justify-content: center; }
+  .form { gap: 14px; }
+  .kv { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .kv dt { font-size: .74rem; margin-top: 8px; }
+
+  /* داشبورد */
+  .hero h1 { font-size: 1.25rem; }
+  .hero-clock .big { font-size: 2.6rem; }
+  .hero-pray { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .hero-pray .ph, .hero-pray .next { grid-column: 1 / -1; }
+  .hero-pray .pt { flex-direction: column; align-items: center; background: rgba(255,255,255,.06); padding: 6px 4px; font-size: .74rem; }
+  .hero .row .btn { flex: 1 1 auto; justify-content: center; }
+  .quick.big { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .permgrid { grid-template-columns: minmax(0, 1fr); }
+  .perm { flex-wrap: wrap; }
+  .admnav button { padding: 10px 12px; }
+  .letter { font-size: .86rem; }
 }
 
 </style>
@@ -1699,11 +1799,13 @@ const steps = (names, cur, done = false) => `<div class="steps">${names.map((n, 
 
 function table(cols, rows, opts = {}) {
   if (!rows.length) return empty(opts.empty || 'موردی یافت نشد.');
-  return `<div class="tbl-wrap"><table><thead><tr>${cols.map(c => `<th>${c[0]}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr ${opts.click ? `class="click" data-a="${opts.click}" data-id="${r.id}"` : ''}>${cols.map(c => `<td>${c[1](r)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  return `<div class="tbl-wrap"><table><thead><tr>${cols.map(c => `<th>${c[0]}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr ${opts.click ? `class="click" data-a="${opts.click}" data-id="${r.id}"` : ''}>${cols.map(c => `<td data-l="${esc(String(c[0]).replace(/<[^>]+>/g, ''))}">${c[1](r)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
 function filterBar(key, items) {
   const v = vs(key);
-  return `<div class="filters">${items.map(it => {
+  const active = items.filter(it => it.t !== 'search' && v[it.k]).length;
+  const extra = items.some(it => it.t !== 'search');
+  return `<div class="filters ${v._fopen || active ? 'open' : ''}">${extra ? `<button type="button" class="ftog" data-a="ftog" data-key="${key}">${ic('menu')}فیلترها${active ? ` <b>${fa(active)}</b>` : ''}</button>` : ''}${items.map(it => {
     const id = `flt-${key}-${it.k}`;
     if (it.t === 'search') return `<input type="search" id="${id}" data-f="${key}:${it.k}" placeholder="${it.l}" value="${esc(v[it.k] || '')}" aria-label="${it.l}">`;
     if (it.t === 'date') return `<input type="text" id="${id}" data-f="${key}:${it.k}" placeholder="${it.l}" value="${esc(v[it.k] || '')}" aria-label="${it.l}" size="11">`;
@@ -1739,11 +1841,11 @@ function barChart(groups, series) {
 
 /* ---------- مودال و فرم ---------- */
 let MODAL_REOPEN = null;
-function modal({ title, body, foot = '', wide = false, locked = false }) {
+function modal({ title, body, foot = '', wide = false, locked = false, sheet = false }) {
   closeModal(true);
   const bg = document.createElement('div');
   bg.className = 'modal-bg';
-  bg.innerHTML = `<div class="modal ${wide ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="mh"><h2>${title}</h2>${locked ? '' : `<button class="ibtn" data-a="close" aria-label="بستن">${ic('x')}</button>`}</div><div class="mb">${body}</div>${foot ? `<div class="mf">${foot}</div>` : ''}</div>`;
+  bg.innerHTML = `<div class="modal ${wide ? 'wide' : ''} ${sheet ? 'sheet' : ''}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="mh"><h2>${title}</h2>${locked ? '' : `<button class="ibtn" data-a="close" aria-label="بستن">${ic('x')}</button>`}</div><div class="mb">${body}</div>${foot ? `<div class="mf">${foot}</div>` : ''}</div>`;
   if (locked) bg.dataset.locked = '1';
   else bg.addEventListener('mousedown', e => { if (e.target === bg) closeModal(); });
   document.body.appendChild(bg);
@@ -1955,7 +2057,8 @@ function navItems() {
   const u = myUnit();
   return [
     ['grp', 'کارتابل'],
-    ['dashboard', 'داشبورد', 'home', true, q],
+    ['dashboard', 'داشبورد', 'home', true],
+    ['inbox', 'کارتابل من', 'inbox', true, q],
     ['imam', 'کارتابل امام جماعت', 'dome', isAll()],
     ['units', 'فهرست ۱۷ مدیریت', 'building', true],
     [`unit-${u}`, 'کارتابل ' + unitShort(u), UNITS.find(x => x.id === u)?.ic || 'building', u > 0],
@@ -2000,6 +2103,7 @@ function renderShell() {
       </header>
       <main id="main"></main>
     </div>
+    <nav class="tabbar" id="tabbar" aria-label="ناوبری پایین صفحه"></nav>
   </div>`;
   const gs = $('#gsearch');
   gs.addEventListener('input', () => globalSearch(gs.value));
@@ -2014,6 +2118,11 @@ function renderChrome() {
   const unread = DB.notifs.filter(n => n.pos === ME.pos.id && !n.read).length;
   $('#bell').innerHTML = ic('bell') + (unread ? `<span class="dot">${fa(unread > 99 ? '99+' : unread)}</span>` : '');
   $('#themebtn').innerHTML = ic(curTheme() === 'dark' ? 'sun' : 'moon');
+  const q = myQueue().length;
+  const tb = (href, icon, label, n) => `<a href="#${href}" class="${h === href ? 'on' : ''}">${ic(icon)}<span>${label}</span>${n ? `<i>${fa(n > 99 ? '99+' : n)}</i>` : ''}</a>`;
+  $('#tabbar').innerHTML = tb('dashboard', 'home', 'خانه') + tb('inbox', 'inbox', 'کارتابل', q)
+    + `<button class="fab" data-a="quickAdd" aria-label="ثبت سریع">${ic('plus')}</button>`
+    + tb('notifications', 'bell', 'اعلان‌ها', unread) + `<button data-a="menu" class="${$('#app').classList.contains('open') ? 'on' : ''}">${ic('menu')}<span>منو</span></button>`;
 }
 function tick() {
   const lc = $('#lclock'); if (lc) lc.textContent = fa(nowHMS());
@@ -2033,7 +2142,8 @@ function tick() {
 }
 const curTheme = () => document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 A.theme = () => { const t = curTheme() === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = t; pref.set('theme', t); renderChrome(); };
-A.menu = () => $('#app').classList.toggle('open');
+A.ftog = d => { const v = vs(d.key); v._fopen = !v._fopen; route(); };
+A.menu = () => { $('#app').classList.toggle('open'); renderChrome(); };
 A.close = () => closeModal();
 A.tab = d => { vs(d.key).tab = d.v; refresh(); };
 A.go = d => { location.hash = d.h; };
@@ -2048,8 +2158,8 @@ function route() {
   $('#main').innerHTML = fn();
   liveWidgets();
   touchSession();
-  renderChrome();
   $('#app').classList.remove('open');
+  renderChrome();
   if (active && active.startsWith('flt-')) { const el = document.getElementById(active); if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch (e) {} } }
 }
 let LAST_HASH = '';
@@ -2129,6 +2239,35 @@ function myQueue() {
 }
 const queueList = (q, n = 8) => q.length ? `<div class="list">${q.slice(0, n).map(x => `<a class="li" data-a="open" data-k="${x.k === 'leave' ? 'leave' : x.k === 'move' ? 'move' : x.k}" data-id="${x.id}"><div class="k">${ic({ req: 'inbox', task: 'check', order: 'flag', pay: 'wallet', res: 'door', leave: 'user', move: 'box', letter: 'mail', meet: 'cal' }[x.k])}</div><div class="t"><b>${esc(x.title)}</b><small>${x.t} · <span class="${x.k === 'letter' ? 'lno' : 'code'}">${esc(x.no)}</span>${x.due ? ' · مهلت ' + jd(x.due) : ''}</small></div>${pill(x.st)}</a>`).join('')}</div>` : empty('کاری در انتظار اقدام شما نیست.');
 A.open_leave = d => showLeave(d.id);
+
+/* ---------- کارتابل من (همه کارهای منتظر اقدام) ---------- */
+PAGES.inbox = () => {
+  const v = vs('inbox');
+  const all = myQueue();
+  const kinds = [...new Set(all.map(x => x.t))];
+  const rows = all.filter(x => !v.t || x.t === v.t);
+  return `${head('کارتابل من', `${fa(all.length)} مورد منتظر اقدام شما · ${esc(posLabel(ME.pos.id))}`)}
+  ${kinds.length > 1 ? `<div class="chips">${['', ...kinds].map(k => `<button class="chip ${(v.t || '') === k ? 'on' : ''}" data-a="inboxF" data-v="${esc(k)}">${k || 'همه'} <b>${fa(k ? all.filter(x => x.t === k).length : all.length)}</b></button>`).join('')}</div>` : ''}
+  <section class="card"><div class="cb flush">${queueList(rows, 500)}</div></section>`;
+};
+A.inboxF = d => { vs('inbox').t = d.v; route(); };
+
+/* ---------- ثبت سریع (دکمه + در گوشی) ---------- */
+A.quickAdd = () => {
+  const items = [
+    [myRole() !== 'staff', 'newReq', 'ثبت درخواست', 'inbox', {}],
+    [can('letters.create'), 'newLetter', 'ثبت نامه', 'mail', {}],
+    [isMgrOrOffice(myUnit()) && myUnit() > 0, 'newTask', 'وظیفه جدید', 'check', { u: myUnit() }],
+    [isImam() || can('orders.issue'), 'newOrder', 'صدور دستور', 'flag', {}],
+    [can('meetings.create'), 'newMeeting', 'ثبت جلسه', 'cal', {}],
+    [true, 'newRes', 'درخواست رزرو', 'door', {}],
+    [true, 'newLeave', 'درخواست مرخصی', 'user', {}],
+    [can('finance.request') && !isImam(), 'newPay', 'درخواست پرداخت', 'wallet', {}],
+    [can('admin.users'), 'admNewUser', 'کاربر جدید', 'users', {}]
+  ].filter(x => x[0]);
+  modal({ title: 'ثبت سریع', sheet: true, body: `<div class="quick big">${items.map(([, a, l, i, d]) => `<button class="qa" data-a="qaGo" data-go="${a}" ${Object.entries(d).map(([k, v]) => `data-${k}="${v}"`).join(' ')}>${ic(i)}<span>${l}</span></button>`).join('')}</div>` });
+};
+A.qaGo = d => { closeModal(); A[d.go](d); };
 
 /* دامنه داده بر اساس جایگاه */
 const scopeUnits = () => (isAll() ? UNITS.map(u => u.id).concat([0]) : [myUnit()]);
@@ -3263,7 +3402,7 @@ PAGES.admin = () => {
   const pend = can('admin.approve') ? pendingAll().length : 0;
   const nav = `<nav class="admnav" aria-label="بخش‌های پنل مدیریت">${tabsOk.map(t => `<button data-a="tab" data-key="adm" data-v="${t[0]}" class="${v.tab === t[0] ? 'on' : ''}">${ic(t[2])}<span>${t[1]}</span>${t[0] === 'signups' && sg ? `<i>${fa(sg)}</i>` : t[0] === 'approvals' && pend ? `<i>${fa(pend)}</i>` : t[0] === 'users' && lockedUsers().length ? `<i>${fa(lockedUsers().length)}</i>` : ''}</button>`).join('')}</nav>`;
   const body = (ADMIN_VIEWS[v.tab] || ADMIN_VIEWS.overview)();
-  return `${head('پنل مدیریت سامانه', 'کنترل کامل کاربران، رمزها، ورودها، دسترسی‌ها، تأییدها، ظاهر و داده‌های سامانه', `${btn('کاربر جدید', 'admNewUser', {}, '', 'plus')}`)}
+  return `${head('پنل مدیریت سامانه', 'کنترل کامل کاربران، رمزها، ورودها، دسترسی‌ها، تأییدها، ظاهر و داده‌های سامانه', v.tab === 'users' ? '' : btn('کاربر جدید', 'admNewUser', {}, '', 'plus'))}
   <div class="admin-wrap">${nav}<div class="admin-body">${body}</div></div>`;
 };
 PAGES.users = () => { vs('adm').tab = 'users'; return PAGES.admin(); };
