@@ -20,7 +20,7 @@ function myQueue() {
     if (imam ? o.status === 'منتظر تأیید' : o.status !== 'تکمیل‌شده' && o.status !== 'منتظر تأیید' && o.units.some(u => isMgrOrOffice(u))) q.push({ k: 'order', t: 'دستور امام', no: o.no, title: o.title, st: orderStatus(o), due: o.due, id: o.id });
   });
   DB.payreqs.forEach(p => { if (payCanAct(p) && (!imam || nextPayStage(p) === 3)) q.push({ k: 'pay', t: 'پرداخت', no: p.no, title: p.title, st: payLabel(p), due: '', id: p.id }); });
-  if (!imam) DB.reservations.forEach(r => { if (r.status === 'در انتظار تأیید' && canDecideRes(r)) q.push({ k: 'res', t: 'رزرو', no: r.no, title: spaceOf(r.space).name + ' — ' + r.kind, st: r.status, due: r.date, id: r.id }); });
+  if (!imam) DB.reservations.forEach(r => { if (r.status === 'در انتظار تأیید' && canDecideRes(r)) q.push({ k: 'res', t: 'رزرو', no: r.no, title: resPlace(r) + ' — ' + r.kind, st: r.status, due: r.date, id: r.id }); });
   DB.leaves.forEach(l => { if (leaveCanAct(l) && (!imam || posById(l.pos).role === 'manager')) q.push({ k: 'leave', t: 'مرخصی', no: l.no, title: userById(l.uid).name + ' — ' + l.type, st: l.status, due: l.from, id: l.id }); });
   if (!imam) DB.movements.forEach(m => { const a = DB.assets.find(x => x.id === m.assetId); if (m.status === 'در انتظار تأیید' && canApproveMove(a)) q.push({ k: 'move', t: 'گردش کالا', no: m.no, title: m.type + ' — ' + a.name, st: m.status, due: m.date, id: m.id }); });
   DB.letters.forEach(l => {
@@ -96,7 +96,7 @@ PAGES.dashboard = () => {
   const near = open.filter(x => x.due && x.due >= T && daysBetween(T, x.due) <= 3);
   const late = open.filter(x => x.st === 'معوق');
   const today = [...DB.meetings.filter(m => canSeeMeeting(m) && m.date === T).map(m => ({ t: m.start, title: m.title, sub: m.place, k: 'meet', id: m.id, tag: m.kind })),
-    ...DB.reservations.filter(r => r.date === T && r.status === 'تأییدشده').map(r => ({ t: r.start, title: r.kind, sub: spaceOf(r.space).name + ' · ' + r.applicant, k: 'res', id: r.id, tag: 'رزرو' }))].sort(by('t'));
+    ...DB.reservations.filter(r => r.date === T && r.status === 'تأییدشده').map(r => ({ t: r.start, title: r.kind, sub: resPlace(r) + (r.applicant ? ' · ' + r.applicant : ''), k: 'res', id: r.id, tag: 'رزرو' }))].sort(by('t'));
   const notifs = DB.notifs.filter(n => n.pos === ME.pos.id && !n.read).slice(-6).reverse();
   const acts = DB.audit.filter(a => isAll() || a.unit === myUnit()).slice(-8).reverse();
   const role = myRole();
@@ -124,7 +124,7 @@ PAGES.dashboard = () => {
     ${card('آخرین اقدامات انجام‌شده', acts.length ? `<div class="list">${acts.map(a => `<div class="li"><div class="t"><b>${esc(a.act)}</b><small>${esc((userById(a.uid) || {}).name || 'سامانه')} · ${esc(a.note)} · ${jdt(a.ts)}</small></div></div>`).join('')}</div>` : empty('اقدامی ثبت نشده است.'), '', { flush: true })}
   </div>`;
 };
-A.notif = d => { const n = DB.notifs.find(x => x.id === d.id); n.read = true; Store.save(); location.hash = n.link; route(); };
+A.notif = async d => { const n = DB.notifs.find(x => x.id === d.id); if (!n) return; await run('readNotif', n.id); location.hash = n.link; route(); };
 
 /* ---------- کارتابل امام جماعت ---------- */
 function unitStats(u, f, t) {
@@ -180,7 +180,7 @@ PAGES.units = () => `
   <section class="card"><div class="cb" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
     <div class="li" style="border:0;padding:0;cursor:default"><div class="k" style="width:46px;height:46px">${ic('dome')}</div><div class="t"><b>امام جماعت مسجد شباب اهل‌الجنه — مدیریت عالی مجتمع</b><small>${esc(holderOf('P0').name)}</small></div></div>
   </div></section>
-  <div class="units">${UNITS.map(u => {
+  <div class="units">${UNITS.filter(u => !u.off || isAll()).map(u => {
     const s = unitStats(u.id); const ok = canSeeUnit(u.id);
     const tag = ok ? 'a' : 'div';
     return `<${tag} class="unit ${ok ? '' : 'locked'}" ${ok ? `href="#unit-${u.id}"` : ''}>
@@ -237,7 +237,7 @@ function pgUnit(u) {
 A.unitSvc = d => { vs('requests').cat = d.cat; vs('requests').tab = 'in'; location.hash = 'requests'; };
 A.newRec = d => {
   const R = REGISTRIES[d.u].find(r => r.key === d.key);
-  formModal('ثبت در «' + R.title + '»', R.fields.map(([k, l, t]) => Array.isArray(t) ? { k, l, t: 'select', o: t } : { k, l, t: t || 'text', req: k === 'title' }), { date: todayISO() }, v => addRecord(+d.u, d.key, v));
+  formModal('ثبت در «' + R.title + '»', R.fields.map(([k, l, t]) => Array.isArray(t) ? { k, l, t: 'select', o: t } : { k, l, t: t || 'text', req: k === 'title' }), { date: todayISO() }, v => run('addRecord', +d.u, d.key, v));
 };
 
 /* ---------- دبیرخانه ---------- */
@@ -277,7 +277,7 @@ A.newLetter = () => {
     { k: 'needReply', l: 'پیگیری پاسخ', t: 'check', cl: 'این نامه نیازمند پاسخ است' },
     { k: 'body', l: 'متن نامه', t: 'textarea' }, { k: 'files', l: 'ضمایم', t: 'file' }
   ], { type: 'in', date: todayISO(), cat: 'اداری', priority: 'عادی', conf: 'عادی', sender: '', receiver: unitName(u), signer: unitPos(u, 'manager')?.id },
-  v => { if (v.type === 'internal' && v.toUnit === '') return fail('برای مکاتبه داخلی، مدیریت گیرنده را انتخاب کنید.'); return createLetter({ ...v, unitId: u }); },
+  v => { if (v.type === 'internal' && v.toUnit === '') return fail('برای مکاتبه داخلی، مدیریت گیرنده را انتخاب کنید.'); return run('createLetter', { ...v, unitId: u }); },
   { wide: true, done: 'نامه ثبت و شماره‌گذاری شد.', reopen: l => showLetter(l.id) });
 };
 function letterSheet(l) {
@@ -313,9 +313,9 @@ function showLetter(id) {
   });
   MODAL_REOPEN = () => showLetter(id);
 }
-A.letterRefer = d => { const l = DB.letters.find(x => x.id === d.id); actModal('ارجاع نامه ' + fa(l.no), v => referLetter(l, v.unit, v.note), { fields: [{ k: 'unit', l: 'ارجاع به', t: 'select', o: unitOpts(true), req: true }], noteLabel: 'دستور ارجاع', reopen: () => showLetter(l.id), done: 'نامه ارجاع شد.' }); };
-A.letterReply = d => { const l = DB.letters.find(x => x.id === d.id); actModal('ثبت پاسخ نامه ' + fa(l.no), v => replyLetter(l, v.note), { noteReq: true, noteLabel: 'متن پاسخ', reopen: () => showLetter(l.id) }); };
-A.letterArchive = d => { const l = DB.letters.find(x => x.id === d.id); archiveLetter(l); refresh(); showLetter(l.id); toast('نامه بایگانی شد.'); };
+A.letterRefer = d => { const l = DB.letters.find(x => x.id === d.id); actModal('ارجاع نامه ' + fa(l.no), v => run('referLetter', l.id, v.unit, v.note), { fields: [{ k: 'unit', l: 'ارجاع به', t: 'select', o: unitOpts(true), req: true }], noteLabel: 'دستور ارجاع', reopen: () => showLetter(l.id), done: 'نامه ارجاع شد.' }); };
+A.letterReply = d => { const l = DB.letters.find(x => x.id === d.id); actModal('ثبت پاسخ نامه ' + fa(l.no), v => run('replyLetter', l.id, v.note), { noteReq: true, noteLabel: 'متن پاسخ', reopen: () => showLetter(l.id) }); };
+A.letterArchive = async d => { const r = await run('archiveLetter', d.id); if (r.error) return toast(r.error); refresh(); showLetter(d.id); toast('نامه بایگانی شد.'); };
 A.print = () => { document.body.classList.add('printing'); window.print(); setTimeout(() => document.body.classList.remove('printing'), 500); };
 
 /* ---------- دستورات امام جماعت ---------- */
@@ -344,9 +344,9 @@ A.newOrder = () => formModal('صدور دستور امام جماعت', [
   { k: 'issued', l: 'تاریخ صدور', t: 'date', req: true }, { k: 'due', l: 'مهلت انجام', t: 'date', req: true },
   { k: 'needReport', l: 'گزارش نهایی', t: 'check', cl: 'ارائه گزارش نهایی الزامی است' }, { k: 'files', l: 'فایل‌های ضمیمه', t: 'file' }
 ], { issued: todayISO(), due: addDays(todayISO(), 7), priority: 'عادی', needReport: true }, v => {
-  if (v.due < v.issued) return fail('مهلت نمی‌تواند پیش از تاریخ صدور باشد.');
-  if (!v.units.includes(String(posById(v.respPos).unitId))) v.units.push(String(posById(v.respPos).unitId));
-  return createOrder(v);
+  const ru = String((posById(v.respPos) || {}).unitId);
+  if (!v.units.includes(ru)) v.units.push(ru);
+  return run('createOrder', v);
 }, { wide: true, submit: 'صدور دستور', done: 'دستور صادر و به مدیریت‌های مسئول ابلاغ شد.', reopen: o => showOrder(o.id) });
 function showOrder(id) {
   const o = DB.orders.find(x => x.id === id);
@@ -364,9 +364,9 @@ function showOrder(id) {
     foot: `${editBtn('order', o)}${canRep ? btn('ثبت گزارش پیشرفت', 'orderRep', { id }, '', 'send') : ''}${isImam() && o.status === 'منتظر تأیید' ? btn('تأیید و تکمیل', 'orderOk', { id }) + btn('بازگشت برای اصلاح', 'orderBack', { id }, 'danger') : ''}`
   });
 }
-A.orderRep = d => { const o = DB.orders.find(x => x.id === d.id); actModal('گزارش پیشرفت دستور', v => orderReport(o, v), { fields: [{ k: 'status', l: 'وضعیت', t: 'select', o: ['در حال بررسی', 'در حال انجام', 'منتظر تأیید'], blank: false }, { k: 'progress', l: 'درصد پیشرفت', t: 'number' }, { k: 'files', l: 'پیوست گزارش', t: 'file' }], init: { status: o.status === 'جدید' ? 'در حال بررسی' : o.status, progress: o.progress }, noteLabel: 'شرح گزارش (برای ارسال نهایی، گزارش نهایی را بنویسید)', reopen: () => showOrder(o.id) }); };
-A.orderOk = d => { const o = DB.orders.find(x => x.id === d.id); actModal('تأیید نهایی دستور', v => orderDecide(o, true, v.note), { submit: 'تأیید و تکمیل', reopen: () => showOrder(o.id) }); };
-A.orderBack = d => { const o = DB.orders.find(x => x.id === d.id); actModal('بازگشت دستور برای اصلاح', v => orderDecide(o, false, v.note), { noteReq: true, noteLabel: 'دلیل بازگشت', reopen: () => showOrder(o.id) }); };
+A.orderRep = d => { const o = DB.orders.find(x => x.id === d.id); actModal('گزارش پیشرفت دستور', v => run('orderReport', o.id, v), { fields: [{ k: 'status', l: 'وضعیت', t: 'select', o: ['در حال بررسی', 'در حال انجام', 'منتظر تأیید'], blank: false }, { k: 'progress', l: 'درصد پیشرفت', t: 'number' }, { k: 'files', l: 'پیوست گزارش', t: 'file' }], init: { status: o.status === 'جدید' ? 'در حال بررسی' : o.status, progress: o.progress }, noteLabel: 'شرح گزارش (برای ارسال نهایی، گزارش نهایی را بنویسید)', reopen: () => showOrder(o.id) }); };
+A.orderOk = d => { const o = DB.orders.find(x => x.id === d.id); actModal('تأیید نهایی دستور', v => run('orderDecide', o.id, true, v.note), { submit: 'تأیید و تکمیل', reopen: () => showOrder(o.id) }); };
+A.orderBack = d => { const o = DB.orders.find(x => x.id === d.id); actModal('بازگشت دستور برای اصلاح', v => run('orderDecide', o.id, false, v.note), { noteReq: true, noteLabel: 'دلیل بازگشت', reopen: () => showOrder(o.id) }); };
 
 /* ---------- ارجاع وظایف ---------- */
 function taskTable(rows) {
@@ -395,7 +395,7 @@ A.newTask = d => {
     { k: 'title', l: 'عنوان وظیفه', req: true, full: true }, { k: 'desc', l: 'شرح', t: 'textarea' },
     { k: 'assignee', l: 'مسئول انجام', t: 'select', o: posOpts(u), req: true }, { k: 'priority', l: 'اولویت', t: 'select', o: PRIORITIES, blank: false },
     { k: 'start', l: 'تاریخ شروع', t: 'date', req: true }, { k: 'due', l: 'مهلت', t: 'date', req: true }, { k: 'files', l: 'فایل ضمیمه', t: 'file' }
-  ], { start: todayISO(), due: addDays(todayISO(), 5), priority: 'عادی' }, v => createTask({ ...v, unitId: u }), { done: 'وظیفه ثبت و ارجاع شد.', reopen: t => showTask(t.id) });
+  ], { start: todayISO(), due: addDays(todayISO(), 5), priority: 'عادی' }, v => run('createTask', { ...v, unitId: u }), { done: 'وظیفه ثبت و ارجاع شد.', reopen: t => showTask(t.id) });
 };
 function showTask(id) {
   const t = DB.tasks.find(x => x.id === id);
@@ -414,7 +414,7 @@ function showTask(id) {
 A.taskAct = d => {
   const t = DB.tasks.find(x => x.id === d.id);
   const lbl = taskActions(t).find(x => x[0] === d.act)[1];
-  actModal(lbl, v => taskAct(t, d.act, v.note, v.to), { fields: d.act === 'reassign' ? [{ k: 'to', l: 'ارجاع به', t: 'select', o: posOpts(t.unitId), req: true }] : [], noteReq: ['return', 'note'].includes(d.act), reopen: () => showTask(t.id) });
+  actModal(lbl, v => run('taskAct', t.id, d.act, v.note, v.to), { fields: d.act === 'reassign' ? [{ k: 'to', l: 'ارجاع به', t: 'select', o: posOpts(t.unitId), req: true }] : [], noteReq: ['return', 'note'].includes(d.act), reopen: () => showTask(t.id) });
 };
 
 /* ---------- درخواست‌های داخلی ---------- */
@@ -449,7 +449,7 @@ A.newReq = d => {
     { k: 'desc', l: 'شرح درخواست', t: 'textarea' },
     { k: 'priority', l: 'اولویت', t: 'select', o: PRIORITIES, blank: false }, { k: 'due', l: 'مهلت مورد انتظار', t: 'date' },
     { k: 'needsImam', l: 'تصویب', t: 'check', cl: 'نیازمند تصویب امام جماعت' }, { k: 'files', l: 'پیوست', t: 'file' }
-  ], init, v => { const [to, cat] = v.svc.split('|'); return createRequest({ ...v, toUnit: +to, cat }); }, { done: 'درخواست ثبت شد و کد پیگیری گرفت.', reopen: r => showReq(r.id) });
+  ], init, v => { const [to, cat] = v.svc.split('|'); return run('createRequest', { ...v, toUnit: +to, cat }); }, { done: 'درخواست ثبت شد و کد پیگیری گرفت.', reopen: r => showReq(r.id) });
 };
 function showReq(id) {
   const r = DB.requests.find(x => x.id === id);
@@ -471,7 +471,7 @@ function showReq(id) {
 A.reqAct = d => {
   const r = DB.requests.find(x => x.id === d.id);
   const lbl = reqActions(r).find(x => x[0] === d.act)[1];
-  actModal(lbl, v => reqAct(r, d.act, v.note, v.unit), {
+  actModal(lbl, v => run('reqAct', r.id, d.act, v.note, v.unit), {
     fields: d.act === 'coop' ? [{ k: 'unit', l: 'مدیریت همکار', t: 'select', o: unitOpts().filter(x => x[0] !== r.toUnit), req: true }] : [],
     noteReq: ['reject', 'exec', 'final', 'coopnote'].includes(d.act),
     noteLabel: d.act === 'final' ? 'گزارش نهایی' : d.act === 'exec' ? 'شرح اقدام اجرایی' : d.act === 'reject' ? 'علت رد' : 'توضیح',

@@ -1,31 +1,38 @@
 /* =====================================================================
-   داده‌های نمونه آغازین (برای آشنایی با سامانه؛ از «تنظیمات › پشتیبان‌گیری» قابل پاک‌سازی است)
+   ساختار پایه (برای نسخه عملیاتی، بدون هیچ داده نمونه) و داده‌های نمونه نسخه نمایشی
    ===================================================================== */
-function seed() {
-  const T = todayISO();
+function baseDB() {
   const D = {
     ver: 1, seq: {}, positions: [], users: [], posHistory: [], letters: [], orders: [], tasks: [], requests: [], reservations: [], meetings: [],
     warehouses: [], assets: [], movements: [], tx: [], payreqs: [], budgets: [], commitments: [], decrees: [], leaves: [], missions: [], contracts: [],
     registry: {}, notifs: [], sms: [], audit: [], flags: {},
     settings: {
       orgName: 'مجتمع مسجدمحور شباب اهل‌الجنه', payThreshold: 500000000,
-      sms: { enabled: true, provider: 'سامانه پیامکی (تنظیم نشده)', sender: '3000xxxx', events: { request: true, letter: true, order: true, decision: true, due: true, overdue: true, meeting: true, reservation: true }, roles: ['imam', 'manager', 'office'] },
+      sms: { enabled: false, provider: 'none', sender: '', apiKey: '', webhook: '', events: { request: true, letter: true, order: true, decision: true, due: true, overdue: true, meeting: true, reservation: true }, roles: ['imam', 'manager', 'office'] },
       backups: []
     }
   };
-  DB = D;
   migrate(D);
-  const prevME = ME;
-  const at = (off, hm = '10:00') => { SEED_TS = new Date(addDays(T, off) + 'T' + hm + ':00+03:30').toISOString(); };
-  const as = pid => { ME = { user: D.users.find(u => u.posId === pid), pos: D.positions.find(p => p.id === pid) }; };
-
-  /* جایگاه‌ها: امام جماعت + سه جایگاه اصلی برای هر مدیریت */
   D.positions.push({ id: 'P0', unitId: 0, role: 'imam', title: 'امام جماعت' });
   UNITS.forEach(u => {
     D.positions.push({ id: `P${u.id}-m`, unitId: u.id, role: 'manager', title: 'مدیر' });
     D.positions.push({ id: `P${u.id}-o`, unitId: u.id, role: 'office', title: 'مسئول دفتر' });
     D.positions.push({ id: `P${u.id}-s`, unitId: u.id, role: 'secretary', title: 'منشی' });
   });
+  UNITS.forEach(u => D.budgets.push({ unitId: u.id, year: jYearNow(), amount: 0 }));
+  return D;
+}
+function seed() {
+  const T = todayISO();
+  const D = baseDB();
+  D.budgets = [];
+  D.settings.sms.enabled = true; /* نسخه نمایشی: پیامک‌ها فقط در صف نمایش داده می‌شوند */
+  DB = D;
+  const prevME = ME;
+  const at = (off, hm = '10:00') => { SEED_TS = new Date(addDays(T, off) + 'T' + hm + ':00+03:30').toISOString(); };
+  const as = pid => { ME = { user: D.users.find(u => u.posId === pid), pos: D.positions.find(p => p.id === pid) }; };
+
+  /* جایگاه‌های کارشناسی نمونه */
   [[1, 'کارشناس تأسیسات'], [1, 'انباردار مرکزی'], [4, 'عکاس و تصویربردار'], [16, 'کارشناس شبکه'], [17, 'ناظر فنی']].forEach(([u, t], i) =>
     D.positions.push({ id: `P${u}-k${i + 1}`, unitId: u, role: 'staff', title: t }));
 
@@ -34,7 +41,7 @@ function seed() {
   const LN = ['کریمی', 'حسینی', 'رحیمی', 'موسوی', 'جعفری', 'صادقی', 'نوری', 'احمدی', 'رضایی', 'کاظمی', 'باقری', 'اکبری', 'قاسمی', 'شریفی', 'عباسی', 'یوسفی', 'نجفی', 'طاهری', 'سلیمانی', 'مرادی', 'فلاحی', 'امینی', 'زارعی', 'حیدری', 'میرزایی'];
   let k = 0;
   const mk = (pid, name, user) => {
-    const u = { id: 'u' + (D.users.length + 1), name, username: user, pass: hash('shabab:1234'), posId: pid, active: true, phone: '0912' + pad(1000000 + D.users.length * 7919 % 8999999, 7).slice(-7), nid: '', hired: addDays(T, -400 - D.users.length * 11) };
+    const u = { id: 'u' + (D.users.length + 1), name, username: user, pass: pwHash('1234'), posId: pid, active: true, phone: '0912' + pad(1000000 + D.users.length * 7919 % 8999999, 7).slice(-7), nid: '', hired: addDays(T, -400 - D.users.length * 11) };
     D.users.push(u); D.posHistory.push({ posId: pid, userId: u.id, from: u.hired, to: '' });
   };
   mk('P0', 'حجت‌الاسلام سید محمد هاشمی', 'imam');
@@ -43,7 +50,7 @@ function seed() {
   });
   D.positions.filter(p => p.role === 'staff').forEach(p => { mk(p.id, `${FN[(k * 7 + 3) % FN.length]} ${LN[(k * 5 + 1) % LN.length]}`, 'k' + p.unitId + '-' + p.id.split('-k')[1]); k++; });
   /* نمونه تغییر متصدی: سوابق جایگاه پس از تغییر فرد حفظ می‌شود */
-  const former = { id: 'u0', name: 'غلامرضا فرهادی', username: 'former4', pass: hash('shabab:1234'), posId: '', active: false, phone: '', hired: addDays(T, -1200) };
+  const former = { id: 'u0', name: 'غلامرضا فرهادی', username: 'former4', pass: pwHash('1234'), posId: '', active: false, phone: '', hired: addDays(T, -1200) };
   D.users.push(former);
   D.posHistory.unshift({ posId: 'P4-m', userId: 'u0', from: addDays(T, -1200), to: addDays(T, -420) });
 
@@ -154,20 +161,22 @@ function seed() {
 
   /* رزروها */
   const res = [
-    ['hosseinieh', 'هیئت محبان الزهرا', 'مراسم عزاداری', 2, '19:00', '22:30', 450, 'approve'],
-    ['amphi', 'مدیریت روابط عمومی', 'همایش خانواده', 3, '16:00', '19:00', 140, 'approve'],
-    ['meeting', 'مدیریت عمران و توسعه', 'جلسه پیمانکاران', 1, '10:00', '12:00', 14, 'approve'],
-    ['fateheh', 'خانواده مرحوم حاج حسن کریمی', 'مراسم ترحیم', 0, '14:00', '16:00', 250, 'approve'],
-    ['cinema', 'پایگاه بسیج', 'اکران فیلم دفاع مقدس', 5, '18:00', '20:30', 55, 'pending'],
-    ['zaersara', 'کاروان زائران مشهد', 'اسکان زائرین', 7, '14:00', '23:59', 32, 'pending'],
-    ['farhangsara', 'کتابخانه مجتمع', 'نشست کتابخوانی', 4, '17:00', '19:00', 40, 'approve'],
-    ['amphi', 'متوسطه دوم', 'جشن فارغ‌التحصیلی', 3, '17:30', '20:00', 130, 'pending'],
-    ['hosseinieh', 'مدیریت امور فرهنگی', 'مراسم دهه فاطمیه — شب اول', 9, '19:00', '22:30', 550, 'approve']
+    ['religious', 'hosseinieh', 'هیئت محبان الزهرا', 'مراسم عزاداری', 2, '19:00', '22:30', 450, 'approve'],
+    ['general', 'amphi', 'مدیریت روابط عمومی', 'همایش خانواده', 3, '16:00', '19:00', 140, 'approve'],
+    ['general', 'meeting', 'مدیریت عمران و توسعه', 'جلسه پیمانکاران', 1, '10:00', '12:00', 14, 'approve'],
+    ['fateheh', 'hosseinieh', 'خانواده مرحوم حاج حسن کریمی', 'مراسم ترحیم', 0, '14:00', '16:00', 250, 'approve'],
+    ['general', 'cinema', 'پایگاه بسیج', 'اکران فیلم دفاع مقدس', 5, '18:00', '20:30', 55, 'pending'],
+    ['lodging', 'zaersara', 'کاروان زائران مشهد', 'اسکان زائرین', 7, '14:00', '23:59', 32, 'pending'],
+    ['general', 'farhangsara', 'کتابخانه مجتمع', 'نشست کتابخوانی', 4, '17:00', '19:00', 40, 'approve'],
+    ['general', 'amphi', 'متوسطه دوم', 'جشن فارغ‌التحصیلی', 3, '17:30', '20:00', 130, 'pending'],
+    ['religious', 'hosseinieh', 'مدیریت امور فرهنگی', 'مراسم دهه فاطمیه — شب اول', 9, '19:00', '22:30', 550, 'approve'],
+    ['rahian', '', 'مدیریت امور فرهنگی', 'کاروان راهیان نور دانش‌آموزی', 20, '06:00', '22:00', 110, 'pending']
   ];
-  res.forEach(([sp, ap, kind, d, s, e, n, st]) => {
+  res.forEach(([prog, sp, ap, kind, d, s, e, n, st]) => {
     as('P3-s'); at(d - 3, '10:00');
-    const r = createReservation({ space: sp, applicant: ap, phone: '09121234567', kind, date: addDays(T, d), start: s, end: e, people: n, equip: 'صوت، پروژکتور', desc: '' });
-    if (st === 'approve') { as(`P${spaceOf(sp).unit}-m`); at(d - 2, '12:00'); resDecide(r, 'تأییدشده', ''); }
+    const r = createReservation({ program: prog, space: sp, applicant: ap, phone: '09121234567', kind, date: addDays(T, d), start: s, end: e, people: n, equip: 'صوت، پروژکتور', desc: '' });
+    if (r.error) throw new Error('seed reservation: ' + r.error);
+    if (st === 'approve') { as(`P${resUnit(r)}-m`); at(d - 2, '12:00'); resDecide(r, 'تأییدشده', ''); }
   });
 
   /* جلسات */

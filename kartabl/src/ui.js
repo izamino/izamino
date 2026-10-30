@@ -36,7 +36,7 @@ const btn = (label, a, data = {}, cls = '', icon = '') => `<button class="btn ${
 const bar = (pct, cls = '') => `<div class="bar ${cls}" title="${fa(Math.round(pct))}٪"><i style="width:${Math.max(0, Math.min(100, pct))}%"></i></div>`;
 const files = fs => (fs && fs.length ? `<div class="row">${fs.map(f => `<span class="att">${ic('clip')}${f.url ? `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.name)}</a>` : esc(f.name)} <small class="code">${fa(Math.ceil(f.size / 1024))}KB</small>${!f.url && !f.data ? ' <small class="hint">فقط مشخصات</small>' : ''}</span>`).join('')}</div>` : '');
 const kv = rows => `<dl class="kv">${rows.filter(Boolean).map(([k, v]) => `<dt>${k}</dt><dd>${v ?? '—'}</dd>`).join('')}</dl>`;
-const tabs = (key, list, cur) => `<div class="tabs" role="tablist">${list.map(([k, l]) => `<button role="tab" data-a="tab" data-key="${key}" data-v="${k}" class="${k === cur ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+const tabs = (key, list, cur) => `<div class="tabs" role="tablist">${list.map(([k, l]) => `<button role="tab" aria-selected="${k === cur}" data-a="tab" data-key="${key}" data-v="${k}" class="${k === cur ? 'on' : ''}">${l}</button>`).join('')}</div>`;
 const steps = (names, cur, done = false) => `<div class="steps">${names.map((n, i) => `<div class="step ${i < cur || (done && i === cur) ? 'done' : i === cur ? 'cur' : ''}"><i>${i < cur || (done && i === cur) ? '✓' : fa(i + 1)}</i>${esc(n)}</div>`).join('')}</div>`;
 
 function table(cols, rows, opts = {}) {
@@ -83,58 +83,90 @@ function barChart(groups, series) {
 
 /* ---------- مودال و فرم ---------- */
 let MODAL_REOPEN = null;
+let MODAL_OPENER = null;
+const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 function modal({ title, body, foot = '', wide = false, locked = false, sheet = false }) {
+  const opener = document.activeElement && !document.activeElement.closest('.modal-bg') ? document.activeElement : MODAL_OPENER;
   closeModal(true);
+  MODAL_OPENER = opener;
   const bg = document.createElement('div');
   bg.className = 'modal-bg';
-  bg.innerHTML = `<div class="modal ${wide ? 'wide' : ''} ${sheet ? 'sheet' : ''}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="mh"><h2>${title}</h2>${locked ? '' : `<button class="ibtn" data-a="close" aria-label="بستن">${ic('x')}</button>`}</div><div class="mb">${body}</div>${foot ? `<div class="mf">${foot}</div>` : ''}</div>`;
+  bg.innerHTML = `<div class="modal ${wide ? 'wide' : ''} ${sheet ? 'sheet' : ''}" role="dialog" aria-modal="true" aria-labelledby="mtitle"><div class="mh"><h2 id="mtitle"></h2>${locked ? '' : `<button class="ibtn" data-a="close" aria-label="بستن">${ic('x')}</button>`}</div><div class="mb">${body}</div>${foot ? `<div class="mf">${foot}</div>` : ''}</div>`;
+  $('#mtitle', bg).textContent = title; // عنوان همیشه به‌صورت متن درج می‌شود، نه HTML
   if (locked) bg.dataset.locked = '1';
   else bg.addEventListener('mousedown', e => { if (e.target === bg) closeModal(); });
+  /* فوکوس داخل پنجره محصور می‌ماند */
+  bg.addEventListener('keydown', e => {
+    if (e.key !== 'Tab') return;
+    const f = $$(FOCUSABLE, bg).filter(x => x.offsetParent !== null);
+    if (!f.length) return;
+    if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+  });
   document.body.appendChild(bg);
-  const f = bg.querySelector('input:not([type=hidden]),select,textarea');
+  document.querySelector('.app')?.setAttribute('aria-hidden', 'true');
+  const f = bg.querySelector('input:not([type=hidden]):not([type=file]),select,textarea') || bg.querySelector(FOCUSABLE);
   if (f) setTimeout(() => f.focus(), 30);
   return bg;
 }
-function closeModal(keep) { $$('.modal-bg').forEach(m => m.remove()); if (!keep) MODAL_REOPEN = null; if (!keep && typeof Sync !== 'undefined') setTimeout(() => { if (!$('.modal-bg')) Sync.flushPending(); }, 0); }
+function closeModal(keep) {
+  const had = !!$('.modal-bg');
+  $$('.modal-bg').forEach(m => m.remove());
+  document.querySelector('.app')?.removeAttribute('aria-hidden');
+  if (!keep) {
+    MODAL_REOPEN = null;
+    if (had && MODAL_OPENER && document.contains(MODAL_OPENER)) { try { MODAL_OPENER.focus(); } catch (e) {} }
+    MODAL_OPENER = null;
+    setTimeout(() => { if ($('.modal-bg')) return; if (SERVER) Remote.flush(); else if (typeof Sync !== 'undefined') Sync.flushPending(); }, 0);
+  }
+}
 
 function fieldHTML(f, v) {
   const id = 'f_' + f.k;
-  const lab = `<label for="${id}">${f.l}${f.req ? ' <span class="req">*</span>' : ''}</label>`;
+  const lab = `<label for="${id}">${esc(f.l)}${f.req ? ' <span class="req" aria-hidden="true">*</span>' : ''}</label>`;
   const full = f.full || ['textarea', 'multi', 'file'].includes(f.t) ? 'full' : '';
+  const req = f.req ? 'aria-required="true"' : '';
   let inp;
   const opts = (o, cur) => o.map(x => {
     if (x && x.group) return `<optgroup label="${esc(x.group)}">${opts(x.items, cur)}</optgroup>`;
     const [ov, ol] = Array.isArray(x) ? x : [x, x];
     return `<option value="${esc(ov)}" ${String(cur ?? '') === String(ov) ? 'selected' : ''}>${esc(ol)}</option>`;
   }).join('');
+  let hint = f.hint;
   switch (f.t) {
-    case 'textarea': inp = `<textarea id="${id}" name="${f.k}" placeholder="${esc(f.ph || '')}">${esc(v || '')}</textarea>`; break;
-    case 'select': inp = `<select id="${id}" name="${f.k}">${f.blank !== false ? `<option value="">${f.blank || 'انتخاب کنید'}</option>` : ''}${opts(f.o, v)}</select>`; break;
-    case 'multi': inp = `<div class="checks" id="${id}">${f.o.map(x => { const [ov, ol] = Array.isArray(x) ? x : [x, x]; return `<label><input type="checkbox" name="${f.k}" value="${esc(ov)}" ${(v || []).map(String).includes(String(ov)) ? 'checked' : ''}>${esc(ol)}</label>`; }).join('')}</div>`; break;
+    case 'textarea': inp = `<textarea id="${id}" name="${f.k}" ${req} placeholder="${esc(f.ph || '')}">${esc(v || '')}</textarea>`; break;
+    case 'select': inp = `<select id="${id}" name="${f.k}" ${req}>${f.blank !== false ? `<option value="">${esc(f.blank || 'انتخاب کنید')}</option>` : ''}${opts(f.o, v)}</select>`; break;
+    case 'multi': inp = `<div class="checks" id="${id}" role="group" aria-label="${esc(f.l)}">${f.o.map(x => { const [ov, ol] = Array.isArray(x) ? x : [x, x]; return `<label><input type="checkbox" name="${f.k}" value="${esc(ov)}" ${(v || []).map(String).includes(String(ov)) ? 'checked' : ''}>${esc(ol)}</label>`; }).join('')}</div>`; break;
     case 'check': inp = `<label class="row" style="font-weight:500;color:var(--fg)"><input type="checkbox" id="${id}" name="${f.k}" ${v ? 'checked' : ''}> ${esc(f.cl || 'بله')}</label>`; break;
-    case 'date': inp = `<input type="text" inputmode="numeric" id="${id}" name="${f.k}" value="${v ? jd(v) : ''}" placeholder="۱۴۰۵/۰۸/۰۸" autocomplete="off">`; break;
-    case 'time': inp = `<input type="time" id="${id}" name="${f.k}" value="${esc(v || '')}">`; break;
-    case 'file': inp = `<input type="file" id="${id}" name="${f.k}" multiple>`; f.hint = f.hint || (typeof Sync !== 'undefined' && Sync.assets ? 'فایل‌ها تا ۲۰ مگابایت در مخزن فایل سامانه ذخیره می‌شوند.' : 'فایل‌های تا ۱۵۰ کیلوبایت کامل ذخیره می‌شوند؛ از فایل‌های بزرگ‌تر فقط مشخصات ثبت می‌شود.'); break;
-    case 'number': inp = `<input type="text" inputmode="numeric" id="${id}" name="${f.k}" value="${v != null && v !== '' ? esc(v) : ''}" placeholder="${esc(f.ph || '')}">`; break;
-    default: inp = `<input type="${f.t || 'text'}" id="${id}" name="${f.k}" value="${esc(v ?? '')}" placeholder="${esc(f.ph || '')}" ${f.ro ? 'readonly' : ''}>`;
+    case 'date': inp = `<input type="text" inputmode="numeric" id="${id}" name="${f.k}" ${req} value="${v ? jd(v) : ''}" placeholder="۱۴۰۵/۰۸/۰۸" autocomplete="off">`; break;
+    case 'time': inp = `<input type="time" id="${id}" name="${f.k}" ${req} value="${esc(v || '')}">`; break;
+    case 'file': inp = `<input type="file" id="${id}" name="${f.k}" ${f.single ? '' : 'multiple'}>`; hint = hint || fileLimitHint(); break;
+    case 'number': inp = `<input type="text" inputmode="numeric" id="${id}" name="${f.k}" ${req} value="${v != null && v !== '' ? esc(v) : ''}" placeholder="${esc(f.ph || '')}">`; break;
+    default: inp = `<input type="${f.t || 'text'}" id="${id}" name="${f.k}" ${req} value="${esc(v ?? '')}" placeholder="${esc(f.ph || '')}" ${f.ro ? 'readonly' : ''}>`;
   }
-  return `<div class="fld ${full}">${f.t === 'check' ? `<label>${f.l}</label>` : lab}${inp}${f.hint ? `<div class="hint">${f.hint}</div>` : ''}<div class="err" data-err="${f.k}"></div></div>`;
+  return `<div class="fld ${full}">${f.t === 'check' ? `<label>${esc(f.l)}</label>` : lab}${inp}${hint ? `<div class="hint">${esc(hint)}</div>` : ''}<div class="err" data-err="${f.k}" role="alert"></div></div>`;
 }
-const readFile = file => new Promise(async res => {
-  const meta = { name: file.name, size: file.size, type: file.type };
-  if (typeof Sync !== 'undefined' && Sync.assets && file.size <= 20 * 1024 * 1024) {
-    try { const a = await Sync.assets.upload(file); return res({ ...meta, url: a.url, aid: a.id }); } catch (e) { /* در صورت خطا، روش جایگزین */ }
+/* پیوست‌ها: سرور ← مخزن فایل سرور؛ پیش‌نمایش claude.ai ← مخزن فایل؛ نسخه مستقل ← حداکثر ۱۵۰ کیلوبایت در مرورگر */
+const FILE_MAX = () => (SERVER ? 20 : typeof Sync !== 'undefined' && Sync.assets ? 20 : 0.15) * 1024 * 1024;
+const fileLimitHint = () => (SERVER || (typeof Sync !== 'undefined' && Sync.assets) ? 'هر فایل تا ۲۰ مگابایت در مخزن فایل سامانه ذخیره می‌شود.' : 'در نسخه نمایشی هر فایل حداکثر ۱۵۰ کیلوبایت؛ نسخه سروری تا ۲۰ مگابایت.');
+async function readFile(file, asText) {
+  const meta = { name: file.name, size: file.size, type: file.type || 'application/octet-stream' };
+  if (asText) return { ...meta, text: await file.text() };
+  if (file.size > FILE_MAX()) throw new Error(`حجم «${file.name}» (${fa(Math.ceil(file.size / 1024))} کیلوبایت) بیشتر از حد مجاز است. ${fileLimitHint()}`);
+  if (SERVER) { const r = await Remote.upload(file); if (r.error) throw new Error(`بارگذاری «${file.name}» انجام نشد: ${r.error}`); return r; }
+  if (typeof Sync !== 'undefined' && Sync.assets) {
+    try { const a = await Sync.assets.upload(file); return { ...meta, url: a.url, aid: a.id }; }
+    catch (e) { throw new Error(`بارگذاری «${file.name}» در مخزن فایل انجام نشد (${e && e.code || 'خطا'}). دوباره تلاش کنید.`); }
   }
-  if (file.size > 150 * 1024) return res(meta); // فایل بزرگ: فقط مشخصات (در نسخه سروری به مخزن فایل می‌رود)
-  const r = new FileReader(); r.onload = () => res({ ...meta, data: r.result }); r.onerror = () => res(meta); r.readAsDataURL(file);
-});
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res({ ...meta, data: r.result }); r.onerror = () => rej(new Error(`خواندن «${file.name}» ممکن نشد.`)); r.readAsDataURL(file); });
+}
 async function readForm(form, fields) {
   const out = {}; const errs = {};
   for (const f of fields) {
     const el = form.elements[f.k];
     if (f.t === 'multi') out[f.k] = $$(`input[name="${f.k}"]:checked`, form).map(x => x.value);
     else if (f.t === 'check') out[f.k] = !!(el && el.checked);
-    else if (f.t === 'file') out[f.k] = el && el.files.length ? await Promise.all([...el.files].map(readFile)) : [];
+    else if (f.t === 'file') { try { out[f.k] = el && el.files.length ? await Promise.all([...el.files].map(x => readFile(x, f.single))) : []; } catch (e) { errs[f.k] = e.message; } }
     else if (f.t === 'date') { const s = (el.value || '').trim(); if (s) { const iso = jToIso(s); if (!iso) errs[f.k] = 'تاریخ شمسی معتبر نیست (نمونه: ۱۴۰۵/۰۸/۰۸).'; out[f.k] = iso || ''; } else out[f.k] = ''; }
     else if (f.t === 'number') { const s = en(el.value).replace(/[,٬\s]/g, ''); if (s && isNaN(+s)) errs[f.k] = 'عدد معتبر وارد کنید.'; out[f.k] = s === '' ? '' : +s; }
     else out[f.k] = el ? el.value.trim() : '';
@@ -142,32 +174,62 @@ async function readForm(form, fields) {
   }
   return { out, errs };
 }
+/* پیش‌نویس فرم‌ها: متن تایپ‌شده تا ثبت موفق در همین مرورگر نگه داشته می‌شود */
+const DRAFT_KEY = t => 'shabab-draft-' + (ME ? ME.user.id : 'x') + '-' + t;
+const draftStore = { get: k => { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { sessionStorage.setItem(k, v); } catch (e) {} }, del: k => { try { sessionStorage.removeItem(k); } catch (e) {} } };
 function formModal(title, fields, init, onSave, opts = {}) {
+  let draft = null;
+  const useDraft = !opts.noDraft && !opts.locked && !fields.some(f => f.t === 'password');
+  if (useDraft) { try { draft = JSON.parse(draftStore.get(DRAFT_KEY(title)) || 'null'); } catch (e) {} }
+  const vals = draft && draft.v ? { ...init, ...draft.v } : init;
   const bg = modal({
     title, wide: opts.wide, locked: opts.locked,
-    body: `${opts.pre || ''}<form class="form" id="mform" novalidate>${fields.map(f => fieldHTML(f, init[f.k])).join('')}</form><div class="err" id="merr" role="alert"></div>`,
-    foot: `<button class="btn" type="submit" form="mform">${opts.submit || 'ثبت'}</button>${opts.locked ? '' : '<button class="btn ghost" data-a="close">انصراف</button>'}`
+    body: `${opts.pre || ''}${draft ? `<div class="notice">پیش‌نویس ذخیره‌شده (${jdt(draft.ts)}) بازگردانی شد. <button type="button" class="linkbtn" id="dropdraft">حذف پیش‌نویس</button></div>` : ''}<form class="form" id="mform" novalidate>${fields.map(f => fieldHTML(f, vals[f.k])).join('')}</form><div class="err" id="merr" role="alert"></div>`,
+    foot: `<button class="btn" type="submit" form="mform">${esc(opts.submit || 'ثبت')}</button>${opts.locked ? '' : '<button class="btn ghost" data-a="close">انصراف</button>'}`
   });
   const form = $('#mform', bg);
+  const saveDraft = () => { if (!useDraft) return; const v = {}; fields.forEach(f => { const el = form.elements[f.k]; if (!el || ['file', 'multi', 'check', 'date'].includes(f.t)) return; v[f.k] = el.value; }); draftStore.set(DRAFT_KEY(title), JSON.stringify({ ts: stamp(), v })); };
+  const clearDraft = () => draftStore.del(DRAFT_KEY(title));
+  let dt; form.addEventListener('input', () => { clearTimeout(dt); dt = setTimeout(saveDraft, 600); });
+  $('#dropdraft', bg)?.addEventListener('click', () => { clearDraft(); closeModal(); formModal(title, fields, init, onSave, opts); });
   form.addEventListener('submit', async e => {
     e.preventDefault();
-    $$('[data-err]', form).forEach(x => (x.textContent = ''));
-    const { out, errs } = await readForm(form, fields);
-    if (Object.keys(errs).length) { Object.entries(errs).forEach(([k, m]) => { const x = $(`[data-err="${k}"]`, form); if (x) x.textContent = m; }); return; }
-    const res = onSave(out);
-    if (res && res.error) { $('#merr', bg).textContent = res.error; return; }
-    const reopen = opts.reopen;
-    closeModal();
-    toast(opts.done || 'ثبت شد.');
-    refresh();
-    if (reopen) reopen(res);
+    const sb = $('button[type=submit]', bg); if (sb.disabled) return;
+    $$('[data-err]', form).forEach(x => (x.textContent = '')); $('#merr', bg).textContent = '';
+    sb.disabled = true; sb.setAttribute('aria-busy', 'true');
+    try {
+      const { out, errs } = await readForm(form, fields);
+      if (Object.keys(errs).length) { Object.entries(errs).forEach(([k, m]) => { const x = $(`[data-err="${k}"]`, form); if (x) x.textContent = m; }); form.querySelector(`[name="${Object.keys(errs)[0]}"]`)?.focus(); return; }
+      const res = await onSave(out);
+      if (res && res.error) { $('#merr', bg).textContent = res.error; return; }
+      clearDraft();
+      const reopen = opts.reopen;
+      closeModal();
+      toast(opts.done || 'ثبت شد.');
+      refresh();
+      if (reopen) reopen(res || {});
+    } finally { sb.disabled = false; sb.removeAttribute('aria-busy'); }
   });
   return bg;
 }
 /* پنجره اقدام با یادداشت */
 function actModal(title, cb, opts = {}) {
   const fields = [...(opts.fields || []), { k: 'note', l: opts.noteLabel || 'توضیح / یادداشت', t: 'textarea', req: !!opts.noteReq }];
-  formModal(title, fields, opts.init || {}, v => cb(v), { submit: opts.submit || 'ثبت اقدام', done: opts.done || 'اقدام ثبت شد.', reopen: opts.reopen });
+  formModal(title, fields, opts.init || {}, v => cb(v), { submit: opts.submit || 'ثبت اقدام', done: opts.done || 'اقدام ثبت شد.', reopen: opts.reopen, noDraft: true });
+}
+
+/* ---------- اجرای عملیات: سرور (نسخه عملیاتی) یا موتور داخل مرورگر (نسخه نمایشی) ---------- */
+const SERVER = typeof window !== 'undefined' && !!window.__KARTABL_SERVER__;
+async function run(name, ...args) {
+  if (SERVER) return PUBLIC_OPS[name] && !ME ? Remote.signup(args[0]) : Remote.cmd(name, args);
+  const fn = OPS[name] || PUBLIC_OPS[name];
+  if (!fn) return { error: 'عملیات ناشناخته.' };
+  const snap = JSON.stringify(DB);
+  let res;
+  try { res = fn(...args); } catch (e) { res = { error: e instanceof OpError ? e.message : 'خطای پیش‌بینی‌نشده: ' + e.message }; if (!(e instanceof OpError)) console.error(e); }
+  if (res && res.error) { /* هیچ تغییر ناقصی باقی نمی‌ماند */ const me = ME && ME.user.id; DB = JSON.parse(snap); applySettings(); if (me && userById(me)) setMe(userById(me)); return res; }
+  Store.save();
+  return res || {};
 }
 
 let TOAST_T;
@@ -177,11 +239,11 @@ function toast(t) {
 }
 
 /* ---------- گزینه‌های مشترک فرم ---------- */
-const unitOpts = (withImam = false) => [...(withImam ? [[0, 'دفتر امام جماعت']] : []), ...UNITS.map(u => [u.id, u.name])];
+const unitOpts = (withImam = false) => [...(withImam ? [[0, 'دفتر امام جماعت']] : []), ...UNITS.filter(u => !u.off).map(u => [u.id, u.name])];
 const posOpts = unitId => DB.positions.filter(p => unitId == null || p.unitId === +unitId).map(p => [p.id, posWho(p.id)]);
 const allPosOpts = () => [{ group: 'امام جماعت', items: [['P0', posWho('P0')]] }, ...UNITS.map(u => ({ group: u.name, items: posOpts(u.id) }))];
 const allPosChecks = () => DB.positions.map(p => [p.id, posLabel(p.id) + ' — ' + ((holderOf(p.id) || {}).name || 'بدون متصدی')]);
-const serviceOpts = () => UNITS.map(u => ({ group: u.name, items: [...SERVICES[u.id].map(s => [`${u.id}|${s}`, s]), [`${u.id}|همکاری میان‌بخشی`, 'درخواست همکاری میان‌بخشی']] }));
+const serviceOpts = () => UNITS.filter(u => !u.off).map(u => ({ group: u.name, items: [...SERVICES[u.id].map(s => [`${u.id}|${s}`, s]), [`${u.id}|همکاری میان‌بخشی`, 'درخواست همکاری میان‌بخشی']] }));
 
 /* ---------- ورود ---------- */
 const SEC = () => DB.settings.security;
@@ -205,14 +267,14 @@ function renderLogin(err = '', mode = 'login') {
       ${err ? `<div class="notice warn" role="alert">${err}</div>` : ''}
       <button class="btn lg" type="submit">${ic('lock')}ورود امن</button>
       <button class="btn ghost" type="button" data-a="loginMode" data-m="signup">${ic('user')}درخواست ایجاد حساب کاربری</button>
-      ${st.showDemo ? `<details class="demo-wrap"><summary>حساب‌های نمونه (رمز همه <b class="code">1234</b>)</summary><div class="demo">${groups.flat().map(pid => { const u = holderOf(pid); if (!u) return ''; return `<button type="button" data-a="quick" data-u="${esc(u.username)}"><span>${esc(u.name)}</span><small>${esc(posLabel(pid))} · <span class="code">${esc(u.username)}</span></small></button>`; }).join('')}</div></details>` : ''}
+      ${!SERVER && st.showDemo ? `<details class="demo-wrap"><summary>حساب‌های نسخه نمایشی (رمز همه <b class="code">1234</b>؛ در نسخه سروری وجود ندارد)</summary><div class="demo">${groups.flat().map(pid => { const u = holderOf(pid); if (!u) return ''; return `<button type="button" data-a="quick" data-u="${esc(u.username)}"><span>${esc(u.name)}</span><small>${esc(posLabel(pid))} · <span class="code">${esc(u.username)}</span></small></button>`; }).join('')}</div></details>` : ''}
     </form>`;
   $('#root').innerHTML = `
   <div class="login">
     <div class="art"><canvas id="geo" aria-hidden="true"></canvas>
       <div><div class="bs">بسم الله الرحمن الرحیم</div><h1>${esc(st.loginTitle)}<br>${esc(st.orgName)}</h1><p>${esc(st.loginText)}</p></div>
       <div class="login-clock"><b id="lclock">${fa(nowHMS())}</b><span>${jdLong(todayISO())}</span></div>
-      <div class="facts"><div><b>${fa(UNITS.length)}</b><span>مدیریت مستقل</span></div><div><b>${fa(DB.positions.length)}</b><span>جایگاه سازمانی</span></div><div><b>${fa(DB.users.filter(u => u.active && !u.deleted).length)}</b><span>کاربر فعال</span></div></div>
+      <div class="facts"><div><b>${fa(UNITS.length)}</b><span>مدیریت مستقل</span></div><div><b>${fa(DB.positions.length)}</b><span>جایگاه سازمانی</span></div><div><b>${fa(DB.publicActive ?? DB.users.filter(u => u.active && !u.deleted).length)}</b><span>کاربر فعال</span></div></div>
     </div>
     <div class="pane">${pane}</div>
   </div>`;
@@ -221,9 +283,9 @@ function renderLogin(err = '', mode = 'login') {
     e.preventDefault();
     const F = [{ k: 'name', req: 1 }, { k: 'username', req: 1 }, { k: 'phone', req: 1 }, { k: 'unitId', req: 1 }, { k: 'title', req: 1 }, { k: 'pass', req: 1 }, { k: 'note' }];
     const { out } = await readForm(e.target, F);
-    const r = createSignup(out);
+    const r = await run('createSignup', out);
     if (r.error) { $('#serr').textContent = r.error; return; }
-    Store.save(); renderLogin('درخواست شما با کد ' + fa(r.no) + ' ثبت شد. پس از تأیید، با همان نام کاربری و رمز وارد شوید.');
+    renderLogin('درخواست شما با کد ' + fa(r.no) + ' ثبت شد. پس از تأیید مدیر سامانه، با همان نام کاربری و رمز وارد شوید.');
   });
   drawGeo();
 }
@@ -233,13 +295,19 @@ function logLogin(username, u, ok, reason) {
   DB.logins.push({ id: uid(), ts: stamp(), username, uid: u ? u.id : '', ok, reason, agent: navigator.userAgent.replace(/\(.*?\)/g, '').slice(0, 60) });
   if (DB.logins.length > 3000) DB.logins = DB.logins.slice(-3000);
 }
-function doLogin(username, pass) {
+async function doLogin(username, pass) {
   username = en(username);
+  if (SERVER) {
+    const r = await Remote.login(username, pass);
+    if (r.error) return renderLogin(r.error);
+    afterLogin(); return;
+  }
+  /* نسخه نمایشی: همان قواعد سرور، در مرورگر */
   const u = DB.users.find(x => x.username === username && !x.deleted);
   const deny = (msg, reason) => { logLogin(username, u, false, reason); Store.save(); renderLogin(msg); };
   if (!u) return deny('نام کاربری یا رمز عبور درست نیست.', 'نام کاربری ناموجود');
   if (u.lockedUntil && new Date(u.lockedUntil) > new Date()) return deny(`حساب به دلیل تلاش‌های ناموفق تا ساعت ${fa(new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit' }).format(new Date(u.lockedUntil)))} قفل است. مدیر فناوری اطلاعات می‌تواند آن را باز کند.`, 'حساب قفل');
-  if (u.pass !== hash('shabab:' + en(pass))) {
+  if (!pwCheck(u.pass, pass)) {
     u.fails = (u.fails || 0) + 1;
     if (u.fails >= SEC().maxFails) { u.lockedUntil = new Date(Date.now() + SEC().lockMin * 60000).toISOString(); u.fails = 0; notify(adminPositions(), 'request', `حساب ${u.name} پس از ${fa(SEC().maxFails)} تلاش ناموفق قفل شد.`, 'admin', u.username); return deny(`به دلیل ${fa(SEC().maxFails)} تلاش ناموفق، حساب برای ${fa(SEC().lockMin)} دقیقه قفل شد. مدیر فناوری اطلاعات می‌تواند قفل را زودتر باز کند.`, 'قفل‌شدن حساب'); }
     return deny('نام کاربری یا رمز عبور درست نیست.' + (u.fails ? ` (${fa(SEC().maxFails - u.fails)} تلاش دیگر تا قفل‌شدن حساب)` : ''), 'رمز نادرست');
@@ -255,23 +323,34 @@ function doLogin(username, pass) {
   sess.set(u.id + '|' + ses.id);
   audit('ورود به سامانه', 'session', u.id, '');
   Store.save();
-  renderShell();
-  if (u.mustChange) forcePassChange();
+  afterLogin();
 }
+function afterLogin() { LAST_ACT = Date.now(); renderShell(); if (ME.user.mustChange) forcePassChange(); }
 function setMe(u) { ME = { user: u, pos: posById(u.posId) }; }
-function touchSession() { const s = ME && mySession(); if (s && Date.now() - new Date(s.last) > 60000) { s.last = stamp(); Store.save(); } }
-const mySession = () => { const s = (sess.get() || '').split('|')[1]; return DB.sessions.find(x => x.id === s); };
+const mySession = () => { if (SERVER) return Remote.session; const s = (sess.get() || '').split('|')[1]; return DB.sessions.find(x => x.id === s); };
+/* فعالیت کاربر: کلیک، تایپ، لمس و پیمایش همه فعالیت حساب می‌شوند */
+let LAST_ACT = Date.now(), LAST_SENT = 0;
+function noteActivity() {
+  LAST_ACT = Date.now();
+  const w = $('#idlewarn'); if (w) w.remove();
+  if (Date.now() - LAST_SENT < 60000 || !ME) return;
+  LAST_SENT = Date.now();
+  if (SERVER) Remote.ping(); else { const s = mySession(); if (s) { s.last = stamp(); Store.save(); } }
+}
+function touchSession() { noteActivity(); }
+['pointerdown', 'keydown', 'input', 'wheel', 'touchstart'].forEach(ev => document.addEventListener(ev, noteActivity, { passive: true, capture: true }));
 A.quick = d => doLogin(d.u, '1234');
-function endSession(msg) {
-  const s = mySession(); if (s) { s.active = false; s.end = stamp(); }
-  if (ME) audit('خروج از سامانه', 'session', ME.user.id, msg || '');
-  Store.save(); ME = null; sess.set(null); closeModal(); location.hash = ''; renderLogin(msg || '');
+async function endSession(msg) {
+  if (SERVER) await Remote.logout(msg);
+  else { const s = mySession(); if (s) { s.active = false; s.end = stamp(); } if (ME) audit('خروج از سامانه', 'session', ME.user.id, msg || ''); Store.save(); }
+  ME = null; sess.set(null); closeModal(); location.hash = ''; renderLogin(msg || '');
 }
 A.logout = () => endSession();
+A.stayIn = () => noteActivity();
 function forcePassChange() {
   formModal('تغییر رمز عبور الزامی است', [{ k: 'p1', l: 'رمز جدید', t: 'password', req: true, hint: 'دست‌کم ' + fa(SEC().minLen) + ' نویسه' }, { k: 'p2', l: 'تکرار رمز جدید', t: 'password', req: true }], {}, v => {
     if (v.p1 !== v.p2) return fail('رمز و تکرار آن یکسان نیست.');
-    return setPassword(ME.user, v.p1, false, true);
+    return run('forcedPassChange', v.p1);
   }, { submit: 'ذخیره رمز', done: 'رمز عبور تغییر کرد.', locked: true, pre: '<div class="notice">مدیر سامانه برای حساب شما تغییر رمز را الزامی کرده است.</div>' });
 }
 
@@ -343,6 +422,7 @@ function renderShell() {
         <a class="who" href="#profile" title="حساب کاربری من">${av(ME.user.name)}<div><b>${esc(ME.user.name)}</b><small>${esc(posLabel(ME.pos.id))}</small></div></a>
         <button class="ibtn" data-a="logout" aria-label="خروج">${ic('logout')}</button>
       </header>
+      ${SERVER ? '' : `<div class="demobar" role="note">${ic('alert')}<span>نسخه نمایشی: داده‌ها نمونه‌اند و در همین مرورگر ${typeof Sync !== 'undefined' && Sync.mode === 'shared' ? 'و پایگاه پیش‌نمایش' : ''} نگهداری می‌شوند. برای اطلاعات واقعی از نسخه سروری استفاده کنید.</span></div>`}
       <main id="main"></main>
     </div>
     <nav class="tabbar" id="tabbar" aria-label="ناوبری پایین صفحه"></nav>
@@ -375,12 +455,20 @@ function tick() {
   if (Date.now() - (tick.sweep || 0) > 60000) { tick.sweep = Date.now(); const n = DB.notifs.length; sweepDeadlines(); if (DB.notifs.length !== n) { Store.save(); renderChrome(); } }
   if (tick.day && tick.day !== todayISO() && !$('.modal-bg')) route();
   tick.day = todayISO();
-  /* کنترل نشست: خروج اجباری توسط مدیر یا پایان مهلت بی‌فعالیتی */
-  const s = mySession();
-  if (s && !s.active) return endSession('نشست شما توسط مدیر سامانه پایان یافت.');
-  if (!ME.user.active || ME.user.deleted) return endSession('حساب شما غیرفعال شد.');
-  const to = SEC().sessionMin;
-  if (s && to && Date.now() - new Date(s.last) > to * 60000) return endSession('به دلیل ' + fa(to) + ' دقیقه بی‌فعالیتی، از سامانه خارج شدید.');
+  /* کنترل نشست: خروج اجباری توسط مدیر یا پایان مهلت بی‌فعالیتی (با هشدار دو دقیقه پیش از خروج) */
+  if (!SERVER) {
+    const s = mySession();
+    if (s && !s.active) return endSession('نشست شما توسط مدیر سامانه پایان یافت.');
+    if (!ME.user.active || ME.user.deleted) return endSession('حساب شما غیرفعال شد.');
+  }
+  const to = SEC().sessionMin * 60000;
+  const idle = Date.now() - LAST_ACT;
+  if (to && idle > to) return endSession('به دلیل ' + fa(SEC().sessionMin) + ' دقیقه بی‌فعالیتی، از سامانه خارج شدید. متن فرم‌های نیمه‌کاره به‌صورت پیش‌نویس حفظ شده است.');
+  if (to && idle > to - 120000 && !$('#idlewarn')) {
+    const w = document.createElement('div'); w.id = 'idlewarn'; w.className = 'idlewarn'; w.setAttribute('role', 'alertdialog'); w.setAttribute('aria-live', 'assertive');
+    w.innerHTML = `<span>به دلیل بی‌فعالیتی، کمتر از دو دقیقه دیگر از سامانه خارج می‌شوید.</span><button class="btn sm" data-a="stayIn">ادامه کار</button>`;
+    document.body.appendChild(w);
+  }
 }
 const curTheme = () => document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 A.theme = () => { const t = curTheme() === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = t; pref.set('theme', t); renderChrome(); };
@@ -434,7 +522,7 @@ function globalSearch(q) {
     ...DB.tasks.filter(t => canSeeTask(t) && m(t.no, t.title)).map(t => ['task', t.id, 'وظیفه', t.no, t.title]),
     ...DB.requests.filter(r => canSeeReq(r) && m(r.no, r.title)).map(r => ['req', r.id, 'درخواست', r.no, r.title]),
     ...DB.meetings.filter(x => canSeeMeeting(x) && m(x.no, x.title)).map(x => ['meet', x.id, x.kind, x.no, x.title]),
-    ...DB.reservations.filter(r => m(r.no, r.applicant, r.kind, spaceOf(r.space).name)).map(r => ['res', r.id, 'رزرو', r.no, spaceOf(r.space).name + ' — ' + r.kind]),
+    ...DB.reservations.filter(r => m(r.no, r.applicant || '', r.kind, resPlace(r))).map(r => ['res', r.id, 'رزرو', r.no, resPlace(r) + ' — ' + r.kind]),
     ...DB.assets.filter(a => canSeeAsset(a) && m(a.code, a.name, a.serial)).map(a => ['asset', a.id, 'اموال', a.code, a.name]),
     ...(canHR() ? DB.users.filter(u => m(u.name, u.username)).map(u => ['person', u.id, 'پرونده اداری', u.username, u.name]) : [])
   ].slice(0, 14);

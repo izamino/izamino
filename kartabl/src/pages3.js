@@ -14,7 +14,7 @@ PAGES.reports = () => {
   const tot = k => sum(stats, s => s[k]);
   const pct = tot('tasks') ? Math.round((tot('done') / tot('tasks')) * 100) : 0;
   const uIds = units.map(u => u.id);
-  const resv = DB.reservations.filter(r => inRange(r.date, F, T) && (isAll() ? !v.u || spaceOf(r.space).unit === +v.u : spaceOf(r.space).unit === myUnit() || r.fromUnit === myUnit()));
+  const resv = DB.reservations.filter(r => inRange(r.date, F, T) && (isAll() ? !v.u || resUnit(r) === +v.u : resUnit(r) === myUnit() || r.fromUnit === myUnit()));
   const pays = DB.payreqs.filter(p => uIds.includes(p.unitId) && inRange(isoOfStamp(p.created), F, T));
   const proj = isAll() || inUnit(U_CIVIL) ? reg(U_CIVIL, 'projects') : [];
   const st = v.st;
@@ -63,41 +63,17 @@ PAGES.notifications = () => {
   ${tabs('notif', [['unread', `خوانده‌نشده (${fa(unread)})`], ['all', 'همه']], v.tab)}
   <section class="card">${filterBar('notif', [{ k: 'ev', l: 'همه رویدادها', o: Object.entries(SMS_EVENTS) }])}<div class="cb flush">${rows.length ? `<div class="list">${rows.slice(0, 120).map(n => `<a class="li" data-a="notif" data-id="${n.id}" style="${n.read ? 'opacity:.7' : ''}"><div class="k">${ic('bell')}</div><div class="t"><b>${esc(n.text)}</b><small>${esc(SMS_EVENTS[n.ev] || '')} · ${jdt(n.ts)}</small></div>${n.read ? '' : pill('جدید', 'new')}</a>`).join('')}</div>` : empty('اعلانی وجود ندارد.')}</div></section>`;
 };
-A.readAll = () => { DB.notifs.forEach(n => { if (n.pos === ME.pos.id) n.read = true; }); refresh(); toast('همه اعلان‌ها خوانده شد.'); };
+A.readAll = async () => { await run('readAllNotifs'); refresh(); toast('همه اعلان‌ها خوانده شد.'); };
 
-/* ---------- کاربران و دسترسی‌ها ---------- */
-PAGES.users = () => {
-  if (!canAdminUsers()) return denied();
-  const v = vs('usr', { tab: 'pos' });
-  let body = '';
-  if (v.tab === 'pos') {
-    const groups = [{ id: 0, name: 'مدیریت عالی' }, ...UNITS];
-    body = groups.filter(g => !v.u || g.id === +v.u).map(g => card(esc(g.name), table([
-      ['جایگاه', p => `<b>${esc(p.title)}</b><span class="sub code">${esc(p.id)}</span>`], ['نقش', p => pill(ROLES[p.role], 'mute')],
-      ['متصدی فعلی', p => { const h = holderOf(p.id); return h ? esc(h.name) : pill('بدون متصدی', 'warn'); }],
-      ['سابقه متصدیان', p => fa(DB.posHistory.filter(h => h.posId === p.id).length) + ' نفر'],
-      ['', p => btn('تغییر متصدی', 'assign', { id: p.id }, 'sm ghost') + ' ' + btn('سوابق', 'posHist', { id: p.id }, 'sm ghost')]
-    ], unitPositions(g.id)), g.id ? btn('افزودن جایگاه (کارشناس / کارمند)', 'addPos', { u: g.id }, 'sm soft', 'plus') : '', { flush: true })).join('');
-    body = `<section class="card">${filterBar('usr', [{ k: 'u', l: 'همه مدیریت‌ها', o: unitOpts(true) }])}</section><div class="notice">دسترسی‌ها به جایگاه سازمانی متصل است، نه به شخص. با تغییر متصدی، تمام سوابق، نامه‌ها، وظایف و تاریخچه جایگاه برای متصدی جدید باقی می‌ماند.</div>${body}`;
-  }
-  if (v.tab === 'users') {
-    const rows = DB.users.filter(u => textMatch(v.q, u.name, u.username));
-    body = `<section class="card"><div class="ch"><h2>حساب‌های کاربری</h2>${btn('کاربر جدید', 'newUser', {}, 'sm', 'plus')}</div>${filterBar('usr', [{ k: 'q', t: 'search', l: 'جست‌وجوی نام یا نام کاربری…' }])}<div class="cb flush">${table([['نام', u => `<b>${esc(u.name)}</b>`], ['نام کاربری', u => `<span class="code">${esc(u.username)}</span>`], ['جایگاه', u => esc(u.posId ? posLabel(u.posId) : '—')], ['تلفن', u => `<span class="code">${fa(u.phone || '—')}</span>`], ['وضعیت', u => pill(u.active ? 'فعال' : 'غیرفعال')], ['', u => u.id === ME.user.id ? '' : btn(u.active ? 'غیرفعال‌سازی' : 'فعال‌سازی', 'toggleUser', { id: u.id }, 'sm ' + (u.active ? 'danger' : 'soft')) + ' ' + btn('بازنشانی رمز', 'resetPass', { id: u.id }, 'sm ghost')]], rows)}</div></section>`;
-  }
-  if (v.tab === 'matrix') body = card('ماتریس سطح دسترسی بر اساس نقش سازمانی', table([['مجوز', r => esc(r[0])], ...Object.entries(ROLES).map(([k, l]) => [l, r => (r[1].includes(k) ? pill('✓', 'ok') : '—')])], PERM_MATRIX.map((r, i) => Object.assign(r, { id: i }))) + `<div class="cb"><div class="notice">تفکیک داده‌ها: اطلاعات مالی فقط برای مدیریت امور مالی و امام جماعت؛ پرونده‌های پرسنلی فقط برای مدیریت امور اداری؛ اطلاعات درمانگاه و داروخانه و خیریه فقط برای همان مدیریت. نامه‌های «سری» فقط برای مدیر واحد و امام جماعت قابل مشاهده‌اند.</div></div>`, '', { flush: true });
-  return `${head('کاربران و دسترسی‌ها', 'تعریف جایگاه‌ها، انتساب متصدی، فعال یا غیرفعال‌سازی حساب و ماتریس سطح دسترسی')}${tabs('usr', [['pos', `جایگاه‌های سازمانی (${fa(DB.positions.length)})`], ['users', `حساب‌های کاربری (${fa(DB.users.length)})`], ['matrix', 'ماتریس دسترسی']], v.tab)}${body}`;
-};
-A.assign = d => formModal('تغییر متصدی — ' + posLabel(d.id), [{ k: 'user', l: 'متصدی جدید', t: 'select', o: DB.users.filter(u => u.active).map(u => [u.id, `${u.name} (${u.posId ? posLabel(u.posId) : 'بدون جایگاه'})`]), req: true }], {}, v => assignHolder(d.id, v.user), { submit: 'ثبت انتصاب', done: 'متصدی جایگاه تغییر کرد؛ سوابق جایگاه حفظ شد.' });
-A.posHist = d => modal({ title: 'سوابق جایگاه ' + posLabel(d.id), body: table([['متصدی', h => esc(userById(h.userId)?.name)], ['از', h => jd(h.from)], ['تا', h => (h.to ? jd(h.to) : 'اکنون')]], DB.posHistory.filter(h => h.posId === d.id).map((h, i) => ({ ...h, id: i }))) + `<div class="hint">تعداد اقدامات ثبت‌شده با این جایگاه: ${fa(DB.audit.filter(a => a.pos === d.id).length)}</div>` });
-A.addPos = d => formModal('افزودن جایگاه به ' + unitShort(+d.u), [{ k: 'title', l: 'عنوان جایگاه', req: true, ph: 'مثلاً: معاون، کارشناس، کارمند خدمات' }], {}, v => addPosition({ ...v, unitId: d.u }));
-A.newUser = () => formModal('کاربر جدید', [{ k: 'name', l: 'نام و نام خانوادگی', req: true }, { k: 'username', l: 'نام کاربری', req: true }, { k: 'pass', l: 'رمز اولیه', t: 'password', req: true }, { k: 'phone', l: 'تلفن همراه', t: 'tel' }, { k: 'posId', l: 'جایگاه سازمانی', t: 'select', o: allPosOpts() }], {}, v => createUser(v));
-A.toggleUser = d => { const u = userById(d.id); u.active = !u.active; audit(u.active ? 'فعال‌سازی حساب' : 'غیرفعال‌سازی حساب', 'user', u.id, u.username); refresh(); toast(u.active ? 'حساب فعال شد.' : 'حساب غیرفعال شد.'); };
-A.resetPass = d => formModal('بازنشانی رمز', [{ k: 'pass', l: 'رمز جدید', t: 'password', req: true }], {}, v => { const u = userById(d.id); u.pass = hash('shabab:' + en(v.pass)); audit('بازنشانی رمز', 'user', u.id, u.username); return u; });
+/* ---------- جایگاه‌ها (اقدام‌های مشترک پنل مدیریت) ---------- */
+A.assign = d => formModal('تغییر متصدی — ' + posLabel(d.id), [{ k: 'user', l: 'متصدی جدید', t: 'select', o: DB.users.filter(u => u.active && !u.deleted && u.id !== ME.user.id).map(u => [u.id, `${u.name} (${u.posId ? posLabel(u.posId) : 'بدون جایگاه'})`]), req: true }], {}, v => run('assignHolder', d.id, v.user), { submit: 'ثبت انتصاب', done: 'متصدی جایگاه تغییر کرد؛ سوابق جایگاه حفظ شد.' });
+A.posHist = d => modal({ title: 'سوابق جایگاه ' + posLabel(d.id), body: table([['متصدی', h => esc(userById(h.userId)?.name || '—')], ['از', h => jd(h.from)], ['تا', h => (h.to ? jd(h.to) : 'اکنون')]], DB.posHistory.filter(h => h.posId === d.id).map((h, i) => ({ ...h, id: i }))) });
+A.addPos = d => formModal('افزودن جایگاه به ' + unitShort(+d.u), [{ k: 'title', l: 'عنوان جایگاه', req: true, ph: 'مثلاً: معاون، کارشناس، کارمند خدمات' }], {}, v => run('addPosition', { ...v, unitId: +d.u }));
 
-/* ---------- تنظیمات و آرشیو ---------- */
+/* ---------- آرشیو و رویدادها (برای همه کاربران، در محدوده دسترسی) ---------- */
 PAGES.system = () => {
-  const adm = canSettings();
   const v = vs('sys', { tab: 'archive' });
+  if (!['archive', 'audit'].includes(v.tab)) v.tab = 'archive';
   let body = '';
   if (v.tab === 'archive') {
     const rows = [
@@ -110,41 +86,43 @@ PAGES.system = () => {
     body = `<section class="card">${filterBar('sys', [{ k: 'q', t: 'search', l: 'جست‌وجو در آرشیو دائمی…' }, { k: 'ty', l: 'همه انواع', o: ['نامه', 'درخواست', 'دستور', 'وظیفه', 'جلسه', 'ملاقات'] }])}<div class="cb flush">${table([['نوع', x => pill(x.type, 'mute')], ['شماره', x => `<span class="${x.k === 'letter' ? 'lno' : 'code'}">${esc(x.no)}</span>`], ['عنوان', x => esc(x.title)], ['مدیریت', x => esc(unitShort(x.unit))], ['تاریخ', x => jd(x.date)], ['وضعیت', x => pill(x.st || 'بایگانی')]], rows.map(x => ({ ...x, id: x.id + '|' + x.k })), { click: 'arch' })}</div></section>`;
   }
   if (v.tab === 'audit') {
-    const bad = verifyAudit();
-    const rows = DB.audit.filter(a => (adm || isImam() ? true : a.unit === myUnit()) && textMatch(v.aq, a.act, a.note, (userById(a.uid) || {}).name || '')).slice().reverse().slice(0, 200);
-    body = `<div class="notice ${bad >= 0 ? 'warn' : ''}">${bad >= 0 ? `زنجیره رویدادها از ردیف ${fa(bad + 1)} دست‌کاری شده است.` : `زنجیره ${fa(DB.audit.length)} رویداد سالم است؛ هر رویداد با اثر انگشت رویداد قبلی پیوند خورده و کاربران امکان حذف یا ویرایش تاریخچه را ندارند.`}</div>
-    <section class="card">${filterBar('sys', [{ k: 'aq', t: 'search', l: 'جست‌وجو در رویدادها…' }])}<div class="cb flush">${table([['زمان', a => jdt(a.ts)], ['کاربر', a => esc((userById(a.uid) || {}).name || 'سامانه') + `<span class="sub">${esc(a.pos ? posLabel(a.pos) : '')}</span>`], ['اقدام', a => esc(a.act)], ['شرح', a => esc(a.note)], ['اثر انگشت', a => `<span class="code">${a.h}</span>`]], rows.map((a, i) => ({ ...a, id: i })))}</div></section>`;
+    const rows = DB.audit.filter(a => (isAll() || can('admin.logs') ? true : a.unit === myUnit()) && textMatch(v.aq, a.act, a.note, (userById(a.uid) || {}).name || '')).slice().reverse().slice(0, 300);
+    body = `<div class="notice">رویدادها فقط ${SERVER ? 'روی سرور و در جدول افزودنی (بدون امکان ویرایش و حذف از طریق سامانه) ثبت می‌شوند' : 'در این نسخه نمایشی در همین مرورگر ثبت می‌شوند و فقط برای آشنایی است'}.</div>
+    <section class="card">${filterBar('sys', [{ k: 'aq', t: 'search', l: 'جست‌وجو در رویدادها…' }])}<div class="cb flush">${table([['زمان', a => jdt(a.ts)], ['کاربر', a => esc((userById(a.uid) || {}).name || 'سامانه') + `<span class="sub">${esc(a.pos ? posLabel(a.pos) : '')}</span>`], ['اقدام', a => esc(a.act)], ['شرح', a => esc(a.note)]], rows.map((a, i) => ({ ...a, id: i })))}</div></section>`;
   }
-  if (v.tab === 'general') body = !adm ? denied() : card('تنظیمات عمومی', `<form class="form" id="genf">${fieldHTML({ k: 'orgName', l: 'نام مجموعه' }, DB.settings.orgName)}${fieldHTML({ k: 'payThreshold', l: 'سقف پرداخت بدون نیاز به تصویب امام جماعت (ریال)', t: 'number' }, DB.settings.payThreshold)}</form><div class="row" style="margin-top:12px">${btn('ذخیره تنظیمات', 'saveGen')}</div><div class="notice" style="margin-top:12px">منطقه زمانی رسمی سامانه: <b>تهران (Asia/Tehran)</b>. همه زمان‌ها به‌صورت UTC ذخیره و به وقت تهران با تقویم شمسی نمایش داده می‌شوند.</div>`);
-  if (v.tab === 'sms') {
-    const s = DB.settings.sms;
-    body = !adm ? denied() : `${card('تنظیمات پیامک', `<form class="form" id="smsf">
-      <div class="fld"><label>سرویس پیامک</label><label class="row" style="color:var(--fg);font-weight:500"><input type="checkbox" id="sms_en" ${s.enabled ? 'checked' : ''}> ارسال پیامک فعال باشد</label></div>
-      ${fieldHTML({ k: 'provider', l: 'سرویس‌دهنده' }, s.provider)}${fieldHTML({ k: 'sender', l: 'شماره فرستنده' }, s.sender)}
-      ${fieldHTML({ k: 'events', l: 'رویدادهای قابل اعلان با پیامک', t: 'multi', o: Object.entries(SMS_EVENTS) }, Object.keys(s.events).filter(k => s.events[k]))}
-      ${fieldHTML({ k: 'roles', l: 'دریافت‌کنندگان (بر اساس نقش)', t: 'multi', o: Object.entries(ROLES) }, s.roles)}
-    </form><div class="row" style="margin-top:12px">${btn('ذخیره', 'saveSms')}</div><div class="notice" style="margin-top:12px">برای جلوگیری از افشای اطلاعات محرمانه، متن پیامک فقط شامل نوع رویداد و کد پیگیری است و جزئیات تنها در کارتابل قابل مشاهده است.</div>`)}
-    ${card('صف ارسال پیامک', table([['زمان', x => jdt(x.ts)], ['گیرنده', x => esc(x.name) + `<span class="sub code">${fa(x.to)}</span>`], ['متن', x => esc(x.text)], ['وضعیت', x => pill(x.status, 'mute')]], DB.sms.slice().reverse().slice(0, 60)), '<small>اتصال به درگاه پیامکی در نسخه سروری انجام می‌شود</small>', { flush: true })}`;
-  }
-  if (v.tab === 'backup') body = !adm ? denied() : `${card('نسخه پشتیبان', `<p>نسخه پشتیبان کامل پایگاه داده (شامل تاریخچه اقدامات) به‌صورت JSON. آن را کپی و در محل امن نگهداری کنید.</p><div class="row">${btn('تهیه نسخه پشتیبان', 'backup', {}, '', 'archive')}${btn('بازیابی از نسخه پشتیبان', 'restore', {}, 'ghost')}${btn('بازنشانی به داده‌های نمونه', 'resetDemo', {}, 'danger')}</div>
-    ${DB.settings.backups.length ? `<h3 style="margin-top:14px">سوابق پشتیبان‌گیری</h3>${table([['زمان', b => jdt(b.ts)], ['کاربر', b => esc(b.by)], ['حجم', b => fa(Math.round(b.size / 1024)) + ' KB'], ['رکوردها', b => fa(b.n)]], DB.settings.backups.slice().reverse().map((b, i) => ({ ...b, id: i })))}` : ''}`)}`;
-  const T = [['archive', 'آرشیو سامانه'], ['audit', 'رویدادهای سیستمی'], ...(adm ? [['general', 'تنظیمات عمومی'], ['sms', 'اطلاع‌رسانی و پیامک'], ['backup', 'پشتیبان‌گیری']] : [])];
-  return `${head('تنظیمات و آرشیو سامانه', 'آرشیو دائمی، ثبت رویدادهای سیستمی، تنظیمات پیامک و نسخه پشتیبان')}${tabs('sys', T, v.tab)}${body}`;
+  return `${head('آرشیو و رویدادها', 'آرشیو دائمی مکاتبات و اقدامات و سوابق رویدادهای واحد شما')}${tabs('sys', [['archive', 'آرشیو سامانه'], ['audit', isAll() || can('admin.logs') ? 'رویدادهای سیستمی' : 'رویدادهای واحد من']], v.tab)}${canAdminPanel() ? `<div class="notice">تنظیمات، پیامک و پشتیبان‌گیری در <a href="#admin">پنل مدیریت سامانه</a> است.</div>` : ''}${body}`;
 };
-A.arch = d => { const [k, id] = [d.id.split('|')[1], d.id.split('|')[0]]; A.open({ k, id }); };
-A.saveGen = () => { const f = $('#genf'); DB.settings.orgName = f.elements.orgName.value.trim() || DB.settings.orgName; const n = +en(f.elements.payThreshold.value).replace(/\D/g, ''); if (n > 0) DB.settings.payThreshold = n; audit('تغییر تنظیمات عمومی', 'settings', 'general', ''); refresh(); toast('تنظیمات ذخیره شد.'); };
-A.saveSms = () => { const f = $('#smsf'); const s = DB.settings.sms; s.enabled = $('#sms_en').checked; s.provider = f.elements.provider.value; s.sender = f.elements.sender.value; const ev = $$('input[name="events"]:checked', f).map(x => x.value); Object.keys(s.events).forEach(k => (s.events[k] = ev.includes(k))); s.roles = $$('input[name="roles"]:checked', f).map(x => x.value); audit('تغییر تنظیمات پیامک', 'settings', 'sms', ''); refresh(); toast('تنظیمات پیامک ذخیره شد.'); };
-A.backup = () => {
-  const { settings, ...rest } = DB;
+A.arch = d => { const [id, k] = d.id.split('|'); A.open({ k, id }); };
+
+/* ---------- پشتیبان‌گیری و بازیابی ---------- */
+A.backup = async () => {
+  if (!can('admin.backup')) return toast('پشتیبان‌گیری برای جایگاه شما مجاز نیست.');
+  if (SERVER) { const r = await Remote.post('/api/backups', {}); if (r.error) return toast(r.error); toast('نسخه پشتیبان روی سرور ذخیره شد: ' + r.name); await Remote.refresh(); return; }
   const json = JSON.stringify(DB);
   DB.settings.backups.push({ ts: stamp(), by: ME.user.name, size: json.length, n: DB.letters.length + DB.tasks.length + DB.requests.length + DB.orders.length });
   audit('تهیه نسخه پشتیبان', 'backup', '', fa(Math.round(json.length / 1024)) + 'KB');
   Store.save();
-  modal({ title: 'نسخه پشتیبان', wide: true, body: `<p>کل متن زیر را کپی و در فایلی با پسوند <span class="code">.json</span> ذخیره کنید.</p><textarea id="bk" readonly style="width:100%;height:240px;direction:ltr;font-family:monospace;font-size:11px">${esc(json)}</textarea>`, foot: btn('کپی', 'copyBk', {}, '', 'file') });
+  const name = `kartabl-backup-${todayISO()}.json`;
+  modal({ title: 'نسخه پشتیبان', wide: true, body: `<p>فایل را دریافت کنید یا متن زیر را کپی و در فایلی با پسوند <span class="code">.json</span> ذخیره کنید.</p><p><a class="btn" href="data:application/json;charset=utf-8,${encodeURIComponent(json)}" download="${name}">${ic('archive')}دریافت فایل پشتیبان</a></p><textarea id="bk" readonly class="json" aria-label="متن نسخه پشتیبان">${esc(json)}</textarea>`, foot: btn('کپی متن', 'copyBk', {}, 'ghost', 'file') });
   route();
 };
 A.copyBk = () => { const t = $('#bk'); navigator.clipboard.writeText(t.value).then(() => toast('نسخه پشتیبان کپی شد.'), () => { t.select(); toast('متن انتخاب شد؛ با Ctrl+C کپی کنید.'); }); };
-A.restore = () => formModal('بازیابی از نسخه پشتیبان', [{ k: 'json', l: 'متن نسخه پشتیبان (JSON)', t: 'textarea', req: true }], {}, v => { try { const d = JSON.parse(v.json); if (d.ver !== 1 || !d.audit) return fail('نسخه پشتیبان معتبر نیست.'); const me = ME.user.id; DB = migrate(d); applySettings(); const u = userById(me); if (u) setMe(u); audit('بازیابی نسخه پشتیبان', 'backup', '', ''); return d; } catch (e) { return fail('متن واردشده JSON معتبر نیست.'); } }, { done: 'اطلاعات بازیابی شد.' });
-A.resetDemo = () => modal({ title: 'بازنشانی داده‌ها', body: '<p>همه داده‌های فعلی حذف و داده‌های نمونه آغازین جایگزین می‌شوند. این کار برگشت‌پذیر نیست؛ ابتدا نسخه پشتیبان تهیه کنید.</p>', foot: btn('بله، بازنشانی شود', 'resetGo', {}, 'danger') + btn('انصراف', 'close', {}, 'ghost') });
-A.resetGo = () => { const name = ME.user.username; Store.reset(); migrate(DB); applySettings(); closeModal(); const u = DB.users.find(x => x.username === name); if (u) { setMe(u); renderShell(); } else A.logout(); toast('داده‌های نمونه بازنشانی شد.'); };
-
+A.restore = () => formModal('بازیابی از نسخه پشتیبان', [{ k: 'file', l: 'فایل پشتیبان', t: 'file', single: true, hint: 'یا متن را در کادر زیر بچسبانید' }, { k: 'json', l: 'متن نسخه پشتیبان (JSON)', t: 'textarea' }], {}, async v => {
+  if (!can('admin.backup')) return fail('بازیابی برای جایگاه شما مجاز نیست.');
+  let text = v.json;
+  if (v.file && v.file.length && v.file[0].text != null) text = v.file[0].text;
+  if (!text) return fail('فایل یا متن نسخه پشتیبان را وارد کنید.');
+  let d; try { d = JSON.parse(text); } catch (e) { return fail('متن واردشده JSON معتبر نیست.'); }
+  if (SERVER) return Remote.post('/api/backups/restore', { data: d });
+  const errs = validateBackup(d, ME.user.id);
+  if (errs.length) return fail('نسخه پشتیبان پذیرفته نشد:\n• ' + errs.join('\n• '));
+  try { localStorage.setItem('shabab-prerestore', JSON.stringify(DB)); } catch (e) { return fail('ذخیره خودکار نسخه فعلی پیش از بازیابی ممکن نشد؛ بازیابی انجام نشد.'); }
+  const me = ME.user.id;
+  const next = migrate(d);
+  const prev = DB; DB = next;
+  try { applySettings(); const u = userById(me); if (!u || !u.posId) throw new Error('حساب شما در نسخه پشتیبان نیست.'); setMe(u); audit('بازیابی نسخه پشتیبان', 'backup', '', 'نسخه فعلی پیش از بازیابی ذخیره شد'); }
+  catch (e) { DB = prev; applySettings(); setMe(userById(me)); return fail('بازیابی انجام نشد: ' + e.message); }
+  return {};
+}, { done: 'اطلاعات بازیابی شد؛ نسخه قبلی به‌طور خودکار نگهداری شد.', submit: 'بررسی و بازیابی' });
+A.resetDemo = () => modal({ title: 'بازنشانی داده‌های نمونه', body: '<p>همه داده‌های این مرورگر حذف و داده‌های نمونه آغازین جایگزین می‌شوند. ابتدا نسخه پشتیبان تهیه کنید.</p>', foot: btn('بله، بازنشانی شود', 'resetGo', {}, 'danger') + btn('انصراف', 'close', {}, 'ghost') });
+A.resetGo = () => { if (SERVER || !can('admin.backup')) return toast('این کار فقط در نسخه نمایشی و برای مدیر سامانه است.'); const name = ME.user.username; Store.reset(); migrate(DB); applySettings(); closeModal(); const u = DB.users.find(x => x.username === name); if (u) { setMe(u); renderShell(); } else A.logout(); toast('داده‌های نمونه بازنشانی شد.'); };

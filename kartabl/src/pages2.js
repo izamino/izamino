@@ -33,8 +33,8 @@ A.calDay = d => { const v = vs(d.key); v.day = d.iso; if (d.key === 'cal') v.mod
 /* ---------- رزرو فضاها ---------- */
 PAGES.reservations = () => {
   const v = vs('res', { tab: 'cal' });
-  const list = DB.reservations.filter(r => !v.sp || r.space === v.sp);
-  const evFn = iso => list.filter(r => r.date === iso && r.status !== 'ردشده' && r.status !== 'لغوشده').sort(by('start')).map(r => ({ t: `${fa(r.start)} ${spaceOf(r.space).name}`, c: r.status === 'تأییدشده' ? 'res' : 'pend' }));
+  const list = DB.reservations.filter(r => !v.sp || r.space === v.sp || (v.sp === '-' && !r.space));
+  const evFn = iso => list.filter(r => r.date === iso && r.status !== 'ردشده' && r.status !== 'لغوشده').sort(by('start')).map(r => ({ t: `${fa(r.start)} ${resPlace(r)}`, c: r.status === 'تأییدشده' ? 'res' : 'pend' }));
   const pending = DB.reservations.filter(r => r.status === 'در انتظار تأیید' && canDecideRes(r));
   const day = v.day || todayISO();
   const dayList = list.filter(r => r.date === day).sort(by('start'));
@@ -42,49 +42,51 @@ PAGES.reservations = () => {
   if (v.tab === 'pending') rows = list.filter(r => r.status === 'در انتظار تأیید');
   if (v.tab === 'mine') rows = list.filter(r => r.by === ME.user.id);
   return `${head('رزرو فضاها و امکانات', 'تقویم مرکزی رزرو با کنترل تداخل زمانی؛ تأیید هر رزرو با مدیریت متولی همان فضا', btn('درخواست رزرو', 'newRes', {}, '', 'plus'))}
-  <div class="tiles">${[2, 3, 1].map(u => tile(unitShort(u), DB.reservations.filter(r => spaceOf(r.space).unit === u && r.status === 'تأییدشده' && r.date >= todayISO()).length, 'رزرو تأییدشده پیش رو')).join('')}${tile('منتظر تأیید شما', pending.length, '', pending.length ? 'warn' : '')}</div>
+  <div class="tiles">${[2, 3, 1].map(u => tile(unitShort(u), DB.reservations.filter(r => resUnit(r) === u && r.status === 'تأییدشده' && r.date >= todayISO()).length, 'رزرو تأییدشده پیش رو')).join('')}${tile('منتظر تأیید شما', pending.length, '', pending.length ? 'warn' : '')}</div>
   ${tabs('res', [['cal', 'تقویم ماهانه'], ['pending', `در انتظار تأیید (${fa(DB.reservations.filter(r => r.status === 'در انتظار تأیید').length)})`], ['all', 'همه رزروها'], ['mine', 'درخواست‌های من']], v.tab)}
-  <section class="card">${filterBar('res', [{ k: 'sp', l: 'همه فضاها و برنامه‌ها', o: [2, 3, 1].flatMap(u => SPACES.filter(s => s.unit === u).map(s => [s.id, s.name + ' — ' + unitShort(u)])) }])}
+  <section class="card">${filterBar('res', [{ k: 'sp', l: 'همه فضاها', o: SPACES.map(s => [s.id, s.name + ' — ' + unitShort(s.unit)]).concat([['-', 'خارج از مجتمع']]) }])}
   ${v.tab === 'cal' ? `<div class="cb flush">${monthGrid('res', evFn)}</div><div class="cb"><h3>${jdLong(day)}</h3>${resTable(dayList)}</div>` : `<div class="cb flush">${resTable(rows.sort(by('date', -1)))}</div>`}</section>
-  ${card('فضاها و متولیان تأیید', table([['فضا / برنامه', s => esc(s.name)], ['مدیریت تأییدکننده', s => esc(unitName(s.unit))], ['ظرفیت', s => fa(s.cap) + ' نفر'], ['کنترل تداخل', s => (s.excl ? pill('دارد', 'ok') : pill('برنامه هم‌زمان مجاز', 'mute'))]], SPACES), '', { flush: true })}`;
+  <div class="grid g2">${card('سالن‌ها و متولیان تأیید', table([['فضا', s => `<b>${esc(s.name)}</b>`], ['مدیریت تأییدکننده', s => esc(unitName(s.unit))], ['ظرفیت', s => fa(s.cap) + ' نفر'], ['کنترل تداخل', s => (s.excl ? pill('دارد', 'ok') : pill('ندارد', 'mute'))]], SPACES), '', { flush: true })}
+  ${card('انواع برنامه', table([['نوع برنامه', p => `<b>${esc(p.name)}</b>`], ['محل', p => (p.offsite ? 'خارج از مجتمع — ظرفیت ' + fa(p.cap) : 'در یکی از سالن‌ها')], ['تأیید', p => esc(p.offsite ? unitName(p.unit) : 'متولی سالن')]], PROGRAMS), '', { flush: true })}</div>
+  <div class="notice">تداخل بر اساس سالن واقعی کنترل می‌شود: مثلاً مراسم مذهبی و مراسم فاتحه در حسینیه نمی‌توانند هم‌زمان تأیید شوند.</div>`;
 };
 const resTable = rows => table([
-  ['شماره', r => `<span class="code">${esc(r.no)}</span>`], ['فضا', r => `<b>${esc(spaceOf(r.space).name)}</b><span class="sub">${esc(r.kind)}</span>`],
+  ['شماره', r => `<span class="code">${esc(r.no)}</span>`], ['برنامه', r => `<b>${esc(r.kind)}</b><span class="sub">${esc(programOf(r.program).name)} · ${esc(resPlace(r))}</span>`],
   ['متقاضی', r => esc(r.applicant)], ['تاریخ', r => jd(r.date)], ['ساعت', r => `${tm(r.start)} تا ${tm(r.end)}`], ['نفرات', r => fa(r.people)],
   ['وضعیت', r => pill(r.status) + (r.status === 'در انتظار تأیید' && resConflicts(r).length ? '<span class="sub" style="color:var(--bad)">تداخل با رزرو تأییدشده</span>' : '')]
 ], rows, { click: 'resv', empty: 'رزروی ثبت نشده است.' });
 A.resv = d => showRes(d.id);
 A.newRes = d => formModal('درخواست رزرو', [
-  { k: 'space', l: 'فضا / برنامه', t: 'select', o: [2, 3, 1].map(u => ({ group: unitName(u), items: SPACES.filter(s => s.unit === u).map(s => [s.id, `${s.name} (ظرفیت ${fa(s.cap)})`]) })), req: true, full: true },
+  { k: 'program', l: 'نوع برنامه', t: 'select', o: PROGRAMS.map(p => [p.id, p.name + (p.offsite ? ' (خارج از مجتمع)' : '')]), req: true, blank: false },
+  { k: 'space', l: 'سالن / فضای برگزاری', t: 'select', o: SPACES.map(s => [s.id, `${s.name} — ظرفیت ${fa(s.cap)}`]), blank: 'بدون فضا (برنامه خارج از مجتمع)', hint: 'برای راهیان نور و اردو خالی بگذارید.' },
+  { k: 'kind', l: 'عنوان برنامه', req: true, full: true, ph: 'مثلاً: مراسم ترحیم مرحوم …' },
   { k: 'applicant', l: 'نام متقاضی', req: true }, { k: 'phone', l: 'شماره تماس', t: 'tel', req: true, ph: '09123456789' },
-  { k: 'kind', l: 'نوع برنامه', req: true }, { k: 'date', l: 'تاریخ', t: 'date', req: true },
+  { k: 'date', l: 'تاریخ', t: 'date', req: true }, { k: 'people', l: 'تعداد افراد', t: 'number', req: true, hint: 'عدد صحیح، حداکثر ظرفیت فضا' },
   { k: 'start', l: 'ساعت شروع', t: 'time', req: true }, { k: 'end', l: 'ساعت پایان', t: 'time', req: true },
-  { k: 'people', l: 'تعداد افراد', t: 'number', req: true }, { k: 'equip', l: 'تجهیزات موردنیاز', ph: 'صوت، پروژکتور، پذیرایی…' },
-  { k: 'desc', l: 'توضیحات', t: 'textarea' }
-], { date: d && d.iso ? d.iso : vs('res').day || todayISO(), applicant: unitName(myUnit()), phone: ME.user.phone, start: '17:00', end: '19:00' }, v => createReservation(v), { done: 'درخواست رزرو ثبت و برای مدیریت متولی ارسال شد.', reopen: r => showRes(r.id) });
+  { k: 'equip', l: 'تجهیزات موردنیاز', ph: 'صوت، پروژکتور، پذیرایی…', full: true }, { k: 'desc', l: 'توضیحات', t: 'textarea' }
+], { program: 'general', space: d && d.space || '', date: d && d.iso ? d.iso : vs('res').day || todayISO(), applicant: unitName(myUnit()), phone: ME.user.phone, start: '17:00', end: '19:00' }, v => run('createReservation', v), { done: 'درخواست رزرو ثبت و برای مدیریت متولی ارسال شد.', reopen: r => showRes(r.id) });
 function showRes(id) {
   const r = DB.reservations.find(x => x.id === id); if (!r) return;
-  const sp = spaceOf(r.space);
-  const detail = canDecideRes(r) || r.by === ME.user.id || isImam();
+  const detail = canDecideRes(r) || r.by === ME.user.id || isAll();
   const c = resConflicts(r);
   modal({
     title: 'رزرو ' + r.no, wide: true,
-    body: `<div><h2>${esc(sp.name)} — ${esc(r.kind)}</h2>${pill(r.status)}</div>
+    body: `<div><h2>${esc(r.kind)}</h2><div class="row">${pill(r.status)} ${pill(programOf(r.program).name, 'mute')}</div></div>
     ${c.length && r.status !== 'تأییدشده' ? `<div class="notice warn">تداخل زمانی با ${c.map(x => `${fa(x.no)} (${tm(x.start)} تا ${tm(x.end)} — ${esc(x.kind)})`).join('، ')}. تأیید این رزرو تا رفع تداخل ممکن نیست.</div>` : ''}
-    ${kv([['تاریخ', jdLong(r.date)], ['ساعت', `${tm(r.start)} تا ${tm(r.end)}`], ['تعداد افراد', fa(r.people) + ' از ظرفیت ' + fa(sp.cap)], ['مدیریت تأییدکننده', esc(unitName(sp.unit))],
+    ${kv([['محل برگزاری', esc(resPlace(r))], ['تاریخ', jdLong(r.date)], ['ساعت', `${tm(r.start)} تا ${tm(r.end)}`], ['تعداد افراد', fa(r.people) + (resCap(r) ? ' از ظرفیت ' + fa(resCap(r)) : '')], ['مدیریت تأییدکننده', esc(unitName(resUnit(r)))],
       detail && ['نام متقاضی', esc(r.applicant)], detail && ['شماره تماس', `<span class="code">${fa(r.phone)}</span>`], detail && ['تجهیزات موردنیاز', esc(r.equip || '—')], detail && ['توضیحات', esc(r.desc || '—')]])}
     ${!detail ? '<div class="hint">مشخصات متقاضی فقط برای مدیریت متولی و ثبت‌کننده نمایش داده می‌شود.</div>' : ''}
     <div><h3>سابقه</h3>${histHTML(r.history)}</div>`,
     foot: `${editBtn('res', r)}${r.status === 'در انتظار تأیید' && canDecideRes(r) ? btn('تأیید رزرو', 'resDo', { id, s: 'تأییدشده' }) + btn('رد', 'resDo', { id, s: 'ردشده' }, 'danger') : ''}${['در انتظار تأیید', 'تأییدشده'].includes(r.status) && (r.by === ME.user.id || canDecideRes(r)) ? btn('لغو رزرو', 'resDo', { id, s: 'لغوشده' }, 'ghost') : ''}`
   });
 }
-A.resDo = d => { const r = DB.reservations.find(x => x.id === d.id); actModal(d.s === 'تأییدشده' ? 'تأیید رزرو' : d.s === 'ردشده' ? 'رد رزرو' : 'لغو رزرو', v => resDecide(r, d.s, v.note), { noteReq: d.s === 'ردشده', reopen: () => showRes(r.id) }); };
+A.resDo = d => { const r = DB.reservations.find(x => x.id === d.id); actModal(d.s === 'تأییدشده' ? 'تأیید رزرو' : d.s === 'ردشده' ? 'رد رزرو' : 'لغو رزرو', v => run('resDecide', r.id, d.s, v.note), { noteReq: d.s === 'ردشده', reopen: () => showRes(r.id) }); };
 
 /* ---------- تقویم و جلسات ---------- */
 function calEvents(iso) {
   const out = [];
   DB.meetings.filter(m => m.date === iso && canSeeMeeting(m)).forEach(m => out.push({ t: `${fa(m.start)} ${m.title}`, c: '', k: 'meet', id: m.id, time: m.start, sub: m.place, tag: m.kind }));
-  DB.reservations.filter(r => r.date === iso && r.status === 'تأییدشده').forEach(r => out.push({ t: `${fa(r.start)} ${spaceOf(r.space).name}`, c: 'res', k: 'res', id: r.id, time: r.start, sub: r.kind, tag: 'رزرو' }));
+  DB.reservations.filter(r => r.date === iso && r.status === 'تأییدشده').forEach(r => out.push({ t: `${fa(r.start)} ${resPlace(r)}`, c: 'res', k: 'res', id: r.id, time: r.start, sub: r.kind, tag: 'رزرو' }));
   DB.orders.filter(o => o.due === iso && canSeeOrder(o) && o.status !== 'تکمیل‌شده').forEach(o => out.push({ t: 'مهلت دستور: ' + o.title, c: 'due', k: 'order', id: o.id, time: '23:59', sub: o.units.map(unitShort).join('، '), tag: 'مهلت' }));
   DB.tasks.filter(t => t.due === iso && canSeeTask(t) && t.status !== 'تکمیل‌شده' && (t.assignee === ME.pos.id || isMgrOrOffice(t.unitId) && !isImam())).forEach(t => out.push({ t: 'مهلت: ' + t.title, c: 'due', k: 'task', id: t.id, time: '23:59', sub: unitShort(t.unitId), tag: 'مهلت' }));
   return out.sort(by('time'));
@@ -121,7 +123,7 @@ A.newMeeting = d => formModal(d && d.kind === 'ملاقات' ? 'ثبت ملاق�
   { k: 'place', l: 'مکان', t: 'select', o: ['سالن جلسات', 'دفتر امام جماعت', 'حسینیه', 'فرهنگسرا', 'دفتر ' + unitShort(myUnit()), 'خارج از مجتمع'], blank: false },
   { k: 'start', l: 'ساعت شروع', t: 'time', req: true }, { k: 'end', l: 'ساعت پایان', t: 'time' },
   { k: 'invitees', l: 'مدعوین', t: 'multi', o: allPosChecks(), req: true }, { k: 'agenda', l: 'دستور جلسه', t: 'textarea' }
-], { date: vs('cal').day || todayISO(), start: '10:00', end: '11:00' }, v => createMeeting({ ...v, kind: d && d.kind || 'جلسه' }), { wide: true, done: 'ثبت شد و دعوت‌نامه برای مدعوین ارسال شد.', reopen: m => showMeeting(m.id) });
+], { date: vs('cal').day || todayISO(), start: '10:00', end: '11:00' }, v => run('createMeeting', { ...v, kind: d && d.kind || 'جلسه' }), { wide: true, done: 'ثبت شد و دعوت‌نامه برای مدعوین ارسال شد.', reopen: m => showMeeting(m.id) });
 function showMeeting(id) {
   const m = DB.meetings.find(x => x.id === id);
   if (!m || !canSeeMeeting(m)) return toast('دسترسی به این جلسه مجاز نیست.');
@@ -137,9 +139,9 @@ function showMeeting(id) {
     foot: (ed ? btn('ثبت صورت‌جلسه', 'minutes', { id }, '', 'file') + btn('افزودن مصوبه', 'resolAdd', { id }, 'ghost', 'plus') : '') + editBtn('meet', m)
   });
 }
-A.minutes = d => { const m = DB.meetings.find(x => x.id === d.id); formModal('صورت‌جلسه', [{ k: 'minutes', l: 'متن صورت‌جلسه', t: 'textarea', req: true }, { k: 'files', l: 'بارگذاری فایل صورت‌جلسه', t: 'file' }], { minutes: m.minutes }, v => { m.minutes = v.minutes; m.minutesFiles.push(...v.files); hist(m, 'ثبت صورت‌جلسه'); audit('ثبت صورت‌جلسه', 'meeting', m.id, m.no); return m; }, { reopen: () => showMeeting(m.id) }); };
-A.resolAdd = d => { const m = DB.meetings.find(x => x.id === d.id); formModal('افزودن مصوبه', [{ k: 'text', l: 'متن مصوبه', t: 'textarea', req: true }, { k: 'owner', l: 'مسئول اجرای مصوبه', t: 'select', o: allPosOpts(), req: true }, { k: 'due', l: 'مهلت اجرا', t: 'date' }], { due: addDays(todayISO(), 7) }, v => addResolution(m, v), { reopen: () => showMeeting(m.id) }); };
-A.resolUp = d => { const m = DB.meetings.find(x => x.id === d.id); const x = m.resolutions.find(r => r.id === d.x); actModal('پیگیری مصوبه', v => resolutionUpdate(m, x, v.status, v.note), { fields: [{ k: 'status', l: 'وضعیت', t: 'select', o: ['در حال پیگیری', 'انجام‌شده'], blank: false }], init: { status: 'انجام‌شده' }, reopen: () => showMeeting(m.id) }); };
+A.minutes = d => { const m = DB.meetings.find(x => x.id === d.id); formModal('صورت‌جلسه', [{ k: 'minutes', l: 'متن صورت‌جلسه', t: 'textarea', req: true }, { k: 'files', l: 'بارگذاری فایل صورت‌جلسه', t: 'file' }], { minutes: m.minutes }, v => run('meetingMinutes', m.id, v.minutes, v.files), { reopen: () => showMeeting(m.id) }); };
+A.resolAdd = d => { const m = DB.meetings.find(x => x.id === d.id); formModal('افزودن مصوبه', [{ k: 'text', l: 'متن مصوبه', t: 'textarea', req: true }, { k: 'owner', l: 'مسئول اجرای مصوبه', t: 'select', o: allPosOpts(), req: true }, { k: 'due', l: 'مهلت اجرا', t: 'date' }], { due: addDays(todayISO(), 7) }, v => run('addResolution', m.id, v), { reopen: () => showMeeting(m.id) }); };
+A.resolUp = d => { const m = DB.meetings.find(x => x.id === d.id); const x = m.resolutions.find(r => r.id === d.x); actModal('پیگیری مصوبه', v => run('resolutionUpdate', m.id, x.id, v.status, v.note), { fields: [{ k: 'status', l: 'وضعیت', t: 'select', o: ['در حال پیگیری', 'انجام‌شده'], blank: false }], init: { status: 'انجام‌شده' }, reopen: () => showMeeting(m.id) }); };
 
 /* ---------- اموال و انبار ---------- */
 const assetTable = rows => table([
@@ -179,8 +181,8 @@ A.newAsset = () => formModal('ثبت کالا در فهرست اموال', [
   { k: 'whId', l: 'انبار', t: 'select', o: DB.warehouses.map(w => [w.id, w.name]), req: true },
   { k: 'health', l: 'وضعیت سلامت', t: 'select', o: ASSET_HEALTH, blank: false }, { k: 'serial', l: 'شماره سریال' },
   { k: 'value', l: 'ارزش (ریال)', t: 'number' }, { k: 'specs', l: 'مشخصات فنی', t: 'textarea' }
-], { unitId: myUnit() > 0 ? myUnit() : 1, health: 'سالم' }, v => createAsset(v), { done: 'کالا ثبت و کدگذاری شد.', reopen: a => showAsset(a.id) });
-A.newWh = () => formModal('تعریف انبار', [{ k: 'name', l: 'نام انبار', req: true }, { k: 'unitId', l: 'واحد', t: 'select', o: unitOpts(), req: true }], {}, v => { const w = { id: 'w' + uid().slice(0, 5), name: v.name, unitId: +v.unitId }; DB.warehouses.push(w); audit('تعریف انبار', 'warehouse', w.id, w.name); return w; });
+], { unitId: myUnit() > 0 ? myUnit() : 1, health: 'سالم' }, v => run('createAsset', v), { done: 'کالا ثبت و کدگذاری شد.', reopen: a => showAsset(a.id) });
+A.newWh = () => formModal('تعریف انبار', [{ k: 'name', l: 'نام انبار', req: true }, { k: 'unitId', l: 'واحد', t: 'select', o: unitOpts(), req: true }], {}, v => run('addWarehouse', v));
 function showAsset(id) {
   const a = DB.assets.find(x => x.id === id);
   if (!a || !canSeeAsset(a)) return toast('دسترسی به این کالا مجاز نیست.');
@@ -193,12 +195,12 @@ function showAsset(id) {
     <div><h3>سابقه کالا</h3>${histHTML(a.history)}</div>`,
     foot: editBtn('asset', a) + (canManageAsset(a) ? btn('ثبت گردش (ورود، خروج، امانت، عودت، جابه‌جایی)', 'newMove', { id }, '', 'send') + btn('تغییر وضعیت سلامت', 'assetHealth', { id }, 'ghost') : '')
   });
-  if (window.QRCode) try { new QRCode($('#qrbox'), { text: `SHABAB-ASSET:${a.code}`, width: 112, height: 112 }); } catch (e) {}
+  if (window.qrcode) try { const q = qrcode(0, 'M'); q.addData(`SHABAB-ASSET:${a.code}`); q.make(); $('#qrbox').innerHTML = q.createSvgTag(3, 2); } catch (e) {}
   else $('#qrbox').innerHTML = `<div style="width:112px;height:112px;display:grid;place-items:center;color:#333">${ic('qr')}</div>`;
 }
-A.newMove = d => { const a = DB.assets.find(x => x.id === d.id); formModal('ثبت گردش کالا — ' + a.code, [{ k: 'type', l: 'نوع عملیات', t: 'select', o: MOVE_TYPES, req: true }, { k: 'date', l: 'تاریخ', t: 'date', req: true }, { k: 'toWh', l: 'انبار مقصد (جابه‌جایی)', t: 'select', o: DB.warehouses.filter(w => w.id !== a.whId).map(w => [w.id, w.name]) }, { k: 'person', l: 'تحویل‌گیرنده / امانت‌گیرنده' }, { k: 'note', l: 'توضیح', t: 'textarea' }], { date: todayISO() }, v => createMovement(a, v), { done: 'ثبت شد؛ خروج، امانت و جابه‌جایی پس از تأیید مسئول مجاز اعمال می‌شود.', reopen: () => showAsset(a.id) }); };
-A.assetHealth = d => { const a = DB.assets.find(x => x.id === d.id); actModal('وضعیت سلامت کالا', v => { a.health = v.health; hist(a, 'تغییر وضعیت سلامت به «' + v.health + '»', v.note); audit('تغییر وضعیت کالا', 'asset', a.id, a.code); return a; }, { fields: [{ k: 'health', l: 'وضعیت', t: 'select', o: ASSET_HEALTH, blank: false }], init: { health: a.health }, reopen: () => showAsset(a.id) }); };
-A.moveDo = d => { const m = DB.movements.find(x => x.id === d.id); actModal(+d.ok ? 'تأیید ' + m.type : 'رد ' + m.type, v => decideMovement(m, !!+d.ok, v.note), { noteReq: !+d.ok }); };
+A.newMove = d => { const a = DB.assets.find(x => x.id === d.id); formModal('ثبت گردش کالا — ' + a.code, [{ k: 'type', l: 'نوع عملیات', t: 'select', o: MOVE_TYPES, req: true }, { k: 'date', l: 'تاریخ', t: 'date', req: true }, { k: 'toWh', l: 'انبار مقصد (جابه‌جایی)', t: 'select', o: DB.warehouses.filter(w => w.id !== a.whId).map(w => [w.id, w.name]) }, { k: 'person', l: 'تحویل‌گیرنده / امانت‌گیرنده' }, { k: 'note', l: 'توضیح', t: 'textarea' }], { date: todayISO() }, v => run('createMovement', a.id, v), { done: 'ثبت شد؛ خروج، امانت و جابه‌جایی پس از تأیید مسئول مجاز اعمال می‌شود.', reopen: () => showAsset(a.id) }); };
+A.assetHealth = d => { const a = DB.assets.find(x => x.id === d.id); actModal('وضعیت سلامت کالا', v => run('assetHealth', a.id, v.health, v.note), { fields: [{ k: 'health', l: 'وضعیت', t: 'select', o: ASSET_HEALTH, blank: false }], init: { health: a.health }, reopen: () => showAsset(a.id) }); };
+A.moveDo = d => { const m = DB.movements.find(x => x.id === d.id); actModal(+d.ok ? 'تأیید ' + m.type : 'رد ' + m.type, v => run('decideMovement', m.id, !!+d.ok, v.note), { noteReq: !+d.ok }); };
 function showMove(id) { location.hash = 'assets'; vs('assets').tab = 'moves'; route(); }
 
 /* ---------- امور مالی ---------- */
@@ -238,10 +240,10 @@ PAGES.finance = () => {
   return `${head('امور مالی', full ? 'زیر نظر مدیریت مستقل امور مالی؛ ثبت اسناد، بودجه، تعهدات و کنترل پرداخت‌ها' : 'نمای محدود واحد شما؛ جزئیات مالی سایر واحدها نمایش داده نمی‌شود', '')}${tabs('fin', T, v.tab)}${body}`;
 };
 A.pay = d => showPay(d.id);
-A.newPay = () => formModal('درخواست پرداخت', [{ k: 'title', l: 'بابت', req: true, full: true }, { k: 'amount', l: 'مبلغ (ریال)', t: 'number', req: true }, { k: 'payee', l: 'دریافت‌کننده', req: true }, { k: 'desc', l: 'توضیح', t: 'textarea' }, { k: 'files', l: 'فاکتور / مستندات', t: 'file' }], {}, v => createPay(v), { done: 'درخواست پرداخت ثبت و برای تأیید مدیر واحد ارسال شد.', reopen: p => showPay(p.id) });
-A.newTx = () => formModal('ثبت سند مالی', [{ k: 'kind', l: 'نوع', t: 'select', o: TX_KINDS, req: true }, { k: 'amount', l: 'مبلغ (ریال)', t: 'number', req: true }, { k: 'unitId', l: 'واحد', t: 'select', o: unitOpts(), blank: 'عمومی مجتمع' }, { k: 'date', l: 'تاریخ', t: 'date', req: true }, { k: 'docNo', l: 'شماره سند' }, { k: 'desc', l: 'شرح', req: true, full: true }, { k: 'files', l: 'مستندات', t: 'file' }], { date: todayISO() }, v => { if (v.kind === 'هزینه') return fail('هزینه فقط از مسیر «درخواست پرداخت» و پس از طی مراحل تأیید ثبت می‌شود.'); return addTx(v); });
-A.newCom = () => formModal('ثبت تعهد مالی', [{ k: 'title', l: 'عنوان', req: true, full: true }, { k: 'unitId', l: 'واحد', t: 'select', o: unitOpts(), req: true }, { k: 'amount', l: 'مبلغ (ریال)', t: 'number', req: true }, { k: 'due', l: 'سررسید', t: 'date', req: true }], {}, v => { const c = { id: uid(), ...v, unitId: +v.unitId, status: 'جاری' }; DB.commitments.push(c); audit('ثبت تعهد', 'commitment', c.id, c.title); return c; });
-A.budget = d => { if (!(isImam() || isMgr(U_FIN))) return; const b = DB.budgets.find(x => x.unitId === +d.id && x.year === jYearNow()); formModal('بودجه ' + unitShort(b.unitId), [{ k: 'amount', l: 'بودجه مصوب (ریال)', t: 'number', req: true }], { amount: b.amount }, v => { audit('اصلاح بودجه', 'budget', b.unitId, `${money(b.amount)} ← ${money(v.amount)}`); b.amount = v.amount; return b; }); };
+A.newPay = () => formModal('درخواست پرداخت', [{ k: 'title', l: 'بابت', req: true, full: true }, { k: 'amount', l: 'مبلغ (ریال)', t: 'number', req: true }, { k: 'payee', l: 'دریافت‌کننده', req: true }, { k: 'desc', l: 'توضیح', t: 'textarea' }, { k: 'files', l: 'فاکتور / مستندات', t: 'file' }], {}, v => run('createPay', v), { done: 'درخواست پرداخت ثبت و برای تأیید مدیر واحد ارسال شد.', reopen: p => showPay(p.id) });
+A.newTx = () => formModal('ثبت سند مالی', [{ k: 'kind', l: 'نوع', t: 'select', o: TX_KINDS, req: true }, { k: 'amount', l: 'مبلغ (ریال)', t: 'number', req: true }, { k: 'unitId', l: 'واحد', t: 'select', o: unitOpts(), blank: 'عمومی مجتمع' }, { k: 'date', l: 'تاریخ', t: 'date', req: true }, { k: 'docNo', l: 'شماره سند' }, { k: 'desc', l: 'شرح', req: true, full: true }, { k: 'files', l: 'مستندات', t: 'file' }], { date: todayISO() }, v => run('addTx', v));
+A.newCom = () => formModal('ثبت تعهد مالی', [{ k: 'title', l: 'عنوان', req: true, full: true }, { k: 'unitId', l: 'واحد', t: 'select', o: unitOpts(), req: true }, { k: 'amount', l: 'مبلغ (ریال)', t: 'number', req: true }, { k: 'due', l: 'سررسید', t: 'date', req: true }], {}, v => run('addCommitment', v));
+A.budget = d => { if (!(isImam() || isMgr(U_FIN))) return; const b = DB.budgets.find(x => x.unitId === +d.id && x.year === jYearNow()); formModal('بودجه ' + unitShort(b.unitId), [{ k: 'amount', l: 'بودجه مصوب (ریال)', t: 'number', req: true }], { amount: b.amount }, v => run('setBudget', b.unitId, v.amount)); };
 function showPay(id) {
   const p = DB.payreqs.find(x => x.id === id);
   if (!p || !canSeePay(p)) return toast('دسترسی به این درخواست مالی مجاز نیست.');
@@ -254,7 +256,7 @@ function showPay(id) {
     foot: payCanAct(p) ? btn(nextPayStage(p) === 4 ? 'ثبت پرداخت' : 'تأیید: ' + PAY_ST[nextPayStage(p)], 'payDo', { id, ok: 1 }) + btn('رد', 'payDo', { id, ok: 0 }, 'danger') : ''
   });
 }
-A.payDo = d => { const p = DB.payreqs.find(x => x.id === d.id); const s = nextPayStage(p); actModal(+d.ok ? PAY_ST[s] : 'رد درخواست پرداخت', v => payAct(p, !!+d.ok, v.note, v.doc), { fields: +d.ok && s === 4 ? [{ k: 'doc', l: 'شماره سند پرداخت', req: true }] : [], noteReq: !+d.ok, reopen: () => showPay(p.id) }); };
+A.payDo = d => { const p = DB.payreqs.find(x => x.id === d.id); const s = nextPayStage(p); actModal(+d.ok ? PAY_ST[s] : 'رد درخواست پرداخت', v => run('payAct', p.id, !!+d.ok, v.note, v.doc), { fields: +d.ok && s === 4 ? [{ k: 'doc', l: 'شماره سند پرداخت', req: true }] : [], noteReq: !+d.ok, reopen: () => showPay(p.id) }); };
 
 /* ---------- منابع انسانی و امور اداری ---------- */
 PAGES.hr = () => {
@@ -297,7 +299,7 @@ function showPerson(id) {
   });
 }
 A.leave = d => showLeave(d.id);
-A.newLeave = () => formModal('درخواست مرخصی', [{ k: 'type', l: 'نوع مرخصی', t: 'select', o: LEAVE_TYPES, blank: false }, { k: 'from', l: 'از تاریخ', t: 'date', req: true }, { k: 'to', l: 'تا تاریخ', t: 'date', req: true }, { k: 'reason', l: 'توضیح', t: 'textarea' }], { from: addDays(todayISO(), 1), to: addDays(todayISO(), 1) }, v => createLeave(v), { done: 'درخواست مرخصی برای تأیید ارسال شد.' });
+A.newLeave = () => formModal('درخواست مرخصی', [{ k: 'type', l: 'نوع مرخصی', t: 'select', o: LEAVE_TYPES, blank: false }, { k: 'from', l: 'از تاریخ', t: 'date', req: true }, { k: 'to', l: 'تا تاریخ', t: 'date', req: true }, { k: 'reason', l: 'توضیح', t: 'textarea' }], { from: addDays(todayISO(), 1), to: addDays(todayISO(), 1) }, v => run('createLeave', v), { done: 'درخواست مرخصی برای تأیید ارسال شد.' });
 function showLeave(id) {
   const l = DB.leaves.find(x => x.id === id); if (!l) return;
   modal({
@@ -306,14 +308,14 @@ function showLeave(id) {
     foot: leaveCanAct(l) ? btn('تأیید', 'leaveDo', { id, ok: 1 }) + btn('رد', 'leaveDo', { id, ok: 0 }, 'danger') : ''
   });
 }
-A.leaveDo = d => { const l = DB.leaves.find(x => x.id === d.id); actModal(+d.ok ? 'تأیید مرخصی' : 'رد مرخصی', v => leaveAct(l, !!+d.ok, v.note), { noteReq: !+d.ok, reopen: () => showLeave(l.id) }); };
+A.leaveDo = d => { const l = DB.leaves.find(x => x.id === d.id); actModal(+d.ok ? 'تأیید مرخصی' : 'رد مرخصی', v => run('leaveAct', l.id, !!+d.ok, v.note), { noteReq: !+d.ok, reopen: () => showLeave(l.id) }); };
 A.newHR = d => {
   const F = {
     missions: [{ k: 'uid', l: 'کارمند', t: 'select', o: DB.users.filter(u => u.active).map(u => [u.id, u.name + ' — ' + posLabel(u.posId)]), req: true }, { k: 'dest', l: 'مقصد', req: true }, { k: 'title', l: 'موضوع مأموریت', req: true }, { k: 'from', l: 'از', t: 'date', req: true }, { k: 'to', l: 'تا', t: 'date', req: true }],
     decrees: [{ k: 'uid', l: 'کارمند', t: 'select', o: DB.users.filter(u => u.active).map(u => [u.id, u.name]), req: true }, { k: 'pos', l: 'سمت سازمانی', t: 'select', o: allPosOpts(), req: true }, { k: 'title', l: 'عنوان حکم / ابلاغ', req: true }, { k: 'no', l: 'شماره', req: true }, { k: 'date', l: 'تاریخ', t: 'date', req: true }],
     contracts: [{ k: 'uid', l: 'کارمند', t: 'select', o: DB.users.map(u => [u.id, u.name]), req: true }, { k: 'type', l: 'نوع قرارداد', t: 'select', o: ['قرارداد کار معین', 'قرارداد کار موقت', 'قرارداد پاره‌وقت', 'همکاری داوطلبانه'], req: true }, { k: 'title', l: 'عنوان شغل', req: true }, { k: 'from', l: 'شروع', t: 'date', req: true }, { k: 'to', l: 'پایان', t: 'date', req: true }]
   }[d.k];
-  formModal('ثبت', F, { date: todayISO(), from: todayISO(), to: addDays(todayISO(), 1) }, v => addHR(d.k, { ...v, status: 'تأییدشده' }));
+  formModal('ثبت', F, { date: todayISO(), from: todayISO(), to: addDays(todayISO(), 1) }, v => run('addHR', d.k, v));
 };
 
 /* بازکننده‌های عمومی برای جست‌وجو و صف کارها */

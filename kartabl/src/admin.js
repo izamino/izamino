@@ -1,195 +1,6 @@
 /* =====================================================================
-   پنل مدیریت سامانه (مدیر فناوری اطلاعات)، تنظیمات، ساعت زنده و حساب کاربری
+   رابط پنل مدیریت سامانه، ساعت زنده و حساب کاربری
    ===================================================================== */
-const DEFAULTS = JSON.parse(JSON.stringify({ units: UNITS, services: SERVICES, spaces: SPACES, letterCats: LETTER_CATS, leaveTypes: LEAVE_TYPES }));
-
-/* ---------- مهاجرت داده و اعمال تنظیمات ---------- */
-function migrate(D) {
-  D.logins = D.logins || []; D.sessions = D.sessions || []; D.signups = D.signups || [];
-  const s = D.settings;
-  const def = {
-    loginTitle: 'کارتابل اداری', subtitle: 'مجتمع مسجدمحور', loginText: 'سامانه یکپارچه مکاتبات، دستورات، ارجاع وظایف، درخواست‌ها، رزروها، اموال، امور مالی و منابع انسانی ۱۷ مدیریت مستقل زیر نظر امام جماعت.',
-    announcement: { on: false, text: '', tone: 'info' }, maintenance: false, showDemo: true,
-    theme: { palette: 'zomorrod', scale: 14 }, security: { minLen: 6, maxFails: 5, lockMin: 15, sessionMin: 60 },
-    clock: { city: 'تهران', lat: 35.6892, lng: 51.389, prayer: true }, rolePerms: {}, units: {}
-  };
-  for (const k in def) if (s[k] === undefined) s[k] = def[k];
-  for (const k in def.security) if (s.security[k] === undefined) s.security[k] = def.security[k];
-  return D;
-}
-function applySettings() {
-  const s = DB.settings;
-  UNITS.forEach(u => { const d = DEFAULTS.units.find(x => x.id === u.id); Object.assign(u, d, s.units[u.id] || {}); });
-  Object.keys(SERVICES).forEach(k => { SERVICES[k] = (s.services && s.services[k]) || DEFAULTS.services[k].slice(); });
-  SPACES.splice(0, SPACES.length, ...(s.spaces || DEFAULTS.spaces).map(x => ({ ...x })));
-  LETTER_CATS.splice(0, LETTER_CATS.length, ...(s.letterCats || DEFAULTS.letterCats));
-  LEAVE_TYPES.splice(0, LEAVE_TYPES.length, ...(s.leaveTypes || DEFAULTS.leaveTypes));
-  applyTheme();
-}
-const PALETTES = {
-  zomorrod: { name: 'زمردی', l: ['#0f4b3a', '#0f4b3a', '#0d3a2e', '#12493a', '#2f8f88', '#e1f1ef', '#8fd9c6'], d: ['#6cc9ad', '#3c9e82', '#07110e', '#10241e', '#62c3ba', '#163532', '#6cc9ad'] },
-  firouzeh: { name: 'فیروزه‌ای', l: ['#0b5e66', '#0b6670', '#0a3f45', '#0f525a', '#1f9aa3', '#dff2f3', '#8fe0e4'], d: ['#6fd0d6', '#3aa9b1', '#061214', '#0d2628', '#5ccad2', '#12333a', '#6fd0d6'] },
-  lajvard: { name: 'لاجوردی', l: ['#1d3f7a', '#1f4688', '#142b55', '#1c3a6e', '#3a78c2', '#e3ecf8', '#a9c6f2'], d: ['#8fb4ee', '#5585cf', '#070d18', '#101d33', '#7aa6e8', '#15243d', '#8fb4ee'] },
-  kahroba: { name: 'کهربایی', l: ['#6b4a12', '#7a5414', '#3d2c10', '#523b16', '#b07d2a', '#f6ecd9', '#f0cf8e'], d: ['#e7c27a', '#c49a4a', '#120d05', '#251b0c', '#d9b067', '#33270f', '#e7c27a'] },
-  anar: { name: 'اناری', l: ['#7a1f2b', '#86222f', '#4a131b', '#621a24', '#b8434f', '#f8e4e6', '#f2a7af'], d: ['#ef9aa3', '#c55a66', '#14070a', '#2a1014', '#e3808b', '#3a171c', '#ef9aa3'] }
-};
-function applyTheme() {
-  const t = DB.settings.theme; const p = PALETTES[t.palette] || PALETTES.zomorrod;
-  const v = a => `--accent:${a[0]};--btn:${a[1]};--side:${a[2]};--side-2:${a[3]};--teal:${a[4]};--teal-soft:${a[5]};--glow:${a[6]};`;
-  let el = document.getElementById('theme-vars');
-  if (!el) { el = document.createElement('style'); el.id = 'theme-vars'; document.head.appendChild(el); }
-  el.textContent = `:root{${v(p.l)}font-size:${t.scale}px}
-  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){${v(p.d)}}}
-  :root[data-theme="dark"]{${v(p.d)}}`;
-}
-
-/* ---------- کاربران، رمزها و عضویت ---------- */
-const adminPositions = () => DB.positions.filter(p => p.role !== 'imam' && permOf(p, 'admin.signups')).map(p => p.id);
-const adminAlerts = () => (can('admin.signups') ? DB.signups.filter(x => x.status === 'در انتظار بررسی').length : 0) + (can('admin.users') ? lockedUsers().length : 0);
-const lockedUsers = () => DB.users.filter(u => !u.deleted && u.lockedUntil && new Date(u.lockedUntil) > new Date());
-const USERNAME_RE = /^[a-z0-9._-]{3,24}$/i;
-function setPassword(u, pass, mustChange, self) {
-  if (!self && !can('admin.passwords')) return fail('تعیین رمز کاربران فقط برای مدیر سامانه مجاز است.');
-  pass = en(pass || '');
-  if (pass.length < DB.settings.security.minLen) return fail(`رمز عبور باید دست‌کم ${fa(DB.settings.security.minLen)} نویسه باشد.`);
-  if (self && hash('shabab:' + pass) === u.pass) return fail('رمز جدید باید با رمز فعلی متفاوت باشد.');
-  u.pass = hash('shabab:' + pass); u.mustChange = !!mustChange; u.passChanged = stamp(); u.fails = 0; u.lockedUntil = '';
-  audit(self ? 'تغییر رمز توسط کاربر' : 'تعیین رمز توسط مدیر', 'user', u.id, u.username + (mustChange ? ' · تغییر در ورود بعدی الزامی' : ''));
-  return u;
-}
-const genPass = () => { const c = 'abcdefghjkmnpqrstuvwxyz23456789'; let s = ''; for (let i = 0; i < 8; i++) s += c[Math.floor(Math.random() * c.length)]; return s; };
-function createUser2(v) {
-  if (!can('admin.users')) return fail('افزودن کاربر مجاز نیست.');
-  if (!v.name) return fail('نام کاربر را بنویسید.');
-  if (!USERNAME_RE.test(v.username || '')) return fail('نام کاربری باید ۳ تا ۲۴ نویسه انگلیسی، عدد، نقطه یا خط تیره باشد.');
-  if (DB.users.some(u => u.username === v.username && !u.deleted)) return fail('این نام کاربری قبلاً ثبت شده است.');
-  if (en(v.pass || '').length < DB.settings.security.minLen) return fail(`رمز عبور باید دست‌کم ${fa(DB.settings.security.minLen)} نویسه باشد.`);
-  const u = { id: 'u' + uid(), name: v.name, username: v.username, pass: hash('shabab:' + en(v.pass)), posId: '', active: true, phone: en(v.phone || ''), nid: en(v.nid || ''), hired: v.hired || todayISO(), mustChange: !!v.mustChange, created: stamp() };
-  DB.users.push(u);
-  audit('ایجاد کاربر', 'user', u.id, u.username);
-  if (v.posId) { const r = assignHolder(v.posId, u.id); if (r && r.error) return r; }
-  return u;
-}
-function updateUser(u, v) {
-  if (!can('admin.users')) return fail('ویرایش کاربر مجاز نیست.');
-  if (!v.name) return fail('نام را بنویسید.');
-  if (!USERNAME_RE.test(v.username)) return fail('نام کاربری معتبر نیست.');
-  if (DB.users.some(x => x.id !== u.id && x.username === v.username && !x.deleted)) return fail('این نام کاربری متعلق به کاربر دیگری است.');
-  const ch = ['name', 'username', 'phone', 'nid'].filter(k => String(u[k] || '') !== String(v[k] || ''));
-  Object.assign(u, { name: v.name, username: v.username, phone: en(v.phone || ''), nid: en(v.nid || '') });
-  if (v.posId !== (u.posId || '')) {
-    if (!v.posId) { const h = DB.posHistory.find(x => x.userId === u.id && !x.to); if (h) h.to = todayISO(); u.posId = ''; audit('برداشتن جایگاه کاربر', 'user', u.id, u.username); }
-    else { const r = assignHolder(v.posId, u.id); if (r && r.error) return r; }
-  }
-  if (ch.length) audit('ویرایش کاربر', 'user', u.id, u.username + ' · ' + ch.join('، '));
-  return u;
-}
-function deleteUser(u) {
-  if (!can('admin.users')) return fail('حذف کاربر مجاز نیست.');
-  if (u.id === ME.user.id) return fail('حساب خودتان را نمی‌توانید حذف کنید.');
-  const h = DB.posHistory.find(x => x.userId === u.id && !x.to); if (h) h.to = todayISO();
-  u.deleted = true; u.active = false; u.posId = '';
-  DB.sessions.filter(s => s.uid === u.id && s.active).forEach(s => { s.active = false; s.end = stamp(); });
-  audit('حذف کاربر', 'user', u.id, u.username + ' (سوابق اقدامات حفظ شد)');
-  return u;
-}
-function setPosPerm(pos, k, val) {
-  if (!can('admin.perms')) return fail('تعیین دسترسی مجاز نیست.');
-  if (pos.id === ME.pos.id && k.startsWith('admin.') && val === 'deny') return fail('برای جلوگیری از قفل‌شدن سامانه، اختیار مدیریتی جایگاه خودتان را نمی‌توانید بگیرید.');
-  pos.perms = pos.perms || {};
-  if (!val) delete pos.perms[k]; else pos.perms[k] = val;
-  audit(val === 'allow' ? 'اعطای دسترسی' : val === 'deny' ? 'سلب دسترسی' : 'بازگشت دسترسی به پیش‌فرض', 'perm', pos.id, posLabel(pos.id) + ' · ' + permLabel(k));
-  notify([pos.id], 'decision', `سطح دسترسی «${permLabel(k)}» برای جایگاه شما ${val === 'allow' ? 'اعطا' : val === 'deny' ? 'سلب' : 'به حالت پیش‌فرض بازگردانده'} شد.`, 'profile');
-  return pos;
-}
-function setRolePerm(role, k, val) {
-  if (!can('admin.perms')) return fail('تعیین دسترسی مجاز نیست.');
-  const rp = DB.settings.rolePerms; rp[role] = rp[role] || {};
-  if (!val) delete rp[role][k]; else rp[role][k] = val;
-  audit('تغییر ماتریس دسترسی نقش', 'perm', role, ROLES[role] + ' · ' + permLabel(k) + ' · ' + (val || 'پیش‌فرض'));
-  return rp;
-}
-function createSignup(v) {
-  if (!v.name || !v.username || !v.phone || !v.unitId || !v.title || !v.pass) return fail('همه بخش‌های ستاره‌دار را تکمیل کنید.');
-  if (!USERNAME_RE.test(v.username)) return fail('نام کاربری باید ۳ تا ۲۴ نویسه انگلیسی، عدد، نقطه یا خط تیره باشد.');
-  if (DB.users.some(u => u.username === v.username && !u.deleted) || DB.signups.some(s => s.username === v.username && s.status === 'در انتظار بررسی')) return fail('این نام کاربری قبلاً گرفته شده است.');
-  if (!/^0?9\d{9}$/.test(en(v.phone).replace(/\D/g, ''))) return fail('شماره همراه معتبر نیست.');
-  if (en(v.pass).length < DB.settings.security.minLen) return fail(`رمز عبور باید دست‌کم ${fa(DB.settings.security.minLen)} نویسه باشد.`);
-  DB.seq.signup = (DB.seq.signup || 0) + 1;
-  const s = { id: uid(), no: 'S-' + pad(DB.seq.signup, 4), name: v.name, username: v.username, phone: en(v.phone), unitId: +v.unitId, title: v.title, note: v.note || '', passHash: hash('shabab:' + en(v.pass)), status: 'در انتظار بررسی', created: stamp() };
-  DB.signups.push(s);
-  audit('درخواست عضویت', 'signup', s.id, s.username);
-  notify(adminPositions(), 'request', `درخواست عضویت جدید: ${s.name} (${unitShort(s.unitId)})`, 'admin', s.no);
-  return s;
-}
-function decideSignup(sg, ok, v) {
-  if (!can('admin.signups')) return fail('بررسی درخواست عضویت مجاز نیست.');
-  if (sg.status !== 'در انتظار بررسی') return fail('این درخواست قبلاً بررسی شده است.');
-  if (!ok) { if (!v.note) return fail('علت رد را بنویسید.'); sg.status = 'ردشده'; sg.reason = v.note; audit('رد درخواست عضویت', 'signup', sg.id, sg.username); return sg; }
-  let posId = v.posId;
-  if (!posId) return fail('جایگاه سازمانی را انتخاب کنید.');
-  if (posId === 'new') { const p = addPosition({ unitId: sg.unitId, title: sg.title }); if (p.error) return p; posId = p.id; }
-  if (DB.users.some(u => u.username === sg.username && !u.deleted)) return fail('این نام کاربری در این فاصله توسط کاربر دیگری گرفته شده است.');
-  const u = { id: 'u' + uid(), name: sg.name, username: sg.username, pass: sg.passHash, posId: '', active: true, phone: sg.phone, hired: todayISO(), created: stamp() };
-  DB.users.push(u);
-  const r = assignHolder(posId, u.id); if (r && r.error) return r;
-  sg.status = 'تأییدشده'; sg.userId = u.id;
-  audit('تأیید درخواست عضویت', 'signup', sg.id, sg.username + ' ← ' + posLabel(posId));
-  return sg;
-}
-
-/* ---------- تأیید و رد مدیریتی همه موارد معلق ---------- */
-function overrideAs(posId, fn) {
-  const real = ME;
-  ME = { user: real.user, pos: posById(posId), override: true, realPos: real.pos.id };
-  try { return fn(); } finally { ME = real; }
-}
-function pendingAll() {
-  const out = [];
-  const age = t => daysBetween(isoOfStamp(t), todayISO());
-  DB.requests.filter(r => r.status === 'جاری' && r.stage === 3).forEach(r => out.push({ k: 'req', id: r.id, no: r.no, type: 'درخواست', title: r.title, unit: r.toUnit, wait: r.needsImam ? 'P0' : unitPos(r.toUnit, 'manager').id, age: age(r.created),
-    ok: n => reqAct(r, 'approve', n), no_: n => reqAct(r, 'reject', n) }));
-  DB.orders.filter(o => o.status === 'منتظر تأیید').forEach(o => out.push({ k: 'order', id: o.id, no: o.no, type: 'دستور', title: o.title, unit: o.units[0], wait: 'P0', age: age(o.created), ok: n => orderDecide(o, true, n), no_: n => orderDecide(o, false, n) }));
-  DB.payreqs.filter(p => p.status === 'جاری').forEach(p => { const s = nextPayStage(p); out.push({ k: 'pay', id: p.id, no: p.no, type: 'پرداخت · ' + PAY_ST[s], title: p.title + ' — ' + money(p.amount), unit: p.unitId, wait: s === 1 ? unitPos(p.unitId, 'manager').id : s === 2 ? unitPos(U_FIN, 'office').id : s === 3 ? 'P0' : unitPos(U_FIN, 'manager').id, age: age(p.created), needDoc: s === 4, ok: (n, doc) => payAct(p, true, n, doc), no_: n => payAct(p, false, n) }); });
-  DB.reservations.filter(r => r.status === 'در انتظار تأیید').forEach(r => out.push({ k: 'res', id: r.id, no: r.no, type: 'رزرو', title: spaceOf(r.space).name + ' — ' + r.kind + ' (' + jd(r.date) + ')', unit: spaceOf(r.space).unit, wait: unitPos(spaceOf(r.space).unit, 'manager').id, age: age(r.created), ok: n => resDecide(r, 'تأییدشده', n), no_: n => resDecide(r, 'ردشده', n) }));
-  DB.leaves.filter(l => l.status.startsWith('در انتظار')).forEach(l => out.push({ k: 'leave', id: l.id, no: l.no, type: 'مرخصی', title: (userById(l.uid) || {}).name + ' — ' + l.type, unit: l.unitId, wait: l.status === 'در انتظار تأیید مدیر' ? (posById(l.pos).role === 'manager' ? 'P0' : unitPos(l.unitId, 'manager').id) : unitPos(U_ADMIN, 'manager').id, age: age(l.created), ok: n => leaveAct(l, true, n), no_: n => leaveAct(l, false, n) }));
-  DB.movements.filter(m => m.status === 'در انتظار تأیید').forEach(m => { const a = DB.assets.find(x => x.id === m.assetId); out.push({ k: 'asset', id: a.id, no: m.no, type: 'گردش کالا · ' + m.type, title: a.name + ' (' + a.code + ')', unit: a.unitId, wait: unitPos(a.unitId, 'manager').id, age: age(m.created), ok: n => decideMovement(m, true, n), no_: n => decideMovement(m, false, n) }); });
-  DB.tasks.filter(t => t.status === 'منتظر تأیید').forEach(t => out.push({ k: 'task', id: t.id, no: t.no, type: 'وظیفه', title: t.title, unit: t.unitId, wait: t.assignee === unitPos(t.unitId, 'manager').id ? t.assignee : unitPos(t.unitId, 'manager').id, age: age(t.created), ok: n => taskAct(t, 'approve', n), no_: n => taskAct(t, 'return', n) }));
-  return out.sort((a, b) => b.age - a.age);
-}
-
-/* ---------- اوقات شرعی (روش ژئوفیزیک دانشگاه تهران) ---------- */
-function prayerTimes(iso, lat, lng, tz = 3.5) {
-  const rad = d => (d * Math.PI) / 180, deg = r => (r * 180) / Math.PI;
-  const fix = (a, b) => a - b * Math.floor(a / b);
-  let [y, m, d] = iso.split('-').map(Number);
-  if (m <= 2) { y--; m += 12; }
-  const A = Math.floor(y / 100), B = 2 - A + Math.floor(A / 4);
-  const jdate = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524.5 - lng / (15 * 24);
-  const sun = t => {
-    const D = jdate + t - 2451545, g = fix(357.529 + 0.98560028 * D, 360), q = fix(280.459 + 0.98564736 * D, 360);
-    const L = fix(q + 1.915 * Math.sin(rad(g)) + 0.02 * Math.sin(rad(2 * g)), 360), e = 23.439 - 0.00000036 * D;
-    const RA = deg(Math.atan2(Math.cos(rad(e)) * Math.sin(rad(L)), Math.cos(rad(L)))) / 15;
-    return { decl: deg(Math.asin(Math.sin(rad(e)) * Math.sin(rad(L)))), eqt: q / 15 - fix(RA, 24) };
-  };
-  const mid = t => fix(12 - sun(t).eqt, 24);
-  const angT = (ang, t, ccw) => { const dc = sun(t).decl, n = mid(t); const T = deg(Math.acos((-Math.sin(rad(ang)) - Math.sin(rad(dc)) * Math.sin(rad(lat))) / (Math.cos(rad(dc)) * Math.cos(rad(lat))))) / 15; return n + (ccw ? -T : T); };
-  const adj = h => h + tz - lng / 15;
-  const t = { fajr: adj(angT(17.7, 5 / 24, true)), sunrise: adj(angT(0.833, 6 / 24, true)), dhuhr: adj(mid(0.5)), sunset: adj(angT(0.833, 0.75)), maghrib: adj(angT(4.5, 0.75)), isha: adj(angT(14, 0.75)) };
-  t.midnight = t.sunset + (t.fajr + 24 - t.sunset) / 2;
-  return t;
-}
-const PRAYER_NAMES = [['fajr', 'اذان صبح'], ['sunrise', 'طلوع آفتاب'], ['dhuhr', 'اذان ظهر'], ['sunset', 'غروب آفتاب'], ['maghrib', 'اذان مغرب'], ['midnight', 'نیمه‌شب شرعی']];
-const hToHM = h => { h = ((h % 24) + 24) % 24; let H = Math.floor(h), M = Math.round((h - H) * 60); if (M === 60) { H = (H + 1) % 24; M = 0; } return pad(H) + ':' + pad(M); };
-const hmToMin = s => { const [a, b] = s.split(':').map(Number); return a * 60 + b; };
-function todayPrayers() {
-  const c = DB.settings.clock;
-  const t = prayerTimes(todayISO(), +c.lat, +c.lng);
-  return PRAYER_NAMES.map(([k, l]) => ({ k, l, t: hToHM(t[k]) }));
-}
-const hijri = () => { try { return new Intl.DateTimeFormat('fa-IR-u-ca-islamic-umalqura', { timeZone: TZ, day: 'numeric', month: 'long', year: 'numeric' }).format(new Date()); } catch (e) { return ''; } };
-const greg = () => new Intl.DateTimeFormat('fa-IR-u-ca-gregory', { timeZone: TZ, day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
-
 function heroHTML() {
   const a = DB.settings.announcement;
   const pr = DB.settings.clock.prayer ? todayPrayers() : [];
@@ -207,7 +18,7 @@ function heroHTML() {
       <div class="dates"><b>${jdLong(todayISO())}</b><span>${hijri()}</span><span>${greg()}</span></div>
       <div class="tz">به وقت رسمی ایران · ${esc(DB.settings.clock.city)}</div>
     </div>
-    ${pr.length ? `<div class="hero-pray"><div class="ph">اوقات شرعی ${esc(DB.settings.clock.city)}</div>${pr.map(p => `<div class="pt" data-pt="${p.t}"><span>${p.l}</span><b>${fa(p.t)}</b></div>`).join('')}<div class="next" id="hnext"></div></div>` : ''}
+    ${pr.length ? `<div class="hero-pray"><div class="ph">اوقات شرعی ${esc(DB.settings.clock.city)}</div>${pr.map(p => `<div class="pt" data-pt="${p.t}"><span>${p.l}</span><b>${fa(p.t)}</b></div>`).join('')}<div class="next" id="hnext"></div><div class="method">روش ژئوفیزیک دانشگاه تهران</div></div>` : ''}
   </section>`;
 }
 function liveWidgets() {
@@ -313,7 +124,7 @@ const ADMIN_VIEWS = {
     let g = '';
     const rows = PERMS.map(p => { const sep = p[2] !== g; g = p[2]; return `${sep ? `<tr class="grp"><td colspan="${Object.keys(ROLES).length + 1}">${esc(p[2])}</td></tr>` : ''}<tr><td>${esc(p[1])}</td>${Object.keys(ROLES).map(r => `<td>${cell(r, p[0])}</td>`).join('')}</tr>`; }).join('');
     const over = DB.positions.filter(p => Object.keys(p.perms || {}).length);
-    return `${card('ماتریس دسترسی نقش‌ها', `<div class="notice">هر تغییر فوراً اعمال و در رویدادهای سیستمی ثبت می‌شود. «پیش‌فرض» یعنی رفتار استاندارد سامانه (مثلاً «امور مالی» به‌طور پیش‌فرض فقط برای مدیریت امور مالی باز است). برای یک جایگاه خاص از «استثنای جایگاه» استفاده کنید.</div><div class="tbl-wrap"><table class="matrix"><thead><tr><th>مجوز</th>${Object.values(ROLES).map(r => `<th>${r}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`, '', { flush: false })}
+    return `${card('ماتریس دسترسی نقش‌ها', `<div class="notice">هر تغییر فوراً اعمال و در رویدادهای سیستمی ثبت می‌شود. «پیش‌فرض» یعنی رفتار استاندارد سامانه (مثلاً «امور مالی» به‌طور پیش‌فرض فقط برای مدیریت امور مالی باز است). برای یک جایگاه خاص از «استثنای جایگاه» استفاده کنید.</div><div class="tbl-wrap matrix-wrap" tabindex="0" aria-label="ماتریس دسترسی؛ برای دیدن همه نقش‌ها افقی پیمایش کنید"><table class="matrix"><thead><tr><th>مجوز</th>${Object.values(ROLES).map(r => `<th>${r}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`, '', { flush: false })}
     ${card('استثنای دسترسی جایگاه‌ها', table([['جایگاه', p => `<b>${esc(posLabel(p.id))}</b><span class="sub">${esc((holderOf(p.id) || {}).name || 'بدون متصدی')}</span>`], ['استثناها', p => Object.entries(p.perms).map(([k, v]) => pill((v === 'allow' ? '+ ' : '− ') + permLabel(k), v === 'allow' ? 'ok' : 'bad')).join(' ')], ['', p => btn('ویرایش', 'admPosPerm', { id: p.id }, 'sm ghost')]], over, { empty: 'هنوز برای هیچ جایگاهی استثنا تعریف نشده است.' }), `<select id="pickpos" aria-label="انتخاب جایگاه"><option value="">انتخاب جایگاه برای تعیین دسترسی…</option>${allPosOpts().map(gp => `<optgroup label="${esc(gp.group)}">${gp.items.map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('')}</optgroup>`).join('')}</select>`, { flush: true })}`;
   },
   approvals() {
@@ -350,42 +161,53 @@ const ADMIN_VIEWS = {
     ${card('اطلاعیه عمومی داشبورد', `<form class="form" id="annf">${fieldHTML({ k: 'on', l: 'نمایش', t: 'check', cl: 'اطلاعیه برای همه کاربران نمایش داده شود' }, s.announcement.on)}${fieldHTML({ k: 'tone', l: 'نوع', t: 'select', o: [['info', 'اطلاع‌رسانی'], ['warn', 'هشدار'], ['ok', 'خبر خوب']], blank: false }, s.announcement.tone)}${fieldHTML({ k: 'text', l: 'متن اطلاعیه', t: 'textarea' }, s.announcement.text)}</form><div class="row mt">${btn('انتشار اطلاعیه', 'admSaveAnn', {}, '', 'megaphone')}</div>`)}
     ${card('رنگ‌بندی و اندازه', `<div class="swatches">${Object.entries(PALETTES).map(([k, p]) => `<button class="sw ${s.theme.palette === k ? 'on' : ''}" data-a="admPal" data-v="${k}"><i style="background:linear-gradient(135deg, ${p.l[2]} 0 50%, ${p.l[4]} 50% 100%)"></i><span>${p.name}</span></button>`).join('')}</div>
       <div class="row mt"><span class="muted">اندازه متن:</span>${[13, 14, 15, 16].map(n => btn(fa(n), 'admScale', { v: n }, 'sm ' + (s.theme.scale === n ? '' : 'ghost'))).join('')}</div><div class="hint mt">تغییرات فوراً برای همه کاربران اعمال می‌شود.</div>`)}
-    ${card('ساعت و اوقات شرعی', `<form class="form" id="clkf">${fieldHTML({ k: 'city', l: 'نام شهر' }, s.clock.city)}${fieldHTML({ k: 'prayer', l: 'اوقات شرعی', t: 'check', cl: 'نمایش اوقات شرعی در داشبورد' }, s.clock.prayer)}${fieldHTML({ k: 'lat', l: 'عرض جغرافیایی', hint: 'تهران: ۳۵٫۶۸۹۲' }, s.clock.lat)}${fieldHTML({ k: 'lng', l: 'طول جغرافیایی', hint: 'تهران: ۵۱٫۳۸۹۰' }, s.clock.lng)}</form><div class="row mt">${btn('ذخیره', 'admSaveClock', {}, '', 'clock')}</div><div class="hint mt">محاسبه به روش مؤسسه ژئوفیزیک دانشگاه تهران (فجر ۱۷٫۷°، مغرب ۴٫۵°).</div>`)}`;
+    ${card('ساعت و اوقات شرعی', `<form class="form" id="clkf">${fieldHTML({ k: 'city', l: 'نام شهر' }, s.clock.city)}${fieldHTML({ k: 'prayer', l: 'اوقات شرعی', t: 'check', cl: 'نمایش اوقات شرعی در داشبورد' }, s.clock.prayer)}${fieldHTML({ k: 'lat', l: 'عرض جغرافیایی', hint: 'آبادان: ۳۰٫۳۳۹۲' }, s.clock.lat)}${fieldHTML({ k: 'lng', l: 'طول جغرافیایی', hint: 'آبادان: ۴۸٫۳۰۴۳' }, s.clock.lng)}</form><div class="row mt">${btn('ذخیره', 'admSaveClock', {}, '', 'clock')}</div><div class="hint mt">محاسبه به روش مؤسسه ژئوفیزیک دانشگاه تهران (فجر ۱۷٫۷°، عشا ۱۴°، مغرب ۴٫۵° زیر افق) و به وقت رسمی ایران. مختصات پیش‌فرض: آبادان (۳۰٫۳۳۹۲ شمالی، ۴۸٫۳۰۴۳ شرقی). برای دقت کامل، مختصات تأییدشده محل مسجد را وارد کنید.</div>`)}`;
   },
   org() {
     const s = DB.settings;
-    return `${card('نام مدیریت‌ها', table([['#', u => fa(u.id)], ['نام کامل', u => esc(u.name)], ['نام کوتاه', u => esc(u.short)], ['خدمات', u => fa(SERVICES[u.id].length)], ['', u => btn('ویرایش', 'admUnit', { id: u.id }, 'sm ghost', 'edit')]], UNITS), '', { flush: true })}
+    return `${card('مدیریت‌ها', `<div class="notice">پیش از ورود اطلاعات واقعی، فهرست مدیریت‌ها، نام‌ها و خدمات را با ساختار نهایی مجموعه تطبیق دهید. مدیریت غیرفعال از فهرست‌ها پنهان می‌شود ولی سوابقش حفظ می‌شود.</div>` + table([['#', u => fa(u.id)], ['نام کامل', u => `<b>${esc(u.name)}</b>`], ['نام کوتاه', u => esc(u.short)], ['خدمات', u => fa(SERVICES[u.id].length)], ['وضعیت', u => (u.off ? pill('غیرفعال', 'mute') : pill('فعال', 'ok'))], ['', u => btn('ویرایش', 'admUnit', { id: u.id }, 'sm ghost', 'edit') + ' ' + btn(u.off ? 'فعال‌سازی' : 'غیرفعال‌سازی', 'admUnitToggle', { id: u.id }, 'sm ' + (u.off ? 'soft' : 'ghost'))]], UNITS), btn('افزودن مدیریت', 'admUnit', {}, 'sm', 'plus'), { flush: true })}
     ${card('فضاها و امکانات قابل رزرو', table([['نام', x => esc(x.name)], ['تأییدکننده', x => esc(unitShort(x.unit))], ['ظرفیت', x => fa(x.cap)], ['کنترل تداخل', x => (x.excl ? pill('دارد', 'ok') : pill('ندارد', 'mute'))], ['', x => btn('ویرایش', 'admSpace', { id: x.id }, 'sm ghost', 'edit') + ' ' + btn('حذف', 'admSpaceDel', { id: x.id }, 'sm danger')]], SPACES), btn('افزودن فضا', 'admSpace', {}, 'sm', 'plus'), { flush: true })}
     ${card('فهرست‌های پایه', `<form class="form" id="listf">${fieldHTML({ k: 'letterCats', l: 'طبقه‌بندی نامه‌ها (هر خط یک مورد)', t: 'textarea' }, LETTER_CATS.join('\n'))}${fieldHTML({ k: 'leaveTypes', l: 'انواع مرخصی (هر خط یک مورد)', t: 'textarea' }, LEAVE_TYPES.join('\n'))}</form><div class="row mt">${btn('ذخیره فهرست‌ها', 'admSaveLists', {}, '', 'check')}${btn('بازگردانی همه ساختار به پیش‌فرض', 'admOrgReset', {}, 'ghost')}</div>`)}`;
   },
   security() {
     const s = DB.settings.security;
-    return `${card('سیاست رمز و ورود', `<form class="form" id="secf">${fieldHTML({ k: 'minLen', l: 'حداقل طول رمز عبور', t: 'number' }, s.minLen)}${fieldHTML({ k: 'maxFails', l: 'تعداد تلاش ناموفق تا قفل‌شدن حساب', t: 'number' }, s.maxFails)}${fieldHTML({ k: 'lockMin', l: 'مدت قفل حساب (دقیقه)', t: 'number' }, s.lockMin)}${fieldHTML({ k: 'sessionMin', l: 'خروج خودکار پس از بی‌فعالیتی (دقیقه، صفر = خاموش)', t: 'number' }, s.sessionMin)}
-      ${fieldHTML({ k: 'showDemo', l: 'حساب‌های نمونه', t: 'check', cl: 'نمایش فهرست حساب‌های نمونه در صفحه ورود' }, DB.settings.showDemo)}${fieldHTML({ k: 'maintenance', l: 'حالت به‌روزرسانی', t: 'check', cl: 'فقط مدیران سامانه بتوانند وارد شوند' }, DB.settings.maintenance)}</form>
+    return `${card('سیاست رمز و ورود', `<form class="form" id="secf">${fieldHTML({ k: 'minLen', l: 'حداقل طول رمز عبور', t: 'number', hint: 'دست‌کم ۶ و برای بهره‌برداری واقعی ۱۰ یا بیشتر' }, s.minLen)}${fieldHTML({ k: 'maxFails', l: 'تعداد تلاش ناموفق تا قفل‌شدن حساب', t: 'number' }, s.maxFails)}${fieldHTML({ k: 'lockMin', l: 'مدت قفل حساب (دقیقه)', t: 'number' }, s.lockMin)}${fieldHTML({ k: 'sessionMin', l: 'خروج خودکار پس از بی‌فعالیتی (دقیقه)', t: 'number', hint: 'بین ۵ تا ۱۴۴۰؛ دو دقیقه پیش از خروج به کاربر هشدار داده می‌شود' }, s.sessionMin)}
+      ${SERVER ? '' : fieldHTML({ k: 'showDemo', l: 'حساب‌های نمونه', t: 'check', cl: 'نمایش فهرست حساب‌های نمونه در صفحه ورود (فقط نسخه نمایشی)' }, DB.settings.showDemo)}${fieldHTML({ k: 'maintenance', l: 'حالت به‌روزرسانی', t: 'check', cl: 'فقط مدیران سامانه بتوانند وارد شوند' }, DB.settings.maintenance)}</form>
       <div class="row mt">${btn('ذخیره تنظیمات امنیتی', 'admSaveSec', {}, '', 'shield')}</div>`)}
-    ${card('اقدامات اضطراری', `<div class="row">${btn('خروج همه کاربران به‌جز من', 'admKickAll', {}, 'danger', 'logout')}${btn('الزام تغییر رمز برای همه', 'admForceAll', {}, 'ghost', 'key')}${btn('بازکردن قفل همه حساب‌ها', 'admUnlockAll', {}, 'ghost', 'unlock')}</div><div class="hint mt">رمزها به‌صورت هش‌شده ذخیره می‌شوند و هیچ‌کس، حتی مدیر سامانه، رمز کاربران را نمی‌بیند؛ مدیر می‌تواند رمز جدید تعیین کند.</div>`)}`;
+    ${card('اقدامات اضطراری', `<div class="row">${btn('خروج همه کاربران به‌جز من', 'admKickAll', {}, 'danger', 'logout')}${btn('الزام تغییر رمز برای همه', 'admForceAll', {}, 'ghost', 'key')}${btn('بازکردن قفل همه حساب‌ها', 'admUnlockAll', {}, 'ghost', 'unlock')}</div><div class="hint mt">${SERVER ? 'رمزها روی سرور با scrypt و نمک جداگانه ذخیره می‌شوند و هیچ‌کس، حتی مدیر سامانه، رمز کاربران را نمی‌بیند؛ مدیر می‌تواند رمز جدید تعیین کند. رمز متصدیان جایگاه‌های حساس فقط با امام جماعت یا خط فرمان سرور تعیین می‌شود.' : 'نسخه نمایشی: رمزها فقط برای آشنایی و با روش ساده نگهداری می‌شوند؛ برای بهره‌برداری از نسخه سروری استفاده کنید.'}</div>`)}`;
   },
   sms() {
     const s = DB.settings.sms;
-    return `${card('تنظیمات پیامک', `<form class="form" id="smsf">
-      <div class="fld"><label>سرویس پیامک</label><label class="row" style="color:var(--fg);font-weight:500"><input type="checkbox" id="sms_en" ${s.enabled ? 'checked' : ''}> ارسال پیامک فعال باشد</label></div>
-      ${fieldHTML({ k: 'provider', l: 'سرویس‌دهنده' }, s.provider)}${fieldHTML({ k: 'sender', l: 'شماره فرستنده' }, s.sender)}
+    const ready = s.enabled && ((s.provider === 'kavenegar' && (s.apiKeySet || s.apiKey)) || (s.provider === 'webhook' && s.webhook));
+    const st = !SERVER ? pill('نسخه نمایشی — پیامکی ارسال نمی‌شود', 'warn') : ready ? pill('فعال و تنظیم‌شده', 'ok') : s.enabled ? pill('روشن ولی تنظیم‌نشده — ارسال نمی‌شود', 'bad') : pill('خاموش', 'mute');
+    const cnt = k => DB.sms.filter(x => x.status === k).length;
+    return `${card('وضعیت سرویس پیامک', `<div class="row">${st}</div><div class="tiles mt">${['در صف ارسال', 'ارسال‌شده', 'تحویل‌شده', 'تحویل نشد', 'ناموفق'].map(k => tile(k, cnt(k), '', k === 'ناموفق' || k === 'تحویل نشد' ? (cnt(k) ? 'bad' : '') : k === 'تحویل‌شده' ? 'ok' : '')).join('')}</div>${SERVER ? `<div class="row mt">${btn('ارسال پیامک آزمایشی', 'smsTest', {}, 'ghost', 'send')}</div>` : ''}`)}
+    ${card('تنظیمات پیامک', `<form class="form" id="smsf">
+      <div class="fld"><label>سرویس پیامک</label><label class="row" style="color:var(--fg);font-weight:500"><input type="checkbox" id="sms_en" ${s.enabled ? 'checked' : ''}> ارسال پیامک روشن باشد</label></div>
+      ${fieldHTML({ k: 'provider', l: 'سرویس‌دهنده', t: 'select', o: [['none', 'تنظیم نشده'], ['kavenegar', 'کاوه‌نگار'], ['webhook', 'درگاه اختصاصی (Webhook)']], blank: false }, s.provider)}
+      ${fieldHTML({ k: 'sender', l: 'شماره خط فرستنده' }, s.sender)}
+      ${fieldHTML({ k: 'apiKey', l: 'کلید API کاوه‌نگار', t: 'password', ph: s.apiKeyHint || '', hint: s.apiKeySet ? 'کلید ذخیره شده است؛ برای تغییر، کلید جدید را وارد کنید. کلید هرگز به مرورگر فرستاده نمی‌شود.' : 'کلید فقط روی سرور نگهداری می‌شود.' }, '')}
+      ${fieldHTML({ k: 'webhook', l: 'نشانی درگاه اختصاصی', ph: 'https://…', hint: 'برای درگاه اختصاصی: درخواست POST با to و text' }, s.webhook || '')}
       ${fieldHTML({ k: 'events', l: 'رویدادهای قابل اعلان با پیامک', t: 'multi', o: Object.entries(SMS_EVENTS) }, Object.keys(s.events).filter(k => s.events[k]))}
       ${fieldHTML({ k: 'roles', l: 'دریافت‌کنندگان (بر اساس نقش)', t: 'multi', o: Object.entries(ROLES) }, s.roles)}
-    </form><div class="row mt">${btn('ذخیره', 'saveSms', {}, '', 'check')}</div><div class="notice mt">متن پیامک فقط شامل نوع رویداد و کد پیگیری است؛ جزئیات محرمانه فقط در کارتابل نمایش داده می‌شود.</div>`)}
-    ${card('صف ارسال پیامک', table([['زمان', x => jdt(x.ts)], ['گیرنده', x => esc(x.name) + `<span class="sub code">${fa(x.to)}</span>`], ['متن', x => esc(x.text)], ['وضعیت', x => pill(x.status, 'mute')]], DB.sms.slice().reverse().slice(0, 80)), '', { flush: true })}`;
+    </form><div class="row mt">${btn('ذخیره', 'saveSms', {}, '', 'check')}</div><div class="notice mt">متن پیامک فقط شامل نوع رویداد و کد پیگیری است؛ جزئیات محرمانه فقط در کارتابل نمایش داده می‌شود. هر پیامک تا سه بار با فاصله فزاینده دوباره ارسال می‌شود و وضعیت تحویل از کاوه‌نگار پیگیری می‌شود.</div>`)}
+    ${card('صف ارسال پیامک', table([['زمان', x => jdt(x.ts)], ['گیرنده', x => esc(x.name) + `<span class="sub code">${fa(x.to)}</span>`], ['متن', x => esc(x.text)], ['وضعیت', x => pill(x.status, ['تحویل‌شده'].includes(x.status) ? 'ok' : ['ناموفق', 'تحویل نشد'].includes(x.status) ? 'bad' : x.status === 'ارسال‌شده' ? 'info' : 'warn') + (x.lastError ? `<span class="sub">${esc(x.lastError)}${x.tries ? ' · ' + fa(x.tries) + ' تلاش' : ''}</span>` : '')]], DB.sms.slice().reverse().slice(0, 100)), '', { flush: true })}`;
   },
   data() {
-    const v = vs('admd', { c: 'users' });
+    const cols = Object.keys(DATA_COLS).filter(c => SAFE_DATA_COLS.includes(c));
+    const v = vs('admd', { c: cols[0] });
+    if (!cols.includes(v.c)) v.c = cols[0];
     const C = DATA_COLS[v.c];
-    const list = (DB[v.c] || []).map((r, i) => ({ ...r, id: r.id || String(i), _i: i })).filter(r => textMatch(v.q, JSON.stringify(r)));
-    return `<div class="notice warn">${ic('alert')} ویرایش مستقیم، قواعد گردش کار را دور می‌زند؛ فقط برای اصلاح خطا استفاده کنید. هر تغییر با مقدار قبلی در رویدادهای سیستمی ثبت می‌شود. رویدادهای سیستمی قابل ویرایش نیستند.</div>
-    <section class="card"><div class="filters"><select data-f="admd:c" id="flt-admd-c" aria-label="مجموعه داده">${Object.entries(DATA_COLS).map(([k, c]) => `<option value="${k}" ${k === v.c ? 'selected' : ''}>${c.t} (${fa((DB[k] || []).length)})</option>`).join('')}</select><input type="search" data-f="admd:q" id="flt-admd-q" placeholder="جست‌وجو در همه فیلدها…" value="${esc(v.q || '')}"></div>
-    <div class="cb flush">${table(C.f.map(([k, l]) => [l, r => { const x = r[k]; return esc(Array.isArray(x) ? fa(x.length) + ' مورد' : x && typeof x === 'object' ? '{…}' : /^\d{4}-\d\d-\d\d$/.test(x || '') ? jd(x) : String(x ?? '—').slice(0, 60)); }]), list.slice().reverse().slice(0, 200).map(r => ({ ...r, id: v.c + '|' + r._i })), { click: 'admRec' })}</div></section>`;
+    const list = (DB[v.c] || []).map((r, i) => ({ ...r, _k: r.id || String(i) })).filter(r => textMatch(v.q, JSON.stringify(r)));
+    return `<div class="notice warn">${ic('alert')} ویرایش مستقیم، قواعد گردش کار را دور می‌زند؛ فقط برای اصلاح خطا استفاده کنید. هر تغییر با مقدار قبلی در رویدادهای سیستمی ثبت می‌شود. کاربران، جایگاه‌ها، دسترسی‌ها، نشست‌ها و رویدادهای سیستمی از ویرایش مستقیم محافظت شده‌اند.</div>
+    <section class="card"><div class="filters"><select data-f="admd:c" id="flt-admd-c" aria-label="مجموعه داده">${cols.map(k => `<option value="${k}" ${k === v.c ? 'selected' : ''}>${esc(DATA_COLS[k].t)} (${fa((DB[k] || []).length)})</option>`).join('')}</select><input type="search" data-f="admd:q" id="flt-admd-q" placeholder="جست‌وجو در همه فیلدها…" value="${esc(v.q || '')}" aria-label="جست‌وجو"></div>
+    <div class="cb flush">${table(C.f.map(([k, l]) => [l, r => { const x = r[k]; return esc(Array.isArray(x) ? fa(x.length) + ' مورد' : x && typeof x === 'object' ? '{…}' : /^\d{4}-\d\d-\d\d$/.test(x || '') ? jd(x) : String(x ?? '—').slice(0, 60)); }]), list.slice().reverse().slice(0, 200).map(r => ({ ...r, id: v.c + '|' + r._k })), { click: 'admRec' })}</div></section>`;
   },
   backup() {
-    return `${card('نسخه پشتیبان', `<p>نسخه پشتیبان کامل پایگاه داده، شامل تاریخچه اقدامات، به‌صورت JSON تهیه می‌شود. آن را کپی و در محل امن نگهداری کنید.</p><div class="row">${btn('تهیه نسخه پشتیبان', 'backup', {}, '', 'archive')}${btn('بازیابی از نسخه پشتیبان', 'restore', {}, 'ghost')}${btn('بازنشانی به داده‌های نمونه', 'resetDemo', {}, 'danger')}</div>
-    ${DB.settings.backups.length ? `<h3 class="mt">سوابق پشتیبان‌گیری</h3>${table([['زمان', b => jdt(b.ts)], ['کاربر', b => esc(b.by)], ['حجم', b => fa(Math.round(b.size / 1024)) + ' KB'], ['رکوردها', b => fa(b.n)]], DB.settings.backups.slice().reverse().map((b, i) => ({ ...b, id: i })))}` : ''}`)}`;
+    const list = DB.settings.backups.slice().reverse();
+    return `${card('نسخه پشتیبان', `<p>${SERVER ? 'سرور هر روز به‌طور خودکار نسخه پشتیبان کامل تهیه می‌کند و پیش از هر بازیابی نیز از وضعیت فعلی نسخه می‌گیرد. شصت نسخه آخر نگهداری می‌شود.' : 'در نسخه نمایشی، نسخه پشتیبان به‌صورت فایل JSON در اختیار شما قرار می‌گیرد.'}</p><div class="row">${btn('تهیه نسخه پشتیبان', 'backup', {}, '', 'archive')}${btn('بازیابی از نسخه پشتیبان', 'restore', {}, 'ghost')}${SERVER ? '' : btn('بازنشانی به داده‌های نمونه', 'resetDemo', {}, 'danger')}</div>
+    <div class="notice mt">بازیابی فقط پس از بررسی کامل ساختار فایل${SERVER ? '، سلامت زنجیره رویدادها' : ''} و اطمینان از اینکه دسترسی شما را افزایش نمی‌دهد انجام می‌شود. ${SERVER ? 'رویدادهای سیستمی، ورودها و نشست‌ها هرگز به عقب برنمی‌گردند.' : 'پیش از بازیابی، نسخه فعلی خودکار نگهداری می‌شود.'}</div>
+    ${list.length ? `<h3 class="mt">سوابق پشتیبان‌گیری</h3>${table([['زمان', b => jdt(b.ts)], ['کاربر', b => esc(b.by)], ['حجم', b => fa(Math.round(b.size / 1024)) + ' KB'], ['رکوردها', b => fa(b.n)], ['', b => (SERVER && b.name ? `<a class="btn sm ghost" href="/api/backups/${encodeURIComponent(b.name)}" download>${ic('archive')}دریافت</a>` : '')]], list.map((b, i) => ({ ...b, id: i })))}` : ''}`)}`;
   }
 };
 const DATA_COLS = {
@@ -429,118 +251,96 @@ A.admUserCard = d => {
     foot: u.deleted ? '' : `${b2('admEditUser', 'ویرایش اطلاعات', 'edit', '')}${can('admin.passwords') ? b2('admPass', 'تعیین رمز جدید', 'key') : ''}${u.posId && can('admin.perms') ? btn('دسترسی‌ها', 'admPosPerm', { id: u.posId }, 'ghost', 'shield') : ''}${lockedUsers().includes(u) ? b2('admUnlock', 'بازکردن قفل', 'unlock') : ''}${self ? '' : b2('admKick', 'خروج اجباری', 'logout') + b2('admToggle', u.active ? 'غیرفعال‌سازی' : 'فعال‌سازی', u.active ? 'lock' : 'check') + b2('admDel', 'حذف کاربر', 'trash', 'danger')}` });
 };
 A.admTab = d => { vs('adm').tab = d.v; route(); };
-const userForm = (u = {}) => [
+const userForm = () => [
   { k: 'name', l: 'نام و نام خانوادگی', req: true }, { k: 'username', l: 'نام کاربری', req: true, hint: 'انگلیسی، ۳ تا ۲۴ نویسه' },
   { k: 'phone', l: 'تلفن همراه', t: 'tel' }, { k: 'nid', l: 'کد ملی' },
   { k: 'posId', l: 'جایگاه سازمانی', t: 'select', o: allPosOpts(), blank: 'بدون جایگاه' }
 ];
-A.admNewUser = () => formModal('افزودن کاربر', [...userForm(), { k: 'pass', l: 'رمز اولیه', req: true, hint: 'دست‌کم ' + fa(DB.settings.security.minLen) + ' نویسه' }, { k: 'mustChange', l: 'امنیت', t: 'check', cl: 'کاربر در اولین ورود رمز را تغییر دهد' }], { pass: genPass(), mustChange: true }, v => createUser2(v), { done: 'کاربر ساخته شد.', submit: 'ایجاد کاربر' });
-A.admEditUser = d => { const u = userById(d.id); formModal('ویرایش کاربر — ' + u.name, userForm(), u, v => updateUser(u, v), { done: 'اطلاعات کاربر ذخیره شد.' }); };
+const toastRes = (r, okMsg) => { if (r && r.error) toast(r.error); else { refresh(); if (okMsg) toast(typeof okMsg === 'function' ? okMsg(r) : okMsg); } };
+A.admNewUser = () => formModal('افزودن کاربر', [...userForm(), { k: 'pass', l: 'رمز اولیه', req: true, hint: 'دست‌کم ' + fa(DB.settings.security.minLen) + ' نویسه؛ رمز تصادفی پیشنهاد شده است' }, { k: 'mustChange', l: 'امنیت', t: 'check', cl: 'کاربر در اولین ورود رمز را تغییر دهد' }], { pass: genPass(), mustChange: true }, v => run('createUser', v), { done: 'کاربر ساخته شد.', submit: 'ایجاد کاربر' });
+A.admEditUser = d => { const u = userById(d.id); formModal('ویرایش کاربر', userForm(), u, v => run('updateUser', u.id, v), { done: 'اطلاعات کاربر ذخیره شد.' }); };
 A.admPass = d => {
-  const u = userById(d.id); const p = genPass();
-  formModal('تعیین رمز — ' + u.name, [{ k: 'pass', l: 'رمز جدید', req: true, hint: 'یک رمز تصادفی پیشنهاد شده؛ می‌توانید آن را تغییر دهید' }, { k: 'mustChange', l: 'امنیت', t: 'check', cl: 'کاربر در ورود بعدی رمز را تغییر دهد' }], { pass: p, mustChange: true }, v => {
-    const r = setPassword(u, v.pass, v.mustChange); if (r.error) return r;
-    setTimeout(() => modal({ title: 'رمز جدید', body: `<p>رمز جدید <b>${esc(u.name)}</b> را به او اعلام کنید. این رمز دوباره نمایش داده نمی‌شود.</p><div class="secret code">${esc(en(v.pass))}</div>`, foot: btn('کپی رمز', 'copyTxt', { t: en(v.pass) }, '', 'file') }), 50);
+  const u = userById(d.id);
+  formModal('تعیین رمز', [{ k: 'pass', l: 'رمز جدید', req: true, hint: 'یک رمز تصادفی پیشنهاد شده؛ می‌توانید آن را تغییر دهید' }, { k: 'mustChange', l: 'امنیت', t: 'check', cl: 'کاربر در ورود بعدی رمز را تغییر دهد' }], { pass: genPass(), mustChange: true }, async v => {
+    const r = await run('setPassword', u.id, v.pass, v.mustChange); if (r.error) return r;
+    setTimeout(() => { const m = modal({ title: 'رمز جدید', body: `<p>رمز جدید <b>${esc(u.name)}</b> را به او اعلام کنید. این رمز دوباره نمایش داده نمی‌شود.</p><div class="secret code">${esc(en(v.pass))}</div>`, foot: btn('کپی رمز', 'copyTxt', { t: en(v.pass) }, '', 'file') }); }, 50);
     return r;
   }, { submit: 'تعیین رمز', done: 'رمز تعیین شد.' });
 };
 A.copyTxt = d => navigator.clipboard.writeText(d.t).then(() => toast('کپی شد.'), () => toast('کپی ممکن نشد؛ متن را انتخاب و کپی کنید.'));
-A.admUnlock = d => { const u = userById(d.id); u.lockedUntil = ''; u.fails = 0; audit('بازکردن قفل حساب', 'user', u.id, u.username); refresh(); toast('قفل حساب باز شد.'); };
-A.admUnlockAll = () => { lockedUsers().forEach(u => { u.lockedUntil = ''; u.fails = 0; }); audit('بازکردن قفل همه حساب‌ها', 'user', '', ''); refresh(); toast('قفل همه حساب‌ها باز شد.'); };
-A.admToggle = d => { const u = userById(d.id); u.active = !u.active; if (!u.active) DB.sessions.filter(s => s.uid === u.id && s.active).forEach(s => { s.active = false; s.end = stamp(); }); audit(u.active ? 'فعال‌سازی حساب' : 'غیرفعال‌سازی حساب', 'user', u.id, u.username); refresh(); toast(u.active ? 'حساب فعال شد.' : 'حساب غیرفعال شد و نشست‌های آن بسته شد.'); };
-A.admKick = d => { const u = userById(d.id); const n = DB.sessions.filter(s => s.uid === u.id && s.active); n.forEach(s => { s.active = false; s.end = stamp(); }); audit('خروج اجباری کاربر', 'session', u.id, u.username + ' · ' + fa(n.length) + ' نشست'); refresh(); toast(n.length ? `${fa(n.length)} نشست بسته شد.` : 'این کاربر نشست فعالی ندارد.'); };
-A.admEndSes = d => { const s = DB.sessions.find(x => x.id === d.id); s.active = false; s.end = stamp(); audit('پایان نشست', 'session', s.uid, (userById(s.uid) || {}).username || ''); refresh(); toast('نشست بسته شد.'); };
-A.admKickAll = () => confirmBox('خروج همه کاربران', 'همه نشست‌ها به‌جز نشست شما بسته می‌شوند و کاربران باید دوباره وارد شوند.', 'خروج همه', () => { const me = (mySession() || {}).id; let n = 0; DB.sessions.forEach(s => { if (s.active && s.id !== me) { s.active = false; s.end = stamp(); n++; } }); audit('خروج همه کاربران', 'session', '', fa(n) + ' نشست'); toast(fa(n) + ' نشست بسته شد.'); });
-A.admForceAll = () => confirmBox('الزام تغییر رمز', 'همه کاربران (به‌جز شما) در ورود بعدی باید رمز جدید تعیین کنند.', 'اعمال', () => { DB.users.forEach(u => { if (u.id !== ME.user.id && !u.deleted) u.mustChange = true; }); audit('الزام تغییر رمز برای همه', 'user', '', ''); toast('اعمال شد.'); });
-A.admDel = d => { const u = userById(d.id); confirmBox('حذف کاربر', `حساب <b>${esc(u.name)}</b> حذف می‌شود و دیگر امکان ورود ندارد. سوابق اقدامات او در سامانه باقی می‌ماند.`, 'حذف کاربر', () => { const r = deleteUser(u); if (r.error) toast(r.error); else toast('کاربر حذف شد.'); }); };
-A.admDelPos = d => { const p = posById(d.id); if (holderOf(p.id)) return toast('ابتدا متصدی این جایگاه را تغییر دهید یا بردارید.'); confirmBox('حذف جایگاه', `جایگاه «${esc(posLabel(p.id))}» حذف شود؟`, 'حذف', () => { DB.positions = DB.positions.filter(x => x.id !== p.id); audit('حذف جایگاه', 'position', p.id, posLabel(p.id)); toast('جایگاه حذف شد.'); }); };
-function confirmBox(title, text, okLabel, fn) {
-  modal({ title, body: `<p>${text}</p>`, foot: `<button class="btn danger" id="cfok">${okLabel}</button>${btn('انصراف', 'close', {}, 'ghost')}` });
-  $('#cfok').addEventListener('click', () => { fn(); closeModal(); refresh(); });
+A.admUnlock = async d => toastRes(await run('unlockUser', d.id), 'قفل حساب باز شد.');
+A.admUnlockAll = async () => toastRes(await run('unlockAll'), 'قفل همه حساب‌ها باز شد.');
+A.admToggle = async d => toastRes(await run('toggleUser', d.id), r => (r.active ? 'حساب فعال شد.' : 'حساب غیرفعال شد و نشست‌های آن بسته شد.'));
+A.admKick = async d => toastRes(await run('kickUser', d.id), r => (r.n ? `${fa(r.n)} نشست بسته شد.` : 'این کاربر نشست فعالی ندارد.'));
+A.admEndSes = async d => toastRes(await run('endSession', d.id), 'نشست بسته شد.');
+A.admKickAll = () => confirmBox('خروج همه کاربران', 'همه نشست‌ها به‌جز نشست شما بسته می‌شوند و کاربران باید دوباره وارد شوند.', 'خروج همه', () => run('kickAll', (mySession() || {}).id), r => fa(r.n) + ' نشست بسته شد.');
+A.admForceAll = () => confirmBox('الزام تغییر رمز', 'همه کاربران (به‌جز شما و متصدیان جایگاه‌های حساس، مگر با تأیید امام جماعت) در ورود بعدی باید رمز جدید تعیین کنند.', 'اعمال', () => run('forceAllChange'), 'اعمال شد.');
+A.admDel = d => { const u = userById(d.id); confirmBox('حذف کاربر', `حساب <b>${esc(u.name)}</b> حذف می‌شود و دیگر امکان ورود ندارد. سوابق اقدامات او در سامانه باقی می‌ماند.`, 'حذف کاربر', () => run('deleteUser', u.id), 'کاربر حذف شد.'); };
+A.admDelPos = d => confirmBox('حذف جایگاه', `جایگاه «${esc(posLabel(d.id))}» حذف شود؟`, 'حذف', () => run('deletePosition', d.id), 'جایگاه حذف شد.');
+function confirmBox(title, text, okLabel, fn, okMsg) {
+  modal({ title, body: `<p>${text}</p><div class="err" id="cferr" role="alert"></div>`, foot: `<button class="btn danger" id="cfok">${esc(okLabel)}</button>${btn('انصراف', 'close', {}, 'ghost')}` });
+  $('#cfok').addEventListener('click', async () => { const r = await fn(); if (r && r.error) { $('#cferr').textContent = r.error; return; } closeModal(); refresh(); if (okMsg) toast(typeof okMsg === 'function' ? okMsg(r) : okMsg); });
 }
 A.admPosPerm = d => {
-  const p = posById(d.id);
+  const p = posById(d.id); if (!p) return;
   const groups = [...new Set(PERMS.map(x => x[2]))];
+  const self = p.id === ME.pos.id;
   modal({
     title: 'دسترسی‌های جایگاه — ' + posLabel(p.id), wide: true,
-    body: `<div class="notice">متصدی فعلی: <b>${esc((holderOf(p.id) || {}).name || 'بدون متصدی')}</b>. تغییرات فوراً ذخیره می‌شود.</div>${groups.map(g => `<div><h3>${g}</h3><div class="permgrid">${PERMS.filter(x => x[2] === g).map(([k, l]) => { const o = (p.perms || {})[k] || ''; const eff = permOf(p, k); return `<div class="perm"><div><b>${esc(l)}</b><small>${eff ? pill('دارد', 'ok') : pill('ندارد', 'mute')}</small></div><div class="seg" role="radiogroup" aria-label="${esc(l)}">${[['', 'پیش‌فرض'], ['allow', 'اعطا'], ['deny', 'سلب']].map(([v, t]) => `<button class="${o === v ? 'on ' + v : ''}" data-a="admSetPerm" data-p="${p.id}" data-k="${k}" data-v="${v}">${t}</button>`).join('')}</div></div>`; }).join('')}</div></div>`).join('')}`
+    body: `<div class="notice ${self ? 'warn' : ''}">${self ? 'این جایگاه خود شماست؛ تغییر دسترسی خود مجاز نیست و فقط امام جماعت می‌تواند آن را تغییر دهد.' : `متصدی فعلی: <b>${esc((holderOf(p.id) || {}).name || 'بدون متصدی')}</b>. تغییرات فوراً ذخیره می‌شود. مجوزهای نشان‌دار ${pill('حساس', 'warn')} را فقط امام جماعت می‌تواند اعطا کند.`}</div><div class="err" id="permerr" role="alert"></div>${groups.map(g => `<div><h3>${esc(g)}</h3><div class="permgrid">${PERMS.filter(x => x[2] === g).map(([k, l]) => { const o = (p.perms || {})[k] || ''; const eff = permOf(p, k); return `<div class="perm"><div><b>${esc(l)}</b><small>${eff ? pill('دارد', 'ok') : pill('ندارد', 'mute')}${isSensitivePerm(k) ? ' ' + pill('حساس', 'warn') : ''}</small></div><div class="seg" role="radiogroup" aria-label="${esc(l)}">${[['', 'پیش‌فرض'], ['allow', 'اعطا'], ['deny', 'سلب']].map(([v, t]) => `<button role="radio" aria-checked="${o === v}" class="${o === v ? 'on ' + v : ''}" data-a="admSetPerm" data-p="${p.id}" data-k="${k}" data-v="${v}" ${self ? 'disabled' : ''}>${t}</button>`).join('')}</div></div>`; }).join('')}</div></div>`).join('')}`
   });
 };
-A.admSetPerm = d => { const p = posById(d.p); const r = setPosPerm(p, d.k, d.v); if (r.error) return toast(r.error); Store.save(); A.admPosPerm({ id: p.id }); route(); toast('دسترسی به‌روز شد.'); };
-document.addEventListener('change', e => {
+A.admSetPerm = async d => { const r = await run('setPosPerm', d.p, d.k, d.v); if (r.error) { const e = $('#permerr'); if (e) e.textContent = r.error; else toast(r.error); return; } refresh(); A.admPosPerm({ id: d.p }); toast('دسترسی به‌روز شد.'); };
+document.addEventListener('change', async e => {
   const t = e.target;
-  if (t.dataset && t.dataset.pm) { const [role, k] = t.dataset.pm.split('|'); const r = setRolePerm(role, k, t.value); if (r.error) toast(r.error); else { refresh(); toast('ماتریس دسترسی به‌روز شد.'); } }
+  if (t.dataset && t.dataset.pm) { const [role, k] = t.dataset.pm.split('|'); const r = await run('setRolePerm', role, k, t.value); if (r.error) { toast(r.error); route(); } else { refresh(); toast('ماتریس دسترسی به‌روز شد.'); } }
   if (t.id === 'pickpos' && t.value) A.admPosPerm({ id: t.value });
 });
-A.admSignOk = d => { const s = DB.signups.find(x => x.id === d.id); const free = DB.positions.filter(p => p.unitId === s.unitId && !holderOf(p.id)).map(p => [p.id, posLabel(p.id) + ' (خالی)']);
-  formModal('تأیید عضویت — ' + s.name, [{ k: 'posId', l: 'جایگاه سازمانی', t: 'select', o: [['new', `ایجاد جایگاه جدید «${s.title}» در ${unitShort(s.unitId)}`], ...free, ...posOpts(s.unitId).filter(x => holderOf(x[0]))], req: true }], { posId: 'new' }, v => decideSignup(s, true, v), { submit: 'تأیید و ایجاد حساب', done: 'حساب کاربری ایجاد شد.' }); };
-A.admSignNo = d => { const s = DB.signups.find(x => x.id === d.id); actModal('رد درخواست عضویت', v => decideSignup(s, false, v), { noteReq: true, noteLabel: 'علت رد' }); };
+A.admSignOk = d => { const s = DB.signups.find(x => x.id === d.id); const free = DB.positions.filter(p => p.unitId === s.unitId && !holderOf(p.id) && !isSensitivePos(p)).map(p => [p.id, posLabel(p.id) + ' (خالی)']);
+  formModal('تأیید عضویت — ' + s.name, [{ k: 'posId', l: 'جایگاه سازمانی', t: 'select', o: [['new', `ایجاد جایگاه جدید «${s.title}» در ${unitShort(s.unitId)}`], ...free], req: true, blank: false }], { posId: 'new' }, v => run('decideSignup', s.id, true, v), { submit: 'تأیید و ایجاد حساب', done: 'حساب کاربری ایجاد شد.' }); };
+A.admSignNo = d => actModal('رد درخواست عضویت', v => run('decideSignup', d.id, false, v), { noteReq: true, noteLabel: 'علت رد' });
 const findPending = no => pendingAll().find(x => x.no === no);
-A.admOk = d => { const x = findPending(d.i); if (!x) return; actModal('تأیید مدیریتی — ' + x.type, v => overrideAs(x.wait, () => x.ok(v.note, v.doc)), { fields: x.needDoc ? [{ k: 'doc', l: 'شماره سند پرداخت', req: true }] : [], submit: 'تأیید', done: 'تأیید مدیریتی ثبت شد.' }); };
-A.admNo = d => { const x = findPending(d.i); if (!x) return; actModal('رد مدیریتی — ' + x.type, v => overrideAs(x.wait, () => x.no_(v.note)), { noteReq: true, noteLabel: 'علت رد', submit: 'رد', done: 'رد مدیریتی ثبت شد.' }); };
-A.admMaint = () => { DB.settings.maintenance = !DB.settings.maintenance; audit(DB.settings.maintenance ? 'فعال‌سازی حالت به‌روزرسانی' : 'غیرفعال‌سازی حالت به‌روزرسانی', 'settings', 'security', ''); refresh(); toast(DB.settings.maintenance ? 'حالت به‌روزرسانی فعال شد.' : 'سامانه برای همه باز شد.'); };
-const formVals = id => { const f = $('#' + id); const o = {}; [...f.elements].forEach(el => { if (!el.name) return; o[el.name] = el.type === 'checkbox' ? el.checked : el.value.trim(); }); return o; };
-A.admSaveSite = () => { const v = formVals('sitef'); const s = DB.settings; if (!v.orgName) return toast('نام مجموعه را بنویسید.'); Object.assign(s, { orgName: v.orgName, subtitle: v.subtitle, loginTitle: v.loginTitle, loginText: v.loginText }); const n = +en(v.payThreshold).replace(/\D/g, ''); if (n > 0) s.payThreshold = n; audit('تغییر هویت و متن‌های سامانه', 'settings', 'site', ''); renderShell(); toast('ذخیره شد.'); };
-A.admSaveAnn = () => { const v = formVals('annf'); DB.settings.announcement = { on: v.on, tone: v.tone, text: v.text }; audit('انتشار اطلاعیه عمومی', 'settings', 'announcement', v.text.slice(0, 60)); if (v.on && v.text) notify(DB.positions.map(p => p.id), 'decision', 'اطلاعیه: ' + v.text.slice(0, 80), 'dashboard'); refresh(); toast(v.on ? 'اطلاعیه منتشر شد.' : 'اطلاعیه پنهان شد.'); };
-A.admPal = d => { DB.settings.theme.palette = d.v; audit('تغییر رنگ‌بندی', 'settings', 'theme', PALETTES[d.v].name); applyTheme(); refresh(); };
-A.admScale = d => { DB.settings.theme.scale = +d.v; audit('تغییر اندازه متن', 'settings', 'theme', d.v); applyTheme(); refresh(); };
-A.admSaveClock = () => { const v = formVals('clkf'); const lat = +en(v.lat), lng = +en(v.lng); if (!(lat > -90 && lat < 90 && lng > -180 && lng < 180)) return toast('مختصات جغرافیایی معتبر نیست.'); DB.settings.clock = { city: v.city || 'تهران', lat, lng, prayer: v.prayer }; audit('تغییر تنظیمات ساعت و اوقات شرعی', 'settings', 'clock', v.city); refresh(); toast('ذخیره شد.'); };
-A.admSaveSec = () => { const v = formVals('secf'); const s = DB.settings.security; const num = (x, min, max) => { const n = +en(x); return n >= min && n <= max ? n : null; };
-  const m = num(v.minLen, 4, 32), f = num(v.maxFails, 2, 20), l = num(v.lockMin, 1, 1440), t = num(v.sessionMin, 0, 1440);
-  if ([m, f, l, t].includes(null)) return toast('مقادیر معتبر نیست (طول رمز ۴ تا ۳۲، تلاش ۲ تا ۲۰).');
-  Object.assign(s, { minLen: m, maxFails: f, lockMin: l, sessionMin: t }); DB.settings.showDemo = v.showDemo; DB.settings.maintenance = v.maintenance;
-  audit('تغییر تنظیمات امنیتی', 'settings', 'security', ''); refresh(); toast('تنظیمات امنیتی ذخیره شد.'); };
-A.admUnit = d => { const u = UNITS.find(x => x.id === +d.id); formModal('ویرایش ' + u.name, [{ k: 'name', l: 'نام کامل', req: true }, { k: 'short', l: 'نام کوتاه', req: true }, { k: 'services', l: 'خدمات قابل درخواست (هر خط یک خدمت)', t: 'textarea' }], { name: u.name, short: u.short, services: SERVICES[u.id].join('\n') }, v => {
-  DB.settings.units[u.id] = { name: v.name, short: v.short };
-  DB.settings.services = DB.settings.services || {}; DB.settings.services[u.id] = v.services.split('\n').map(x => x.trim()).filter(Boolean);
-  if (!DB.settings.services[u.id].length) return fail('دست‌کم یک خدمت لازم است.');
-  audit('ویرایش مدیریت', 'settings', 'unit-' + u.id, v.name); applySettings(); return u; }); };
-A.admSpace = d => { const x = d.id ? SPACES.find(s => s.id === d.id) : { cap: 50, excl: true, unit: 3 };
-  formModal(d.id ? 'ویرایش فضا' : 'افزودن فضا', [{ k: 'name', l: 'نام', req: true }, { k: 'unit', l: 'مدیریت تأییدکننده', t: 'select', o: unitOpts(), req: true, blank: false }, { k: 'cap', l: 'ظرفیت (نفر)', t: 'number', req: true }, { k: 'excl', l: 'کنترل تداخل', t: 'check', cl: 'رزرو هم‌زمان مجاز نباشد' }], x, v => {
-    const list = SPACES.map(s => ({ ...s }));
-    if (d.id) Object.assign(list.find(s => s.id === d.id), { name: v.name, unit: +v.unit, cap: +v.cap, excl: v.excl });
-    else list.push({ id: 'sp' + uid().slice(0, 6), name: v.name, unit: +v.unit, cap: +v.cap, excl: v.excl });
-    DB.settings.spaces = list; audit(d.id ? 'ویرایش فضا' : 'افزودن فضا', 'settings', 'spaces', v.name); applySettings(); return x; }); };
-A.admSpaceDel = d => { if (DB.reservations.some(r => r.space === d.id && r.status !== 'لغوشده' && r.date >= todayISO())) return toast('این فضا رزرو پیش رو دارد؛ ابتدا رزروها را لغو کنید.'); confirmBox('حذف فضا', 'این فضا از فهرست رزرو حذف شود؟ سوابق رزروهای گذشته حفظ می‌شود.', 'حذف', () => { DB.settings.spaces = SPACES.filter(s => s.id !== d.id).map(s => ({ ...s })); audit('حذف فضا', 'settings', 'spaces', d.id); applySettings(); }); };
-A.admSaveLists = () => { const v = formVals('listf'); const L = t => t.split('\n').map(x => x.trim()).filter(Boolean); if (!L(v.letterCats).length || !L(v.leaveTypes).length) return toast('فهرست‌ها نباید خالی باشند.'); DB.settings.letterCats = L(v.letterCats); DB.settings.leaveTypes = L(v.leaveTypes); audit('ویرایش فهرست‌های پایه', 'settings', 'lists', ''); applySettings(); refresh(); toast('ذخیره شد.'); };
-A.admOrgReset = () => confirmBox('بازگردانی ساختار', 'نام مدیریت‌ها، خدمات، فضاها و فهرست‌های پایه به حالت اولیه برمی‌گردد.', 'بازگردانی', () => { const s = DB.settings; s.units = {}; delete s.services; delete s.spaces; delete s.letterCats; delete s.leaveTypes; audit('بازگردانی ساختار به پیش‌فرض', 'settings', 'org', ''); applySettings(); toast('بازگردانی شد.'); });
+A.admOk = d => { const x = findPending(d.i); if (!x) return toast('این مورد دیگر معلق نیست.'); actModal('تأیید مدیریتی — ' + x.type, v => run('overrideDecision', x.no, true, v.note, v.doc), { fields: x.needDoc ? [{ k: 'doc', l: 'شماره سند پرداخت', req: true }] : [], submit: 'تأیید', done: 'تأیید مدیریتی ثبت شد.' }); };
+A.admNo = d => { const x = findPending(d.i); if (!x) return toast('این مورد دیگر معلق نیست.'); actModal('رد مدیریتی — ' + x.type, v => run('overrideDecision', x.no, false, v.note), { noteReq: true, noteLabel: 'علت رد', submit: 'رد', done: 'رد مدیریتی ثبت شد.' }); };
+const formVals = id => { const f = $('#' + id); const o = {}; [...f.elements].forEach(el => { if (!el.name) return; if (el.type === 'checkbox' && f.querySelectorAll(`input[name="${el.name}"]`).length > 1) { (o[el.name] = o[el.name] || []); if (el.checked) o[el.name].push(el.value); } else o[el.name] = el.type === 'checkbox' ? el.checked : el.value.trim(); }); return o; };
+const saveSet = async (section, v, msg) => { const r = await run('saveSettings', section, v); if (r.error) return toast(r.error); if (section === 'site') renderShell(); else refresh(); toast(msg || 'ذخیره شد.'); };
+A.admMaint = () => saveSet('maintenance', { on: !DB.settings.maintenance }, DB.settings.maintenance ? 'سامانه برای همه باز شد.' : 'حالت به‌روزرسانی فعال شد.');
+A.admSaveSite = () => saveSet('site', formVals('sitef'));
+A.admSaveAnn = () => { const v = formVals('annf'); saveSet('announcement', v, v.on ? 'اطلاعیه منتشر شد.' : 'اطلاعیه پنهان شد.'); };
+A.admPal = d => saveSet('theme', { palette: d.v }, 'رنگ‌بندی تغییر کرد.');
+A.admScale = d => saveSet('theme', { scale: +d.v }, 'اندازه متن تغییر کرد.');
+A.admSaveClock = () => saveSet('clock', formVals('clkf'));
+A.admSaveSec = () => saveSet('security', formVals('secf'), 'تنظیمات امنیتی ذخیره شد.');
+A.saveSms = () => { const v = formVals('smsf'); v.enabled = $('#sms_en').checked; v.events = v.events || []; v.roles = v.roles || []; saveSet('sms', v, 'تنظیمات پیامک ذخیره شد.'); };
+A.smsTest = () => formModal('ارسال پیامک آزمایشی', [{ k: 'to', l: 'شماره همراه', t: 'tel', req: true }], { to: ME.user.phone || '' }, async v => { if (!SERVER) return fail('ارسال واقعی پیامک فقط در نسخه سروری ممکن است.'); return Remote.post('/api/sms/test', { to: v.to }); }, { submit: 'ارسال', done: 'نتیجه در صف ارسال نمایش داده می‌شود.' });
+A.admUnit = d => { const u = d.id ? UNITS.find(x => x.id === +d.id) : null; formModal(u ? 'ویرایش مدیریت' : 'افزودن مدیریت', [{ k: 'name', l: 'نام کامل', req: true }, { k: 'short', l: 'نام کوتاه', req: true }, { k: 'services', l: 'خدمات قابل درخواست (هر خط یک خدمت)', t: 'textarea', req: true }], u ? { name: u.name, short: u.short, services: SERVICES[u.id].join('\n') } : { services: 'امور عمومی' }, v => run('saveUnit', u ? u.id : 0, v), { done: u ? 'مدیریت ذخیره شد.' : 'مدیریت جدید با سه جایگاه مدیر، مسئول دفتر و منشی ساخته شد.' }); };
+A.admUnitToggle = d => { const u = UNITS.find(x => x.id === +d.id); confirmBox(u.off ? 'فعال‌سازی مدیریت' : 'غیرفعال‌سازی مدیریت', u.off ? `«${esc(u.name)}» دوباره در فهرست‌ها نمایش داده می‌شود.` : `«${esc(u.name)}» از فهرست‌ها و فرم‌ها پنهان می‌شود؛ سوابق و جایگاه‌های آن حفظ می‌شود.`, u.off ? 'فعال شود' : 'غیرفعال شود', () => run('toggleUnit', u.id), 'انجام شد.'); };
+A.admSpace = d => { const x = d.id ? SPACES.find(s => s.id === d.id) : { cap: 50, excl: true, unit: 3 }; formModal(d.id ? 'ویرایش فضا' : 'افزودن فضا', [{ k: 'name', l: 'نام', req: true }, { k: 'unit', l: 'مدیریت تأییدکننده', t: 'select', o: unitOpts(), req: true, blank: false }, { k: 'cap', l: 'ظرفیت (نفر)', t: 'number', req: true }, { k: 'excl', l: 'کنترل تداخل', t: 'check', cl: 'رزرو هم‌زمان مجاز نباشد' }], x, v => run('saveSpace', d.id || '', v)); };
+A.admSpaceDel = d => confirmBox('حذف فضا', 'این فضا از فهرست رزرو حذف شود؟ سوابق رزروهای گذشته حفظ می‌شود.', 'حذف', () => run('deleteSpace', d.id), 'فضا حذف شد.');
+A.admSaveLists = () => saveSet('lists', formVals('listf'));
+A.admOrgReset = () => confirmBox('بازگردانی ساختار', 'نام مدیریت‌ها، خدمات، فضاها و فهرست‌های پایه به حالت اولیه برمی‌گردد.', 'بازگردانی', () => run('orgReset'), 'بازگردانی شد.');
 A.admRec = d => {
-  const [c, i] = d.id.split('|'); const rec = DB[c][+i];
-  const safe = { ...rec }; if (c === 'users') delete safe.pass;
-  modal({ title: `${DATA_COLS[c].t} — ویرایش مستقیم`, wide: true, body: `<textarea id="rec" class="json" spellcheck="false">${esc(JSON.stringify(safe, null, 2))}</textarea><div class="err" id="recerr"></div>${c === 'users' ? '<div class="hint">رمز عبور در این ویرایشگر نمایش داده نمی‌شود؛ برای تغییر رمز از «کاربران › تعیین رمز» استفاده کنید.</div>' : ''}`,
+  const [c, id] = d.id.split('|'); const rec0 = DB[c].find((x, i) => (x.id || String(i)) === id);
+  if (!rec0) return;
+  modal({ title: `${DATA_COLS[c].t} — ویرایش مستقیم`, wide: true, body: `<textarea id="rec" class="json" spellcheck="false" aria-label="متن رکورد">${esc(JSON.stringify(rec0, null, 2))}</textarea><div class="err" id="recerr" role="alert"></div>`,
     foot: `${btn('ذخیره تغییرات', 'admRecSave', { id: d.id }, '', 'check')}${btn('حذف رکورد', 'admRecDel', { id: d.id }, 'danger', 'trash')}${btn('انصراف', 'close', {}, 'ghost')}` });
 };
-A.admRecSave = d => { const [c, i] = d.id.split('|'); let v; try { v = JSON.parse($('#rec').value); } catch (e) { $('#recerr').textContent = 'متن JSON معتبر نیست: ' + e.message; return; }
-  const old = DB[c][+i]; if (c === 'users') v.pass = old.pass;
-  const changed = Object.keys({ ...old, ...v }).filter(k => JSON.stringify(old[k]) !== JSON.stringify(v[k]));
-  DB[c][+i] = v; audit('ویرایش مستقیم داده', c, v.id || i, changed.map(k => `${k}: ${String(JSON.stringify(old[k])).slice(0, 40)} ← ${String(JSON.stringify(v[k])).slice(0, 40)}`).join(' | ').slice(0, 400) || 'بدون تغییر');
-  closeModal(); refresh(); toast('رکورد ذخیره شد.'); };
-A.admRecDel = d => { const [c, i] = d.id.split('|'); const r = DB[c][+i]; if (c === 'users' && r.id === ME.user.id) return toast('حساب خودتان را نمی‌توانید حذف کنید.'); confirmBox('حذف رکورد', 'این رکورد برای همیشه حذف شود؟ اثر آن در رویدادهای سیستمی می‌ماند.', 'حذف', () => { DB[c].splice(+i, 1); audit('حذف مستقیم داده', c, r.id || i, JSON.stringify(r).slice(0, 200)); toast('حذف شد.'); }); };
+A.admRecSave = async d => { const [c, id] = d.id.split('|'); let v; try { v = JSON.parse($('#rec').value); } catch (e) { $('#recerr').textContent = 'متن JSON معتبر نیست: ' + e.message; return; }
+  const r = await run('dataSave', c, id, v); if (r.error) { $('#recerr').textContent = r.error; return; } closeModal(); refresh(); toast('رکورد ذخیره شد.'); };
+A.admRecDel = d => { const [c, id] = d.id.split('|'); confirmBox('حذف رکورد', 'این رکورد برای همیشه حذف شود؟ اثر آن در رویدادهای سیستمی می‌ماند.', 'حذف', () => run('dataDelete', c, id), 'حذف شد.'); };
 
-/* ---------- ویرایش آسان رکوردها از پنجره جزئیات ---------- */
-const EDITS = {
-  task: { col: 'tasks', ok: r => isMgrOrOffice(r.unitId) || can('admin.data'), f: [{ k: 'title', l: 'عنوان', req: true, full: true }, { k: 'desc', l: 'شرح', t: 'textarea' }, { k: 'priority', l: 'اولویت', t: 'select', o: PRIORITIES, blank: false }, { k: 'due', l: 'مهلت', t: 'date', req: true }], back: showTask },
-  letter: { col: 'letters', ok: r => (isClerk(r.unitId) && r.status !== 'بایگانی') || can('admin.data'), f: [{ k: 'subject', l: 'موضوع', req: true, full: true }, { k: 'sender', l: 'فرستنده' }, { k: 'receiver', l: 'گیرنده' }, { k: 'cat', l: 'طبقه‌بندی', t: 'select', o: LETTER_CATS, blank: false }, { k: 'priority', l: 'اهمیت', t: 'select', o: PRIORITIES, blank: false }, { k: 'conf', l: 'محرمانگی', t: 'select', o: CONF, blank: false }, { k: 'date', l: 'تاریخ', t: 'date', req: true }, { k: 'body', l: 'متن', t: 'textarea' }], back: showLetter },
-  order: { col: 'orders', ok: r => isImam() || can('admin.data'), f: [{ k: 'title', l: 'عنوان', req: true, full: true }, { k: 'desc', l: 'شرح', t: 'textarea' }, { k: 'priority', l: 'اهمیت', t: 'select', o: PRIORITIES, blank: false }, { k: 'due', l: 'مهلت', t: 'date', req: true }], back: showOrder },
-  meet: { col: 'meetings', ok: r => canEditMeeting(r) || can('admin.data'), f: [{ k: 'title', l: 'عنوان', req: true, full: true }, { k: 'date', l: 'تاریخ', t: 'date', req: true }, { k: 'place', l: 'مکان' }, { k: 'start', l: 'شروع', t: 'time', req: true }, { k: 'end', l: 'پایان', t: 'time' }, { k: 'agenda', l: 'دستور جلسه', t: 'textarea' }], back: showMeeting },
-  res: { col: 'reservations', ok: r => (r.by === ME.user.id && r.status === 'در انتظار تأیید') || canDecideRes(r) || can('admin.data'), f: [{ k: 'kind', l: 'نوع برنامه', req: true }, { k: 'date', l: 'تاریخ', t: 'date', req: true }, { k: 'start', l: 'شروع', t: 'time', req: true }, { k: 'end', l: 'پایان', t: 'time', req: true }, { k: 'people', l: 'تعداد افراد', t: 'number' }, { k: 'equip', l: 'تجهیزات' }, { k: 'desc', l: 'توضیحات', t: 'textarea' }], back: showRes,
-    check: (r, v) => { if (v.end <= v.start) return 'ساعت پایان باید بعد از شروع باشد.'; if (r.status === 'تأییدشده' && resConflicts({ ...r, ...v }).length) return 'این تغییر با رزرو تأییدشده دیگری تداخل دارد.'; } },
-  asset: { col: 'assets', ok: r => canManageAsset(r) || can('admin.data'), f: [{ k: 'name', l: 'نام', req: true, full: true }, { k: 'cat', l: 'گروه' }, { k: 'serial', l: 'شماره سریال' }, { k: 'value', l: 'ارزش (ریال)', t: 'number' }, { k: 'specs', l: 'مشخصات فنی', t: 'textarea' }], back: showAsset }
+/* ---------- ویرایش آسان رکوردها از پنجره جزئیات (قواعد در ops.js) ---------- */
+const EDIT_FORMS = {
+  task: [{ k: 'title', l: 'عنوان', req: true, full: true }, { k: 'desc', l: 'شرح', t: 'textarea' }, { k: 'priority', l: 'اولویت', t: 'select', o: PRIORITIES, blank: false }, { k: 'due', l: 'مهلت', t: 'date', req: true }],
+  letter: [{ k: 'subject', l: 'موضوع', req: true, full: true }, { k: 'sender', l: 'فرستنده' }, { k: 'receiver', l: 'گیرنده' }, { k: 'cat', l: 'طبقه‌بندی', t: 'select', o: LETTER_CATS, blank: false }, { k: 'priority', l: 'اهمیت', t: 'select', o: PRIORITIES, blank: false }, { k: 'conf', l: 'محرمانگی', t: 'select', o: CONF, blank: false }, { k: 'date', l: 'تاریخ', t: 'date', req: true }, { k: 'body', l: 'متن', t: 'textarea' }],
+  order: [{ k: 'title', l: 'عنوان', req: true, full: true }, { k: 'desc', l: 'شرح', t: 'textarea' }, { k: 'priority', l: 'اهمیت', t: 'select', o: PRIORITIES, blank: false }, { k: 'due', l: 'مهلت', t: 'date', req: true }],
+  meet: [{ k: 'title', l: 'عنوان', req: true, full: true }, { k: 'date', l: 'تاریخ', t: 'date', req: true }, { k: 'place', l: 'مکان' }, { k: 'start', l: 'شروع', t: 'time', req: true }, { k: 'end', l: 'پایان', t: 'time' }, { k: 'agenda', l: 'دستور جلسه', t: 'textarea' }],
+  res: [{ k: 'kind', l: 'عنوان برنامه', req: true, full: true }, { k: 'date', l: 'تاریخ', t: 'date', req: true }, { k: 'people', l: 'تعداد افراد', t: 'number', req: true }, { k: 'start', l: 'شروع', t: 'time', req: true }, { k: 'end', l: 'پایان', t: 'time', req: true }, { k: 'equip', l: 'تجهیزات' }, { k: 'desc', l: 'توضیحات', t: 'textarea' }],
+  asset: [{ k: 'name', l: 'نام', req: true, full: true }, { k: 'cat', l: 'گروه' }, { k: 'serial', l: 'شماره سریال' }, { k: 'value', l: 'ارزش (ریال)', t: 'number' }, { k: 'specs', l: 'مشخصات فنی', t: 'textarea' }]
 };
-const editBtn = (k, r) => (EDITS[k].ok(r) ? btn('ویرایش', 'editRec', { k, id: r.id }, 'ghost', 'edit') : '');
-A.editRec = d => {
-  const E = EDITS[d.k]; const r = DB[E.col].find(x => x.id === d.id);
-  formModal('ویرایش', E.f, r, v => {
-    if (!E.ok(r)) return fail('ویرایش این مورد برای جایگاه شما مجاز نیست.');
-    const err = E.check && E.check(r, v); if (err) return fail(err);
-    const ch = E.f.map(f => f.k).filter(k => String(r[k] ?? '') !== String(v[k] ?? ''));
-    if (!ch.length) return r;
-    ch.forEach(k => (r[k] = v[k]));
-    hist(r, 'ویرایش', ch.map(k => E.f.find(f => f.k === k).l).join('، '));
-    audit('ویرایش ' + E.col, E.col, r.id, r.no || r.code || '');
-    return r;
-  }, { submit: 'ذخیره تغییرات', done: 'تغییرات ذخیره شد.', reopen: () => E.back(r.id) });
-};
+const EDIT_BACK = { task: id => showTask(id), letter: id => showLetter(id), order: id => showOrder(id), meet: id => showMeeting(id), res: id => showRes(id), asset: id => showAsset(id) };
+const editBtn = (k, r) => (canEditRec(k, r) ? btn('ویرایش', 'editRec', { k, id: r.id }, 'ghost', 'edit') : '');
+A.editRec = d => { const r = DB[EDIT_RULES[d.k].col].find(x => x.id === d.id); formModal('ویرایش', EDIT_FORMS[d.k], r, v => run('editRecord', d.k, d.id, v), { submit: 'ذخیره تغییرات', done: 'تغییرات ذخیره شد.', reopen: () => EDIT_BACK[d.k](d.id) }); };
 
 /* ---------- حساب کاربری من ---------- */
 PAGES.profile = () => {
@@ -555,16 +355,7 @@ PAGES.profile = () => {
   ${card('تاریخچه ورود من', table([['زمان', l => jdt(l.ts)], ['نتیجه', l => pill(l.ok ? 'موفق' : 'ناموفق', l.ok ? 'ok' : 'bad')], ['شرح', l => esc(l.reason)], ['مرورگر', l => `<span class="code">${esc(l.agent || '')}</span>`]], mine), '<small>اگر ورودی را نمی‌شناسید، رمز خود را تغییر دهید</small>', { flush: true })}`;
 };
 A.myPass = () => formModal('تغییر رمز عبور', [{ k: 'cur', l: 'رمز فعلی', t: 'password', req: true }, { k: 'p1', l: 'رمز جدید', t: 'password', req: true, hint: 'دست‌کم ' + fa(DB.settings.security.minLen) + ' نویسه' }, { k: 'p2', l: 'تکرار رمز جدید', t: 'password', req: true }], {}, v => {
-  if (hash('shabab:' + en(v.cur)) !== ME.user.pass) return fail('رمز فعلی درست نیست.');
   if (v.p1 !== v.p2) return fail('رمز جدید و تکرار آن یکسان نیست.');
-  return setPassword(ME.user, v.p1, false, true);
-}, { submit: 'تغییر رمز', done: 'رمز عبور شما تغییر کرد.' });
-A.myPhone = () => formModal('تلفن همراه', [{ k: 'phone', l: 'شماره همراه', t: 'tel', req: true }], ME.user, v => { if (!/^0?9\d{9}$/.test(en(v.phone).replace(/\D/g, ''))) return fail('شماره همراه معتبر نیست.'); ME.user.phone = en(v.phone); audit('تغییر تلفن توسط کاربر', 'user', ME.user.id, ''); return ME.user; });
-
-/* ---------- تنظیمات و آرشیو (برای همه کاربران) ---------- */
-const _systemPage = PAGES.system;
-PAGES.system = () => {
-  const v = vs('sys', { tab: 'archive' });
-  if (!['archive', 'audit'].includes(v.tab)) v.tab = 'archive';
-  return _systemPage().replace(/<div class="tabs"[\s\S]*?<\/div>/, tabs('sys', [['archive', 'آرشیو سامانه'], ['audit', 'رویدادهای واحد من']], v.tab) + (canAdminPanel() ? `<div class="notice">تنظیمات، پیامک و پشتیبان‌گیری به <a href="#admin">پنل مدیریت سامانه</a> منتقل شده است.</div>` : ''));
-};
+  return run('changeOwnPassword', v.cur, v.p1);
+}, { submit: 'تغییر رمز', done: 'رمز عبور شما تغییر کرد.', noDraft: true });
+A.myPhone = () => formModal('تلفن همراه', [{ k: 'phone', l: 'شماره همراه', t: 'tel', req: true }], ME.user, v => run('changeOwnPhone', v.phone));

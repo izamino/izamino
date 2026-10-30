@@ -1,0 +1,23 @@
+# /etc/systemd/system/kartabl.service
+[Unit]
+Description=Kartabl Shabab Ahl al-Jannah
+After=network.target
+
+[Service]
+Type=simple
+User=kartabl
+WorkingDirectory=/opt/kartabl/server
+Environment=PORT=8080
+Environment=HOST=127.0.0.1
+Environment=DATA_DIR=/var/lib/kartabl
+Environment=COOKIE_SECURE=1
+Environment=TRUST_PROXY=1
+ExecStart=/usr/bin/node --disable-warning=ExperimentalWarning server.js
+Restart=on-failure
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/kartabl
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -135,13 +135,9 @@ const REGISTRIES = {
   17: [{ key: 'projects', title: 'پروژه‌های عمرانی', fields: [['title', 'نام پروژه'], ['contractor', 'پیمانکار'], ['start', 'شروع', 'date'], ['end', 'پایان برنامه', 'date'], ['progress', 'پیشرفت فیزیکی (٪)', 'number'], ['budget', 'بودجه (ریال)', 'number'], ['spent', 'هزینه‌شده (ریال)', 'number']] }]
 };
 
-/* فضاها و امکانات قابل رزرو و مدیریت تأییدکننده */
+/* فضاهای فیزیکی قابل رزرو و مدیریت تأییدکننده هر فضا (کنترل تداخل بر اساس سالن واقعی) */
 const SPACES = [
   { id: 'hosseinieh', name: 'حسینیه', unit: 2, cap: 600, excl: true },
-  { id: 'fateheh', name: 'مراسم فاتحه و ترحیم', unit: 2, cap: 400, excl: false },
-  { id: 'religious', name: 'مراسم مذهبی', unit: 2, cap: 800, excl: false },
-  { id: 'rahian', name: 'راهیان نور', unit: 2, cap: 120, excl: false },
-  { id: 'ziarat', name: 'اردوی زیارتی', unit: 2, cap: 90, excl: false },
   { id: 'farhangsara', name: 'فرهنگسرا', unit: 3, cap: 80, excl: true },
   { id: 'amphi', name: 'سالن آمفی‌تئاتر ۱۴۴ نفره', unit: 3, cap: 144, excl: true },
   { id: 'cinema', name: 'سینما', unit: 3, cap: 60, excl: true },
@@ -149,7 +145,21 @@ const SPACES = [
   { id: 'zaersara', name: 'زائرسرا', unit: 1, cap: 40, excl: true },
   { id: 'guest', name: 'مهمانسرا و خدمات اسکان', unit: 1, cap: 16, excl: true }
 ];
-const spaceOf = id => SPACES.find(s => s.id === id) || { name: id, unit: 1 };
+/* نوع برنامه جدا از فضا: مراسم در یک سالن واقعی برگزار می‌شود؛ برنامه‌های بیرون از مجتمع فضا ندارند */
+const PROGRAMS = [
+  { id: 'general', name: 'برنامه عمومی', unit: 0 },
+  { id: 'religious', name: 'مراسم مذهبی', unit: 2 },
+  { id: 'fateheh', name: 'مراسم فاتحه و ترحیم', unit: 2 },
+  { id: 'rahian', name: 'راهیان نور', unit: 2, offsite: true, cap: 120 },
+  { id: 'ziarat', name: 'اردوی زیارتی', unit: 2, offsite: true, cap: 90 },
+  { id: 'lodging', name: 'اسکان', unit: 1 }
+];
+const spaceOf = id => SPACES.find(s => s.id === id) || { id: '', name: 'خارج از مجتمع', unit: 0, cap: 0, excl: false };
+const programOf = id => PROGRAMS.find(p => p.id === id) || PROGRAMS[0];
+/* مدیریت تأییدکننده: مالک سالن؛ برای برنامه بیرون از مجتمع، متولی همان برنامه */
+const resUnit = r => (r.space ? spaceOf(r.space).unit : programOf(r.program).unit || U_CULTURE);
+const resCap = r => (r.space ? spaceOf(r.space).cap : programOf(r.program).cap || 0);
+const resPlace = r => (r.space ? spaceOf(r.space).name : 'خارج از مجتمع');
 
 /* ---------- آیکون‌ها ---------- */
 const IC = {
@@ -219,7 +229,7 @@ const Store = {
     try { const s = localStorage.getItem(STORE_KEY); if (s) { DB = JSON.parse(s); if (DB && DB.ver === 1) return; } } catch (e) { MEMORY_ONLY = true; }
     DB = seed(); this.save();
   },
-  save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(DB)); } catch (e) { MEMORY_ONLY = true; } if (typeof Sync !== 'undefined') Sync.schedule(); },
+  save() { if (typeof SERVER !== 'undefined' && SERVER) return; /* نسخه سروری: هیچ داده‌ای در مرورگر نمی‌ماند */ try { localStorage.setItem(STORE_KEY, JSON.stringify(DB)); } catch (e) { MEMORY_ONLY = true; } if (typeof Sync !== 'undefined') Sync.schedule(); },
   reset() { try { localStorage.removeItem(STORE_KEY); } catch (e) {} DB = seed(); this.save(); }
 };
 const pref = {
@@ -281,6 +291,10 @@ const PERMS = [
   ['admin.data', 'ویرایش و حذف مستقیم داده‌ها', 'مدیریت سامانه'],
   ['admin.backup', 'پشتیبان‌گیری و بازیابی', 'مدیریت سامانه']
 ];
+/* مجوزهای حساس: فقط امام جماعت می‌تواند آن‌ها را اعطا کند و هیچ‌کس نمی‌تواند به خودش بدهد */
+const SENSITIVE_PERMS = ['view.all', 'orders.issue', 'finance.view', 'hr.view', 'letters.secret', 'admin.panel', 'admin.users', 'admin.passwords', 'admin.perms', 'admin.signups', 'admin.logs', 'admin.approve', 'admin.settings', 'admin.data', 'admin.backup'];
+const isSensitivePerm = k => SENSITIVE_PERMS.includes(k);
+const isSensitivePos = p => !!p && (p.role === 'imam' || ['view.all', 'orders.issue', 'admin.users', 'admin.passwords', 'admin.perms', 'admin.settings', 'admin.data', 'admin.backup', 'admin.approve'].some(k => permOf(p, k)));
 const permLabel = k => (PERMS.find(p => p[0] === k) || [k, k])[1];
 /* پیش‌فرض بر اساس نقش و مدیریت (مدیر فناوری اطلاعات همه اختیارات مدیریت سامانه را دارد) */
 function permDefault(pos, k) {
@@ -321,6 +335,9 @@ const canAssets = () => can('assets.view');
 const canAdminPanel = () => can('admin.panel') || can('admin.users') || can('admin.settings') || can('admin.logs');
 
 /* ---------- ثبت رویداد (زنجیره غیرقابل‌ویرایش) ---------- */
+/* رمز عبور: در نسخه نمایشی هش ساده؛ سرور این دو تابع را با scrypt جایگزین می‌کند */
+let pwHash = p => 'demo$' + hash('shabab:' + en(p));
+let pwCheck = (stored, p) => !!stored && (stored === pwHash(p) || stored === hash('shabab:' + en(p)));
 function hash(s) { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(16).padStart(8, '0'); }
 function audit(act, ent, id, note = '') {
   const prev = DB.audit.length ? DB.audit[DB.audit.length - 1].h : '00000000';
