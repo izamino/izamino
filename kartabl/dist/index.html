@@ -3816,7 +3816,7 @@ A.backup = async () => {
   audit('تهیه نسخه پشتیبان', 'backup', '', fa(Math.round(json.length / 1024)) + 'KB');
   Store.save();
   const name = `kartabl-backup-${todayISO()}.json`;
-  modal({ title: 'نسخه پشتیبان', wide: true, body: `<p>فایل را دریافت کنید یا متن زیر را کپی و در فایلی با پسوند <span class="code">.json</span> ذخیره کنید.</p><p><a class="btn" href="data:application/json;charset=utf-8,${encodeURIComponent(json)}" download="${name}">${ic('archive')}دریافت فایل پشتیبان</a></p><textarea id="bk" readonly class="json" aria-label="متن نسخه پشتیبان">${esc(json)}</textarea>`, foot: btn('کپی متن', 'copyBk', {}, 'ghost', 'file') });
+  modal({ title: 'نسخه پشتیبان', wide: true, body: `<p>فایل را دریافت کنید یا متن زیر را کپی و در فایلی با پسوند <span class="code">.json</span> ذخیره کنید.</p>${CAN_PRINT ? `<p><a class="btn" href="data:application/json;charset=utf-8,${encodeURIComponent(json)}" download="${name}">${ic('archive')}دریافت فایل پشتیبان</a></p>` : ''}<textarea id="bk" readonly class="json" aria-label="متن نسخه پشتیبان">${esc(json)}</textarea>`, foot: btn('کپی متن', 'copyBk', {}, 'ghost', 'file') });
   route();
 };
 A.copyBk = () => { const t = $('#bk'); navigator.clipboard.writeText(t.value).then(() => toast('نسخه پشتیبان کپی شد.'), () => { t.select(); toast('متن انتخاب شد؛ با Ctrl+C کپی کنید.'); }); };
