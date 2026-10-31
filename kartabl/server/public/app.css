@@ -634,3 +634,4 @@ textarea.json { width: 100%; height: 340px; direction: ltr; text-align: left; fo
   .loanrow .lr { flex-direction: row; width: 100%; justify-content: space-between; align-items: center; }
   .posgrid, .permlist { grid-template-columns: minmax(0, 1fr); }
 }
+.who2 .sub { display: block; }
