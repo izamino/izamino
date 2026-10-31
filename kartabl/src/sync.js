@@ -24,7 +24,7 @@ const Sync = {
     try { snap = await this.col.get(); } catch (e) { return this.fail(e); }
     const remote = this.assemble(snap.docs);
     this.mode = 'shared';
-    if (!Object.keys(remote).length) await this.pushAll();
+    if (!Object.keys(remote).length || remote.demoRev !== JSON.stringify(DEMO_REV)) await this.pushAll(); /* داده نمایشی با ساختار قدیمی جایگزین می‌شود */
     else this.apply(remote);
     this.col.onSnapshot(s => { const r = this.assemble(s.docs); if ($('.modal-bg')) this.pending = r; else this.apply(r); }, e => this.fail(e));
     showSync();

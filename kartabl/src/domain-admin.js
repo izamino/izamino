@@ -7,9 +7,17 @@ const DEFAULTS = JSON.parse(JSON.stringify({ units: UNITS, services: SERVICES, s
 /* ---------- مهاجرت داده و اعمال تنظیمات ---------- */
 function migrate(D) {
   D.logins = D.logins || []; D.sessions = D.sessions || []; D.signups = D.signups || [];
+  D.books = D.books || []; D.members = D.members || []; D.loans = D.loans || []; D.msessions = D.msessions || [];
+  (D.users || []).forEach(u => { if (!u.first && u.name) { const parts = u.name.replace(/^(حجت‌الاسلام و?(المسلمین)?|حجت‌الاسلام)\s+/, '').split(' '); u.first = parts[0]; u.last = parts.slice(1).join(' ') || '—'; } });
+  (D.posHistory || []).forEach(h => { if (!h.name) { const u = (D.users || []).find(x => x.id === h.userId); if (u) h.name = u.name; } });
+  /* جایگاه‌های سه‌گانه برای همه مدیریت‌ها (از جمله مدیریت‌های تازه) */
+  if (D.positions && D.positions.length) {
+    UNITS.forEach(u => [['m', 'manager', 'مدیر'], ['o', 'office', 'مسئول دفتر'], ['s', 'secretary', 'منشی']].forEach(([c, role, title]) => { if (!D.positions.some(p => p.id === `P${u.id}-${c}`)) D.positions.push({ id: `P${u.id}-${c}`, unitId: u.id, role, title }); }));
+    if (D.budgets) UNITS.forEach(u => { if (!D.budgets.some(b => b.unitId === u.id)) D.budgets.push({ unitId: u.id, year: jYearNow(), amount: 0 }); });
+  }
   const s = D.settings;
   const def = {
-    loginTitle: 'کارتابل اداری', subtitle: 'مجتمع مسجدمحور', loginText: 'سامانه یکپارچه مکاتبات، دستورات، ارجاع وظایف، درخواست‌ها، رزروها، اموال، امور مالی و منابع انسانی ۱۷ مدیریت مستقل زیر نظر امام جماعت.',
+    loginTitle: 'کارتابل اداری', subtitle: 'مجتمع مسجدمحور', loginText: 'سامانه یکپارچه مکاتبات، دستورات، ارجاع وظایف، درخواست‌ها، رزروها، اموال، امور مالی و منابع انسانی مدیریت‌های مستقل زیر نظر امام جماعت.',
     announcement: { on: false, text: '', tone: 'info' }, maintenance: false, showDemo: true,
     theme: { palette: 'zomorrod', scale: 14 }, security: { minLen: 6, maxFails: 5, lockMin: 15, sessionMin: 60 },
     clock: { city: 'آبادان', lat: 30.3392, lng: 48.3043, prayer: true }, rolePerms: {}, units: {}, unitsOff: [], extraUnits: []
@@ -90,21 +98,68 @@ function createUser2(v) {
   if (v.posId) { const r = assignHolder(v.posId, u.id); if (r && r.error) return r; }
   return u;
 }
-function updateUser(u, v) {
-  if (!can('admin.users')) return fail('ویرایش کاربر مجاز نیست.');
+/* ویرایش ساده مشخصات متصدی فعلی: نام، نام خانوادگی و تماس؛ نام کاربری، جایگاه و سوابق تغییر نمی‌کند */
+function updateHolder(u, v) {
+  const self = u.id === ME.user.id;
+  if (!self && !can('admin.users')) return fail('ویرایش مشخصات متصدی برای جایگاه شما مجاز نیست.');
   if (u.deleted) return fail('این حساب حذف شده است.');
-  if (u.posId && isSensitivePos(posById(u.posId)) && !isImam() && u.id !== ME.user.id) return fail('ویرایش حساب متصدی جایگاه حساس فقط با امام جماعت است.');
-  if (!v.name) return fail('نام را بنویسید.');
-  if (!USERNAME_RE.test(v.username)) return fail('نام کاربری معتبر نیست.');
-  if (DB.users.some(x => x.id !== u.id && x.username === v.username && !x.deleted)) return fail('این نام کاربری متعلق به کاربر دیگری است.');
-  const ch = ['name', 'username', 'phone', 'nid'].filter(k => String(u[k] || '') !== String(v[k] || ''));
-  Object.assign(u, { name: v.name, username: v.username, phone: en(v.phone || ''), nid: en(v.nid || '') });
-  if (v.posId !== (u.posId || '')) {
-    if (!v.posId) { const h = DB.posHistory.find(x => x.userId === u.id && !x.to); if (h) h.to = todayISO(); u.posId = ''; audit('برداشتن جایگاه کاربر', 'user', u.id, u.username); }
-    else { const r = assignHolder(v.posId, u.id); if (r && r.error) return r; }
-  }
-  if (ch.length) audit('ویرایش کاربر', 'user', u.id, u.username + ' · ' + ch.join('، '));
+  if (!self && u.posId && isSensitivePos(posById(u.posId)) && !isImam()) return fail('ویرایش مشخصات متصدی جایگاه حساس فقط با امام جماعت یا خود متصدی است.');
+  const first = String(v.first || '').trim(), last = String(v.last || '').trim();
+  if (!first || !last) return fail('نام و نام خانوادگی را بنویسید.');
+  if (LABEL_BAD.test(first + last)) return fail('نام نباید شامل نویسه‌های < > " \' ` & باشد.');
+  const phone = en(v.phone || '').replace(/\D/g, '');
+  if (phone && !/^0?9\d{9}$|^0\d{10}$/.test(phone)) return fail('شماره تماس معتبر نیست.');
+  const before = `${u.name} · ${u.phone || '—'}`;
+  Object.assign(u, { first, last, name: first + ' ' + last, phone, nid: en(v.nid ?? u.nid ?? '') });
+  /* نام متصدی فعلی در سابقه جایگاه هم به‌روز می‌شود؛ سوابق متصدیان قبلی دست‌نخورده می‌ماند */
+  const h = DB.posHistory.filter(x => x.posId === u.posId && x.userId === u.id && !x.to).slice(-1)[0];
+  if (h) { h.name = u.name; h.phone = phone; }
+  audit('ویرایش مشخصات متصدی', 'user', u.id, `${posLabel(u.posId)}: ${before} ← ${u.name} · ${phone || '—'}`);
   return u;
+}
+/* تغییر متصدی و تحویل رسمی مسئولیت: حساب و پنل جایگاه ثابت می‌ماند؛ فرد، رمز و نشست‌ها عوض می‌شود */
+function handover(posId, v) {
+  if (!can('admin.users')) return fail('تغییر متصدی جایگاه برای جایگاه شما مجاز نیست.');
+  const p = posById(posId); if (!p) return fail('جایگاه یافت نشد.');
+  if (posId === ME.pos.id) return fail('تحویل جایگاه خودتان با امام جماعت یا مدیر فناوری اطلاعات است.');
+  if (isSensitivePos(p) && !isImam()) return fail(`«${posLabel(p.id)}» جایگاه حساس است و تغییر متصدی آن فقط با امام جماعت است.`);
+  const first = String(v.first || '').trim(), last = String(v.last || '').trim();
+  if (!first || !last) return fail('نام و نام خانوادگی متصدی جدید را بنویسید.');
+  if (LABEL_BAD.test(first + last)) return fail('نام نباید شامل نویسه‌های < > " \' ` & باشد.');
+  const phone = en(v.phone || '').replace(/\D/g, '');
+  if (!/^0?9\d{9}$|^0\d{10}$/.test(phone)) return fail('شماره تماس متصدی جدید معتبر نیست.');
+  const start = v.start || todayISO();
+  if (!/^\d{4}-\d\d-\d\d$/.test(start)) return fail('تاریخ شروع مسئولیت معتبر نیست.');
+  let acc = accountOf(posId);
+  const prevName = acc ? acc.name : '';
+  if (!acc) {
+    let un = posUsername(p); let n = 2; while (DB.users.some(u => u.username === un && !u.deleted)) un = posUsername(p) + n++;
+    acc = { id: 'u' + uid(), username: un, posId, active: true, created: stamp() };
+    DB.users.push(acc);
+  }
+  const cur = DB.posHistory.filter(x => x.posId === posId && !x.to);
+  cur.forEach(h => { h.to = start; h.name = h.name || prevName; h.handedTo = first + ' ' + last; });
+  const tempPass = genPass() + genPass().slice(0, 4);
+  Object.assign(acc, { first, last, name: first + ' ' + last, phone, nid: en(v.nid || ''), hired: start, start, active: true, deleted: false, pass: pwHash(tempPass), mustChange: true, fails: 0, lockedUntil: '' });
+  DB.posHistory.push({ posId, userId: acc.id, name: acc.name, phone, from: start, to: '', by: ME.user.name, note: String(v.note || '').slice(0, 500) });
+  endUserSessions(acc.id);
+  audit('تغییر متصدی و تحویل مسئولیت', 'position', posId, `${posLabel(posId)}: ${prevName || 'بدون متصدی'} ← ${acc.name} از ${jd(start)}${v.note ? ' — ' + v.note : ''}`);
+  return { id: acc.id, username: acc.username, tempPass };
+}
+/* حساب‌های همه جایگاه‌های بدون حساب، با رمز اولیه مستقل و تصادفی (فقط در خط فرمان سرور) */
+function provisionAccounts(makePass) {
+  const out = [];
+  DB.positions.forEach(p => {
+    if (accountOf(p.id)) return;
+    const pass = makePass();
+    let un = posUsername(p); let n = 2; while (DB.users.some(u => u.username === un && !u.deleted)) un = posUsername(p) + n++;
+    const u = { id: 'u' + uid(), username: un, posId: p.id, first: 'متصدی', last: 'ثبت‌نشده', name: 'متصدی ثبت‌نشده', phone: '', active: true, pass: pwHash(pass), mustChange: true, created: stamp(), start: todayISO() };
+    DB.users.push(u);
+    DB.posHistory.push({ posId: p.id, userId: u.id, name: u.name, phone: '', from: todayISO(), to: '', by: 'خط فرمان سرور' });
+    out.push({ pos: posLabel(p.id), panel: panelName(p), username: un, pass });
+  });
+  if (out.length) audit('ایجاد حساب‌های جایگاه‌ها', 'user', '', fa(out.length) + ' حساب');
+  return out;
 }
 function deleteUser(u) {
   if (!can('admin.users')) return fail('حذف کاربر مجاز نیست.');
@@ -159,13 +214,17 @@ function decideSignup(sg, ok, v) {
   let posId = v.posId;
   if (!posId) return fail('جایگاه سازمانی را انتخاب کنید.');
   if (posId === 'new') { const p = addPosition({ unitId: sg.unitId, title: sg.title }); if (p.error) return p; posId = p.id; }
-  if (DB.users.some(u => u.username === sg.username && !u.deleted)) return fail('این نام کاربری در این فاصله توسط کاربر دیگری گرفته شده است.');
-  const u = { id: 'u' + uid(), name: sg.name, username: sg.username, pass: sg.passHash, posId: '', active: true, phone: sg.phone, hired: todayISO(), created: stamp() };
-  DB.users.push(u);
-  const r = assignHolder(posId, u.id); if (r && r.error) return r;
-  sg.status = 'تأییدشده'; sg.userId = u.id;
-  audit('تأیید درخواست عضویت', 'signup', sg.id, sg.username + ' ← ' + posLabel(posId));
-  return sg;
+  const p = posById(posId);
+  if (!p || accountOf(posId)) return fail('این جایگاه متصدی دارد؛ جایگاه خالی یا جایگاه جدید انتخاب کنید.');
+  if (isSensitivePos(p)) return fail('جایگاه حساس را نمی‌توان از مسیر درخواست عضویت واگذار کرد.');
+  const [first, ...rest] = sg.name.split(' ');
+  const r = handover(posId, { first, last: rest.join(' ') || '—', phone: sg.phone, start: todayISO(), note: 'تأیید درخواست عضویت ' + sg.no });
+  if (r.error) return r;
+  const acc = userById(r.id);
+  acc.pass = sg.passHash; acc.mustChange = false; /* رمزی که متقاضی خودش انتخاب کرده بود */
+  sg.status = 'تأییدشده'; sg.userId = acc.id; sg.assignedUsername = acc.username;
+  audit('تأیید درخواست عضویت', 'signup', sg.id, sg.username + ' ← ' + posLabel(posId) + ' · نام کاربری ' + acc.username);
+  return { id: acc.id, username: acc.username };
 }
 
 /* ---------- تأیید و رد مدیریتی همه موارد معلق ---------- */

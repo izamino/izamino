@@ -580,3 +580,57 @@ textarea.json { width: 100%; height: 340px; direction: ltr; text-align: left; fo
   .tbl-wrap.matrix-wrap { overflow-x: auto; }
   .idlewarn { bottom: calc(90px + env(safe-area-inset-bottom, 0px)); }
 }
+
+/* ================= نسخه ۴: کتابخانه عمومی، جایگاه‌ها و نظارت ================= */
+.posgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.poscard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.pc-h { display: flex; gap: 10px; align-items: center; }
+.pc-h .k { width: 38px; height: 38px; border-radius: 10px; background: var(--teal-soft); color: var(--accent); display: grid; place-items: center; flex: none; }
+.pc-h b { display: block; font-size: .9rem; line-height: 1.5; }
+.pc-h small { color: var(--muted); font-size: .74rem; }
+.permlist { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }
+.libentry { display: flex; gap: 12px; align-items: center; text-decoration: none; color: var(--fg); border: 1px dashed var(--teal); background: var(--teal-soft); border-radius: 12px; padding: 12px 14px; }
+.libentry svg { width: 26px; height: 26px; color: var(--accent); flex: none; }
+.libentry b { display: block; color: var(--accent); }
+.libentry small { color: var(--muted); font-size: .78rem; }
+.lib { min-height: 100%; display: flex; flex-direction: column; background: var(--bg); }
+.lib-top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.lib-brand { display: flex; gap: 10px; align-items: center; text-decoration: none; color: var(--fg); }
+.lib-brand .mark { width: 40px; height: 40px; border-radius: 12px; background: var(--side); color: var(--glow); display: grid; place-items: center; }
+.lib-brand b { display: block; font-size: 1rem; }
+.lib-brand small { color: var(--muted); font-size: .74rem; }
+.lib-main { width: 100%; max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; padding-block: 18px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.lib-hero { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px; align-items: center; background-color: var(--side); background-image: var(--pattern); color: var(--hero-fg); border-radius: calc(var(--r) + 4px); padding: 24px; }
+.lib-hero h1 { color: #fff; font-size: 1.45rem; }
+.lib-hero p { color: var(--hero-muted); margin: 6px 0 14px; max-width: 52ch; }
+.lib-search { max-width: none; }
+.lib-search input { background: var(--surface); color: var(--fg); border: 0; padding-block: 11px; }
+.lib-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; font-size: .78rem; }
+.lib-steps li { display: flex; gap: 8px; align-items: center; background: rgba(255,255,255,.08); border-radius: 8px; padding: 6px 8px; color: var(--hero-fg); }
+.lib-steps i { font-style: normal; width: 22px; height: 22px; border-radius: 50%; background: var(--glow); color: var(--side); display: grid; place-items: center; font-weight: 800; flex: none; font-size: .72rem; }
+.books { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.bookcard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column; }
+.bookcard .cover { height: 92px; background: linear-gradient(135deg, var(--side), var(--side-2)); background-image: var(--pattern), linear-gradient(135deg, var(--side), var(--side-2)); color: var(--glow); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+.bookcard .cover svg { width: 34px; height: 34px; }
+.bookcard .cover span { font-size: .72rem; color: var(--hero-muted); }
+.bk-b { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.bk-b h3 { font-size: .98rem; }
+.bk-b p { margin: 0; color: var(--muted); font-size: .82rem; }
+.bk-b .row { margin-top: auto; }
+.lib-foot { text-align: center; color: var(--muted); font-size: .76rem; padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+.loanrow .lr { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.notice.ok-n { background: var(--ok-bg); color: var(--ok); margin-top: 6px; }
+.mt-s { margin-top: 6px; }
+@media (max-width: 900px) { .lib-hero { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) {
+  .lib-top nav { width: 100%; }
+  .lib-top nav .btn { flex: 1 1 auto; justify-content: center; }
+  .lib-hero { padding: 18px 16px; }
+  .lib-hero h1 { font-size: 1.2rem; }
+  .books { grid-template-columns: minmax(0, 1fr); }
+  .bookcard { flex-direction: row; }
+  .bookcard .cover { width: 84px; height: auto; flex-direction: column; justify-content: center; gap: 4px; padding: 10px 6px; text-align: center; flex: none; }
+  .loanrow { flex-wrap: wrap; }
+  .loanrow .lr { flex-direction: row; width: 100%; justify-content: space-between; align-items: center; }
+  .posgrid, .permlist { grid-template-columns: minmax(0, 1fr); }
+}

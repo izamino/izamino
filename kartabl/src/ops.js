@@ -3,7 +3,7 @@
    هر عملیات شناسه می‌گیرد (نه شیء)، مجوز را خودش بررسی می‌کند و در صورت خطا هیچ تغییری باقی نمی‌گذارد.
    در نسخه سروری همین فهرست روی سرور اجرا می‌شود و مرورگر فقط درخواست می‌فرستد.
    ===================================================================== */
-const COLS = { letter: 'letters', order: 'orders', task: 'tasks', req: 'requests', res: 'reservations', meet: 'meetings', asset: 'assets', move: 'movements', pay: 'payreqs', leave: 'leaves', user: 'users', signup: 'signups' };
+const COLS = { book: 'books', loan: 'loans', member: 'members', letter: 'letters', order: 'orders', task: 'tasks', req: 'requests', res: 'reservations', meet: 'meetings', asset: 'assets', move: 'movements', pay: 'payreqs', leave: 'leaves', user: 'users', signup: 'signups' };
 class OpError extends Error {}
 const need = (cond, msg) => { if (!cond) throw new OpError(msg); };
 function rec(col, id) { const r = (DB[col] || []).find(x => x.id === id); need(r, 'این مورد یافت نشد یا حذف شده است.'); return r; }
@@ -67,6 +67,16 @@ const OPS = {
   leaveAct: (id, ok, note) => leaveAct(rec('leaves', id), !!ok, str(note)),
   addHR: (kind, v) => { need(['missions', 'decrees', 'contracts'].includes(kind), 'نوع سابقه نامعتبر است.'); need(userById(v.uid), 'کارمند را انتخاب کنید.'); return addHR(kind, { ...v, status: 'تأییدشده' }); },
   addRecord: (unitId, key, v) => { need((REGISTRIES[unitId] || []).some(r => r.key === key), 'دفتر نامعتبر است.'); return addRecord(+unitId, key, v); },
+  /* کتابخانه عمومی (کتابدار) */
+  saveBook: (id, v) => saveBook(id || '', v || {}),
+  addCopies: (id, n) => addCopies(id, n),
+  setCopyStatus: (id, copyId, available) => setCopyStatus(id, copyId, !!available),
+  loanDecide: (id, ok, reply, days) => loanDecide(id, !!ok, reply, days),
+  loanDeliver: (id, days) => loanDeliver(id, days),
+  loanReturn: id => loanReturn(id),
+  loanExpire: (id, note) => loanExpire(id, note),
+  loanReply: (id, text) => loanReply(id, text),
+  memberToggle: id => memberToggle(id),
   /* اعلان‌ها */
   readNotif: id => { const n = rec('notifs', id); need(n.pos === ME.pos.id, 'این اعلان متعلق به شما نیست.'); n.read = true; return n; },
   readAllNotifs: () => { DB.notifs.forEach(n => { if (n.pos === ME.pos.id) n.read = true; }); return {}; },
@@ -86,15 +96,30 @@ const OPS = {
   },
 
   /* ---------- کاربران و دسترسی‌ها ---------- */
-  createUser: v => { v.name = label(v.name, 'نام کاربر'); return createUser2(v); },
-  updateUser: (id, v) => { v.name = label(v.name, 'نام کاربر'); return updateUser(rec('users', id), v); },
+  updateHolder: (id, v) => updateHolder(rec('users', id), v),
+  handover: (posId, v) => handover(posId, v || {}),
   deleteUser: id => deleteUser(rec('users', id)),
   setPassword: (id, pass, mustChange) => setPassword(rec('users', id), pass, !!mustChange, false),
-  assignHolder: (posId, userId) => assignHolder(posId, userId),
   addPosition: v => { need(UNITS.some(u => u.id === +v.unitId), 'مدیریت را انتخاب کنید.'); v.title = label(v.title, 'عنوان جایگاه'); return addPosition(v); },
   deletePosition: id => { need(can('admin.users'), 'حذف جایگاه مجاز نیست.'); const p = posById(id); need(p, 'جایگاه یافت نشد.'); need(p.role === 'staff', 'فقط جایگاه‌های کارشناسی قابل حذف‌اند.'); need(!holderOf(p.id), 'ابتدا متصدی این جایگاه را تغییر دهید.'); need(!isSensitivePos(p) || isImam(), 'حذف جایگاه حساس فقط با امام جماعت است.'); DB.positions = DB.positions.filter(x => x.id !== id); audit('حذف جایگاه', 'position', id, posLabel(id)); return {}; },
   setPosPerm: (posId, k, val) => { const p = posById(posId); need(p, 'جایگاه یافت نشد.'); return setPosPerm(p, k, val); },
   setRolePerm: (role, k, val) => setRolePerm(role, k, val),
+  /* مدیریت دسترسی‌های دفتر: مدیر فقط مسئول دفتر و منشی همان مدیریت را محدود یا دوباره فعال می‌کند؛ اعطای بیش از سقف ممکن نیست */
+  setOfficeRestriction: (posId, k, restrict) => {
+    const p = posById(posId); need(p, 'جایگاه یافت نشد.');
+    need(['office', 'secretary'].includes(p.role), 'فقط دسترسی مسئول دفتر و منشی از این بخش قابل تنظیم است.');
+    need(isImam() || (myRole() === 'manager' && inUnit(p.unitId)), 'فقط مدیر همان مدیریت می‌تواند دسترسی دفتر خودش را تنظیم کند.');
+    need(OFFICE_PERMS.includes(k), 'این مجوز از بخش دسترسی‌های دفتر قابل تنظیم نیست.');
+    if (k === 'library.manage') need(p.unitId === U_LIB, 'این مجوز فقط برای کتابخانه است.');
+    p.mgrDeny = p.mgrDeny || {};
+    const was = !!p.mgrDeny[k];
+    if (restrict) p.mgrDeny[k] = true; else delete p.mgrDeny[k];
+    if (was !== !!restrict) {
+      audit(restrict ? 'محدودسازی دسترسی دفتر' : 'فعال‌سازی دوباره دسترسی دفتر', 'perm', p.id, `${posLabel(p.id)} · ${permLabel(k)}${!restrict && !permOf(p, k) ? ' (در سقف مدیریت عالی مجاز نیست)' : ''}`);
+      notify([p.id], 'decision', `مدیر بخش دسترسی «${permLabel(k)}» را برای جایگاه شما ${restrict ? 'محدود' : 'دوباره فعال'} کرد.`, 'profile');
+    }
+    return p;
+  },
   toggleUser: id => { need(can('admin.users'), 'مدیریت کاربران مجاز نیست.'); const u = rec('users', id); need(u.id !== ME.user.id, 'حساب خودتان را نمی‌توانید غیرفعال کنید.'); need(!u.posId || !isSensitivePos(posById(u.posId)) || isImam(), 'غیرفعال‌کردن متصدی جایگاه حساس فقط با امام جماعت است.'); u.active = !u.active; if (!u.active) endUserSessions(u.id); audit(u.active ? 'فعال‌سازی حساب' : 'غیرفعال‌سازی حساب', 'user', u.id, u.username); return u; },
   unlockUser: id => { need(can('admin.users'), 'مدیریت کاربران مجاز نیست.'); const u = rec('users', id); u.lockedUntil = ''; u.fails = 0; audit('بازکردن قفل حساب', 'user', u.id, u.username); return u; },
   unlockAll: () => { need(can('admin.users'), 'مدیریت کاربران مجاز نیست.'); lockedUsers().forEach(u => { u.lockedUntil = ''; u.fails = 0; }); audit('بازکردن قفل همه حساب‌ها', 'user', '', ''); return {}; },
@@ -116,6 +141,7 @@ const OPS = {
   /* ---------- حساب کاربری خود ---------- */
   changeOwnPassword: (cur, p1) => { need(pwCheck(ME.user.pass, cur), 'رمز فعلی درست نیست.'); return setPassword(ME.user, p1, false, true); },
   forcedPassChange: p1 => { need(ME.user.mustChange, 'تغییر رمز الزامی نیست.'); return setPassword(ME.user, p1, false, true); },
+  updateOwnHolder: v => updateHolder(ME.user, v),
   changeOwnPhone: phone => { need(/^0?9\d{9}$/.test(en(phone).replace(/\D/g, '')), 'شماره همراه معتبر نیست.'); ME.user.phone = en(phone).replace(/\D/g, ''); audit('تغییر تلفن توسط کاربر', 'user', ME.user.id, ''); return ME.user; },
 
   /* ---------- تنظیمات ---------- */

@@ -11,6 +11,7 @@ const PRIORITIES = ['عادی', 'فوری', 'خیلی فوری'];
 const CONF = ['عادی', 'محرمانه', 'سری'];
 function canSeeLetter(l) {
   if (isAll()) return true;
+  if (!can('letters.view')) return false;
   const mine = inUnit(l.unitId) || l.refs.some(r => inUnit(r.unitId)) || l.toUnit === myUnit();
   if (!mine) return false;
   if (l.conf === 'سری') return can('letters.secret');
@@ -34,12 +35,12 @@ function createLetter(v) {
   if (l.type === 'internal' && l.toUnit != null) referLetter(l, l.toUnit, 'ارسال مکاتبه داخلی');
   return l;
 }
-const canHandleLetter = l => canSeeLetter(l) && (isImam() || can('letters.create')) && l.status !== 'بایگانی';
+const canHandleLetter = l => canSeeLetter(l) && (isImam() || can('letters.refer')) && l.status !== 'بایگانی';
 function referLetter(l, unitId, note) {
   unitId = +unitId;
   if (ME && !canHandleLetter(l)) return fail('ارجاع این نامه برای جایگاه شما مجاز نیست.');
   if (unitId !== 0 && !UNITS.some(u => u.id === unitId)) return fail('مدیریت مقصد را انتخاب کنید.');
-  l.refs.push({ unitId, ts: stamp(), by: ME ? ME.user.id : 'system', note: note || '' });
+  l.refs.push({ unitId, ts: stamp(), by: ME ? ME.user.id : 'system', nm: ME ? ME.user.name : 'سامانه', note: note || '' });
   l.status = 'ارجاع‌شده';
   hist(l, 'ارجاع به ' + unitName(unitId), note);
   audit('ارجاع نامه', 'letter', l.id, unitShort(unitId));
@@ -50,7 +51,7 @@ function referLetter(l, unitId, note) {
 function replyLetter(l, text) {
   if (!canHandleLetter(l)) return fail('ثبت پاسخ برای جایگاه شما مجاز نیست.');
   if (!text) return fail('متن پاسخ را بنویسید.');
-  l.replies.push({ ts: stamp(), by: ME.user.id, pos: ME.pos.id, text });
+  l.replies.push({ ts: stamp(), by: ME.user.id, nm: ME.user.name, pos: ME.pos.id, text });
   l.status = 'پاسخ داده‌شده';
   hist(l, 'ثبت پاسخ', text.slice(0, 80));
   audit('پاسخ نامه', 'letter', l.id, l.no);
@@ -83,7 +84,7 @@ function orderReport(o, v) {
   if (st === 'منتظر تأیید' && o.needReport && !v.note) return fail('این دستور نیازمند گزارش نهایی است؛ متن گزارش را بنویسید.');
   o.status = st; o.progress = Math.max(0, Math.min(100, +v.progress || o.progress));
   if (st === 'منتظر تأیید') o.progress = 100;
-  o.reports.push({ ts: stamp(), by: ME.user.id, pos: ME.pos.id, note: v.note || '', progress: o.progress, files: v.files || [] });
+  o.reports.push({ ts: stamp(), by: ME.user.id, nm: ME.user.name, pos: ME.pos.id, note: v.note || '', progress: o.progress, files: v.files || [] });
   hist(o, 'گزارش پیشرفت: ' + st + ' (' + fa(o.progress) + '٪)', v.note);
   audit('گزارش دستور', 'order', o.id, o.no);
   if (st === 'منتظر تأیید') notify([imamPos()], 'order', `دستور «${o.title}» برای تأیید نهایی ارسال شد.`, 'orders', o.no);
@@ -121,17 +122,18 @@ const taskStatus = t => (t.status !== 'تکمیل‌شده' && t.due && t.due < 
 function canSeeTask(t) {
   if (isAll()) return true;
   if (!inUnit(t.unitId)) return false;
-  return myRole() !== 'staff' || t.assignee === ME.pos.id;
+  if (t.assignee === ME.pos.id) return true;
+  return myRole() !== 'staff' && can('tasks.view');
 }
 function createTask(v) {
   const u = +v.unitId;
-  if (!(isMgrOrOffice(u) || (inUnit(u) && can('tasks.create')))) return fail('تعریف وظیفه برای مدیر و مسئول دفتر همان مدیریت مجاز است.');
+  if (!(isImam() || (inUnit(u) && can('tasks.create')))) return fail('تعریف وظیفه برای مدیر و مسئول دفتر همان مدیریت مجاز است.');
   if (!v.title) return fail('عنوان وظیفه را بنویسید.');
   if (!v.assignee) return fail('مسئول انجام را انتخاب کنید.');
   const terr = validateTask(v); if (terr) return fail(terr);
   if (!posById(v.assignee) || posById(v.assignee).unitId !== u) return fail('مسئول انجام باید از همین مدیریت باشد.');
   const t = { id: uid(), no: nextNo('task'), unitId: u, title: v.title, desc: v.desc || '', assignee: v.assignee, start: v.start || todayISO(), due: v.due || '',
-    priority: v.priority || 'عادی', files: v.files || [], status: 'جدید', created: stamp(), by: ME.user.id, src: v.src || '' };
+    priority: v.priority || 'عادی', files: v.files || [], status: 'جدید', created: stamp(), by: ME.user.id, byName: ME.user.name, src: v.src || '' };
   hist(t, 'تعریف وظیفه', 'مسئول: ' + posWho(t.assignee));
   DB.tasks.push(t);
   audit('تعریف وظیفه', 'task', t.id, t.no);
@@ -141,7 +143,7 @@ function createTask(v) {
 function taskActions(t) {
   const a = [];
   const mine = ME.pos.id === t.assignee;
-  const head = isMgrOrOffice(t.unitId);
+  const head = isMgrOrOffice(t.unitId) && (myRole() !== 'office' || can('tasks.create'));
   if (t.status === 'جدید' && (mine || head)) a.push(['start', 'شروع انجام']);
   if (t.status === 'در حال انجام' && (mine || head)) a.push(['submit', 'اعلام انجام و ارسال برای تأیید']);
   if (t.status === 'منتظر تأیید' && head && !mine) a.push(['approve', 'تأیید انجام'], ['return', 'بازگشت برای اصلاح']);
@@ -178,6 +180,8 @@ const REQ_STAGES = ['ثبت درخواست', 'ارجاع به مدیریت مس�
 const reqLabel = r => (r.status === 'ردشده' ? 'ردشده' : r.status === 'لغوشده' ? 'لغوشده' : REQ_STAGES[r.stage]);
 function canSeeReq(r) {
   if (isAll()) return true;
+  if (r.by === ME.user.id) return true;
+  if (!can('requests.view')) return false;
   const u = myUnit();
   const related = r.fromUnit === u || r.toUnit === u || r.coops.includes(u);
   if (!related) return false;
@@ -185,11 +189,12 @@ function canSeeReq(r) {
   return true;
 }
 function createRequest(v) {
+  if (!can('requests.create')) return fail('ثبت درخواست برای جایگاه شما محدود شده است.');
   if (!v.title) return fail('عنوان درخواست را بنویسید.');
   if (v.toUnit === '' || v.toUnit == null) return fail('مدیریت مسئول را انتخاب کنید.');
   const r = { id: uid(), no: nextNo('req'), title: v.title, desc: v.desc || '', cat: v.cat || '', fromUnit: myUnit(), toUnit: +v.toUnit,
     priority: v.priority || 'عادی', needsImam: !!v.needsImam, due: v.due || '', files: v.files || [], coops: [], coopNotes: [],
-    stage: 0, status: 'جاری', by: ME.user.id, byPos: ME.pos.id, created: stamp(), report: '', kind: v.kind || 'internal' };
+    stage: 0, status: 'جاری', by: ME.user.id, byName: ME.user.name, byPos: ME.pos.id, created: stamp(), report: '', kind: v.kind || 'internal' };
   hist(r, 'ثبت درخواست', 'کد پیگیری ' + r.no);
   r.stage = 1;
   hist(r, 'ارجاع به ' + unitName(r.toUnit));
@@ -230,7 +235,7 @@ function reqAct(r, act, note, extra) {
     }
     case 'coopnote':
       if (!note) return fail('متن نظر یا اقدام را بنویسید.');
-      r.coopNotes.push({ ts: stamp(), unit: myUnit(), by: ME.user.id, note });
+      r.coopNotes.push({ ts: stamp(), unit: myUnit(), by: ME.user.id, nm: ME.user.name, note });
       hist(r, 'نظر همکاری ' + unitShort(myUnit()), note);
       notify(unitHeads(r.toUnit), 'request', `${unitShort(myUnit())} برای «${r.title}» اقدام همکاری ثبت کرد.`, 'requests', r.no);
       break;
@@ -284,6 +289,7 @@ function validateReservation(v) {
   return '';
 }
 function createReservation(v) {
+  if (!can('reservations.manage')) return fail('ثبت رزرو برای جایگاه شما محدود شده است.');
   const err = validateReservation(v); if (err) return fail(err);
   const r = { id: uid(), no: nextNo('res'), program: v.program, space: v.space || '', applicant: String(v.applicant).trim(), phone: en(v.phone).replace(/\D/g, ''), kind: String(v.kind).trim(), date: v.date, start: v.start, end: v.end,
     people: Number(en(v.people)), equip: v.equip || '', desc: v.desc || '', status: 'در انتظار تأیید', by: ME.user.id, byPos: ME.pos.id, fromUnit: myUnit(), created: stamp() };
@@ -294,7 +300,7 @@ function createReservation(v) {
   notify(unitHeads(resUnit(r)), 'reservation', `درخواست رزرو ${resPlace(r)} برای ${jd(r.date)}`, 'reservations', r.no);
   return r;
 }
-const canDecideRes = r => isMgrOrOffice(resUnit(r)) && (inUnit(resUnit(r)) || isImam());
+const canDecideRes = r => isMgrOrOffice(resUnit(r)) && (inUnit(resUnit(r)) || isImam()) && (myRole() !== 'office' || can('reservations.manage'));
 function resDecide(r, status, note) {
   if (!RES_ST.includes(status) || status === 'در انتظار تأیید') return fail('وضعیت نامعتبر است.');
   if (status === 'لغوشده') { if (!(r.by === ME.user.id || canDecideRes(r))) return fail('اجازه لغو ندارید.'); if (!['در انتظار تأیید', 'تأییدشده'].includes(r.status)) return fail('این رزرو قابل لغو نیست.'); }
@@ -336,7 +342,7 @@ function createMeeting(v) {
   notify(m.invitees, 'meeting', `دعوت به ${m.kind} «${m.title}» — ${jd(m.date)} ساعت ${fa(m.start)}`, 'calendar', m.no);
   return m;
 }
-const canEditMeeting = m => isImam() || m.byPos === ME.pos.id || (m.unitId === myUnit() && myRole() !== 'staff');
+const canEditMeeting = m => isImam() || m.byPos === ME.pos.id || (m.unitId === myUnit() && myRole() !== 'staff' && can('meetings.create'));
 function addResolution(m, v) {
   if (!canEditMeeting(m)) return fail('ثبت مصوبه با برگزارکننده جلسه است.');
   if (!v.text || !v.owner) return fail('متن مصوبه و مسئول اجرا لازم است.');
@@ -476,7 +482,7 @@ const unitSpent = (u, y = jYearNow()) => sum(DB.tx.filter(t => t.kind === 'هز�
 const LEAVE_TYPES = ['استحقاقی', 'استعلاجی', 'بدون حقوق', 'ساعتی'];
 function createLeave(v) {
   if (!v.from || !v.to || v.to < v.from) return fail('بازه تاریخ مرخصی معتبر نیست.');
-  const l = { id: uid(), no: nextNo('leave'), uid: ME.user.id, pos: ME.pos.id, unitId: myUnit(), type: v.type || 'استحقاقی', from: v.from, to: v.to, reason: v.reason || '',
+  const l = { id: uid(), no: nextNo('leave'), uid: ME.user.id, nm: ME.user.name, pos: ME.pos.id, unitId: myUnit(), type: v.type || 'استحقاقی', from: v.from, to: v.to, reason: v.reason || '',
     status: myRole() === 'imam' ? 'در انتظار ثبت امور اداری' : 'در انتظار تأیید مدیر', created: stamp() };
   hist(l, 'ثبت درخواست مرخصی', `${jd(l.from)} تا ${jd(l.to)}`);
   DB.leaves.push(l);
@@ -504,7 +510,7 @@ function leaveAct(l, ok, note) {
 }
 function addHR(kind, v) {
   if (!canHR()) return fail('ثبت سوابق اداری فقط برای مدیریت امور اداری مجاز است.');
-  const rec = { id: uid(), ...v, created: stamp(), by: ME.user.id };
+  const rec = { id: uid(), ...v, nm: (userById(v.uid) || {}).name || '', created: stamp(), by: ME.user.id };
   DB[kind].push(rec);
   audit('ثبت سابقه اداری', kind, rec.id, v.title || v.dest || v.type || '');
   return rec;

@@ -587,6 +587,60 @@ textarea.json { width: 100%; height: 340px; direction: ltr; text-align: left; fo
   .idlewarn { bottom: calc(90px + env(safe-area-inset-bottom, 0px)); }
 }
 
+/* ================= نسخه ۴: کتابخانه عمومی، جایگاه‌ها و نظارت ================= */
+.posgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.poscard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.pc-h { display: flex; gap: 10px; align-items: center; }
+.pc-h .k { width: 38px; height: 38px; border-radius: 10px; background: var(--teal-soft); color: var(--accent); display: grid; place-items: center; flex: none; }
+.pc-h b { display: block; font-size: .9rem; line-height: 1.5; }
+.pc-h small { color: var(--muted); font-size: .74rem; }
+.permlist { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }
+.libentry { display: flex; gap: 12px; align-items: center; text-decoration: none; color: var(--fg); border: 1px dashed var(--teal); background: var(--teal-soft); border-radius: 12px; padding: 12px 14px; }
+.libentry svg { width: 26px; height: 26px; color: var(--accent); flex: none; }
+.libentry b { display: block; color: var(--accent); }
+.libentry small { color: var(--muted); font-size: .78rem; }
+.lib { min-height: 100%; display: flex; flex-direction: column; background: var(--bg); }
+.lib-top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.lib-brand { display: flex; gap: 10px; align-items: center; text-decoration: none; color: var(--fg); }
+.lib-brand .mark { width: 40px; height: 40px; border-radius: 12px; background: var(--side); color: var(--glow); display: grid; place-items: center; }
+.lib-brand b { display: block; font-size: 1rem; }
+.lib-brand small { color: var(--muted); font-size: .74rem; }
+.lib-main { width: 100%; max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; padding-block: 18px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.lib-hero { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px; align-items: center; background-color: var(--side); background-image: var(--pattern); color: var(--hero-fg); border-radius: calc(var(--r) + 4px); padding: 24px; }
+.lib-hero h1 { color: #fff; font-size: 1.45rem; }
+.lib-hero p { color: var(--hero-muted); margin: 6px 0 14px; max-width: 52ch; }
+.lib-search { max-width: none; }
+.lib-search input { background: var(--surface); color: var(--fg); border: 0; padding-block: 11px; }
+.lib-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; font-size: .78rem; }
+.lib-steps li { display: flex; gap: 8px; align-items: center; background: rgba(255,255,255,.08); border-radius: 8px; padding: 6px 8px; color: var(--hero-fg); }
+.lib-steps i { font-style: normal; width: 22px; height: 22px; border-radius: 50%; background: var(--glow); color: var(--side); display: grid; place-items: center; font-weight: 800; flex: none; font-size: .72rem; }
+.books { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.bookcard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column; }
+.bookcard .cover { height: 92px; background: linear-gradient(135deg, var(--side), var(--side-2)); background-image: var(--pattern), linear-gradient(135deg, var(--side), var(--side-2)); color: var(--glow); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+.bookcard .cover svg { width: 34px; height: 34px; }
+.bookcard .cover span { font-size: .72rem; color: var(--hero-muted); }
+.bk-b { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.bk-b h3 { font-size: .98rem; }
+.bk-b p { margin: 0; color: var(--muted); font-size: .82rem; }
+.bk-b .row { margin-top: auto; }
+.lib-foot { text-align: center; color: var(--muted); font-size: .76rem; padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+.loanrow .lr { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.notice.ok-n { background: var(--ok-bg); color: var(--ok); margin-top: 6px; }
+.mt-s { margin-top: 6px; }
+@media (max-width: 900px) { .lib-hero { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) {
+  .lib-top nav { width: 100%; }
+  .lib-top nav .btn { flex: 1 1 auto; justify-content: center; }
+  .lib-hero { padding: 18px 16px; }
+  .lib-hero h1 { font-size: 1.2rem; }
+  .books { grid-template-columns: minmax(0, 1fr); }
+  .bookcard { flex-direction: row; }
+  .bookcard .cover { width: 84px; height: auto; flex-direction: column; justify-content: center; gap: 4px; padding: 10px 6px; text-align: center; flex: none; }
+  .loanrow { flex-wrap: wrap; }
+  .loanrow .lr { flex-direction: row; width: 100%; justify-content: space-between; align-items: center; }
+  .posgrid, .permlist { grid-template-columns: minmax(0, 1fr); }
+}
+
 </style>
 <div id="root"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
@@ -666,25 +720,27 @@ const tm = t => (t ? fa(t) : '—');
 
 /* ---------- ساختار سازمانی ---------- */
 const UNITS = [
-  { id: 1, name: 'مدیریت داخلی مجتمع', short: 'داخلی', ic: 'building' },
-  { id: 2, name: 'مدیریت امور فرهنگی و مراسمات مسجد', short: 'فرهنگی و مراسمات', ic: 'dome' },
-  { id: 3, name: 'مدیریت روابط عمومی', short: 'روابط عمومی', ic: 'megaphone' },
-  { id: 4, name: 'مدیریت رسانه', short: 'رسانه', ic: 'camera' },
-  { id: 5, name: 'مدیریت پایگاه بسیج خادم‌الشهدا حاج احمد یلالی', short: 'پایگاه بسیج', ic: 'shield' },
-  { id: 6, name: 'مدیریت دبستان (پایه اول تا ششم)', short: 'دبستان', ic: 'school' },
-  { id: 7, name: 'مدیریت متوسطه اول (پایه هفتم تا نهم)', short: 'متوسطه اول', ic: 'school' },
-  { id: 8, name: 'مدیریت متوسطه دوم (پایه دهم تا دوازدهم)', short: 'متوسطه دوم', ic: 'school' },
-  { id: 9, name: 'مدیریت درمانگاه', short: 'درمانگاه', ic: 'medical' },
-  { id: 10, name: 'مدیریت داروخانه', short: 'داروخانه', ic: 'pill' },
-  { id: 11, name: 'مدیریت کتابخانه', short: 'کتابخانه', ic: 'book' },
-  { id: 12, name: 'مدیریت خیریه', short: 'خیریه', ic: 'heart' },
-  { id: 13, name: 'مدیریت خانه بازی کودک', short: 'خانه بازی کودک', ic: 'kid' },
-  { id: 14, name: 'مدیریت امور اداری', short: 'امور اداری', ic: 'users' },
-  { id: 15, name: 'مدیریت امور مالی', short: 'امور مالی', ic: 'wallet' },
-  { id: 16, name: 'مدیریت فناوری اطلاعات', short: 'فناوری اطلاعات', ic: 'server' },
-  { id: 17, name: 'مدیریت عمران و توسعه', short: 'عمران و توسعه', ic: 'crane' }
+  { id: 1, name: 'مدیریت داخلی مجتمع', short: 'داخلی', slug: 'internal', ic: 'building' },
+  { id: 2, name: 'مدیریت امور فرهنگی و هنری', short: 'فرهنگی و هنری', slug: 'culture', ic: 'palette' },
+  { id: 3, name: 'مدیریت روابط عمومی', short: 'روابط عمومی', slug: 'pr', ic: 'megaphone' },
+  { id: 4, name: 'مدیریت رسانه', short: 'رسانه', slug: 'media', ic: 'camera' },
+  { id: 5, name: 'مدیریت پایگاه بسیج خادم‌الشهدا حاج احمد یلالی', short: 'پایگاه بسیج', slug: 'basij', ic: 'shield' },
+  { id: 6, name: 'مدیریت دبستان؛ پایه اول تا ششم', short: 'دبستان', slug: 'primary', ic: 'school' },
+  { id: 7, name: 'مدیریت متوسطه اول؛ پایه هفتم تا نهم', short: 'متوسطه اول', slug: 'middle', ic: 'school' },
+  { id: 8, name: 'مدیریت متوسطه دوم؛ پایه دهم تا دوازدهم', short: 'متوسطه دوم', slug: 'high', ic: 'school' },
+  { id: 9, name: 'مدیریت درمانگاه', short: 'درمانگاه', slug: 'clinic', ic: 'medical' },
+  { id: 10, name: 'مدیریت داروخانه', short: 'داروخانه', slug: 'pharmacy', ic: 'pill' },
+  { id: 11, name: 'مدیریت کتابخانه', short: 'کتابخانه', slug: 'library', ic: 'book' },
+  { id: 12, name: 'مدیریت خیریه و گروه جهادی', short: 'خیریه و گروه جهادی', slug: 'charity', ic: 'heart' },
+  { id: 13, name: 'مدیریت خانه‌بازی کودک و مهدکودک', short: 'خانه‌بازی و مهدکودک', slug: 'kids', ic: 'kid' },
+  { id: 14, name: 'مدیریت امور اداری', short: 'امور اداری', slug: 'admin', ic: 'users' },
+  { id: 15, name: 'مدیریت امور مالی', short: 'امور مالی', slug: 'finance', ic: 'wallet' },
+  { id: 16, name: 'مدیریت فناوری اطلاعات', short: 'فناوری اطلاعات', slug: 'it', ic: 'server' },
+  { id: 17, name: 'مدیریت طرح و برنامه', short: 'طرح و برنامه', slug: 'planning', ic: 'crane' },
+  { id: 18, name: 'مدیریت مراسمات و مناسبت‌ها، فاتحه، جشن و اعیاد', short: 'مراسمات و مناسبت‌ها', slug: 'ceremony', ic: 'dome' },
+  { id: 19, name: 'مدیریت رستوران', short: 'رستوران', slug: 'restaurant', ic: 'cup' }
 ];
-const U_INTERNAL = 1, U_CULTURE = 2, U_PR = 3, U_ADMIN = 14, U_FIN = 15, U_IT = 16, U_CIVIL = 17;
+const U_INTERNAL = 1, U_CULTURE = 2, U_PR = 3, U_LIB = 11, U_ADMIN = 14, U_FIN = 15, U_IT = 16, U_CIVIL = 17, U_CEREMONY = 18, U_REST = 19;
 const unitName = id => (id === 0 ? 'دفتر امام جماعت' : (UNITS.find(u => u.id === +id) || {}).name || '—');
 const unitShort = id => (id === 0 ? 'دفتر امام جماعت' : (UNITS.find(u => u.id === +id) || {}).short || '—');
 const ROLES = { imam: 'امام جماعت', manager: 'مدیر بخش', office: 'مسئول دفتر', secretary: 'منشی', staff: 'کارشناس' };
@@ -692,7 +748,7 @@ const ROLES = { imam: 'امام جماعت', manager: 'مدیر بخش', office:
 /* خدمات قابل درخواست هر مدیریت (حوزه‌های کارتابل اختصاصی) */
 const SERVICES = {
   1: ['مهمانسرا و زائرسرا', 'آشپزخانه مرکزی', 'پذیرایی', 'انبار مرکزی', 'اموال', 'تأسیسات', 'تعمیرات و نگهداری', 'پارکینگ', 'محوطه و خدمات', 'خرید و تدارکات'],
-  2: ['مراسم مذهبی', 'مراسم فاتحه و ترحیم', 'راهیان نور', 'اردوی زیارتی', 'برنامه فرهنگی'],
+  2: ['برنامه فرهنگی', 'برنامه هنری', 'کارگاه و کلاس', 'راهیان نور', 'اردوی زیارتی', 'مسابقات فرهنگی'],
   3: ['اطلاع‌رسانی عمومی', 'هماهنگی مهمانان', 'فرهنگسرا', 'سالن آمفی‌تئاتر', 'سینما', 'سالن جلسات'],
   4: ['عکاسی', 'فیلم‌برداری', 'طراحی پوستر', 'تدوین', 'پوشش مراسم', 'پشتیبانی صوت و تصویر', 'آرشیو رسانه'],
   5: ['برنامه پایگاه', 'فعالیت فرهنگی', 'فعالیت جهادی', 'آموزش', 'نگهبانی و شیفت شب'],
@@ -702,12 +758,14 @@ const SERVICES = {
   9: ['امور اجرایی', 'هماهنگی کارکنان', 'تجهیزات', 'خدمات'],
   10: ['امور اجرایی', 'تأمین دارو و اقلام', 'گزارش موجودی'],
   11: ['امانت منابع', 'سالن مطالعه', 'عضویت', 'برنامه کتابخوانی'],
-  12: ['نیازسنجی', 'توزیع کمک', 'ارتباط با خیرین'],
-  13: ['پذیرش', 'برنامه بازی', 'ایمنی', 'هماهنگی مربیان'],
+  12: ['نیازسنجی', 'توزیع کمک', 'ارتباط با خیرین', 'اردوی جهادی', 'فعالیت گروه جهادی'],
+  13: ['پذیرش خانه‌بازی', 'ثبت‌نام مهدکودک', 'برنامه بازی و آموزش', 'ایمنی', 'هماهنگی مربیان'],
   14: ['صدور حکم و ابلاغ', 'مرخصی', 'مأموریت', 'قرارداد', 'امور اداری عمومی'],
   15: ['درخواست پرداخت', 'تخصیص بودجه', 'ثبت سند'],
   16: ['پشتیبانی رایانه', 'ایجاد کاربر', 'شبکه و اینترنت', 'امنیت', 'پشتیبان‌گیری'],
-  17: ['پروژه ساختمانی', 'بازدید فنی', 'تهیه نقشه', 'تعمیرات اساسی']
+  17: ['برنامه‌ریزی و طرح‌ها', 'عمران و توسعه: پروژه ساختمانی', 'عمران و توسعه: بازدید فنی', 'عمران و توسعه: تهیه نقشه', 'عمران و توسعه: تعمیرات اساسی'],
+  18: ['مراسم مذهبی', 'مراسم فاتحه و ترحیم', 'جشن و اعیاد', 'مناسبت‌ها'],
+  19: ['پذیرایی مراسم', 'سفارش غذا', 'رزرو سالن رستوران', 'تأمین مواد غذایی']
 };
 
 /* دفاتر ثبت اختصاصی هر مدیریت */
@@ -720,29 +778,35 @@ const REGISTRIES = {
   8: [{ key: 'edu', title: 'برنامه‌های آموزشی و تربیتی', fields: [['title', 'عنوان'], ['grade', 'پایه', ['دهم', 'یازدهم', 'دوازدهم']], ['kind', 'نوع', ['آموزشی', 'تربیتی', 'اجرایی', 'جلسه اولیا']], ['date', 'تاریخ', 'date'], ['note', 'گزارش']] }],
   9: [{ key: 'equip', title: 'تجهیزات و خدمات درمانگاه', fields: [['title', 'تجهیز / خدمت'], ['state', 'وضعیت', ['فعال', 'نیازمند سرویس', 'غیرفعال']], ['date', 'آخرین بازدید', 'date'], ['note', 'توضیح (بدون اطلاعات بیمار)']] }],
   10: [{ key: 'stock', title: 'موجودی اقلام', fields: [['title', 'نام قلم'], ['qty', 'موجودی', 'number'], ['min', 'حداقل مجاز', 'number'], ['supplier', 'تأمین‌کننده'], ['date', 'تاریخ انقضا', 'date']] }],
-  11: [{ key: 'books', title: 'فهرست منابع', fields: [['title', 'عنوان کتاب'], ['author', 'نویسنده'], ['code', 'شماره ثبت'], ['state', 'وضعیت', ['موجود', 'امانت', 'مفقود']], ['member', 'امانت‌گیرنده']] },
-       { key: 'events', title: 'فعالیت‌های کتابخوانی', fields: [['title', 'عنوان'], ['date', 'تاریخ', 'date'], ['count', 'شرکت‌کننده', 'number'], ['note', 'توضیح']] }],
-  12: [{ key: 'aid', title: 'ثبت کمک‌ها (محرمانه)', conf: true, fields: [['donor', 'خیّر / منبع'], ['kind', 'نوع', ['نقدی', 'غیرنقدی', 'خدمات']], ['amount', 'مبلغ / ارزش (ریال)', 'number'], ['date', 'تاریخ', 'date'], ['use', 'مصرف / توزیع']] }],
-  13: [{ key: 'admit', title: 'پذیرش و ظرفیت', fields: [['date', 'تاریخ', 'date'], ['session', 'سانس', ['صبح', 'عصر']], ['count', 'تعداد کودک', 'number'], ['cap', 'ظرفیت', 'number'], ['coach', 'مربی'], ['note', 'گزارش ایمنی']] }],
+  11: [{ key: 'events', title: 'فعالیت‌های کتابخوانی', fields: [['title', 'عنوان'], ['date', 'تاریخ', 'date'], ['count', 'شرکت‌کننده', 'number'], ['note', 'توضیح']] }],
+  12: [{ key: 'jihadi', title: 'فعالیت‌های گروه جهادی', fields: [['title', 'عنوان فعالیت'], ['place', 'محل'], ['date', 'تاریخ', 'date'], ['count', 'تعداد نیروی جهادی', 'number'], ['note', 'گزارش']] },
+       { key: 'aid', title: 'ثبت کمک‌ها (محرمانه)', conf: true, fields: [['donor', 'خیّر / منبع'], ['kind', 'نوع', ['نقدی', 'غیرنقدی', 'خدمات']], ['amount', 'مبلغ / ارزش (ریال)', 'number'], ['date', 'تاریخ', 'date'], ['use', 'مصرف / توزیع']] }],
+  13: [{ key: 'kinder', title: 'ثبت‌نام مهدکودک', fields: [['title', 'نام کودک'], ['age', 'سن', 'number'], ['parent', 'نام ولی'], ['phone', 'تلفن ولی'], ['date', 'تاریخ ثبت‌نام', 'date']] },
+       { key: 'admit', title: 'پذیرش و ظرفیت خانه‌بازی', fields: [['date', 'تاریخ', 'date'], ['session', 'سانس', ['صبح', 'عصر']], ['count', 'تعداد کودک', 'number'], ['cap', 'ظرفیت', 'number'], ['coach', 'مربی'], ['note', 'گزارش ایمنی']] }],
   16: [{ key: 'systems', title: 'سامانه‌ها و پشتیبان‌گیری', fields: [['title', 'سامانه / تجهیز'], ['kind', 'نوع', ['سامانه', 'شبکه', 'امنیت', 'پشتیبان‌گیری']], ['date', 'تاریخ آخرین بررسی', 'date'], ['state', 'وضعیت', ['سالم', 'هشدار', 'از کار افتاده']], ['note', 'توضیح']] }],
-  17: [{ key: 'projects', title: 'پروژه‌های عمرانی', fields: [['title', 'نام پروژه'], ['contractor', 'پیمانکار'], ['start', 'شروع', 'date'], ['end', 'پایان برنامه', 'date'], ['progress', 'پیشرفت فیزیکی (٪)', 'number'], ['budget', 'بودجه (ریال)', 'number'], ['spent', 'هزینه‌شده (ریال)', 'number']] }]
+  18: [{ key: 'events', title: 'تقویم مراسمات و مناسبت‌ها', fields: [['title', 'عنوان مراسم'], ['kind', 'نوع', ['مراسم مذهبی', 'فاتحه و ترحیم', 'جشن و اعیاد', 'مناسبت']], ['date', 'تاریخ', 'date'], ['place', 'محل'], ['count', 'تعداد شرکت‌کننده', 'number']] }],
+  19: [{ key: 'orders', title: 'سفارش‌های پذیرایی', fields: [['title', 'عنوان سفارش'], ['unit', 'سفارش‌دهنده'], ['date', 'تاریخ', 'date'], ['count', 'تعداد پرس', 'number'], ['note', 'توضیح']] }],
+  17: [{ key: 'projects', title: 'عمران و توسعه: پروژه‌های عمرانی', fields: [['title', 'نام پروژه'], ['contractor', 'پیمانکار'], ['start', 'شروع', 'date'], ['end', 'پایان برنامه', 'date'], ['progress', 'پیشرفت فیزیکی (٪)', 'number'], ['budget', 'بودجه (ریال)', 'number'], ['spent', 'هزینه‌شده (ریال)', 'number']] }]
 };
 
 /* فضاهای فیزیکی قابل رزرو و مدیریت تأییدکننده هر فضا (کنترل تداخل بر اساس سالن واقعی) */
 const SPACES = [
-  { id: 'hosseinieh', name: 'حسینیه', unit: 2, cap: 600, excl: true },
+  { id: 'hosseinieh', name: 'حسینیه', unit: 18, cap: 600, excl: true },
   { id: 'farhangsara', name: 'فرهنگسرا', unit: 3, cap: 80, excl: true },
   { id: 'amphi', name: 'سالن آمفی‌تئاتر ۱۴۴ نفره', unit: 3, cap: 144, excl: true },
   { id: 'cinema', name: 'سینما', unit: 3, cap: 60, excl: true },
   { id: 'meeting', name: 'سالن جلسات', unit: 3, cap: 24, excl: true },
   { id: 'zaersara', name: 'زائرسرا', unit: 1, cap: 40, excl: true },
-  { id: 'guest', name: 'مهمانسرا و خدمات اسکان', unit: 1, cap: 16, excl: true }
+  { id: 'guest', name: 'مهمانسرا و خدمات اسکان', unit: 1, cap: 16, excl: true },
+  { id: 'restaurant', name: 'سالن رستوران', unit: 19, cap: 120, excl: true }
 ];
 /* نوع برنامه جدا از فضا: مراسم در یک سالن واقعی برگزار می‌شود؛ برنامه‌های بیرون از مجتمع فضا ندارند */
 const PROGRAMS = [
   { id: 'general', name: 'برنامه عمومی', unit: 0 },
-  { id: 'religious', name: 'مراسم مذهبی', unit: 2 },
-  { id: 'fateheh', name: 'مراسم فاتحه و ترحیم', unit: 2 },
+  { id: 'religious', name: 'مراسم مذهبی', unit: 18 },
+  { id: 'fateheh', name: 'مراسم فاتحه و ترحیم', unit: 18 },
+  { id: 'jashn', name: 'جشن و اعیاد', unit: 18 },
+  { id: 'monasebat', name: 'مناسبت‌ها', unit: 18 },
   { id: 'rahian', name: 'راهیان نور', unit: 2, offsite: true, cap: 120 },
   { id: 'ziarat', name: 'اردوی زیارتی', unit: 2, offsite: true, cap: 90 },
   { id: 'lodging', name: 'اسکان', unit: 1 }
@@ -750,7 +814,7 @@ const PROGRAMS = [
 const spaceOf = id => SPACES.find(s => s.id === id) || { id: '', name: 'خارج از مجتمع', unit: 0, cap: 0, excl: false };
 const programOf = id => PROGRAMS.find(p => p.id === id) || PROGRAMS[0];
 /* مدیریت تأییدکننده: مالک سالن؛ برای برنامه بیرون از مجتمع، متولی همان برنامه */
-const resUnit = r => (r.space ? spaceOf(r.space).unit : programOf(r.program).unit || U_CULTURE);
+const resUnit = r => (r.space ? spaceOf(r.space).unit : programOf(r.program).unit || U_CEREMONY);
 const resCap = r => (r.space ? spaceOf(r.space).cap : programOf(r.program).cap || 0);
 const resPlace = r => (r.space ? spaceOf(r.space).name : 'خارج از مجتمع');
 
@@ -808,6 +872,7 @@ const IC = {
   db: 'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
   pulse: 'M3 12h4l3-8 4 16 3-8h4',
   unlock: 'M5 11h14v10H5zM8 11V7a4 4 0 017.5-2',
+  cup: 'M4 8h13v5a6 6 0 01-6 6H10a6 6 0 01-6-6zM17 9h2a2 2 0 010 4h-2M8 3v2M12 3v2',
   qr: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM18 18h3v3h-3zM6 6h1M17 6h1M6 17h1'
 };
 const ic = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[n] || IC.file}"/></svg>`;
@@ -815,11 +880,12 @@ const ic = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidd
 /* ---------- ذخیره‌سازی ---------- */
 /* لایه داده: در این نسخه روی حافظه مرورگر؛ برای استقرار، همین رابط به API سرور متصل می‌شود (kartabl/README.md) */
 const STORE_KEY = 'shabab-kartabl-v1';
+const DEMO_REV = 4; /* نسخه ساختار داده نمونه؛ داده نمایشی قدیمی‌تر یک بار با نمونه تازه جایگزین می‌شود */
 let DB = null;
 let MEMORY_ONLY = false;
 const Store = {
   load() {
-    try { const s = localStorage.getItem(STORE_KEY); if (s) { DB = JSON.parse(s); if (DB && DB.ver === 1) return; } } catch (e) { MEMORY_ONLY = true; }
+    try { const s = localStorage.getItem(STORE_KEY); if (s) { DB = JSON.parse(s); if (DB && DB.ver === 1 && DB.demoRev === DEMO_REV) return; } } catch (e) { MEMORY_ONLY = true; }
     DB = seed(); this.save();
   },
   save() { if (typeof SERVER !== 'undefined' && SERVER) return; /* نسخه سروری: هیچ داده‌ای در مرورگر نمی‌ماند */ try { localStorage.setItem(STORE_KEY, JSON.stringify(DB)); } catch (e) { MEMORY_ONLY = true; } if (typeof Sync !== 'undefined') Sync.schedule(); },
@@ -848,6 +914,31 @@ const posById = id => DB.positions.find(p => p.id === id);
 const userById = id => DB.users.find(u => u.id === id);
 const holderOf = posId => DB.users.find(u => u.posId === posId && u.active);
 const posLabel = id => { const p = posById(id); if (!p) return '—'; return p.unitId === 0 ? p.title : `${p.title} ${unitShort(p.unitId)}`; };
+/* هر جایگاه یک حساب ثابت دارد؛ نام کاربری از مدیریت و جایگاه ساخته می‌شود و با تغییر افراد عوض نمی‌شود */
+const ROLE_SLUG = { manager: 'manager', office: 'office', secretary: 'secretary' };
+function posUsername(p) {
+  if (!p) return '';
+  if (p.role === 'imam') return 'imam';
+  const u = UNITS.find(x => x.id === p.unitId);
+  const slug = (u && u.slug) || 'unit' + p.unitId;
+  if (ROLE_SLUG[p.role]) return `${slug}.${ROLE_SLUG[p.role]}`;
+  const m = String(p.id).match(/-k(\d+)/);
+  return `${slug}.staff${m ? m[1] : String(p.id).slice(-4)}`;
+}
+/* نام پنل به نام مدیریت و جایگاه است، نه به نام فرد */
+function panelName(p) {
+  if (!p) return '';
+  if (p.role === 'imam') return 'پنل امام جماعت';
+  const un = unitName(p.unitId);
+  if (p.role === 'manager') return 'پنل ' + un;
+  if (p.role === 'office') return 'پنل مسئول دفتر ' + un;
+  if (p.role === 'secretary') return 'پنل منشی ' + un;
+  return `پنل ${p.title} ${un}`;
+}
+const accountOf = posId => DB.users.find(u => u.posId === posId && !u.deleted);
+/* نام انجام‌دهنده در زمان اقدام ثبت می‌شود تا با تغییر متصدی، سوابق قبلی به نام فرد قبلی بماند */
+const who = (uid, nm) => nm || (uid === 'system' ? 'سامانه' : (userById(uid) || {}).name || '—');
+const holderSince = posId => { const h = DB.posHistory.filter(x => x.posId === posId && !x.to).slice(-1)[0]; return h ? h.from : ''; };
 const posWho = id => { const h = holderOf(id); return h ? `${h.name} (${posLabel(id)})` : `${posLabel(id)} (بدون متصدی)`; };
 const unitPos = (unitId, role) => DB.positions.find(p => p.unitId === unitId && p.role === role);
 const unitPositions = unitId => DB.positions.filter(p => p.unitId === unitId);
@@ -868,6 +959,14 @@ const PERMS = [
   ['tasks.create', 'تعریف و ارجاع وظیفه در واحد خود', 'گردش کار'],
   ['letters.create', 'ثبت نامه وارده، صادره و داخلی', 'دبیرخانه'],
   ['letters.secret', 'مشاهده نامه‌های «سری» واحد خود', 'دبیرخانه'],
+  ['letters.view', 'مشاهده مکاتبات واحد', 'دبیرخانه'],
+  ['letters.refer', 'ارجاع، پاسخ و پیگیری نامه‌ها', 'دبیرخانه'],
+  ['files.view', 'دسترسی به اسناد و پیوست‌های مجاز واحد', 'دبیرخانه'],
+  ['tasks.view', 'مشاهده وظایف واحد', 'گردش کار'],
+  ['requests.view', 'مشاهده درخواست‌های واحد', 'گردش کار'],
+  ['requests.create', 'ثبت درخواست', 'گردش کار'],
+  ['reservations.manage', 'ثبت و بررسی رزروهای مرتبط', 'تقویم'],
+  ['library.manage', 'مدیریت خدمات عمومی کتابخانه (کتاب، رزرو و امانت)', 'کتابخانه'],
   ['meetings.create', 'ثبت جلسه و ملاقات', 'تقویم'],
   ['assets.view', 'دسترسی به سامانه اموال و انبار', 'اموال'],
   ['finance.view', 'مشاهده کامل امور مالی همه واحدها', 'مالی'],
@@ -895,21 +994,27 @@ function permDefault(pos, k) {
   const r = pos.role, u = pos.unitId;
   const itMgr = u === U_IT && r === 'manager';
   if (r === 'imam') return true;
-  if (k.startsWith('admin.') || k === 'view.all') return itMgr || (k === 'admin.users' && u === U_ADMIN && r === 'manager');
+  if (k.startsWith('admin.') || k === 'view.all') return itMgr; /* مدیر بودن به‌تنهایی اختیار کارکنان یا اطلاعات بخش‌های دیگر را نمی‌دهد */
   switch (k) {
     case 'reports.view': return ['manager', 'office'].includes(r);
     case 'orders.issue': return false;
     case 'tasks.create': return ['manager', 'office'].includes(r);
     case 'letters.create': return ['manager', 'office', 'secretary'].includes(r);
     case 'letters.secret': return r === 'manager';
+    case 'letters.view': case 'letters.refer': return r !== 'staff';
+    case 'tasks.view': case 'requests.view': case 'requests.create': case 'reservations.manage': case 'files.view': return true;
+    case 'library.manage': return u === U_LIB && ['manager', 'office', 'secretary'].includes(r);
     case 'meetings.create': case 'assets.view': case 'finance.request': return r !== 'staff';
     case 'finance.view': return u === U_FIN;
     case 'hr.view': return u === U_ADMIN && ['manager', 'office'].includes(r);
   }
   return false;
 }
+/* مجوزهایی که مدیر هر بخش می‌تواند برای مسئول دفتر و منشی خودش محدود یا دوباره فعال کند (فقط تا سقف تعیین‌شده) */
+const OFFICE_PERMS = ['letters.view', 'letters.create', 'letters.refer', 'files.view', 'tasks.view', 'tasks.create', 'requests.view', 'requests.create', 'meetings.create', 'reservations.manage', 'reports.view', 'library.manage'];
 function permOf(pos, k) {
   if (!pos) return false;
+  if (pos.role !== 'imam' && pos.mgrDeny && pos.mgrDeny[k]) return false;
   const o = (pos.perms || {})[k];
   if (o === 'allow') return true;
   if (o === 'deny') return false;
@@ -935,7 +1040,7 @@ let pwCheck = (stored, p) => !!stored && (stored === pwHash(p) || stored === has
 function hash(s) { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(16).padStart(8, '0'); }
 function audit(act, ent, id, note = '') {
   const prev = DB.audit.length ? DB.audit[DB.audit.length - 1].h : '00000000';
-  const e = { ts: stamp(), uid: ME ? ME.user.id : 'system', pos: ME ? (ME.realPos || ME.pos.id) : '', unit: ME ? ME.pos.unitId : -1, act: ME && ME.override ? act + ' (مدیریتی)' : act, ent, id, note };
+  const e = { ts: stamp(), uid: ME ? ME.user.id : 'system', nm: ME ? ME.user.name : 'سامانه', pos: ME ? (ME.realPos || ME.pos.id) : '', unit: ME ? ME.pos.unitId : -1, act: ME && ME.override ? act + ' (مدیریتی)' : act, ent, id, note };
   e.h = hash(prev + JSON.stringify(e));
   DB.audit.push(e);
 }
@@ -951,9 +1056,9 @@ function verifyAudit() {
 function hist(obj, action, note = '') {
   obj.history = obj.history || [];
   if (ME && ME.override) note = (note ? note + ' — ' : '') + 'اقدام مدیریتی به‌جای ' + posLabel(ME.pos.id);
-  obj.history.push({ ts: stamp(), uid: ME ? ME.user.id : 'system', pos: ME ? (ME.realPos || ME.pos.id) : '', action, note });
+  obj.history.push({ ts: stamp(), uid: ME ? ME.user.id : 'system', nm: ME ? ME.user.name : 'سامانه', pos: ME ? (ME.realPos || ME.pos.id) : '', action, note });
 }
-const histHTML = h => (h && h.length ? `<div class="hist">${h.slice().reverse().map(x => `<div><b>${esc(x.action)}</b>${x.note ? ` — ${esc(x.note)}` : ''}<small>${jdt(x.ts)} · ${esc(x.uid === 'system' ? 'سامانه' : (userById(x.uid) || {}).name || '—')}${x.pos ? ' · ' + esc(posLabel(x.pos)) : ''}</small></div>`).join('')}</div>` : '<div class="empty">سابقه‌ای ثبت نشده است.</div>');
+const histHTML = h => (h && h.length ? `<div class="hist">${h.slice().reverse().map(x => `<div><b>${esc(x.action)}</b>${x.note ? ` — ${esc(x.note)}` : ''}<small>${jdt(x.ts)} · ${esc(who(x.uid, x.nm))}${x.pos ? ' · ' + esc(posLabel(x.pos)) : ''}</small></div>`).join('')}</div>` : '<div class="empty">سابقه‌ای ثبت نشده است.</div>');
 
 /* ---------- اعلان و پیامک ---------- */
 const SMS_EVENTS = {
@@ -1004,6 +1109,7 @@ const PRIORITIES = ['عادی', 'فوری', 'خیلی فوری'];
 const CONF = ['عادی', 'محرمانه', 'سری'];
 function canSeeLetter(l) {
   if (isAll()) return true;
+  if (!can('letters.view')) return false;
   const mine = inUnit(l.unitId) || l.refs.some(r => inUnit(r.unitId)) || l.toUnit === myUnit();
   if (!mine) return false;
   if (l.conf === 'سری') return can('letters.secret');
@@ -1027,12 +1133,12 @@ function createLetter(v) {
   if (l.type === 'internal' && l.toUnit != null) referLetter(l, l.toUnit, 'ارسال مکاتبه داخلی');
   return l;
 }
-const canHandleLetter = l => canSeeLetter(l) && (isImam() || can('letters.create')) && l.status !== 'بایگانی';
+const canHandleLetter = l => canSeeLetter(l) && (isImam() || can('letters.refer')) && l.status !== 'بایگانی';
 function referLetter(l, unitId, note) {
   unitId = +unitId;
   if (ME && !canHandleLetter(l)) return fail('ارجاع این نامه برای جایگاه شما مجاز نیست.');
   if (unitId !== 0 && !UNITS.some(u => u.id === unitId)) return fail('مدیریت مقصد را انتخاب کنید.');
-  l.refs.push({ unitId, ts: stamp(), by: ME ? ME.user.id : 'system', note: note || '' });
+  l.refs.push({ unitId, ts: stamp(), by: ME ? ME.user.id : 'system', nm: ME ? ME.user.name : 'سامانه', note: note || '' });
   l.status = 'ارجاع‌شده';
   hist(l, 'ارجاع به ' + unitName(unitId), note);
   audit('ارجاع نامه', 'letter', l.id, unitShort(unitId));
@@ -1043,7 +1149,7 @@ function referLetter(l, unitId, note) {
 function replyLetter(l, text) {
   if (!canHandleLetter(l)) return fail('ثبت پاسخ برای جایگاه شما مجاز نیست.');
   if (!text) return fail('متن پاسخ را بنویسید.');
-  l.replies.push({ ts: stamp(), by: ME.user.id, pos: ME.pos.id, text });
+  l.replies.push({ ts: stamp(), by: ME.user.id, nm: ME.user.name, pos: ME.pos.id, text });
   l.status = 'پاسخ داده‌شده';
   hist(l, 'ثبت پاسخ', text.slice(0, 80));
   audit('پاسخ نامه', 'letter', l.id, l.no);
@@ -1076,7 +1182,7 @@ function orderReport(o, v) {
   if (st === 'منتظر تأیید' && o.needReport && !v.note) return fail('این دستور نیازمند گزارش نهایی است؛ متن گزارش را بنویسید.');
   o.status = st; o.progress = Math.max(0, Math.min(100, +v.progress || o.progress));
   if (st === 'منتظر تأیید') o.progress = 100;
-  o.reports.push({ ts: stamp(), by: ME.user.id, pos: ME.pos.id, note: v.note || '', progress: o.progress, files: v.files || [] });
+  o.reports.push({ ts: stamp(), by: ME.user.id, nm: ME.user.name, pos: ME.pos.id, note: v.note || '', progress: o.progress, files: v.files || [] });
   hist(o, 'گزارش پیشرفت: ' + st + ' (' + fa(o.progress) + '٪)', v.note);
   audit('گزارش دستور', 'order', o.id, o.no);
   if (st === 'منتظر تأیید') notify([imamPos()], 'order', `دستور «${o.title}» برای تأیید نهایی ارسال شد.`, 'orders', o.no);
@@ -1114,17 +1220,18 @@ const taskStatus = t => (t.status !== 'تکمیل‌شده' && t.due && t.due < 
 function canSeeTask(t) {
   if (isAll()) return true;
   if (!inUnit(t.unitId)) return false;
-  return myRole() !== 'staff' || t.assignee === ME.pos.id;
+  if (t.assignee === ME.pos.id) return true;
+  return myRole() !== 'staff' && can('tasks.view');
 }
 function createTask(v) {
   const u = +v.unitId;
-  if (!(isMgrOrOffice(u) || (inUnit(u) && can('tasks.create')))) return fail('تعریف وظیفه برای مدیر و مسئول دفتر همان مدیریت مجاز است.');
+  if (!(isImam() || (inUnit(u) && can('tasks.create')))) return fail('تعریف وظیفه برای مدیر و مسئول دفتر همان مدیریت مجاز است.');
   if (!v.title) return fail('عنوان وظیفه را بنویسید.');
   if (!v.assignee) return fail('مسئول انجام را انتخاب کنید.');
   const terr = validateTask(v); if (terr) return fail(terr);
   if (!posById(v.assignee) || posById(v.assignee).unitId !== u) return fail('مسئول انجام باید از همین مدیریت باشد.');
   const t = { id: uid(), no: nextNo('task'), unitId: u, title: v.title, desc: v.desc || '', assignee: v.assignee, start: v.start || todayISO(), due: v.due || '',
-    priority: v.priority || 'عادی', files: v.files || [], status: 'جدید', created: stamp(), by: ME.user.id, src: v.src || '' };
+    priority: v.priority || 'عادی', files: v.files || [], status: 'جدید', created: stamp(), by: ME.user.id, byName: ME.user.name, src: v.src || '' };
   hist(t, 'تعریف وظیفه', 'مسئول: ' + posWho(t.assignee));
   DB.tasks.push(t);
   audit('تعریف وظیفه', 'task', t.id, t.no);
@@ -1134,7 +1241,7 @@ function createTask(v) {
 function taskActions(t) {
   const a = [];
   const mine = ME.pos.id === t.assignee;
-  const head = isMgrOrOffice(t.unitId);
+  const head = isMgrOrOffice(t.unitId) && (myRole() !== 'office' || can('tasks.create'));
   if (t.status === 'جدید' && (mine || head)) a.push(['start', 'شروع انجام']);
   if (t.status === 'در حال انجام' && (mine || head)) a.push(['submit', 'اعلام انجام و ارسال برای تأیید']);
   if (t.status === 'منتظر تأیید' && head && !mine) a.push(['approve', 'تأیید انجام'], ['return', 'بازگشت برای اصلاح']);
@@ -1171,6 +1278,8 @@ const REQ_STAGES = ['ثبت درخواست', 'ارجاع به مدیریت مس�
 const reqLabel = r => (r.status === 'ردشده' ? 'ردشده' : r.status === 'لغوشده' ? 'لغوشده' : REQ_STAGES[r.stage]);
 function canSeeReq(r) {
   if (isAll()) return true;
+  if (r.by === ME.user.id) return true;
+  if (!can('requests.view')) return false;
   const u = myUnit();
   const related = r.fromUnit === u || r.toUnit === u || r.coops.includes(u);
   if (!related) return false;
@@ -1178,11 +1287,12 @@ function canSeeReq(r) {
   return true;
 }
 function createRequest(v) {
+  if (!can('requests.create')) return fail('ثبت درخواست برای جایگاه شما محدود شده است.');
   if (!v.title) return fail('عنوان درخواست را بنویسید.');
   if (v.toUnit === '' || v.toUnit == null) return fail('مدیریت مسئول را انتخاب کنید.');
   const r = { id: uid(), no: nextNo('req'), title: v.title, desc: v.desc || '', cat: v.cat || '', fromUnit: myUnit(), toUnit: +v.toUnit,
     priority: v.priority || 'عادی', needsImam: !!v.needsImam, due: v.due || '', files: v.files || [], coops: [], coopNotes: [],
-    stage: 0, status: 'جاری', by: ME.user.id, byPos: ME.pos.id, created: stamp(), report: '', kind: v.kind || 'internal' };
+    stage: 0, status: 'جاری', by: ME.user.id, byName: ME.user.name, byPos: ME.pos.id, created: stamp(), report: '', kind: v.kind || 'internal' };
   hist(r, 'ثبت درخواست', 'کد پیگیری ' + r.no);
   r.stage = 1;
   hist(r, 'ارجاع به ' + unitName(r.toUnit));
@@ -1223,7 +1333,7 @@ function reqAct(r, act, note, extra) {
     }
     case 'coopnote':
       if (!note) return fail('متن نظر یا اقدام را بنویسید.');
-      r.coopNotes.push({ ts: stamp(), unit: myUnit(), by: ME.user.id, note });
+      r.coopNotes.push({ ts: stamp(), unit: myUnit(), by: ME.user.id, nm: ME.user.name, note });
       hist(r, 'نظر همکاری ' + unitShort(myUnit()), note);
       notify(unitHeads(r.toUnit), 'request', `${unitShort(myUnit())} برای «${r.title}» اقدام همکاری ثبت کرد.`, 'requests', r.no);
       break;
@@ -1277,6 +1387,7 @@ function validateReservation(v) {
   return '';
 }
 function createReservation(v) {
+  if (!can('reservations.manage')) return fail('ثبت رزرو برای جایگاه شما محدود شده است.');
   const err = validateReservation(v); if (err) return fail(err);
   const r = { id: uid(), no: nextNo('res'), program: v.program, space: v.space || '', applicant: String(v.applicant).trim(), phone: en(v.phone).replace(/\D/g, ''), kind: String(v.kind).trim(), date: v.date, start: v.start, end: v.end,
     people: Number(en(v.people)), equip: v.equip || '', desc: v.desc || '', status: 'در انتظار تأیید', by: ME.user.id, byPos: ME.pos.id, fromUnit: myUnit(), created: stamp() };
@@ -1287,7 +1398,7 @@ function createReservation(v) {
   notify(unitHeads(resUnit(r)), 'reservation', `درخواست رزرو ${resPlace(r)} برای ${jd(r.date)}`, 'reservations', r.no);
   return r;
 }
-const canDecideRes = r => isMgrOrOffice(resUnit(r)) && (inUnit(resUnit(r)) || isImam());
+const canDecideRes = r => isMgrOrOffice(resUnit(r)) && (inUnit(resUnit(r)) || isImam()) && (myRole() !== 'office' || can('reservations.manage'));
 function resDecide(r, status, note) {
   if (!RES_ST.includes(status) || status === 'در انتظار تأیید') return fail('وضعیت نامعتبر است.');
   if (status === 'لغوشده') { if (!(r.by === ME.user.id || canDecideRes(r))) return fail('اجازه لغو ندارید.'); if (!['در انتظار تأیید', 'تأییدشده'].includes(r.status)) return fail('این رزرو قابل لغو نیست.'); }
@@ -1329,7 +1440,7 @@ function createMeeting(v) {
   notify(m.invitees, 'meeting', `دعوت به ${m.kind} «${m.title}» — ${jd(m.date)} ساعت ${fa(m.start)}`, 'calendar', m.no);
   return m;
 }
-const canEditMeeting = m => isImam() || m.byPos === ME.pos.id || (m.unitId === myUnit() && myRole() !== 'staff');
+const canEditMeeting = m => isImam() || m.byPos === ME.pos.id || (m.unitId === myUnit() && myRole() !== 'staff' && can('meetings.create'));
 function addResolution(m, v) {
   if (!canEditMeeting(m)) return fail('ثبت مصوبه با برگزارکننده جلسه است.');
   if (!v.text || !v.owner) return fail('متن مصوبه و مسئول اجرا لازم است.');
@@ -1469,7 +1580,7 @@ const unitSpent = (u, y = jYearNow()) => sum(DB.tx.filter(t => t.kind === 'هز�
 const LEAVE_TYPES = ['استحقاقی', 'استعلاجی', 'بدون حقوق', 'ساعتی'];
 function createLeave(v) {
   if (!v.from || !v.to || v.to < v.from) return fail('بازه تاریخ مرخصی معتبر نیست.');
-  const l = { id: uid(), no: nextNo('leave'), uid: ME.user.id, pos: ME.pos.id, unitId: myUnit(), type: v.type || 'استحقاقی', from: v.from, to: v.to, reason: v.reason || '',
+  const l = { id: uid(), no: nextNo('leave'), uid: ME.user.id, nm: ME.user.name, pos: ME.pos.id, unitId: myUnit(), type: v.type || 'استحقاقی', from: v.from, to: v.to, reason: v.reason || '',
     status: myRole() === 'imam' ? 'در انتظار ثبت امور اداری' : 'در انتظار تأیید مدیر', created: stamp() };
   hist(l, 'ثبت درخواست مرخصی', `${jd(l.from)} تا ${jd(l.to)}`);
   DB.leaves.push(l);
@@ -1497,7 +1608,7 @@ function leaveAct(l, ok, note) {
 }
 function addHR(kind, v) {
   if (!canHR()) return fail('ثبت سوابق اداری فقط برای مدیریت امور اداری مجاز است.');
-  const rec = { id: uid(), ...v, created: stamp(), by: ME.user.id };
+  const rec = { id: uid(), ...v, nm: (userById(v.uid) || {}).name || '', created: stamp(), by: ME.user.id };
   DB[kind].push(rec);
   audit('ثبت سابقه اداری', kind, rec.id, v.title || v.dest || v.type || '');
   return rec;
@@ -1586,6 +1697,7 @@ function seed() {
   const T = todayISO();
   const D = baseDB();
   D.budgets = [];
+  D.demoRev = DEMO_REV;
   D.settings.sms.enabled = true; /* نسخه نمایشی: پیامک‌ها فقط در صف نمایش داده می‌شوند */
   DB = D;
   const prevME = ME;
@@ -1600,34 +1712,36 @@ function seed() {
   const FN = ['علی', 'محمدرضا', 'حسین', 'مهدی', 'سعید', 'جواد', 'امیرحسین', 'حمید', 'مصطفی', 'محسن', 'یاسر', 'زهرا', 'فاطمه', 'مریم', 'معصومه', 'سمیه', 'نرگس', 'الهام', 'زینب', 'رضا', 'مجتبی', 'ابوالفضل', 'صادق', 'هادی', 'طاهره', 'سارا'];
   const LN = ['کریمی', 'حسینی', 'رحیمی', 'موسوی', 'جعفری', 'صادقی', 'نوری', 'احمدی', 'رضایی', 'کاظمی', 'باقری', 'اکبری', 'قاسمی', 'شریفی', 'عباسی', 'یوسفی', 'نجفی', 'طاهری', 'سلیمانی', 'مرادی', 'فلاحی', 'امینی', 'زارعی', 'حیدری', 'میرزایی'];
   let k = 0;
-  const mk = (pid, name, user) => {
-    const u = { id: 'u' + (D.users.length + 1), name, username: user, pass: pwHash('1234'), posId: pid, active: true, phone: '0912' + pad(1000000 + D.users.length * 7919 % 8999999, 7).slice(-7), nid: '', hired: addDays(T, -400 - D.users.length * 11) };
-    D.users.push(u); D.posHistory.push({ posId: pid, userId: u.id, from: u.hired, to: '' });
+  /* هر جایگاه یک حساب ثابت با نام کاربری سازمانی دارد (مثلاً library.manager)؛ رمز همه حساب‌های نسخه نمایشی ۱۲۳۴ */
+  const mk = (pid, first, last) => {
+    const p = D.positions.find(x => x.id === pid);
+    const start = addDays(T, -400 - D.users.length * 11);
+    const u = { id: 'u' + (D.users.length + 1), first, last, name: first + ' ' + last, username: posUsername(p), pass: pwHash('1234'), posId: pid, active: true, phone: '0912' + pad(1000000 + D.users.length * 7919 % 8999999, 7).slice(-7), nid: '', hired: start, start };
+    D.users.push(u); D.posHistory.push({ posId: pid, userId: u.id, name: u.name, phone: u.phone, from: start, to: '' });
   };
-  mk('P0', 'حجت‌الاسلام سید محمد هاشمی', 'imam');
+  mk('P0', 'حجت‌الاسلام سید محمد', 'هاشمی');
   UNITS.forEach(u => {
-    ['m', 'o', 's'].forEach(r => { mk(`P${u.id}-${r}`, `${FN[(k * 7 + 3) % FN.length]} ${LN[(k * 5 + 1) % LN.length]}`, r + u.id); k++; });
+    ['m', 'o', 's'].forEach(r => { mk(`P${u.id}-${r}`, FN[(k * 7 + 3) % FN.length], LN[(k * 5 + 1) % LN.length]); k++; });
   });
-  D.positions.filter(p => p.role === 'staff').forEach(p => { mk(p.id, `${FN[(k * 7 + 3) % FN.length]} ${LN[(k * 5 + 1) % LN.length]}`, 'k' + p.unitId + '-' + p.id.split('-k')[1]); k++; });
-  /* نمونه تغییر متصدی: سوابق جایگاه پس از تغییر فرد حفظ می‌شود */
-  const former = { id: 'u0', name: 'غلامرضا فرهادی', username: 'former4', pass: pwHash('1234'), posId: '', active: false, phone: '', hired: addDays(T, -1200) };
-  D.users.push(former);
-  D.posHistory.unshift({ posId: 'P4-m', userId: 'u0', from: addDays(T, -1200), to: addDays(T, -420) });
+  D.positions.filter(p => p.role === 'staff').forEach(p => { mk(p.id, FN[(k * 7 + 3) % FN.length], LN[(k * 5 + 1) % LN.length]); k++; });
+  /* نمونه تحویل جایگاه: پنل «مدیریت رسانه» و سوابقش ثابت است و نام متصدی قبلی در سابقه می‌ماند */
+  const mediaHist = D.posHistory.find(h => h.posId === 'P4-m');
+  D.posHistory.unshift({ posId: 'P4-m', userId: mediaHist.userId, name: 'غلامرضا فرهادی', phone: '09121110000', from: addDays(T, -1200), to: mediaHist.from, handedTo: mediaHist.name });
 
   /* انبارها */
-  D.warehouses.push({ id: 'w1', name: 'انبار مرکزی', unitId: 1 }, { id: 'w2', name: 'انبار تجهیزات صوت و تصویر', unitId: 4 }, { id: 'w3', name: 'انبار آشپزخانه', unitId: 1 }, { id: 'w4', name: 'انبار کالای خیریه', unitId: 12 }, { id: 'w5', name: 'انبار تجهیزات پزشکی', unitId: 9 });
+  D.warehouses.push({ id: 'w1', name: 'انبار مرکزی', unitId: 1 }, { id: 'w2', name: 'انبار تجهیزات صوت و تصویر', unitId: 4 }, { id: 'w3', name: 'انبار آشپزخانه', unitId: 1 }, { id: 'w4', name: 'انبار کالای خیریه', unitId: 12 }, { id: 'w6', name: 'انبار رستوران', unitId: 19 }, { id: 'w5', name: 'انبار تجهیزات پزشکی', unitId: 9 });
 
   /* بودجه سالانه */
   const y = jYearNow();
-  const B = [42, 65, 18, 22, 12, 30, 28, 26, 34, 20, 9, 40, 11, 14, 8, 16, 120];
+  const B = [42, 30, 18, 22, 12, 30, 28, 26, 34, 20, 9, 40, 11, 14, 8, 16, 120, 45, 38];
   UNITS.forEach((u, i) => D.budgets.push({ unitId: u.id, year: y, amount: B[i] * 100000000 }));
 
   /* نامه‌ها */
   as('P1-s'); at(-12, '09:10');
   const L1 = createLetter({ type: 'in', subject: 'اعلام قطعی برنامه‌ریزی‌شده آب در محدوده مجتمع', cat: 'خدماتی', sender: 'شرکت آب و فاضلاب منطقه', receiver: 'مدیریت داخلی مجتمع', unitId: 1, priority: 'فوری', date: addDays(T, -12), body: 'به اطلاع می‌رساند به دلیل تعویض خط انتقال، آب محدوده در تاریخ اعلام‌شده از ساعت ۸ تا ۱۴ قطع خواهد بود.', needReply: false });
   as('P1-o'); at(-12, '11:00'); referLetter(L1, 2, 'جهت هماهنگی برنامه نماز و وضوخانه');
-  as('P2-s'); at(-9, '10:00');
-  createLetter({ type: 'out', subject: 'دعوت از سخنران مراسم دهه فاطمیه', cat: 'فرهنگی', sender: 'مدیریت امور فرهنگی و مراسمات مسجد', receiver: 'دفتر حجت‌الاسلام والمسلمین رضوانی', unitId: 2, date: addDays(T, -9), signer: 'P2-m',
+  as('P18-s'); at(-9, '10:00');
+  createLetter({ type: 'out', subject: 'دعوت از سخنران مراسم دهه فاطمیه', cat: 'فرهنگی', sender: 'مدیریت مراسمات و مناسبت‌ها', receiver: 'دفتر حجت‌الاسلام والمسلمین رضوانی', unitId: 18, date: addDays(T, -9), signer: 'P18-m',
     body: 'سلام علیکم\nبا احترام، به استحضار می‌رساند مراسم دهه فاطمیه در حسینیه مجتمع برگزار می‌شود. خواهشمند است در صورت امکان، سخنرانی شب‌های دوم تا پنجم را بپذیرید.\nپیشاپیش از حسن همکاری سپاسگزاریم.' });
   as('P15-s'); at(-7, '08:40');
   const L3 = createLetter({ type: 'in', subject: 'اعلام مانده حساب نذورات ماه گذشته', cat: 'مالی', sender: 'بانک قرض‌الحسنه', receiver: 'مدیریت امور مالی', unitId: 15, conf: 'محرمانه', date: addDays(T, -7), body: 'صورت‌حساب ماه گذشته پیوست است.', needReply: true });
@@ -1648,7 +1762,7 @@ function seed() {
 
   /* دستورات امام جماعت */
   as('P0'); at(-14, '18:00');
-  const O1 = createOrder({ title: 'برگزاری مراسم دهه فاطمیه با محوریت خانواده', desc: 'برنامه ده‌شبه شامل سخنرانی، مداحی، پذیرایی و ویژه‌برنامه کودک و نوجوان تدوین و اجرا شود. گزارش نهایی با آمار حضور ارائه گردد.', units: [2, 1, 4], respPos: 'P2-m', priority: 'فوری', issued: addDays(T, -14), due: addDays(T, 9), needReport: true });
+  const O1 = createOrder({ title: 'برگزاری مراسم دهه فاطمیه با محوریت خانواده', desc: 'برنامه ده‌شبه شامل سخنرانی، مداحی، پذیرایی و ویژه‌برنامه کودک و نوجوان تدوین و اجرا شود. گزارش نهایی با آمار حضور ارائه گردد.', units: [18, 19, 4], respPos: 'P18-m', priority: 'فوری', issued: addDays(T, -14), due: addDays(T, 9), needReport: true });
   at(-20, '17:00');
   const O2 = createOrder({ title: 'تکمیل مستندسازی اموال مجتمع و الصاق برچسب کد', desc: 'تمامی اموال کدگذاری و برچسب QR الصاق شود.', units: [1], respPos: 'P1-o', priority: 'عادی', issued: addDays(T, -20), due: addDays(T, -2), needReport: true });
   at(-30, '19:00');
@@ -1657,7 +1771,7 @@ function seed() {
   const O4 = createOrder({ title: 'گزارش پیشرفت سالن چندمنظوره', desc: 'گزارش مصور پیشرفت فیزیکی و مالی پروژه ارائه شود.', units: [17], respPos: 'P17-m', priority: 'خیلی فوری', issued: addDays(T, -25), due: addDays(T, -5), needReport: true });
   at(-3, '21:00');
   createOrder({ title: 'ساماندهی طرح اکرام ایتام در آستانه زمستان', desc: 'شناسایی خانواده‌ها و تأمین پوشاک زمستانی با حفظ کامل محرمانگی.', units: [12], respPos: 'P12-m', priority: 'فوری', issued: addDays(T, -3), due: addDays(T, 20), needReport: true });
-  as('P2-o'); at(-10, '10:00'); orderReport(O1, { status: 'در حال انجام', progress: 45, note: 'سخنرانان شب‌های اول تا پنجم قطعی شدند؛ هماهنگی پذیرایی با مدیریت داخلی انجام شد.' });
+  as('P18-o'); at(-10, '10:00'); orderReport(O1, { status: 'در حال انجام', progress: 45, note: 'سخنرانان شب‌های اول تا پنجم قطعی شدند؛ هماهنگی پذیرایی با مدیریت رستوران انجام شد.' });
   as('P1-o'); at(-8); orderReport(O2, { status: 'در حال انجام', progress: 70, note: 'اموال طبقه همکف و حسینیه برچسب‌گذاری شد.' });
   as('P16-m'); at(-6); orderReport(O3, { status: 'در حال انجام', progress: 35, note: 'نیازسنجی با درمانگاه انجام و نسخه آزمایشی آماده شد.' });
   as('P17-o'); at(-6); orderReport(O4, { status: 'منتظر تأیید', progress: 100, note: 'گزارش مصور پیشرفت ۶۲٪ فیزیکی و ۵۸٪ مالی پیوست شد.' });
@@ -1666,9 +1780,10 @@ function seed() {
   const tasks = [
     [1, 'P1-k1', 'سرویس دوره‌ای موتورخانه و دیگ‌های بخار', -10, -1, 'فوری', 'در حال انجام'],
     [1, 'P1-k2', 'انبارگردانی فصلی انبار مرکزی', -6, 4, 'عادی', 'جدید'],
-    [1, 'P1-o', 'هماهنگی پذیرایی مراسم دهه فاطمیه', -9, 8, 'فوری', 'در حال انجام'],
+    [19, 'P19-o', 'هماهنگی پذیرایی مراسم دهه فاطمیه', -9, 8, 'فوری', 'در حال انجام'],
     [1, 'P1-s', 'تنظیم برنامه نظافت محوطه', -15, -6, 'عادی', 'تکمیل‌شده'],
-    [2, 'P2-o', 'تدوین برنامه شب‌های دهه فاطمیه', -12, 1, 'خیلی فوری', 'منتظر تأیید'],
+    [18, 'P18-o', 'تدوین برنامه شب‌های دهه فاطمیه', -12, 1, 'خیلی فوری', 'منتظر تأیید'],
+    [2, 'P2-o', 'برگزاری کارگاه خوشنویسی نوجوانان', -10, 5, 'عادی', 'در حال انجام'],
     [2, 'P2-s', 'ثبت‌نام کاروان راهیان نور', -8, 12, 'عادی', 'در حال انجام'],
     [3, 'P3-o', 'تهیه فهرست مهمانان همایش خانواده', -5, 2, 'فوری', 'در حال انجام'],
     [3, 'P3-s', 'به‌روزرسانی تابلو اعلانات', -20, -12, 'عادی', 'تکمیل‌شده'],
@@ -1699,11 +1814,11 @@ function seed() {
   /* درخواست‌های داخلی */
   const reqs = [
     [3, 4, 'پوشش تصویری همایش خانواده', 'پوشش مراسم', -3, 2, false],
-    [2, 1, 'تأمین پذیرایی ۱۰ شب دهه فاطمیه', 'پذیرایی', -11, 4, false],
+    [18, 19, 'تأمین پذیرایی ۱۰ شب دهه فاطمیه', 'پذیرایی مراسم', -11, 4, false],
     [6, 16, 'راه‌اندازی رایانه‌های کارگاه رایانه دبستان', 'پشتیبانی رایانه', -9, 5, false],
     [12, 15, 'تخصیص اعتبار طرح پوشاک زمستانی', 'تخصیص بودجه', -2, 3, true],
     [9, 1, 'تعمیر سیستم سرمایش اتاق تزریقات', 'تعمیرات و نگهداری', -6, 4, false],
-    [5, 2, 'هماهنگی برنامه شب شهدا در حسینیه', 'مراسم مذهبی', -15, 6, false],
+    [5, 18, 'هماهنگی برنامه شب شهدا در حسینیه', 'مراسم مذهبی', -15, 6, false],
     [13, 4, 'طراحی پوستر جشن تکلیف کودکان', 'طراحی پوستر', -1, 1, false],
     [11, 3, 'اطلاع‌رسانی مسابقه کتابخوانی', 'اطلاع‌رسانی عمومی', -4, 3, false]
   ];
@@ -1714,7 +1829,7 @@ function seed() {
     for (let i = 0; i < Math.min(steps, 5); i++) {
       const a = seq[i];
       as(a === 'approve' ? (imam ? 'P0' : `P${to}-m`) : `P${to}-o`); at(s + i + 1, '12:00');
-      if (a === 'review' && to === 1 && from === 2) { reqAct(r, 'review', ''); as(`P${to}-o`); reqAct(r, 'coop', 'تأمین ظروف یک‌بار مصرف و هماهنگی بودجه', 15); as('P15-o'); reqAct(r, 'coopnote', 'اعتبار پذیرایی از بودجه مراسمات قابل تأمین است.'); continue; }
+      if (a === 'review' && to === 19 && from === 18) { reqAct(r, 'review', ''); as(`P${to}-o`); reqAct(r, 'coop', 'تأمین ظروف یک‌بار مصرف و هماهنگی بودجه', 15); as('P15-o'); reqAct(r, 'coopnote', 'اعتبار پذیرایی از بودجه مراسمات قابل تأمین است.'); continue; }
       reqAct(r, a, a === 'exec' ? 'اقدام انجام شد.' : a === 'final' ? 'درخواست به‌طور کامل انجام شد و گزارش به درخواست‌کننده ارسال شد.' : '');
     }
   });
@@ -1729,7 +1844,7 @@ function seed() {
     ['lodging', 'zaersara', 'کاروان زائران مشهد', 'اسکان زائرین', 7, '14:00', '23:59', 32, 'pending'],
     ['general', 'farhangsara', 'کتابخانه مجتمع', 'نشست کتابخوانی', 4, '17:00', '19:00', 40, 'approve'],
     ['general', 'amphi', 'متوسطه دوم', 'جشن فارغ‌التحصیلی', 3, '17:30', '20:00', 130, 'pending'],
-    ['religious', 'hosseinieh', 'مدیریت امور فرهنگی', 'مراسم دهه فاطمیه — شب اول', 9, '19:00', '22:30', 550, 'approve'],
+    ['religious', 'hosseinieh', 'مدیریت مراسمات و مناسبت‌ها', 'مراسم دهه فاطمیه؛ شب اول', 9, '19:00', '22:30', 550, 'approve'],
     ['rahian', '', 'مدیریت امور فرهنگی', 'کاروان راهیان نور دانش‌آموزی', 20, '06:00', '22:00', 110, 'pending']
   ];
   res.forEach(([prog, sp, ap, kind, d, s, e, n, st]) => {
@@ -1748,8 +1863,8 @@ function seed() {
   addResolution(M1, { text: 'ارائه گزارش مالی پروژه سالن چندمنظوره تا پایان هفته', owner: 'P15-m', due: addDays(T, -1) });
   addResolution(M1, { text: 'تهیه دستورالعمل استفاده از سالن آمفی‌تئاتر', owner: 'P3-m', due: addDays(T, 10) });
   as('P15-m'); at(-2); resolutionUpdate(M1, M1.resolutions[1], 'انجام‌شده', 'گزارش ارسال شد.');
-  as('P2-s'); at(-2);
-  createMeeting({ title: 'جلسه ستاد برگزاری دهه فاطمیه', date: T, start: '17:00', end: '18:30', place: 'دفتر مدیریت فرهنگی', invitees: ['P0', 'P2-m', 'P1-m', 'P4-m', 'P3-m'], agenda: 'نهایی‌سازی برنامه شب‌ها و تقسیم کار' });
+  as('P18-s'); at(-2);
+  createMeeting({ title: 'جلسه ستاد برگزاری دهه فاطمیه', date: T, start: '17:00', end: '18:30', place: 'دفتر مدیریت مراسمات', invitees: ['P0', 'P18-m', 'P19-m', 'P4-m', 'P3-m'], agenda: 'نهایی‌سازی برنامه شب‌ها و تقسیم کار' });
   as('P17-s'); at(-1);
   createMeeting({ title: 'جلسه پیشرفت پروژه با پیمانکار', date: addDays(T, 1), start: '10:00', end: '12:00', place: 'سالن جلسات', invitees: ['P17-m', 'P17-k5', 'P15-o'], agenda: 'بررسی صورت‌وضعیت شماره ۳' });
   as('P0'); at(-1);
@@ -1810,7 +1925,7 @@ function seed() {
   addHR('decrees', { uid: D.users.find(u => u.posId === 'P4-m').id, pos: 'P4-m', title: 'حکم انتصاب مدیر رسانه', no: 'ح/' + fa(y) + '/۰۱۲', date: addDays(T, -420) });
   addHR('contracts', { uid: D.users.find(u => u.posId === 'P1-k1').id, type: 'قرارداد کار معین', from: addDays(T, -300), to: addDays(T, 65), title: 'کارشناس تأسیسات' });
   addHR('contracts', { uid: D.users.find(u => u.posId === 'P1-k2').id, type: 'قرارداد کار معین', from: addDays(T, -200), to: addDays(T, 165), title: 'انباردار' });
-  addHR('missions', { uid: D.users.find(u => u.posId === 'P2-m').id, dest: 'قم', from: addDays(T, 6), to: addDays(T, 7), title: 'هماهنگی سخنرانان', status: 'تأییدشده' });
+  addHR('missions', { uid: D.users.find(u => u.posId === 'P18-m').id, dest: 'قم', from: addDays(T, 6), to: addDays(T, 7), title: 'هماهنگی سخنرانان', status: 'تأییدشده' });
   as('P4-k3'); at(-2); const lv1 = createLeave({ type: 'استحقاقی', from: addDays(T, 4), to: addDays(T, 5), reason: 'امور شخصی' });
   as('P10-o'); at(-4); const lv2 = createLeave({ type: 'استعلاجی', from: addDays(T, -3), to: addDays(T, -2), reason: 'بیماری' });
   as('P10-m'); at(-3); leaveAct(lv2, true, '');
@@ -1826,8 +1941,11 @@ function seed() {
   R(8, 'edu', [{ title: 'کارگاه مدیریت زمان کنکور', grade: 'دوازدهم', kind: 'تربیتی', date: addDays(T, -2), note: '' }]);
   R(9, 'equip', [{ title: 'دستگاه الکتروکاردیوگرافی', state: 'نیازمند سرویس', date: addDays(T, -20), note: '' }, { title: 'دستگاه استریل', state: 'فعال', date: addDays(T, -5), note: '' }]);
   R(10, 'stock', [{ title: 'آموکسی‌سیلین ۵۰۰', qty: 40, min: 100, supplier: 'پخش البرز', date: addDays(T, 300) }, { title: 'استامینوفن ۳۲۵', qty: 600, min: 200, supplier: 'پخش رازی', date: addDays(T, 420) }, { title: 'سرم نمکی', qty: 18, min: 30, supplier: 'پخش البرز', date: addDays(T, 200) }]);
-  R(11, 'books', [{ title: 'مفاتیح‌الجنان', author: 'شیخ عباس قمی', code: '۱۰۲۴', state: 'موجود', member: '' }, { title: 'سلام بر ابراهیم', author: 'گروه فرهنگی ابراهیم هادی', code: '۲۳۱۸', state: 'امانت', member: 'عضو شماره ۴۴۱' }]);
   R(11, 'events', [{ title: 'مسابقه کتابخوانی نوجوانان', date: addDays(T, -10), count: 62, note: '' }]);
+  R(12, 'jihadi', [{ title: 'اردوی جهادی ساخت مدرسه', place: 'روستای کهنک', date: addDays(T, -20), count: 28, note: '' }]);
+  R(18, 'events', [{ title: 'مراسم دهه فاطمیه', kind: 'مراسم مذهبی', date: addDays(T, 9), place: 'حسینیه', count: 500 }, { title: 'جشن میلاد حضرت زینب', kind: 'جشن و اعیاد', date: addDays(T, 30), place: 'حسینیه', count: 300 }]);
+  R(19, 'orders', [{ title: 'شام شب اول دهه فاطمیه', unit: 'مراسمات و مناسبت‌ها', date: addDays(T, 9), count: 450, note: '' }]);
+  R(13, 'kinder', [{ title: 'نیایش رضایی', age: 4, parent: 'محمد رضایی', phone: '09123334455', date: addDays(T, -12) }]);
   R(12, 'aid', [{ donor: 'خیّر ناشناس', kind: 'نقدی', amount: 250000000, date: addDays(T, -6), use: 'طرح پوشاک زمستانی' }, { donor: 'فروشگاه محله', kind: 'غیرنقدی', amount: 90000000, date: addDays(T, -2), use: '۳۰ سبد غذایی' }]);
   R(13, 'admit', [{ date: T, session: 'صبح', count: 22, cap: 30, coach: 'خانم امینی', note: 'بدون حادثه' }, { date: addDays(T, -1), session: 'عصر', count: 29, cap: 30, coach: 'خانم زارعی', note: 'بدون حادثه' }]);
   R(16, 'systems', [{ title: 'پشتیبان‌گیری شبانه سرور', kind: 'پشتیبان‌گیری', date: addDays(T, -1), state: 'سالم', note: '' }, { title: 'فایروال اصلی', kind: 'امنیت', date: addDays(T, -7), state: 'هشدار', note: 'به‌روزرسانی میان‌افزار لازم است' }]);
@@ -1836,15 +1954,30 @@ function seed() {
     { title: 'عایق‌کاری بام حسینیه', contractor: '—', start: addDays(T, 15), end: addDays(T, 45), progress: 0, budget: 900000000, spent: 0 }]);
 
   /* نمونه ورودها و درخواست عضویت */
-  [['imam', 'u1', true, 'ورود موفق', -1, '07:42'], ['m16', null, false, 'رمز نادرست', -1, '08:03'], ['m16', null, true, 'ورود موفق', -1, '08:04'], ['o3', null, true, 'ورود موفق', 0, '08:12'], ['admin', null, false, 'نام کاربری ناموجود', 0, '02:17'], ['admin', null, false, 'نام کاربری ناموجود', 0, '02:18'], ['s9', null, false, 'رمز نادرست', 0, '09:31'], ['s9', null, true, 'ورود موفق', 0, '09:32']].forEach(([un, id, ok, reason, d, hm]) => {
+  [['imam', 'u1', true, 'ورود موفق', -1, '07:42'], ['it.manager', null, false, 'رمز نادرست', -1, '08:03'], ['it.manager', null, true, 'ورود موفق', -1, '08:04'], ['pr.office', null, true, 'ورود موفق', 0, '08:12'], ['admin', null, false, 'نام کاربری ناموجود', 0, '02:17'], ['root', null, false, 'نام کاربری ناموجود', 0, '02:18'], ['clinic.secretary', null, false, 'رمز نادرست', 0, '09:31'], ['clinic.secretary', null, true, 'ورود موفق', 0, '09:32']].forEach(([un, id, ok, reason, d, hm]) => {
     at(d, hm); const u = D.users.find(x => x.username === un);
-    D.logins.push({ id: uid(), ts: SEED_TS, username: un, uid: u ? u.id : '', ok, reason, agent: 'Chrome' });
+    D.logins.push({ id: uid(), ts: SEED_TS, username: un, uid: u ? u.id : '', nm: u ? u.name : '', ok, reason, agent: 'Chrome' });
     if (ok && u) u.lastLogin = SEED_TS;
   });
   ME = null; at(-1, '21:40');
   createSignup({ name: 'محمدحسین اکبری', username: 'mh.akbari', phone: '09127654321', unitId: 4, title: 'تدوینگر', pass: 'akbari123', note: 'نیروی داوطلب واحد رسانه از ماه گذشته' });
   at(0, '07:55');
   createSignup({ name: 'ریحانه موسوی', username: 'r.mousavi', phone: '09351112233', unitId: 11, title: 'کتابدار', pass: 'mousavi99', note: '' });
+  /* کتابخانه عمومی: فهرست کتاب، اعضای نمونه و درخواست‌ها */
+  as('P11-o'); at(-30);
+  [['مفاتیح‌الجنان', 'شیخ عباس قمی', 'قرآن و معارف', 4], ['سلام بر ابراهیم', 'گروه فرهنگی شهید ابراهیم هادی', 'دفاع مقدس', 3], ['دا', 'سیده زهرا حسینی', 'دفاع مقدس', 2],
+   ['شهید گمنام', 'گروه نویسندگان', 'دفاع مقدس', 1], ['داستان راستان', 'شهید مرتضی مطهری', 'قرآن و معارف', 3], ['نهج‌البلاغه', 'سید رضی؛ ترجمه محمد دشتی', 'قرآن و معارف', 2],
+   ['قصه‌های قرآنی برای کودکان', 'مهدی آذریزدی', 'کودک و نوجوان', 3], ['مربای شیرین', 'هوشنگ مرادی کرمانی', 'کودک و نوجوان', 2], ['کلیله و دمنه', 'نصرالله منشی', 'ادبیات و داستان', 1],
+   ['آیین همسرداری', 'ابراهیم امینی', 'خانواده و تربیت', 2], ['تاریخ اسلام', 'رسول جعفریان', 'تاریخ و سیره', 1], ['ریاضیات به زبان ساده', 'گروه مؤلفان', 'علمی و آموزشی', 2]
+  ].forEach(([title, author, category, copies]) => saveBook('', { title, author, category, copies, publisher: '', year: '' }));
+  ME = null;
+  const mem = [['زهرا محمدی', 'z.mohammadi'], ['علی رضوانی', 'a.rezvani'], ['حسین کاظمی', 'h.kazemi']].map(([name, username]) => libSignup({ name, username, phone: '09121112233', pass: 'library1234' }));
+  at(-6); const lA = libRequest(mem[0], D.books[1].id, 'امانت', '');
+  at(-5); const lB = libRequest(mem[1], D.books[3].id, 'امانت', '');
+  at(-2); libRequest(mem[2], D.books[0].id, 'رزرو', 'برای جلسه قرآن');
+  at(-1); libRequest(mem[0], D.books[6].id, 'امانت', 'برای فرزندم');
+  as('P11-o'); at(-5); loanDecide(lA.id, true, '', 3); at(-4); loanDeliver(lA.id, 14);
+  at(-4); loanDecide(lB.id, true, '', 3); at(-3); loanDeliver(lB.id, 2);
   SEED_TS = null;
   ME = prevME;
   D.notifs.forEach((n, i) => { if (i % 3 === 0) n.read = true; });
@@ -1862,9 +1995,17 @@ const DEFAULTS = JSON.parse(JSON.stringify({ units: UNITS, services: SERVICES, s
 /* ---------- مهاجرت داده و اعمال تنظیمات ---------- */
 function migrate(D) {
   D.logins = D.logins || []; D.sessions = D.sessions || []; D.signups = D.signups || [];
+  D.books = D.books || []; D.members = D.members || []; D.loans = D.loans || []; D.msessions = D.msessions || [];
+  (D.users || []).forEach(u => { if (!u.first && u.name) { const parts = u.name.replace(/^(حجت‌الاسلام و?(المسلمین)?|حجت‌الاسلام)\s+/, '').split(' '); u.first = parts[0]; u.last = parts.slice(1).join(' ') || '—'; } });
+  (D.posHistory || []).forEach(h => { if (!h.name) { const u = (D.users || []).find(x => x.id === h.userId); if (u) h.name = u.name; } });
+  /* جایگاه‌های سه‌گانه برای همه مدیریت‌ها (از جمله مدیریت‌های تازه) */
+  if (D.positions && D.positions.length) {
+    UNITS.forEach(u => [['m', 'manager', 'مدیر'], ['o', 'office', 'مسئول دفتر'], ['s', 'secretary', 'منشی']].forEach(([c, role, title]) => { if (!D.positions.some(p => p.id === `P${u.id}-${c}`)) D.positions.push({ id: `P${u.id}-${c}`, unitId: u.id, role, title }); }));
+    if (D.budgets) UNITS.forEach(u => { if (!D.budgets.some(b => b.unitId === u.id)) D.budgets.push({ unitId: u.id, year: jYearNow(), amount: 0 }); });
+  }
   const s = D.settings;
   const def = {
-    loginTitle: 'کارتابل اداری', subtitle: 'مجتمع مسجدمحور', loginText: 'سامانه یکپارچه مکاتبات، دستورات، ارجاع وظایف، درخواست‌ها، رزروها، اموال، امور مالی و منابع انسانی ۱۷ مدیریت مستقل زیر نظر امام جماعت.',
+    loginTitle: 'کارتابل اداری', subtitle: 'مجتمع مسجدمحور', loginText: 'سامانه یکپارچه مکاتبات، دستورات، ارجاع وظایف، درخواست‌ها، رزروها، اموال، امور مالی و منابع انسانی مدیریت‌های مستقل زیر نظر امام جماعت.',
     announcement: { on: false, text: '', tone: 'info' }, maintenance: false, showDemo: true,
     theme: { palette: 'zomorrod', scale: 14 }, security: { minLen: 6, maxFails: 5, lockMin: 15, sessionMin: 60 },
     clock: { city: 'آبادان', lat: 30.3392, lng: 48.3043, prayer: true }, rolePerms: {}, units: {}, unitsOff: [], extraUnits: []
@@ -1945,21 +2086,68 @@ function createUser2(v) {
   if (v.posId) { const r = assignHolder(v.posId, u.id); if (r && r.error) return r; }
   return u;
 }
-function updateUser(u, v) {
-  if (!can('admin.users')) return fail('ویرایش کاربر مجاز نیست.');
+/* ویرایش ساده مشخصات متصدی فعلی: نام، نام خانوادگی و تماس؛ نام کاربری، جایگاه و سوابق تغییر نمی‌کند */
+function updateHolder(u, v) {
+  const self = u.id === ME.user.id;
+  if (!self && !can('admin.users')) return fail('ویرایش مشخصات متصدی برای جایگاه شما مجاز نیست.');
   if (u.deleted) return fail('این حساب حذف شده است.');
-  if (u.posId && isSensitivePos(posById(u.posId)) && !isImam() && u.id !== ME.user.id) return fail('ویرایش حساب متصدی جایگاه حساس فقط با امام جماعت است.');
-  if (!v.name) return fail('نام را بنویسید.');
-  if (!USERNAME_RE.test(v.username)) return fail('نام کاربری معتبر نیست.');
-  if (DB.users.some(x => x.id !== u.id && x.username === v.username && !x.deleted)) return fail('این نام کاربری متعلق به کاربر دیگری است.');
-  const ch = ['name', 'username', 'phone', 'nid'].filter(k => String(u[k] || '') !== String(v[k] || ''));
-  Object.assign(u, { name: v.name, username: v.username, phone: en(v.phone || ''), nid: en(v.nid || '') });
-  if (v.posId !== (u.posId || '')) {
-    if (!v.posId) { const h = DB.posHistory.find(x => x.userId === u.id && !x.to); if (h) h.to = todayISO(); u.posId = ''; audit('برداشتن جایگاه کاربر', 'user', u.id, u.username); }
-    else { const r = assignHolder(v.posId, u.id); if (r && r.error) return r; }
-  }
-  if (ch.length) audit('ویرایش کاربر', 'user', u.id, u.username + ' · ' + ch.join('، '));
+  if (!self && u.posId && isSensitivePos(posById(u.posId)) && !isImam()) return fail('ویرایش مشخصات متصدی جایگاه حساس فقط با امام جماعت یا خود متصدی است.');
+  const first = String(v.first || '').trim(), last = String(v.last || '').trim();
+  if (!first || !last) return fail('نام و نام خانوادگی را بنویسید.');
+  if (LABEL_BAD.test(first + last)) return fail('نام نباید شامل نویسه‌های < > " \' ` & باشد.');
+  const phone = en(v.phone || '').replace(/\D/g, '');
+  if (phone && !/^0?9\d{9}$|^0\d{10}$/.test(phone)) return fail('شماره تماس معتبر نیست.');
+  const before = `${u.name} · ${u.phone || '—'}`;
+  Object.assign(u, { first, last, name: first + ' ' + last, phone, nid: en(v.nid ?? u.nid ?? '') });
+  /* نام متصدی فعلی در سابقه جایگاه هم به‌روز می‌شود؛ سوابق متصدیان قبلی دست‌نخورده می‌ماند */
+  const h = DB.posHistory.filter(x => x.posId === u.posId && x.userId === u.id && !x.to).slice(-1)[0];
+  if (h) { h.name = u.name; h.phone = phone; }
+  audit('ویرایش مشخصات متصدی', 'user', u.id, `${posLabel(u.posId)}: ${before} ← ${u.name} · ${phone || '—'}`);
   return u;
+}
+/* تغییر متصدی و تحویل رسمی مسئولیت: حساب و پنل جایگاه ثابت می‌ماند؛ فرد، رمز و نشست‌ها عوض می‌شود */
+function handover(posId, v) {
+  if (!can('admin.users')) return fail('تغییر متصدی جایگاه برای جایگاه شما مجاز نیست.');
+  const p = posById(posId); if (!p) return fail('جایگاه یافت نشد.');
+  if (posId === ME.pos.id) return fail('تحویل جایگاه خودتان با امام جماعت یا مدیر فناوری اطلاعات است.');
+  if (isSensitivePos(p) && !isImam()) return fail(`«${posLabel(p.id)}» جایگاه حساس است و تغییر متصدی آن فقط با امام جماعت است.`);
+  const first = String(v.first || '').trim(), last = String(v.last || '').trim();
+  if (!first || !last) return fail('نام و نام خانوادگی متصدی جدید را بنویسید.');
+  if (LABEL_BAD.test(first + last)) return fail('نام نباید شامل نویسه‌های < > " \' ` & باشد.');
+  const phone = en(v.phone || '').replace(/\D/g, '');
+  if (!/^0?9\d{9}$|^0\d{10}$/.test(phone)) return fail('شماره تماس متصدی جدید معتبر نیست.');
+  const start = v.start || todayISO();
+  if (!/^\d{4}-\d\d-\d\d$/.test(start)) return fail('تاریخ شروع مسئولیت معتبر نیست.');
+  let acc = accountOf(posId);
+  const prevName = acc ? acc.name : '';
+  if (!acc) {
+    let un = posUsername(p); let n = 2; while (DB.users.some(u => u.username === un && !u.deleted)) un = posUsername(p) + n++;
+    acc = { id: 'u' + uid(), username: un, posId, active: true, created: stamp() };
+    DB.users.push(acc);
+  }
+  const cur = DB.posHistory.filter(x => x.posId === posId && !x.to);
+  cur.forEach(h => { h.to = start; h.name = h.name || prevName; h.handedTo = first + ' ' + last; });
+  const tempPass = genPass() + genPass().slice(0, 4);
+  Object.assign(acc, { first, last, name: first + ' ' + last, phone, nid: en(v.nid || ''), hired: start, start, active: true, deleted: false, pass: pwHash(tempPass), mustChange: true, fails: 0, lockedUntil: '' });
+  DB.posHistory.push({ posId, userId: acc.id, name: acc.name, phone, from: start, to: '', by: ME.user.name, note: String(v.note || '').slice(0, 500) });
+  endUserSessions(acc.id);
+  audit('تغییر متصدی و تحویل مسئولیت', 'position', posId, `${posLabel(posId)}: ${prevName || 'بدون متصدی'} ← ${acc.name} از ${jd(start)}${v.note ? ' — ' + v.note : ''}`);
+  return { id: acc.id, username: acc.username, tempPass };
+}
+/* حساب‌های همه جایگاه‌های بدون حساب، با رمز اولیه مستقل و تصادفی (فقط در خط فرمان سرور) */
+function provisionAccounts(makePass) {
+  const out = [];
+  DB.positions.forEach(p => {
+    if (accountOf(p.id)) return;
+    const pass = makePass();
+    let un = posUsername(p); let n = 2; while (DB.users.some(u => u.username === un && !u.deleted)) un = posUsername(p) + n++;
+    const u = { id: 'u' + uid(), username: un, posId: p.id, first: 'متصدی', last: 'ثبت‌نشده', name: 'متصدی ثبت‌نشده', phone: '', active: true, pass: pwHash(pass), mustChange: true, created: stamp(), start: todayISO() };
+    DB.users.push(u);
+    DB.posHistory.push({ posId: p.id, userId: u.id, name: u.name, phone: '', from: todayISO(), to: '', by: 'خط فرمان سرور' });
+    out.push({ pos: posLabel(p.id), panel: panelName(p), username: un, pass });
+  });
+  if (out.length) audit('ایجاد حساب‌های جایگاه‌ها', 'user', '', fa(out.length) + ' حساب');
+  return out;
 }
 function deleteUser(u) {
   if (!can('admin.users')) return fail('حذف کاربر مجاز نیست.');
@@ -2014,13 +2202,17 @@ function decideSignup(sg, ok, v) {
   let posId = v.posId;
   if (!posId) return fail('جایگاه سازمانی را انتخاب کنید.');
   if (posId === 'new') { const p = addPosition({ unitId: sg.unitId, title: sg.title }); if (p.error) return p; posId = p.id; }
-  if (DB.users.some(u => u.username === sg.username && !u.deleted)) return fail('این نام کاربری در این فاصله توسط کاربر دیگری گرفته شده است.');
-  const u = { id: 'u' + uid(), name: sg.name, username: sg.username, pass: sg.passHash, posId: '', active: true, phone: sg.phone, hired: todayISO(), created: stamp() };
-  DB.users.push(u);
-  const r = assignHolder(posId, u.id); if (r && r.error) return r;
-  sg.status = 'تأییدشده'; sg.userId = u.id;
-  audit('تأیید درخواست عضویت', 'signup', sg.id, sg.username + ' ← ' + posLabel(posId));
-  return sg;
+  const p = posById(posId);
+  if (!p || accountOf(posId)) return fail('این جایگاه متصدی دارد؛ جایگاه خالی یا جایگاه جدید انتخاب کنید.');
+  if (isSensitivePos(p)) return fail('جایگاه حساس را نمی‌توان از مسیر درخواست عضویت واگذار کرد.');
+  const [first, ...rest] = sg.name.split(' ');
+  const r = handover(posId, { first, last: rest.join(' ') || '—', phone: sg.phone, start: todayISO(), note: 'تأیید درخواست عضویت ' + sg.no });
+  if (r.error) return r;
+  const acc = userById(r.id);
+  acc.pass = sg.passHash; acc.mustChange = false; /* رمزی که متقاضی خودش انتخاب کرده بود */
+  sg.status = 'تأییدشده'; sg.userId = acc.id; sg.assignedUsername = acc.username;
+  audit('تأیید درخواست عضویت', 'signup', sg.id, sg.username + ' ← ' + posLabel(posId) + ' · نام کاربری ' + acc.username);
+  return { id: acc.id, username: acc.username };
 }
 
 /* ---------- تأیید و رد مدیریتی همه موارد معلق ---------- */
@@ -2077,11 +2269,184 @@ const greg = () => new Intl.DateTimeFormat('fa-IR-u-ca-gregory', { timeZone: TZ,
 
 
 /* =====================================================================
+   کتابخانه عمومی: فهرست کتاب‌ها با نسخه‌های واقعی، حساب اعضا (جدا از کارکنان)، رزرو و امانت
+   فرایند: انتخاب کتاب ← ورود عضو ← ثبت درخواست ← بررسی کتابدار ← تأیید و اختصاص نسخه آزاد ← تحویل و موعد بازگشت ← بازگشت و آزادشدن نسخه
+   ثبت درخواست به‌تنهایی به معنای تحویل نیست و هر نسخه در هر لحظه فقط به یک نفر اختصاص دارد.
+   ===================================================================== */
+const LOAN = { pending: 'در انتظار بررسی', ready: 'تأییدشده؛ آماده تحویل', rejected: 'ردشده', out: 'در امانت', returned: 'بازگردانده‌شده', cancelled: 'لغوشده', expired: 'منقضی؛ مراجعه نشد' };
+const LOAN_TYPES = ['امانت', 'رزرو'];
+const BOOK_CATS = ['قرآن و معارف', 'تاریخ و سیره', 'ادبیات و داستان', 'کودک و نوجوان', 'دفاع مقدس', 'خانواده و تربیت', 'علمی و آموزشی', 'سایر'];
+const COPY_ST = { free: 'موجود', held: 'رزروشده', out: 'در امانت', off: 'خارج از دسترس' };
+const MEMBER_RE = /^[a-z0-9._-]{3,24}$/i;
+const LIB_LIMIT = 3; /* حداکثر درخواست و امانت فعال هر عضو */
+const canLib = () => !!ME && (isImam() || can('library.manage'));
+const canSeeLib = () => canLib() || isAll();
+const freeCopies = b => b.copies.filter(c => c.status === COPY_ST.free);
+const bookOf = id => DB.books.find(b => b.id === id);
+const memberOf = id => DB.members.find(m => m.id === id);
+const loanLate = l => l.status === LOAN.out && l.due && l.due < todayISO();
+const activeLoan = l => [LOAN.pending, LOAN.ready, LOAN.out].includes(l.status);
+function bookPublic(b) {
+  return { id: b.id, code: b.code, title: b.title, author: b.author, publisher: b.publisher || '', year: b.year || '', category: b.category, desc: b.desc || '',
+    total: b.copies.filter(c => c.status !== COPY_ST.off).length, available: freeCopies(b).length };
+}
+function lhist(l, action, note, by) { (l.history = l.history || []).push({ ts: stamp(), action, note: note || '', by: by || (ME ? ME.user.name : 'عضو') }); }
+const libHeads = () => DB.positions.filter(p => p.unitId === U_LIB && permOf(p, 'library.manage')).map(p => p.id);
+
+/* ---------- کتاب‌ها (کتابدار) ---------- */
+function saveBook(id, v) {
+  if (!canLib()) return fail('مدیریت کتاب‌ها فقط برای کتابداران مجاز است.');
+  const title = String(v.title || '').trim(), author = String(v.author || '').trim();
+  if (!title || !author) return fail('عنوان و نویسنده کتاب را بنویسید.');
+  if (!BOOK_CATS.includes(v.category)) return fail('موضوع کتاب را انتخاب کنید.');
+  const year = String(en(v.year || '')).trim();
+  if (year && !/^\d{4}$/.test(year)) return fail('سال انتشار باید چهار رقم باشد.');
+  const fields = { title: title.slice(0, 300), author: author.slice(0, 200), publisher: String(v.publisher || '').slice(0, 200), year, category: v.category, desc: String(v.desc || '').slice(0, 2000) };
+  if (id) {
+    const b = bookOf(id); if (!b) return fail('کتاب یافت نشد.');
+    Object.assign(b, fields); audit('ویرایش کتاب', 'book', b.id, b.code + ' · ' + b.title); return b;
+  }
+  const n = Number(en(v.copies || 1));
+  if (!Number.isInteger(n) || n < 1 || n > 50) return fail('تعداد نسخه باید عدد صحیح بین ۱ تا ۵۰ باشد.');
+  DB.seq.book = (DB.seq.book || 0) + 1;
+  const code = 'KT-' + pad(DB.seq.book, 4);
+  const b = { id: uid(), code, ...fields, copies: [], created: stamp() };
+  for (let i = 1; i <= n; i++) b.copies.push({ id: uid(), code: `${code}-${i}`, status: COPY_ST.free });
+  DB.books.push(b);
+  audit('ثبت کتاب', 'book', b.id, `${code} · ${b.title} · ${fa(n)} نسخه`);
+  return b;
+}
+function addCopies(bookId, n) {
+  if (!canLib()) return fail('مدیریت نسخه‌ها فقط برای کتابداران مجاز است.');
+  const b = bookOf(bookId); if (!b) return fail('کتاب یافت نشد.');
+  n = Number(en(n)); if (!Number.isInteger(n) || n < 1 || n > 50) return fail('تعداد نسخه باید عدد صحیح بین ۱ تا ۵۰ باشد.');
+  const start = b.copies.length;
+  for (let i = 1; i <= n; i++) b.copies.push({ id: uid(), code: `${b.code}-${start + i}`, status: COPY_ST.free });
+  audit('افزودن نسخه کتاب', 'book', b.id, `${b.code} · ${fa(n)} نسخه`);
+  return b;
+}
+function setCopyStatus(bookId, copyId, available) {
+  if (!canLib()) return fail('مدیریت نسخه‌ها فقط برای کتابداران مجاز است.');
+  const b = bookOf(bookId); const c = b && b.copies.find(x => x.id === copyId); if (!c) return fail('نسخه یافت نشد.');
+  if ([COPY_ST.held, COPY_ST.out].includes(c.status)) return fail('این نسخه در رزرو یا امانت است و تا بازگشت قابل تغییر نیست.');
+  c.status = available ? COPY_ST.free : COPY_ST.off;
+  audit('تغییر وضعیت نسخه کتاب', 'book', b.id, `${c.code} · ${c.status}`);
+  return b;
+}
+
+/* ---------- اعضا ---------- */
+function libSignup(v) {
+  const name = String(v.name || '').trim(), username = String(v.username || '').trim().toLowerCase();
+  if (!name || LABEL_BAD.test(name)) return fail('نام و نام خانوادگی را بدون نویسه‌های < > " \' ` & بنویسید.');
+  if (!MEMBER_RE.test(username)) return fail('نام کاربری باید ۳ تا ۲۴ نویسه انگلیسی، عدد، نقطه یا خط تیره باشد.');
+  if (DB.members.some(m => m.username === username)) return fail('این نام کاربری قبلاً گرفته شده است.');
+  const phone = en(v.phone || '').replace(/\D/g, '');
+  if (!/^0?9\d{9}$/.test(phone)) return fail('شماره همراه معتبر نیست.');
+  if (en(v.pass || '').length < 8) return fail('رمز عبور باید دست‌کم ۸ نویسه باشد.');
+  DB.seq.member = (DB.seq.member || 0) + 1;
+  const m = { id: uid(), no: 'M-' + pad(DB.seq.member, 5), name: name.slice(0, 100), username, phone, pass: pwHash(v.pass), active: true, created: stamp() };
+  DB.members.push(m);
+  audit('عضویت در کتابخانه', 'member', m.id, m.no);
+  return m;
+}
+/* درخواست رزرو یا امانت از سوی عضو (عضو به‌صورت صریح داده می‌شود؛ حساب عضو هیچ اختیار اداری ندارد) */
+function libRequest(mem, bookId, type, note) {
+  if (!mem || !mem.active) return fail('برای ثبت درخواست وارد حساب عضویت شوید.');
+  const b = bookOf(bookId); if (!b) return fail('کتاب یافت نشد.');
+  if (!LOAN_TYPES.includes(type)) return fail('نوع درخواست را انتخاب کنید.');
+  if (!b.copies.some(c => c.status !== COPY_ST.off)) return fail('این کتاب در حال حاضر در دسترس نیست.');
+  const mine = DB.loans.filter(l => l.memberId === mem.id && activeLoan(l));
+  if (mine.some(l => l.bookId === b.id)) return fail('برای این کتاب درخواست یا امانت فعال دارید.');
+  if (mine.length >= LIB_LIMIT) return fail(`حداکثر ${fa(LIB_LIMIT)} درخواست و امانت فعال مجاز است.`);
+  if (type === 'امانت' && !freeCopies(b).length) return fail('فعلاً نسخه آزادی برای امانت نیست؛ می‌توانید «رزرو» ثبت کنید تا پس از آزادشدن به شما اختصاص یابد.');
+  DB.seq.loan = (DB.seq.loan || 0) + 1;
+  const l = { id: uid(), no: 'K-' + pad(DB.seq.loan, 5), bookId: b.id, memberId: mem.id, type, note: String(note || '').slice(0, 500), status: LOAN.pending, reply: '', requested: stamp(), history: [] };
+  lhist(l, 'ثبت درخواست ' + type, l.note, mem.name);
+  DB.loans.push(l);
+  notify(libHeads(), 'request', `درخواست ${type} کتاب «${b.title}» از عضو ${mem.no}`, 'library-admin', l.no);
+  return l;
+}
+function libCancel(mem, loanId) {
+  const l = DB.loans.find(x => x.id === loanId && x.memberId === (mem && mem.id));
+  if (!l) return fail('درخواست یافت نشد.');
+  if (![LOAN.pending, LOAN.ready].includes(l.status)) return fail('این درخواست قابل لغو نیست.');
+  releaseCopy(l);
+  l.status = LOAN.cancelled; lhist(l, 'لغو توسط عضو', '', mem.name);
+  return l;
+}
+function releaseCopy(l) { const b = bookOf(l.bookId); const c = b && b.copies.find(x => x.id === l.copyId); if (c && c.status !== COPY_ST.off) c.status = COPY_ST.free; }
+
+/* ---------- بررسی، تحویل و بازگشت (کتابدار) ---------- */
+function loanDecide(id, ok, reply, pickupDays) {
+  if (!canLib()) return fail('بررسی درخواست‌ها فقط برای کتابداران مجاز است.');
+  const l = DB.loans.find(x => x.id === id); if (!l) return fail('درخواست یافت نشد.');
+  if (l.status !== LOAN.pending) return fail('این درخواست قبلاً بررسی شده است.');
+  if (!ok) { if (!String(reply || '').trim()) return fail('علت رد را برای عضو بنویسید.'); l.status = LOAN.rejected; l.reply = String(reply).slice(0, 500); lhist(l, 'رد درخواست', l.reply); audit('رد درخواست کتاب', 'loan', l.id, l.no); return l; }
+  const b = bookOf(l.bookId); const c = b && freeCopies(b)[0];
+  if (!c) return fail('نسخه آزادی برای این کتاب نیست؛ پس از بازگشت یک نسخه دوباره تلاش کنید یا به عضو پاسخ دهید.');
+  const days = Number(en(pickupDays || 3)); if (!Number.isInteger(days) || days < 1 || days > 14) return fail('مهلت مراجعه باید بین ۱ تا ۱۴ روز باشد.');
+  c.status = COPY_ST.held; l.copyId = c.id; l.status = LOAN.ready; l.readyUntil = addDays(todayISO(), days);
+  l.reply = String(reply || '').slice(0, 500) || `نسخه ${c.code} برای شما کنار گذاشته شد؛ تا ${jd(l.readyUntil)} برای تحویل مراجعه کنید.`;
+  lhist(l, 'تأیید و اختصاص نسخه ' + c.code, l.reply);
+  audit('تأیید درخواست کتاب', 'loan', l.id, l.no + ' · ' + c.code);
+  return l;
+}
+function loanDeliver(id, dueDays) {
+  if (!canLib()) return fail('ثبت تحویل فقط برای کتابداران مجاز است.');
+  const l = DB.loans.find(x => x.id === id); if (!l) return fail('درخواست یافت نشد.');
+  if (l.status !== LOAN.ready) return fail('فقط درخواست تأییدشده و آماده تحویل قابل تحویل است.');
+  const days = Number(en(dueDays || 14)); if (!Number.isInteger(days) || days < 1 || days > 60) return fail('مدت امانت باید بین ۱ تا ۶۰ روز باشد.');
+  const b = bookOf(l.bookId); const c = b.copies.find(x => x.id === l.copyId);
+  if (!c || c.status !== COPY_ST.held) return fail('نسخه اختصاص‌یافته در دسترس نیست.');
+  c.status = COPY_ST.out; l.status = LOAN.out; l.deliveredAt = stamp(); l.due = addDays(todayISO(), days);
+  lhist(l, 'تحویل کتاب به عضو', `نسخه ${c.code} · موعد بازگشت ${jd(l.due)}`);
+  audit('تحویل کتاب', 'loan', l.id, l.no + ' · ' + c.code);
+  return l;
+}
+function loanReturn(id) {
+  if (!canLib()) return fail('ثبت بازگشت فقط برای کتابداران مجاز است.');
+  const l = DB.loans.find(x => x.id === id); if (!l) return fail('درخواست یافت نشد.');
+  if (l.status !== LOAN.out) return fail('این کتاب در امانت نیست.');
+  const late = l.due && l.due < todayISO() ? daysBetween(l.due, todayISO()) : 0;
+  releaseCopy(l); l.status = LOAN.returned; l.returnedAt = stamp(); l.lateDays = late;
+  lhist(l, 'بازگشت کتاب', late ? `${fa(late)} روز تأخیر` : 'بدون تأخیر');
+  audit('بازگشت کتاب', 'loan', l.id, l.no);
+  return l;
+}
+function loanExpire(id, note) {
+  if (!canLib()) return fail('این کار فقط برای کتابداران مجاز است.');
+  const l = DB.loans.find(x => x.id === id); if (!l) return fail('درخواست یافت نشد.');
+  if (l.status !== LOAN.ready) return fail('فقط درخواست آماده تحویل قابل لغو است.');
+  releaseCopy(l); l.status = LOAN.expired; l.reply = String(note || 'عضو در مهلت مراجعه نکرد.').slice(0, 500);
+  lhist(l, 'لغو به دلیل عدم مراجعه', l.reply); audit('لغو آماده‌تحویل کتاب', 'loan', l.id, l.no);
+  return l;
+}
+function loanReply(id, text) {
+  if (!canLib()) return fail('پاسخ‌گویی فقط برای کتابداران مجاز است.');
+  const l = DB.loans.find(x => x.id === id); if (!l) return fail('درخواست یافت نشد.');
+  if (!String(text || '').trim()) return fail('متن پاسخ را بنویسید.');
+  l.reply = String(text).slice(0, 500); lhist(l, 'پاسخ کتابدار', l.reply);
+  return l;
+}
+function memberToggle(id) {
+  if (!canLib()) return fail('مدیریت اعضا فقط برای کتابداران مجاز است.');
+  const m = memberOf(id); if (!m) return fail('عضو یافت نشد.');
+  m.active = !m.active; audit(m.active ? 'فعال‌سازی عضو کتابخانه' : 'غیرفعال‌سازی عضو کتابخانه', 'member', m.id, m.no);
+  return m;
+}
+/* داده‌ای که عضو می‌بیند: کتاب‌ها و فقط درخواست‌ها و امانت‌های خودش */
+function memberView(mem) {
+  const loans = DB.loans.filter(l => l.memberId === mem.id).map(l => { const b = bookOf(l.bookId) || {}; const c = (b.copies || []).find(x => x.id === l.copyId); return { id: l.id, no: l.no, type: l.type, status: l.status, reply: l.reply, requested: l.requested, readyUntil: l.readyUntil || '', due: l.due || '', deliveredAt: l.deliveredAt || '', returnedAt: l.returnedAt || '', lateDays: l.lateDays || 0, late: loanLate(l), book: { id: b.id, title: b.title, author: b.author, code: b.code }, copy: c ? c.code : '', history: (l.history || []).map(h => ({ ts: h.ts, action: h.action, note: h.note })) }; });
+  return { member: { id: mem.id, no: mem.no, name: mem.name, username: mem.username, phone: mem.phone, created: mem.created }, loans };
+}
+const publicBooks = () => DB.books.map(bookPublic);
+
+/* =====================================================================
    فهرست تنها عملیات‌های مجاز تغییر داده
    هر عملیات شناسه می‌گیرد (نه شیء)، مجوز را خودش بررسی می‌کند و در صورت خطا هیچ تغییری باقی نمی‌گذارد.
    در نسخه سروری همین فهرست روی سرور اجرا می‌شود و مرورگر فقط درخواست می‌فرستد.
    ===================================================================== */
-const COLS = { letter: 'letters', order: 'orders', task: 'tasks', req: 'requests', res: 'reservations', meet: 'meetings', asset: 'assets', move: 'movements', pay: 'payreqs', leave: 'leaves', user: 'users', signup: 'signups' };
+const COLS = { book: 'books', loan: 'loans', member: 'members', letter: 'letters', order: 'orders', task: 'tasks', req: 'requests', res: 'reservations', meet: 'meetings', asset: 'assets', move: 'movements', pay: 'payreqs', leave: 'leaves', user: 'users', signup: 'signups' };
 class OpError extends Error {}
 const need = (cond, msg) => { if (!cond) throw new OpError(msg); };
 function rec(col, id) { const r = (DB[col] || []).find(x => x.id === id); need(r, 'این مورد یافت نشد یا حذف شده است.'); return r; }
@@ -2145,6 +2510,16 @@ const OPS = {
   leaveAct: (id, ok, note) => leaveAct(rec('leaves', id), !!ok, str(note)),
   addHR: (kind, v) => { need(['missions', 'decrees', 'contracts'].includes(kind), 'نوع سابقه نامعتبر است.'); need(userById(v.uid), 'کارمند را انتخاب کنید.'); return addHR(kind, { ...v, status: 'تأییدشده' }); },
   addRecord: (unitId, key, v) => { need((REGISTRIES[unitId] || []).some(r => r.key === key), 'دفتر نامعتبر است.'); return addRecord(+unitId, key, v); },
+  /* کتابخانه عمومی (کتابدار) */
+  saveBook: (id, v) => saveBook(id || '', v || {}),
+  addCopies: (id, n) => addCopies(id, n),
+  setCopyStatus: (id, copyId, available) => setCopyStatus(id, copyId, !!available),
+  loanDecide: (id, ok, reply, days) => loanDecide(id, !!ok, reply, days),
+  loanDeliver: (id, days) => loanDeliver(id, days),
+  loanReturn: id => loanReturn(id),
+  loanExpire: (id, note) => loanExpire(id, note),
+  loanReply: (id, text) => loanReply(id, text),
+  memberToggle: id => memberToggle(id),
   /* اعلان‌ها */
   readNotif: id => { const n = rec('notifs', id); need(n.pos === ME.pos.id, 'این اعلان متعلق به شما نیست.'); n.read = true; return n; },
   readAllNotifs: () => { DB.notifs.forEach(n => { if (n.pos === ME.pos.id) n.read = true; }); return {}; },
@@ -2164,15 +2539,30 @@ const OPS = {
   },
 
   /* ---------- کاربران و دسترسی‌ها ---------- */
-  createUser: v => { v.name = label(v.name, 'نام کاربر'); return createUser2(v); },
-  updateUser: (id, v) => { v.name = label(v.name, 'نام کاربر'); return updateUser(rec('users', id), v); },
+  updateHolder: (id, v) => updateHolder(rec('users', id), v),
+  handover: (posId, v) => handover(posId, v || {}),
   deleteUser: id => deleteUser(rec('users', id)),
   setPassword: (id, pass, mustChange) => setPassword(rec('users', id), pass, !!mustChange, false),
-  assignHolder: (posId, userId) => assignHolder(posId, userId),
   addPosition: v => { need(UNITS.some(u => u.id === +v.unitId), 'مدیریت را انتخاب کنید.'); v.title = label(v.title, 'عنوان جایگاه'); return addPosition(v); },
   deletePosition: id => { need(can('admin.users'), 'حذف جایگاه مجاز نیست.'); const p = posById(id); need(p, 'جایگاه یافت نشد.'); need(p.role === 'staff', 'فقط جایگاه‌های کارشناسی قابل حذف‌اند.'); need(!holderOf(p.id), 'ابتدا متصدی این جایگاه را تغییر دهید.'); need(!isSensitivePos(p) || isImam(), 'حذف جایگاه حساس فقط با امام جماعت است.'); DB.positions = DB.positions.filter(x => x.id !== id); audit('حذف جایگاه', 'position', id, posLabel(id)); return {}; },
   setPosPerm: (posId, k, val) => { const p = posById(posId); need(p, 'جایگاه یافت نشد.'); return setPosPerm(p, k, val); },
   setRolePerm: (role, k, val) => setRolePerm(role, k, val),
+  /* مدیریت دسترسی‌های دفتر: مدیر فقط مسئول دفتر و منشی همان مدیریت را محدود یا دوباره فعال می‌کند؛ اعطای بیش از سقف ممکن نیست */
+  setOfficeRestriction: (posId, k, restrict) => {
+    const p = posById(posId); need(p, 'جایگاه یافت نشد.');
+    need(['office', 'secretary'].includes(p.role), 'فقط دسترسی مسئول دفتر و منشی از این بخش قابل تنظیم است.');
+    need(isImam() || (myRole() === 'manager' && inUnit(p.unitId)), 'فقط مدیر همان مدیریت می‌تواند دسترسی دفتر خودش را تنظیم کند.');
+    need(OFFICE_PERMS.includes(k), 'این مجوز از بخش دسترسی‌های دفتر قابل تنظیم نیست.');
+    if (k === 'library.manage') need(p.unitId === U_LIB, 'این مجوز فقط برای کتابخانه است.');
+    p.mgrDeny = p.mgrDeny || {};
+    const was = !!p.mgrDeny[k];
+    if (restrict) p.mgrDeny[k] = true; else delete p.mgrDeny[k];
+    if (was !== !!restrict) {
+      audit(restrict ? 'محدودسازی دسترسی دفتر' : 'فعال‌سازی دوباره دسترسی دفتر', 'perm', p.id, `${posLabel(p.id)} · ${permLabel(k)}${!restrict && !permOf(p, k) ? ' (در سقف مدیریت عالی مجاز نیست)' : ''}`);
+      notify([p.id], 'decision', `مدیر بخش دسترسی «${permLabel(k)}» را برای جایگاه شما ${restrict ? 'محدود' : 'دوباره فعال'} کرد.`, 'profile');
+    }
+    return p;
+  },
   toggleUser: id => { need(can('admin.users'), 'مدیریت کاربران مجاز نیست.'); const u = rec('users', id); need(u.id !== ME.user.id, 'حساب خودتان را نمی‌توانید غیرفعال کنید.'); need(!u.posId || !isSensitivePos(posById(u.posId)) || isImam(), 'غیرفعال‌کردن متصدی جایگاه حساس فقط با امام جماعت است.'); u.active = !u.active; if (!u.active) endUserSessions(u.id); audit(u.active ? 'فعال‌سازی حساب' : 'غیرفعال‌سازی حساب', 'user', u.id, u.username); return u; },
   unlockUser: id => { need(can('admin.users'), 'مدیریت کاربران مجاز نیست.'); const u = rec('users', id); u.lockedUntil = ''; u.fails = 0; audit('بازکردن قفل حساب', 'user', u.id, u.username); return u; },
   unlockAll: () => { need(can('admin.users'), 'مدیریت کاربران مجاز نیست.'); lockedUsers().forEach(u => { u.lockedUntil = ''; u.fails = 0; }); audit('بازکردن قفل همه حساب‌ها', 'user', '', ''); return {}; },
@@ -2194,6 +2584,7 @@ const OPS = {
   /* ---------- حساب کاربری خود ---------- */
   changeOwnPassword: (cur, p1) => { need(pwCheck(ME.user.pass, cur), 'رمز فعلی درست نیست.'); return setPassword(ME.user, p1, false, true); },
   forcedPassChange: p1 => { need(ME.user.mustChange, 'تغییر رمز الزامی نیست.'); return setPassword(ME.user, p1, false, true); },
+  updateOwnHolder: v => updateHolder(ME.user, v),
   changeOwnPhone: phone => { need(/^0?9\d{9}$/.test(en(phone).replace(/\D/g, '')), 'شماره همراه معتبر نیست.'); ME.user.phone = en(phone).replace(/\D/g, ''); audit('تغییر تلفن توسط کاربر', 'user', ME.user.id, ''); return ME.user; },
 
   /* ---------- تنظیمات ---------- */
@@ -2562,8 +2953,9 @@ function renderLogin(err = '', mode = 'login') {
       <div class="fld"><label for="lp">رمز عبور</label><div class="pw"><input id="lp" name="p" type="password" autocomplete="current-password" dir="ltr"><button type="button" class="ibtn sm" data-a="pwShow" data-t="lp" aria-label="نمایش رمز">${ic('eye')}</button></div></div>
       ${err ? `<div class="notice warn" role="alert">${err}</div>` : ''}
       <button class="btn lg" type="submit">${ic('lock')}ورود امن</button>
-      <button class="btn ghost" type="button" data-a="loginMode" data-m="signup">${ic('user')}درخواست ایجاد حساب کاربری</button>
-      ${!SERVER && st.showDemo ? `<details class="demo-wrap"><summary>حساب‌های نسخه نمایشی (رمز همه <b class="code">1234</b>؛ در نسخه سروری وجود ندارد)</summary><div class="demo">${groups.flat().map(pid => { const u = holderOf(pid); if (!u) return ''; return `<button type="button" data-a="quick" data-u="${esc(u.username)}"><span>${esc(u.name)}</span><small>${esc(posLabel(pid))} · <span class="code">${esc(u.username)}</span></small></button>`; }).join('')}</div></details>` : ''}
+      <button class="btn ghost" type="button" data-a="loginMode" data-m="signup">${ic('user')}درخواست ایجاد حساب کارکنان</button>
+      <a class="libentry" href="#library">${ic('book')}<span><b>کتابخانه و رزرو کتاب</b><small>برای عموم مردم؛ مشاهده و جست‌وجوی کتاب‌ها، عضویت و رزرو</small></span></a>
+      ${!SERVER && st.showDemo ? `<details class="demo-wrap"><summary>حساب‌های نسخه نمایشی (رمز همه <b class="code">1234</b>؛ در نسخه سروری وجود ندارد)</summary><div class="demo">${groups.flat().map(pid => { const u = holderOf(pid); if (!u) return ''; return `<button type="button" data-a="quick" data-u="${esc(u.username)}"><span>${esc(panelName(posById(pid)))}</span><small>${esc(u.name)} · <span class="code">${esc(u.username)}</span></small></button>`; }).join('')}</div></details>` : ''}
     </form>`;
   $('#root').innerHTML = `
   <div class="login">
@@ -2677,7 +3069,8 @@ function navItems() {
     ['dashboard', 'داشبورد', 'home', true],
     ['inbox', 'کارتابل من', 'inbox', true, q],
     ['imam', 'کارتابل امام جماعت', 'dome', isAll()],
-    ['units', 'فهرست ۱۷ مدیریت', 'building', true],
+    ['units', `فهرست ${fa(UNITS.filter(u => !u.off).length)} مدیریت`, 'building', true],
+    ['library-admin', 'خدمات عمومی کتابخانه', 'book', canSeeLib(), canLib() ? DB.loans.filter(l => l.status === LOAN.pending).length : 0],
     [`unit-${u}`, 'کارتابل ' + unitShort(u), UNITS.find(x => x.id === u)?.ic || 'building', u > 0],
     ['grp', 'مکاتبات و گردش کار'],
     ['letters', 'دبیرخانه و مکاتبات', 'mail', true],
@@ -2694,7 +3087,7 @@ function navItems() {
     ['reports', 'گزارش‌گیری و نظارت', 'chart', can('reports.view')],
     ['notifications', 'اعلان‌ها', 'bell', true, unread],
     ['admin', 'پنل مدیریت سامانه', 'shield', canAdminPanel(), adminAlerts()],
-    ['profile', 'حساب کاربری من', 'user', true],
+    ['profile', 'حساب و مشخصات متصدی', 'user', true],
     ['system', 'تنظیمات و آرشیو', 'gear', true]
   ];
 }
@@ -2715,7 +3108,7 @@ function renderShell() {
         <div class="clock" id="clock" aria-live="off"></div>
         <button class="ibtn" data-a="theme" aria-label="تغییر حالت روشن و تاریک" id="themebtn"></button>
         <a class="ibtn" href="#notifications" aria-label="اعلان‌ها" id="bell">${ic('bell')}</a>
-        <a class="who" href="#profile" title="حساب کاربری من">${av(ME.user.name)}<div><b>${esc(ME.user.name)}</b><small>${esc(posLabel(ME.pos.id))}</small></div></a>
+        <a class="who" href="#profile" title="حساب و مشخصات متصدی">${av(ME.user.name)}<div><b>${esc(panelName(ME.pos))}</b><small>متصدی فعلی: ${esc(ME.user.name)}</small></div></a>
         <button class="ibtn" data-a="logout" aria-label="خروج">${ic('logout')}</button>
       </header>
       ${SERVER ? '' : `<div class="demobar" role="note">${ic('alert')}<span>نسخه نمایشی: داده‌ها نمونه‌اند و در همین مرورگر ${typeof Sync !== 'undefined' && Sync.mode === 'shared' ? 'و پایگاه پیش‌نمایش' : ''} نگهداری می‌شوند. برای اطلاعات واقعی از نسخه سروری استفاده کنید.</span></div>`}
@@ -2775,7 +3168,9 @@ A.tab = d => { vs(d.key).tab = d.v; refresh(); };
 A.go = d => { location.hash = d.h; };
 
 function route() {
-  if (!ME) return;
+  if (location.hash === '#library') { Lib.load().then(renderLibrary); return; }
+  if (!ME) { if (!$('#loginf') && !$('#signf')) renderLogin(); return; }
+  if (!$('#main')) return renderShell();
   const h = location.hash.slice(1) || 'dashboard';
   const m = h.match(/^unit-(\d+)$/);
   const fn = m ? () => pgUnit(+m[1]) : PAGES[h] || PAGES.dashboard;
@@ -2859,7 +3254,8 @@ const Remote = {
   async boot() {
     const r = await this.req('GET', '/api/state');
     this.apply(r);
-    if (r.state && ME) { renderShell(); if (ME.user.mustChange) forcePassChange(); } else renderLogin(r.message || '');
+    if (location.hash === '#library') route();
+    else if (r.state && ME) { renderShell(); if (ME.user.mustChange) forcePassChange(); } else renderLogin(r.message || '');
     this.listen();
   },
   async login(username, password) {
@@ -2920,7 +3316,7 @@ function myQueue() {
   });
   DB.payreqs.forEach(p => { if (payCanAct(p) && (!imam || nextPayStage(p) === 3)) q.push({ k: 'pay', t: 'پرداخت', no: p.no, title: p.title, st: payLabel(p), due: '', id: p.id }); });
   if (!imam) DB.reservations.forEach(r => { if (r.status === 'در انتظار تأیید' && canDecideRes(r)) q.push({ k: 'res', t: 'رزرو', no: r.no, title: resPlace(r) + ' — ' + r.kind, st: r.status, due: r.date, id: r.id }); });
-  DB.leaves.forEach(l => { if (leaveCanAct(l) && (!imam || posById(l.pos).role === 'manager')) q.push({ k: 'leave', t: 'مرخصی', no: l.no, title: userById(l.uid).name + ' — ' + l.type, st: l.status, due: l.from, id: l.id }); });
+  DB.leaves.forEach(l => { if (leaveCanAct(l) && (!imam || posById(l.pos).role === 'manager')) q.push({ k: 'leave', t: 'مرخصی', no: l.no, title: who(l.uid, l.nm) + ' — ' + l.type, st: l.status, due: l.from, id: l.id }); });
   if (!imam) DB.movements.forEach(m => { const a = DB.assets.find(x => x.id === m.assetId); if (m.status === 'در انتظار تأیید' && canApproveMove(a)) q.push({ k: 'move', t: 'گردش کالا', no: m.no, title: m.type + ' — ' + a.name, st: m.status, due: m.date, id: m.id }); });
   DB.letters.forEach(l => {
     if (l.status !== 'ارجاع‌شده' || !canSeeLetter(l) || myRole() === 'staff') return;
@@ -3020,7 +3416,7 @@ PAGES.dashboard = () => {
   </div>
   <div class="grid g-main">
     ${card('نمودار عملکرد ماهانه', monthlyChart(inScope), `<small>وظایف و درخواست‌های ${isAll() ? 'همه مدیریت‌ها' : esc(unitShort(myUnit()))}</small>`)}
-    ${card('آخرین اقدامات انجام‌شده', acts.length ? `<div class="list">${acts.map(a => `<div class="li"><div class="t"><b>${esc(a.act)}</b><small>${esc((userById(a.uid) || {}).name || 'سامانه')} · ${esc(a.note)} · ${jdt(a.ts)}</small></div></div>`).join('')}</div>` : empty('اقدامی ثبت نشده است.'), '', { flush: true })}
+    ${card('آخرین اقدامات انجام‌شده', acts.length ? `<div class="list">${acts.map(a => `<div class="li"><div class="t"><b>${esc(a.act)}</b><small>${esc(who(a.uid, a.nm))} · ${esc(a.note)} · ${jdt(a.ts)}</small></div></div>`).join('')}</div>` : empty('اقدامی ثبت نشده است.'), '', { flush: true })}
   </div>`;
 };
 A.notif = async d => { const n = DB.notifs.find(x => x.id === d.id); if (!n) return; await run('readNotif', n.id); location.hash = n.link; route(); };
@@ -3052,7 +3448,7 @@ PAGES.imam = () => {
   const lateReq = DB.requests.filter(r => r.status === 'جاری' && r.due && r.due < todayISO());
   const pays = DB.payreqs.filter(p => p.status === 'جاری');
   return `
-  ${head('کارتابل امام جماعت', 'نظارت عالی بر روند امور ۱۷ مدیریت، تصویب موارد ارجاعی و صدور دستور', btn('صدور دستور جدید', 'newOrder', {}, '', 'flag') + btn('ثبت جلسه / ملاقات', 'newMeeting', {}, 'ghost', 'cal') + `<a class="btn ghost" href="#reports">${ic('chart')}گزارش نظارتی</a>`)}
+  ${head('کارتابل امام جماعت', `نظارت عالی بر روند امور ${fa(UNITS.filter(u => !u.off).length)} مدیریت، تصویب موارد ارجاعی و صدور دستور`, btn('صدور دستور جدید', 'newOrder', {}, '', 'flag') + btn('ثبت جلسه / ملاقات', 'newMeeting', {}, 'ghost', 'cal') + `<a class="btn ghost" href="#reports">${ic('chart')}گزارش نظارتی</a>`)}
   <div class="tiles">
     ${tile('منتظر تصویب شما', q.length, 'دستور، درخواست، پرداخت', q.length ? 'warn' : 'ok')}
     ${tile('دستورات معوق', lateOrders.length, 'از ' + fa(DB.orders.filter(o => o.status !== 'تکمیل‌شده').length) + ' دستور باز', lateOrders.length ? 'bad' : 'ok', 'orders')}
@@ -3075,7 +3471,7 @@ const denied = (t = 'دسترسی به این بخش برای جایگاه شم�
 
 /* ---------- فهرست ۱۷ مدیریت ---------- */
 PAGES.units = () => `
-  ${head('مدیریت‌های مجتمع', 'هفده مدیریت مستقل مستقیماً زیر نظر امام جماعت؛ هر مدیریت دارای مدیر، مسئول دفتر و منشی')}
+  ${head('مدیریت‌های مجتمع', `${fa(UNITS.filter(u => !u.off).length)} مدیریت مستقل مستقیماً زیر نظر امام جماعت؛ هر مدیریت سه پنل مستقل دارد: مدیر، مسئول دفتر و منشی`)}
   <section class="card"><div class="cb" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
     <div class="li" style="border:0;padding:0;cursor:default"><div class="k" style="width:46px;height:46px">${ic('dome')}</div><div class="t"><b>امام جماعت مسجد شباب اهل‌الجنه — مدیریت عالی مجتمع</b><small>${esc(holderOf('P0').name)}</small></div></div>
   </div></section>
@@ -3098,6 +3494,9 @@ function pgUnit(u) {
   const regs = REGISTRIES[u] || [];
   const tl = [['overview', 'نمای کلی'], ['services', 'حوزه‌ها و خدمات'], ...regs.map(r => ['reg:' + r.key, r.title]), ['tasks', 'وظایف'], ['requests', 'درخواست‌ها'], ['letters', 'مکاتبات'], ['orders', 'دستورات']];
   if (u === U_INTERNAL) tl.splice(2, 0, ['assets', 'اموال و انبار']);
+  tl.splice(1, 0, ['positions', 'پنل‌ها و متصدیان']);
+  if (canOversee(u)) tl.push(['oversight', 'نظارت بر دفتر']);
+  if (canManageOffice(u)) tl.push(['officeperms', 'مدیریت دسترسی‌های دفتر']);
   const s = unitStats(u);
   const P = unitPositions(u);
   let body = '';
@@ -3108,7 +3507,8 @@ function pgUnit(u) {
       const q = myQueue();
       body = `<div class="tiles">${tile('وظایف', s.tasks)}${tile('تکمیل‌شده', fa(s.pct) + '٪', fa(s.done) + ' مورد', 'ok')}${tile('معوق', s.late, '', s.late ? 'bad' : 'ok')}${tile('درخواست‌های باز', s.reqOpen)}${tile('دستورات باز', s.ordOpen, s.ordLate ? fa(s.ordLate) + ' معوق' : '', s.ordLate ? 'bad' : '')}${tile('مکاتبات', s.letters)}</div>
       <div class="grid g-main">${card('کارهای در انتظار اقدام من', queueList(q, 8), '', { flush: true })}
-      ${card('جایگاه‌های سازمانی', `<div class="list">${P.map(p => `<div class="li"><div class="k">${ic('user')}</div><div class="t"><b>${esc(p.title)}</b><small>${esc((holderOf(p.id) || {}).name || 'بدون متصدی')}</small></div>${pill(ROLES[p.role], 'mute')}</div>`).join('')}</div>`, '', { flush: true })}</div>
+      ${card('پنل‌های این مدیریت', `<div class="list">${P.map(p => `<div class="li"><div class="k">${ic('user')}</div><div class="t"><b>${esc(panelName(p))}</b><small>متصدی فعلی: ${esc((accountOf(p.id) || {}).name || 'بدون متصدی')}</small></div>${pill(ROLES[p.role], 'mute')}</div>`).join('')}</div>`, btn('مشخصات و تحویل', 'tab', { key: 'unit' + u, v: 'positions' }, 'sm ghost'), { flush: true })}</div>
+      ${u === U_LIB && canSeeLib() ? `<div class="notice">خدمات عمومی کتابخانه (کتاب‌ها، رزرو و امانت مردم) در بخش جداگانه <a href="#library-admin">«خدمات عمومی کتابخانه»</a> است؛ این صفحه کارتابل اداری مدیریت کتابخانه است.</div>` : ''}
       ${card('روند ماهانه', monthlyChart(x => x === u))}`;
       break;
     }
@@ -3128,9 +3528,12 @@ function pgUnit(u) {
     case v.tab === 'tasks': body = card('وظایف مدیریت', taskTable(tasks), isMgrOrOffice(u) ? btn('وظیفه جدید', 'newTask', { u }, 'sm', 'plus') : '', { flush: true }); break;
     case v.tab === 'requests': body = card('درخواست‌های مرتبط', reqTable(reqs), btn('درخواست همکاری', 'newReq', {}, 'sm', 'plus'), { flush: true }); break;
     case v.tab === 'letters': body = card('مکاتبات مدیریت', letterTable(DB.letters.filter(l => canSeeLetter(l) && (l.unitId === u || l.refs.some(r => r.unitId === u)))), isClerk(u) ? btn('ثبت نامه', 'newLetter', {}, 'sm', 'plus') : '', { flush: true }); break;
+    case v.tab === 'positions': body = positionsGrid(u); break;
+    case v.tab === 'oversight': body = oversightView(u); break;
+    case v.tab === 'officeperms': body = officePermsView(u); break;
     case v.tab === 'orders': body = card('دستورات امام جماعت برای این مدیریت', orderTable(DB.orders.filter(o => o.units.includes(u))), '', { flush: true }); break;
   }
-  return `${head(esc(U.name), `مدیر: ${esc((holderOf(`P${u}-m`) || {}).name || '—')} · مسئول دفتر: ${esc((holderOf(`P${u}-o`) || {}).name || '—')} · منشی: ${esc((holderOf(`P${u}-s`) || {}).name || '—')}`, isMgrOrOffice(u) ? btn('وظیفه جدید', 'newTask', { u }, 'soft', 'plus') : '', '<a href="#units">مدیریت‌ها</a> / کارتابل اختصاصی')}
+  return `${head(esc(U.id === U_LIB ? 'کارتابل اداری ' + U.name : U.name), `سه پنل مستقل: ${['manager', 'office', 'secretary'].map(r => esc(panelName(unitPos(u, r) || { role: r, unitId: u, title: '' }))).join('، ')}`, isMgrOrOffice(u) ? btn('وظیفه جدید', 'newTask', { u }, 'soft', 'plus') : '', '<a href="#units">مدیریت‌ها</a> / کارتابل اختصاصی')}
   ${tabs('unit' + u, tl, v.tab)}${body}`;
 }
 A.unitSvc = d => { vs('requests').cat = d.cat; vs('requests').tab = 'in'; location.hash = 'requests'; };
@@ -3205,8 +3608,8 @@ function showLetter(id) {
     body: `<div class="row">${pill(l.status)} ${prio(l.priority)} ${l.conf !== 'عادی' ? pill(l.conf) : ''} ${pill(l.cat, 'mute')}</div>
     ${letterSheet(l)}
     ${l.files.length ? `<div><h3>ضمایم</h3>${files(l.files)}${l.conf === 'عادی' || isMgrOrOffice(l.unitId) ? l.files.filter(f => (f.data || f.url) && (f.type || '').startsWith('image/')).map(f => `<img src="${esc(f.data || f.url)}" alt="${esc(f.name)}" style="max-height:200px;border-radius:8px;margin-top:8px">`).join('') : '<div class="hint">مشاهده ضمایم محرمانه فقط برای مدیر و مسئول دفتر مجاز است.</div>'}</div>` : ''}
-    <div class="grid g2"><div><h3>ارجاعات</h3>${l.refs.length ? `<div class="list">${l.refs.map(r => `<div class="li" style="padding:6px 0"><div class="t"><b>${esc(unitName(r.unitId))}</b><small>${jdt(r.ts)} · ${esc(userById(r.by)?.name || '')}${r.note ? ' — ' + esc(r.note) : ''}</small></div></div>`).join('')}</div>` : empty('ارجاع نشده است.')}</div>
-    <div><h3>پاسخ‌ها</h3>${l.replies.length ? l.replies.map(r => `<div class="box">${esc(r.text)}<div class="hint">${esc(userById(r.by)?.name)} · ${jdt(r.ts)}</div></div>`).join('') : empty(l.needReply ? 'در انتظار پاسخ' : 'پاسخی ثبت نشده است.')}</div></div>
+    <div class="grid g2"><div><h3>ارجاعات</h3>${l.refs.length ? `<div class="list">${l.refs.map(r => `<div class="li" style="padding:6px 0"><div class="t"><b>${esc(unitName(r.unitId))}</b><small>${jdt(r.ts)} · ${esc(who(r.by, r.nm))}${r.note ? ' — ' + esc(r.note) : ''}</small></div></div>`).join('')}</div>` : empty('ارجاع نشده است.')}</div>
+    <div><h3>پاسخ‌ها</h3>${l.replies.length ? l.replies.map(r => `<div class="box">${esc(r.text)}<div class="hint">${esc(who(r.by, r.nm))} · ${jdt(r.ts)}</div></div>`).join('') : empty(l.needReply ? 'در انتظار پاسخ' : 'پاسخی ثبت نشده است.')}</div></div>
     <div><h3>سابقه اقدامات</h3>${histHTML(l.history)}</div>`,
     foot: `${editBtn('letter', l)}${can && l.status !== 'بایگانی' ? btn('ارجاع', 'letterRefer', { id }, '', 'send') + btn('ثبت پاسخ', 'letterReply', { id }, 'ghost') + btn('بایگانی', 'letterArchive', { id }, 'ghost', 'archive') : ''}${CAN_PRINT ? btn('چاپ / PDF', 'print', {}, 'ghost', 'print') : '<span class="hint" style="align-self:center">چاپ و خروجی PDF در نسخه مستقر روی سرور فعال است.</span>'}`
   });
@@ -3258,7 +3661,7 @@ function showOrder(id) {
     ${steps(ORDER_ST, ORDER_ST.indexOf(o.status), o.status === 'تکمیل‌شده')}
     <div class="box">${esc(o.desc)}</div>
     ${kv([['مدیریت‌های مسئول', o.units.map(unitName).join('، ')], ['مسئول اصلی اقدام', esc(posWho(o.respPos))], ['تاریخ صدور', jd(o.issued)], ['مهلت انجام', dueTxt(o.status === 'تکمیل‌شده' ? '' : o.due)], ['پیشرفت', `<div class="row">${bar(o.progress)}<span>${fa(o.progress)}٪</span></div>`], o.files.length && ['ضمایم', files(o.files)]])}
-    <div><h3>گزارش‌های پیشرفت</h3>${o.reports.length ? o.reports.slice().reverse().map(r => `<div class="box" style="margin-bottom:6px">${esc(r.note || '—')}<div class="hint">${esc(userById(r.by)?.name)} · ${esc(posLabel(r.pos))} · ${jdt(r.ts)} · ${fa(r.progress)}٪</div>${files(r.files)}</div>`).join('') : empty('هنوز گزارشی ثبت نشده است.')}</div>
+    <div><h3>گزارش‌های پیشرفت</h3>${o.reports.length ? o.reports.slice().reverse().map(r => `<div class="box" style="margin-bottom:6px">${esc(r.note || '—')}<div class="hint">${esc(who(r.by, r.nm))} · ${esc(posLabel(r.pos))} · ${jdt(r.ts)} · ${fa(r.progress)}٪</div>${files(r.files)}</div>`).join('') : empty('هنوز گزارشی ثبت نشده است.')}</div>
     <div><h3>سابقه</h3>${histHTML(o.history)}</div>`,
     foot: `${editBtn('order', o)}${canRep ? btn('ثبت گزارش پیشرفت', 'orderRep', { id }, '', 'send') : ''}${isImam() && o.status === 'منتظر تأیید' ? btn('تأیید و تکمیل', 'orderOk', { id }) + btn('بازگشت برای اصلاح', 'orderBack', { id }, 'danger') : ''}`
   });
@@ -3294,7 +3697,7 @@ A.newTask = d => {
     { k: 'title', l: 'عنوان وظیفه', req: true, full: true }, { k: 'desc', l: 'شرح', t: 'textarea' },
     { k: 'assignee', l: 'مسئول انجام', t: 'select', o: posOpts(u), req: true }, { k: 'priority', l: 'اولویت', t: 'select', o: PRIORITIES, blank: false },
     { k: 'start', l: 'تاریخ شروع', t: 'date', req: true }, { k: 'due', l: 'مهلت', t: 'date', req: true }, { k: 'files', l: 'فایل ضمیمه', t: 'file' }
-  ], { start: todayISO(), due: addDays(todayISO(), 5), priority: 'عادی' }, v => run('createTask', { ...v, unitId: u }), { done: 'وظیفه ثبت و ارجاع شد.', reopen: t => showTask(t.id) });
+  ], { start: todayISO(), due: addDays(todayISO(), 5), priority: 'عادی', assignee: d.to || '' }, v => run('createTask', { ...v, unitId: u }), { done: 'وظیفه ثبت و ارجاع شد.', reopen: t => showTask(t.id) });
 };
 function showTask(id) {
   const t = DB.tasks.find(x => x.id === id);
@@ -3305,7 +3708,7 @@ function showTask(id) {
     body: `<div><h2>${esc(t.title)}</h2><div class="row">${pill(taskStatus(t))} ${prio(t.priority)}</div></div>
     ${steps(TASK_ST, TASK_ST.indexOf(t.status), t.status === 'تکمیل‌شده')}
     ${t.desc ? `<div class="box">${esc(t.desc)}</div>` : ''}
-    ${kv([['مدیریت', esc(unitName(t.unitId))], ['مسئول انجام', esc(posWho(t.assignee))], ['تاریخ شروع', jd(t.start)], ['مهلت', dueTxt(t.status === 'تکمیل‌شده' ? '' : t.due)], ['ثبت‌کننده', esc(userById(t.by)?.name || 'سامانه')], t.files.length && ['ضمایم', files(t.files)]])}
+    ${kv([['مدیریت', esc(unitName(t.unitId))], ['مسئول انجام', esc(posWho(t.assignee))], ['تاریخ شروع', jd(t.start)], ['مهلت', dueTxt(t.status === 'تکمیل‌شده' ? '' : t.due)], ['ثبت‌کننده', esc(t.by ? who(t.by, t.byName) : 'سامانه')], t.files.length && ['ضمایم', files(t.files)]])}
     <div><h3>تاریخچه اقدامات</h3>${histHTML(t.history)}</div>`,
     foot: acts.map(([k, l]) => btn(l, 'taskAct', { id, act: k }, k === 'return' ? 'danger' : k === 'note' || k === 'reassign' ? 'ghost' : '')).join('') + editBtn('task', t)
   });
@@ -3361,7 +3764,7 @@ function showReq(id) {
     ${r.status === 'ردشده' || r.status === 'لغوشده' ? `<div class="notice warn">این درخواست ${r.status} است.</div>` : steps(REQ_STAGES, r.stage, r.stage === 6)}
     ${coopOnly ? '<div class="notice">شما به‌عنوان مدیریت همکار فقط همین درخواست را می‌بینید و به اطلاعات داخلی مدیریت مسئول دسترسی ندارید.</div>' : ''}
     ${r.desc ? `<div class="box">${esc(r.desc)}</div>` : ''}
-    ${kv([['درخواست‌کننده', esc(userById(r.by)?.name) + ' — ' + esc(posLabel(r.byPos))], ['مدیریت مسئول', esc(unitName(r.toUnit))], ['تأییدکننده', r.needsImam ? 'امام جماعت' : 'مدیر ' + esc(unitShort(r.toUnit))], ['مدیریت‌های همکار', r.coops.map(unitName).join('، ') || '—'], ['مهلت', dueTxt(r.status === 'جاری' ? r.due : '')], r.files.length && ['پیوست', files(r.files)], r.report && ['گزارش نهایی', esc(r.report)]])}
+    ${kv([['درخواست‌کننده', esc(who(r.by, r.byName)) + ' — ' + esc(posLabel(r.byPos))], ['مدیریت مسئول', esc(unitName(r.toUnit))], ['تأییدکننده', r.needsImam ? 'امام جماعت' : 'مدیر ' + esc(unitShort(r.toUnit))], ['مدیریت‌های همکار', r.coops.map(unitName).join('، ') || '—'], ['مهلت', dueTxt(r.status === 'جاری' ? r.due : '')], r.files.length && ['پیوست', files(r.files)], r.report && ['گزارش نهایی', esc(r.report)]])}
     ${r.coopNotes.length ? `<div><h3>نظرات همکاری</h3>${r.coopNotes.map(n => `<div class="box" style="margin-bottom:6px">${esc(n.note)}<div class="hint">${esc(unitShort(n.unit))} · ${jdt(n.ts)}</div></div>`).join('')}</div>` : ''}
     <div><h3>تاریخچه گردش (تاریخ، ساعت، اقدام‌کننده، شرح)</h3>${histHTML(r.history)}</div>`,
     foot: acts.map(([k, l]) => btn(l, 'reqAct', { id, act: k }, ['reject', 'cancel'].includes(k) ? 'danger' : k === 'coop' ? 'ghost' : '')).join('')
@@ -3654,12 +4057,12 @@ PAGES.hr = () => {
   if (v.tab === 'leave') {
     const mine = DB.leaves.filter(l => l.uid === ME.user.id);
     const unitL = DB.leaves.filter(l => (full || (isMgr(l.unitId) && inUnit(l.unitId))) && l.uid !== ME.user.id);
-    const lt = rows => table([['شماره', l => `<span class="code">${esc(l.no)}</span>`], ['کارمند', l => esc(userById(l.uid).name) + `<span class="sub">${esc(posLabel(l.pos))}</span>`], ['نوع', l => esc(l.type)], ['از', l => jd(l.from)], ['تا', l => jd(l.to)], ['وضعیت', l => pill(l.status)]], rows.sort(by('created', -1)), { click: 'leave', empty: 'موردی نیست.' });
+    const lt = rows => table([['شماره', l => `<span class="code">${esc(l.no)}</span>`], ['کارمند', l => esc(who(l.uid, l.nm)) + `<span class="sub">${esc(posLabel(l.pos))}</span>`], ['نوع', l => esc(l.type)], ['از', l => jd(l.from)], ['تا', l => jd(l.to)], ['وضعیت', l => pill(l.status)]], rows.sort(by('created', -1)), { click: 'leave', empty: 'موردی نیست.' });
     body = `${card('درخواست‌های مرخصی من', lt(mine), btn('درخواست مرخصی', 'newLeave', {}, 'sm', 'plus'), { flush: true })}${unitL.length || approvals.length ? card(full ? 'همه درخواست‌های مرخصی' : 'مرخصی کارکنان واحد', lt(unitL), approvals.length ? `<small>${fa(approvals.length)} مورد منتظر اقدام شما</small>` : '', { flush: true }) : ''}`;
   }
-  if (v.tab === 'mission') body = card('مأموریت‌ها', table([['کارمند', m => esc(userById(m.uid)?.name)], ['مقصد', m => esc(m.dest)], ['موضوع', m => esc(m.title)], ['از', m => jd(m.from)], ['تا', m => jd(m.to)], ['وضعیت', m => pill(m.status || 'تأییدشده')]], DB.missions.filter(m => full || m.uid === ME.user.id)), full ? btn('ثبت مأموریت', 'newHR', { k: 'missions' }, 'sm', 'plus') : '', { flush: true });
-  if (v.tab === 'decree') body = card('احکام و ابلاغ‌ها', table([['شماره حکم', d => esc(d.no)], ['عنوان', d => esc(d.title)], ['کارمند', d => esc(userById(d.uid)?.name)], ['سمت', d => esc(posLabel(d.pos))], ['تاریخ', d => jd(d.date)]], DB.decrees.filter(d => full || d.uid === ME.user.id)), full ? btn('ثبت حکم / ابلاغ', 'newHR', { k: 'decrees' }, 'sm', 'plus') : '', { flush: true });
-  if (v.tab === 'contract') body = full ? card('بایگانی قراردادها', table([['کارمند', c => esc(userById(c.uid)?.name)], ['نوع قرارداد', c => esc(c.type)], ['عنوان', c => esc(c.title)], ['شروع', c => jd(c.from)], ['پایان', c => dueTxt(c.to)]], DB.contracts), btn('ثبت قرارداد', 'newHR', { k: 'contracts' }, 'sm', 'plus'), { flush: true }) : denied('بایگانی قراردادها فقط برای مدیریت امور اداری قابل مشاهده است.');
+  if (v.tab === 'mission') body = card('مأموریت‌ها', table([['کارمند', m => esc(who(m.uid, m.nm))], ['مقصد', m => esc(m.dest)], ['موضوع', m => esc(m.title)], ['از', m => jd(m.from)], ['تا', m => jd(m.to)], ['وضعیت', m => pill(m.status || 'تأییدشده')]], DB.missions.filter(m => full || m.uid === ME.user.id)), full ? btn('ثبت مأموریت', 'newHR', { k: 'missions' }, 'sm', 'plus') : '', { flush: true });
+  if (v.tab === 'decree') body = card('احکام و ابلاغ‌ها', table([['شماره حکم', d => esc(d.no)], ['عنوان', d => esc(d.title)], ['کارمند', d => esc(who(d.uid, d.nm))], ['سمت', d => esc(posLabel(d.pos))], ['تاریخ', d => jd(d.date)]], DB.decrees.filter(d => full || d.uid === ME.user.id)), full ? btn('ثبت حکم / ابلاغ', 'newHR', { k: 'decrees' }, 'sm', 'plus') : '', { flush: true });
+  if (v.tab === 'contract') body = full ? card('بایگانی قراردادها', table([['کارمند', c => esc(who(c.uid, c.nm))], ['نوع قرارداد', c => esc(c.type)], ['عنوان', c => esc(c.title)], ['شروع', c => jd(c.from)], ['پایان', c => dueTxt(c.to)]], DB.contracts), btn('ثبت قرارداد', 'newHR', { k: 'contracts' }, 'sm', 'plus'), { flush: true }) : denied('بایگانی قراردادها فقط برای مدیریت امور اداری قابل مشاهده است.');
   if (v.tab === 'meet') body = card('جلسات، صورت‌جلسات و پیگیری مصوبات', `<p>مدیریت جلسات، ثبت صورت‌جلسه و پیگیری مصوبات در بخش «تقویم و جلسات» یکپارچه شده است.</p><a class="btn" href="#calendar">${ic('cal')}رفتن به تقویم و جلسات</a>`);
   return `${head('منابع انسانی و امور اداری', 'زیر نظر مدیریت امور اداری؛ اطلاعات پرسنلی فقط برای اشخاص مجاز نمایش داده می‌شود', btn('پرونده من', 'person', { id: ME.user.id }, 'ghost', 'user'))}
   ${tabs('hr', [...(full ? [['files', 'پرونده اداری کارکنان']] : []), ['leave', `مرخصی${approvals.length ? ' (' + fa(approvals.length) + ')' : ''}`], ['mission', 'مأموریت‌ها'], ['decree', 'احکام و ابلاغ‌ها'], ...(full ? [['contract', 'قراردادها']] : []), ['meet', 'جلسات و مصوبات']], v.tab)}${body}`;
@@ -3684,7 +4087,7 @@ function showLeave(id) {
   const l = DB.leaves.find(x => x.id === id); if (!l) return;
   modal({
     title: 'مرخصی ' + l.no,
-    body: `${pill(l.status)}${kv([['کارمند', esc(userById(l.uid).name)], ['سمت', esc(posLabel(l.pos))], ['نوع', esc(l.type)], ['بازه', `${jd(l.from)} تا ${jd(l.to)} (${fa(daysBetween(l.from, l.to) + 1)} روز)`], ['توضیح', esc(l.reason || '—')]])}<div><h3>سابقه</h3>${histHTML(l.history)}</div>`,
+    body: `${pill(l.status)}${kv([['کارمند', esc(who(l.uid, l.nm))], ['سمت', esc(posLabel(l.pos))], ['نوع', esc(l.type)], ['بازه', `${jd(l.from)} تا ${jd(l.to)} (${fa(daysBetween(l.from, l.to) + 1)} روز)`], ['توضیح', esc(l.reason || '—')]])}<div><h3>سابقه</h3>${histHTML(l.history)}</div>`,
     foot: leaveCanAct(l) ? btn('تأیید', 'leaveDo', { id, ok: 1 }) + btn('رد', 'leaveDo', { id, ok: 0 }, 'danger') : ''
   });
 }
@@ -3735,7 +4138,7 @@ PAGES.reports = () => {
   const cult = DB.requests.filter(r => r.toUnit === U_CULTURE && inRange(isoOfStamp(r.created), F, T)).length + reg(5, 'prog').filter(x => inRange(x.date, F, T)).length + reg(11, 'events').filter(x => inRange(x.date, F, T)).length;
   const chartRows = stats.slice().sort((a, b) => b.pct - a.pct);
   const hb = `<div class="chart"><svg viewBox="0 0 560 ${chartRows.length * 26 + 10}" role="img" aria-label="درصد تکمیل وظایف">${chartRows.map((s, i) => { const w = (s.pct / 100) * 330; return `<text x="552" y="${i * 26 + 20}" text-anchor="end">${esc(s.u.short)}</text><rect x="${430 - w}" y="${i * 26 + 8}" width="${w}" height="16" rx="3" class="b1"/><rect x="100" y="${i * 26 + 8}" width="330" height="16" rx="3" fill="none" stroke="var(--line)"/><text x="${Math.max(30, 422 - w)}" y="${i * 26 + 20}" text-anchor="end">${fa(s.pct)}٪</text>`; }).join('')}</svg></div>`;
-  return `${head('گزارش‌گیری و نظارت', isAll() ? 'داشبورد نظارتی بر عملکرد ۱۷ مدیریت' : 'گزارش عملکرد ' + esc(unitName(myUnit())))}
+  return `${head('گزارش‌گیری و نظارت', isAll() ? `داشبورد نظارتی بر عملکرد ${fa(UNITS.filter(u => !u.off).length)} مدیریت` : 'گزارش عملکرد ' + esc(unitName(myUnit())))}
   <section class="card">${filterBar('rep', [{ k: 'f', t: 'date', l: 'از تاریخ' }, { k: 't', t: 'date', l: 'تا تاریخ' }, ...(isAll() ? [{ k: 'u', l: 'همه مدیریت‌ها', o: unitOpts() }] : []), { k: 'type', l: 'همه انواع فعالیت', o: ['وظیفه', 'درخواست', 'دستور', 'نامه'] }, { k: 'st', l: 'همه وضعیت‌ها', o: ['جدید', 'در حال انجام', 'منتظر تأیید', 'تکمیل‌شده', 'معوق', 'بایگانی', 'ردشده', 'ارجاع‌شده'] }])}
   <div class="cb row">${btn('امروز', 'repRange', { r: 'd' }, 'sm ghost')}${btn('این هفته', 'repRange', { r: 'w' }, 'sm ghost')}${btn('این ماه', 'repRange', { r: 'm' }, 'sm ghost')}${btn('امسال', 'repRange', { r: 'y' }, 'sm ghost')}<span class="hint">بازه: ${esc(F || '—')} تا ${esc(T || '—')}</span></div></section>
   <div class="tiles">${tile('وظایف در بازه', tot('tasks'))}${tile('درصد تکمیل', fa(pct) + '٪', fa(tot('done')) + ' مورد', pct >= 70 ? 'ok' : 'warn')}${tile('وظایف معوق', tot('late'), '', tot('late') ? 'bad' : 'ok')}${tile('درخواست‌های معوق', tot('reqLate'), '', tot('reqLate') ? 'bad' : '')}${tile('میانگین زمان رسیدگی', (() => { const a = stats.filter(s => s.avg != null); return a.length ? fa((sum(a, s => s.avg) / a.length).toFixed(1)) + ' روز' : '—'; })())}${tile('مکاتبات', tot('letters'))}${tile('فعالیت‌های فرهنگی', cult, 'درخواست، برنامه پایگاه و کتابخانه')}</div>
@@ -3772,8 +4175,8 @@ PAGES.notifications = () => {
 A.readAll = async () => { await run('readAllNotifs'); refresh(); toast('همه اعلان‌ها خوانده شد.'); };
 
 /* ---------- جایگاه‌ها (اقدام‌های مشترک پنل مدیریت) ---------- */
-A.assign = d => formModal('تغییر متصدی — ' + posLabel(d.id), [{ k: 'user', l: 'متصدی جدید', t: 'select', o: DB.users.filter(u => u.active && !u.deleted && u.id !== ME.user.id).map(u => [u.id, `${u.name} (${u.posId ? posLabel(u.posId) : 'بدون جایگاه'})`]), req: true }], {}, v => run('assignHolder', d.id, v.user), { submit: 'ثبت انتصاب', done: 'متصدی جایگاه تغییر کرد؛ سوابق جایگاه حفظ شد.' });
-A.posHist = d => modal({ title: 'سوابق جایگاه ' + posLabel(d.id), body: table([['متصدی', h => esc(userById(h.userId)?.name || '—')], ['از', h => jd(h.from)], ['تا', h => (h.to ? jd(h.to) : 'اکنون')]], DB.posHistory.filter(h => h.posId === d.id).map((h, i) => ({ ...h, id: i }))) });
+A.assign = d => A.handover(d);
+A.posHist = d => modal({ title: 'سوابق جایگاه ' + posLabel(d.id), body: table([['متصدی', h => esc(h.name || (userById(h.userId) || {}).name || '—')], ['از', h => jd(h.from)], ['تا', h => (h.to ? jd(h.to) : 'اکنون')]], DB.posHistory.filter(h => h.posId === d.id).map((h, i) => ({ ...h, id: i }))) });
 A.addPos = d => formModal('افزودن جایگاه به ' + unitShort(+d.u), [{ k: 'title', l: 'عنوان جایگاه', req: true, ph: 'مثلاً: معاون، کارشناس، کارمند خدمات' }], {}, v => run('addPosition', { ...v, unitId: +d.u }));
 
 /* ---------- آرشیو و رویدادها (برای همه کاربران، در محدوده دسترسی) ---------- */
@@ -3792,9 +4195,9 @@ PAGES.system = () => {
     body = `<section class="card">${filterBar('sys', [{ k: 'q', t: 'search', l: 'جست‌وجو در آرشیو دائمی…' }, { k: 'ty', l: 'همه انواع', o: ['نامه', 'درخواست', 'دستور', 'وظیفه', 'جلسه', 'ملاقات'] }])}<div class="cb flush">${table([['نوع', x => pill(x.type, 'mute')], ['شماره', x => `<span class="${x.k === 'letter' ? 'lno' : 'code'}">${esc(x.no)}</span>`], ['عنوان', x => esc(x.title)], ['مدیریت', x => esc(unitShort(x.unit))], ['تاریخ', x => jd(x.date)], ['وضعیت', x => pill(x.st || 'بایگانی')]], rows.map(x => ({ ...x, id: x.id + '|' + x.k })), { click: 'arch' })}</div></section>`;
   }
   if (v.tab === 'audit') {
-    const rows = DB.audit.filter(a => (isAll() || can('admin.logs') ? true : a.unit === myUnit()) && textMatch(v.aq, a.act, a.note, (userById(a.uid) || {}).name || '')).slice().reverse().slice(0, 300);
+    const rows = DB.audit.filter(a => (isAll() || can('admin.logs') ? true : a.unit === myUnit()) && textMatch(v.aq, a.act, a.note, who(a.uid, a.nm))).slice().reverse().slice(0, 300);
     body = `<div class="notice">رویدادها فقط ${SERVER ? 'روی سرور و در جدول افزودنی (بدون امکان ویرایش و حذف از طریق سامانه) ثبت می‌شوند' : 'در این نسخه نمایشی در همین مرورگر ثبت می‌شوند و فقط برای آشنایی است'}.</div>
-    <section class="card">${filterBar('sys', [{ k: 'aq', t: 'search', l: 'جست‌وجو در رویدادها…' }])}<div class="cb flush">${table([['زمان', a => jdt(a.ts)], ['کاربر', a => esc((userById(a.uid) || {}).name || 'سامانه') + `<span class="sub">${esc(a.pos ? posLabel(a.pos) : '')}</span>`], ['اقدام', a => esc(a.act)], ['شرح', a => esc(a.note)]], rows.map((a, i) => ({ ...a, id: i })))}</div></section>`;
+    <section class="card">${filterBar('sys', [{ k: 'aq', t: 'search', l: 'جست‌وجو در رویدادها…' }])}<div class="cb flush">${table([['زمان', a => jdt(a.ts)], ['کاربر', a => esc(who(a.uid, a.nm)) + `<span class="sub">${esc(a.pos ? posLabel(a.pos) : '')}</span>`], ['اقدام', a => esc(a.act)], ['شرح', a => esc(a.note)]], rows.map((a, i) => ({ ...a, id: i })))}</div></section>`;
   }
   return `${head('آرشیو و رویدادها', 'آرشیو دائمی مکاتبات و اقدامات و سوابق رویدادهای واحد شما')}${tabs('sys', [['archive', 'آرشیو سامانه'], ['audit', isAll() || can('admin.logs') ? 'رویدادهای سیستمی' : 'رویدادهای واحد من']], v.tab)}${canAdminPanel() ? `<div class="notice">تنظیمات، پیامک و پشتیبان‌گیری در <a href="#admin">پنل مدیریت سامانه</a> است.</div>` : ''}${body}`;
 };
@@ -3842,9 +4245,9 @@ function heroHTML() {
   const role = myRole();
   return `<section class="hero">
     <div class="hero-main">
-      <div class="eyebrow">${esc(posLabel(ME.pos.id))}</div>
-      <h1>سلام، ${esc(ME.user.name)}</h1>
-      <p>${esc(DB.settings.orgName)}</p>
+      <div class="eyebrow">${esc(DB.settings.orgName)}</div>
+      <h1>${esc(panelName(ME.pos))}</h1>
+      <p>متصدی فعلی: ${esc(ME.user.name)}</p>
       ${a.on && a.text ? `<div class="hero-note ${a.tone}">${ic('megaphone')}<span>${esc(a.text)}</span></div>` : ''}
       <div class="row">${role !== 'staff' ? btn('ثبت درخواست', 'newReq', {}, 'light', 'plus') : ''}${can('letters.create') ? btn('ثبت نامه', 'newLetter', {}, 'glass', 'mail') : ''}${isImam() || can('orders.issue') ? btn('صدور دستور', 'newOrder', {}, 'glass', 'flag') : ''}${canAdminPanel() ? `<a class="btn glass" href="#admin">${ic('shield')}پنل مدیریت</a>` : ''}</div>
     </div>
@@ -3886,7 +4289,7 @@ PAGES.admin = () => {
   const pend = can('admin.approve') ? pendingAll().length : 0;
   const nav = `<nav class="admnav" aria-label="بخش‌های پنل مدیریت">${tabsOk.map(t => `<button data-a="tab" data-key="adm" data-v="${t[0]}" class="${v.tab === t[0] ? 'on' : ''}">${ic(t[2])}<span>${t[1]}</span>${t[0] === 'signups' && sg ? `<i>${fa(sg)}</i>` : t[0] === 'approvals' && pend ? `<i>${fa(pend)}</i>` : t[0] === 'users' && lockedUsers().length ? `<i>${fa(lockedUsers().length)}</i>` : ''}</button>`).join('')}</nav>`;
   const body = (ADMIN_VIEWS[v.tab] || ADMIN_VIEWS.overview)();
-  return `${head('پنل مدیریت سامانه', 'کنترل کامل کاربران، رمزها، ورودها، دسترسی‌ها، تأییدها، ظاهر و داده‌های سامانه', v.tab === 'users' ? '' : btn('کاربر جدید', 'admNewUser', {}, '', 'plus'))}
+  return `${head('پنل مدیریت سامانه', 'کنترل کامل کاربران، رمزها، ورودها، دسترسی‌ها، تأییدها، ظاهر و داده‌های سامانه', v.tab === 'users' ? '' : btn('تعیین متصدی جایگاه', 'admNewUser', {}, '', 'plus'))}
   <div class="admin-wrap">${nav}<div class="admin-body">${body}</div></div>`;
 };
 PAGES.users = () => { vs('adm').tab = 'users'; return PAGES.admin(); };
@@ -3913,7 +4316,7 @@ const ADMIN_VIEWS = {
       ${tile('سلامت رویدادها', bad < 0 ? 'سالم' : 'آسیب‌دیده', fa(DB.audit.length) + ' رویداد', bad < 0 ? 'ok' : 'bad')}
     </div>
     <div class="grid g2">
-      ${card('اقدامات سریع', `<div class="quick">${[['admNewUser', 'افزودن کاربر', 'plus'], ['go', 'درخواست‌های عضویت', 'user', 'signups'], ['go', 'سطوح دسترسی', 'key', 'perms'], ['go', 'تأیید موارد معلق', 'check', 'approvals'], ['go', 'ظاهر سامانه', 'palette', 'site'], ['go', 'ساختار سازمانی', 'building', 'org'], ['admMaint', DB.settings.maintenance ? 'خروج از حالت به‌روزرسانی' : 'حالت به‌روزرسانی', 'alert'], ['backup', 'تهیه نسخه پشتیبان', 'archive']].map(([a, l, i, t]) => `<button class="qa" data-a="${a === 'go' ? 'admTab' : a}" ${t ? `data-v="${t}"` : ''}>${ic(i)}<span>${l}</span></button>`).join('')}</div>`)}
+      ${card('اقدامات سریع', `<div class="quick">${[['admNewUser', 'تعیین متصدی جایگاه', 'plus'], ['go', 'درخواست‌های عضویت', 'user', 'signups'], ['go', 'سطوح دسترسی', 'key', 'perms'], ['go', 'تأیید موارد معلق', 'check', 'approvals'], ['go', 'ظاهر سامانه', 'palette', 'site'], ['go', 'ساختار سازمانی', 'building', 'org'], ['admMaint', DB.settings.maintenance ? 'خروج از حالت به‌روزرسانی' : 'حالت به‌روزرسانی', 'alert'], ['backup', 'تهیه نسخه پشتیبان', 'archive']].map(([a, l, i, t]) => `<button class="qa" data-a="${a === 'go' ? 'admTab' : a}" ${t ? `data-v="${t}"` : ''}>${ic(i)}<span>${l}</span></button>`).join('')}</div>`)}
       ${card('آخرین ورودهای ناموفق', fails.length ? `<div class="list">${fails.map(l => `<div class="li"><div class="k bad">${ic('alert')}</div><div class="t"><b class="code">${esc(l.username || '—')}</b><small>${esc(l.reason)} · ${jdt(l.ts)}</small></div></div>`).join('')}</div>` : empty('ورود ناموفقی ثبت نشده است.'), btn('همه ورودها', 'admTab', { v: 'logins' }, 'sm ghost'), { flush: true })}
     </div>
     ${card('وضعیت سامانه', kv([['نام مجموعه', esc(DB.settings.orgName)], ['حالت به‌روزرسانی', DB.settings.maintenance ? pill('فعال', 'warn') : pill('غیرفعال', 'ok')], ['پیامک', DB.settings.sms.enabled ? pill('فعال', 'ok') : pill('غیرفعال', 'mute')], ['حجم داده', fa(Math.round(size / 1024)) + ' کیلوبایت'], ['ذخیره‌سازی', MEMORY_ONLY ? pill('فقط حافظه موقت', 'bad') : 'مرورگر (نسخه آزمایشی)'], ['آخرین پشتیبان', DB.settings.backups.length ? jdt(DB.settings.backups[DB.settings.backups.length - 1].ts) : pill('تهیه نشده', 'warn')], ['منطقه زمانی', 'Asia/Tehran']]))}`;
@@ -3924,21 +4327,21 @@ const ADMIN_VIEWS = {
       && (!v.u || (posById(u.posId) || {}).unitId === +v.u) && (!v.r || (posById(u.posId) || {}).role === v.r)
       && (!v.s || (v.s === 'active' ? u.active && !u.deleted : v.s === 'inactive' ? !u.active : v.s === 'locked' ? lockedUsers().includes(u) : !u.posId)));
     const ib = (a, i, l, id, cls = '') => `<button class="ibtn sm ${cls}" data-a="${a}" data-id="${id}" title="${l}" aria-label="${l}">${ic(i)}</button>`;
-    return `<section class="card"><div class="ch"><h2>کاربران سامانه <small>${fa(rows.length)} نفر</small></h2><div class="row">${btn('کاربر جدید', 'admNewUser', {}, 'sm', 'plus')}</div></div>
+    return `<section class="card"><div class="ch"><h2>حساب‌های جایگاه‌ها <small>${fa(rows.length)} حساب</small></h2><div class="row">${btn('تعیین متصدی جایگاه', 'admNewUser', {}, 'sm', 'plus')}</div></div>
     ${filterBar('admu', [{ k: 'q', t: 'search', l: 'جست‌وجوی نام، نام کاربری، تلفن، سمت…' }, { k: 'u', l: 'همه مدیریت‌ها', o: unitOpts(true) }, { k: 'r', l: 'همه نقش‌ها', o: Object.entries(ROLES) }, { k: 's', l: 'همه وضعیت‌ها', o: [['active', 'فعال'], ['inactive', 'غیرفعال'], ['locked', 'قفل'], ['nopos', 'بدون جایگاه']] }, { k: 'del', l: 'بدون حذف‌شده‌ها', o: [['1', 'با نمایش حذف‌شده‌ها']] }])}
     <div class="cb flush">${table([
-      ['کاربر', u => `<a href="#" class="who2 ulink" data-a="admUserCard" data-id="${u.id}">${av(u.name)}<div><b>${esc(u.name)}</b><span class="sub code">${esc(u.username)}</span></div></a>`],
-      ['جایگاه سازمانی', u => (u.posId ? esc(posLabel(u.posId)) : pill('بدون جایگاه', 'warn'))],
+      ['پنل / حساب', u => `<a href="#" class="who2 ulink" data-a="admUserCard" data-id="${u.id}">${av(u.name)}<div><b>${esc(u.posId ? panelName(posById(u.posId)) : 'بدون جایگاه')}</b><span class="sub code">${esc(u.username)}</span></div></a>`],
+      ['متصدی فعلی', u => esc(u.name) + (u.posId ? `<span class="sub">از ${jd(holderSince(u.posId) || u.start || u.hired)}</span>` : '')],
       ['تلفن', u => `<span class="code">${fa(u.phone || '—')}</span>`],
       ['آخرین ورود', u => (u.lastLogin ? jdt(u.lastLogin) : '<span class="sub">هرگز</span>')],
       ['وضعیت', userStatus],
       ['عملیات', u => u.deleted ? '' : `<div class="acts">${ib('admEditUser', 'edit', 'ویرایش', u.id)}${can('admin.passwords') ? ib('admPass', 'key', 'تعیین رمز', u.id) : ''}${u.posId && can('admin.perms') ? ib('admPosPerm', 'shield', 'دسترسی‌های جایگاه', u.posId) : ''}${lockedUsers().includes(u) ? ib('admUnlock', 'unlock', 'بازکردن قفل', u.id) : ''}${u.id !== ME.user.id ? ib('admKick', 'logout', 'خروج اجباری از همه نشست‌ها', u.id) + ib('admToggle', u.active ? 'lock' : 'check', u.active ? 'غیرفعال‌سازی' : 'فعال‌سازی', u.id, u.active ? '' : 'ok') + ib('admDel', 'trash', 'حذف کاربر', u.id, 'bad') : ''}</div>`]
     ], rows)}</div></section>
     ${card('جایگاه‌های سازمانی', `<div class="notice">دسترسی‌ها به جایگاه متصل است، نه به شخص. با تغییر متصدی، همه سوابق جایگاه حفظ می‌شود.</div>` + table([
-      ['مدیریت', p => esc(unitShort(p.unitId))], ['جایگاه', p => `<b>${esc(p.title)}</b>`], ['نقش', p => pill(ROLES[p.role], 'mute')],
+      ['مدیریت', p => esc(unitShort(p.unitId))], ['پنل', p => `<b>${esc(panelName(p))}</b><span class="sub code">${esc((accountOf(p.id) || {}).username || posUsername(p))}</span>`], ['نقش', p => pill(ROLES[p.role], 'mute')],
       ['متصدی', p => { const h = holderOf(p.id); return h ? esc(h.name) : pill('بدون متصدی', 'warn'); }],
       ['استثنای دسترسی', p => (Object.keys(p.perms || {}).length ? pill(fa(Object.keys(p.perms).length) + ' مورد', 'info') : '—')],
-      ['', p => btn('تغییر متصدی', 'assign', { id: p.id }, 'sm ghost') + ' ' + btn('سوابق', 'posHist', { id: p.id }, 'sm ghost') + (can('admin.perms') ? ' ' + btn('دسترسی', 'admPosPerm', { id: p.id }, 'sm soft') : '') + (p.role === 'staff' ? ' ' + btn('حذف', 'admDelPos', { id: p.id }, 'sm danger') : '')]
+      ['', p => btn('تغییر متصدی و تحویل', 'handover', { id: p.id }, 'sm ghost') + ' ' + btn('سوابق', 'posHist', { id: p.id }, 'sm ghost') + (can('admin.perms') ? ' ' + btn('دسترسی', 'admPosPerm', { id: p.id }, 'sm soft') : '') + (p.role === 'staff' ? ' ' + btn('حذف', 'admDelPos', { id: p.id }, 'sm danger') : '')]
     ], DB.positions.filter(p => !vs('admu').u || p.unitId === +vs('admu').u)), [0, ...UNITS.map(u => u.id)].includes(+vs('admu').u) && vs('admu').u ? btn('افزودن جایگاه', 'addPos', { u: vs('admu').u }, 'sm soft', 'plus') : '<small>برای افزودن جایگاه، ابتدا مدیریت را از فیلتر بالا انتخاب کنید</small>', { flush: true })}`;
   },
   signups() {
@@ -3980,11 +4383,11 @@ const ADMIN_VIEWS = {
   audit() {
     const v = vs('adma');
     const bad = verifyAudit();
-    const rows = DB.audit.map((a, i) => ({ ...a, id: i })).filter(a => textMatch(v.q, a.act, a.note, (userById(a.uid) || {}).name || '') && (!v.u || a.unit === +v.u) && (!v.e || a.ent === v.e) && inRange(isoOfStamp(a.ts), v.f, v.t)).reverse().slice(0, 400);
+    const rows = DB.audit.map((a, i) => ({ ...a, id: i })).filter(a => textMatch(v.q, a.act, a.note, who(a.uid, a.nm)) && (!v.u || a.unit === +v.u) && (!v.e || a.ent === v.e) && inRange(isoOfStamp(a.ts), v.f, v.t)).reverse().slice(0, 400);
     const ents = [...new Set(DB.audit.map(a => a.ent))];
     return `<div class="notice ${bad >= 0 ? 'warn' : ''}">${bad >= 0 ? `زنجیره رویدادها از ردیف ${fa(bad + 1)} دست‌کاری شده است.` : `زنجیره ${fa(DB.audit.length)} رویداد سالم است. رویدادها حتی توسط مدیر سامانه قابل حذف یا ویرایش نیستند.`}</div>
     <section class="card">${filterBar('adma', [{ k: 'q', t: 'search', l: 'جست‌وجو در اقدام، کاربر یا شرح…' }, { k: 'u', l: 'همه مدیریت‌ها', o: unitOpts(true) }, { k: 'e', l: 'همه موجودیت‌ها', o: ents }, { k: 'f', t: 'date', l: 'از تاریخ' }, { k: 't', t: 'date', l: 'تا تاریخ' }])}
-    <div class="cb flush">${table([['زمان', a => jdt(a.ts)], ['کاربر', a => esc((userById(a.uid) || {}).name || 'سامانه') + `<span class="sub">${esc(a.pos ? posLabel(a.pos) : '')}</span>`], ['اقدام', a => esc(a.act)], ['موجودیت', a => `<span class="code">${esc(a.ent)}</span>`], ['شرح', a => esc(a.note)], ['اثر انگشت', a => `<span class="code">${a.h}</span>`]], rows)}</div></section>`;
+    <div class="cb flush">${table([['زمان', a => jdt(a.ts)], ['کاربر', a => esc(who(a.uid, a.nm)) + `<span class="sub">${esc(a.pos ? posLabel(a.pos) : '')}</span>`], ['اقدام', a => esc(a.act)], ['موجودیت', a => `<span class="code">${esc(a.ent)}</span>`], ['شرح', a => esc(a.note)], ['اثر انگشت', a => `<span class="code">${a.h}</span>`]], rows)}</div></section>`;
   },
   site() {
     const s = DB.settings;
@@ -4086,14 +4489,11 @@ A.admUserCard = d => {
     foot: u.deleted ? '' : `${b2('admEditUser', 'ویرایش اطلاعات', 'edit', '')}${can('admin.passwords') ? b2('admPass', 'تعیین رمز جدید', 'key') : ''}${u.posId && can('admin.perms') ? btn('دسترسی‌ها', 'admPosPerm', { id: u.posId }, 'ghost', 'shield') : ''}${lockedUsers().includes(u) ? b2('admUnlock', 'بازکردن قفل', 'unlock') : ''}${self ? '' : b2('admKick', 'خروج اجباری', 'logout') + b2('admToggle', u.active ? 'غیرفعال‌سازی' : 'فعال‌سازی', u.active ? 'lock' : 'check') + b2('admDel', 'حذف کاربر', 'trash', 'danger')}` });
 };
 A.admTab = d => { vs('adm').tab = d.v; route(); };
-const userForm = () => [
-  { k: 'name', l: 'نام و نام خانوادگی', req: true }, { k: 'username', l: 'نام کاربری', req: true, hint: 'انگلیسی، ۳ تا ۲۴ نویسه' },
-  { k: 'phone', l: 'تلفن همراه', t: 'tel' }, { k: 'nid', l: 'کد ملی' },
-  { k: 'posId', l: 'جایگاه سازمانی', t: 'select', o: allPosOpts(), blank: 'بدون جایگاه' }
-];
-const toastRes = (r, okMsg) => { if (r && r.error) toast(r.error); else { refresh(); if (okMsg) toast(typeof okMsg === 'function' ? okMsg(r) : okMsg); } };
-A.admNewUser = () => formModal('افزودن کاربر', [...userForm(), { k: 'pass', l: 'رمز اولیه', req: true, hint: 'دست‌کم ' + fa(DB.settings.security.minLen) + ' نویسه؛ رمز تصادفی پیشنهاد شده است' }, { k: 'mustChange', l: 'امنیت', t: 'check', cl: 'کاربر در اولین ورود رمز را تغییر دهد' }], { pass: genPass(), mustChange: true }, v => run('createUser', v), { done: 'کاربر ساخته شد.', submit: 'ایجاد کاربر' });
-A.admEditUser = d => { const u = userById(d.id); formModal('ویرایش کاربر', userForm(), u, v => run('updateUser', u.id, v), { done: 'اطلاعات کاربر ذخیره شد.' }); };
+A.admNewUser = () => {
+  const free = DB.positions.filter(p => !accountOf(p.id));
+  formModal('تعیین متصدی جایگاه', [{ k: 'pos', l: 'جایگاه سازمانی', t: 'select', req: true, o: [...(free.length ? [{ group: 'جایگاه‌های بدون متصدی', items: free.map(p => [p.id, panelName(p)]) }] : []), ...[{ id: 0, name: 'امام جماعت' }, ...UNITS].map(u => ({ group: u.name, items: unitPositions(u.id).filter(p => accountOf(p.id) && p.id !== ME.pos.id).map(p => [p.id, panelName(p) + ' — ' + accountOf(p.id).name]) })).filter(g => g.items.length)] }], {}, v => { setTimeout(() => A.handover({ id: v.pos }), 60); return {}; }, { submit: 'ادامه', done: 'جایگاه انتخاب شد.', pre: '<div class="notice">در این سامانه هر جایگاه یک حساب ثابت با نام کاربری سازمانی دارد (مثلاً <span class="code">library.office</span>). برای افزودن نیروی جدید، ابتدا در «ساختار سازمانی» یا جدول جایگاه‌ها، جایگاه بسازید و سپس متصدی آن را تعیین کنید.</div>' });
+};
+A.admEditUser = d => A.holderEdit(d);
 A.admPass = d => {
   const u = userById(d.id);
   formModal('تعیین رمز', [{ k: 'pass', l: 'رمز جدید', req: true, hint: 'یک رمز تصادفی پیشنهاد شده؛ می‌توانید آن را تغییر دهید' }, { k: 'mustChange', l: 'امنیت', t: 'check', cl: 'کاربر در ورود بعدی رمز را تغییر دهد' }], { pass: genPass(), mustChange: true }, async v => {
@@ -4177,23 +4577,271 @@ const EDIT_BACK = { task: id => showTask(id), letter: id => showLetter(id), orde
 const editBtn = (k, r) => (canEditRec(k, r) ? btn('ویرایش', 'editRec', { k, id: r.id }, 'ghost', 'edit') : '');
 A.editRec = d => { const r = DB[EDIT_RULES[d.k].col].find(x => x.id === d.id); formModal('ویرایش', EDIT_FORMS[d.k], r, v => run('editRecord', d.k, d.id, v), { submit: 'ذخیره تغییرات', done: 'تغییرات ذخیره شد.', reopen: () => EDIT_BACK[d.k](d.id) }); };
 
-/* ---------- حساب کاربری من ---------- */
-PAGES.profile = () => {
-  const u = ME.user;
-  const mine = DB.logins.filter(l => l.uid === u.id).slice().reverse().slice(0, 15);
-  const perms = PERMS.filter(p => can(p[0]));
-  return `${head('حساب کاربری من', esc(posLabel(ME.pos.id)))}
-  <div class="grid g-main">
-    ${card('مشخصات', `<div class="who2 big">${av(u.name)}<div><b>${esc(u.name)}</b><span class="sub code">${esc(u.username)}</span></div></div>${kv([['جایگاه', esc(posLabel(ME.pos.id))], ['مدیریت', esc(unitName(ME.pos.unitId))], ['تلفن همراه', `<span class="code">${fa(u.phone || '—')}</span>`], ['آخرین تغییر رمز', u.passChanged ? jdt(u.passChanged) : '—'], ['ورود فعلی', jdt((mySession() || {}).start)]])}<div class="row mt">${btn('تغییر رمز عبور', 'myPass', {}, '', 'key')}${btn('ویرایش تلفن', 'myPhone', {}, 'ghost', 'edit')}${btn('تغییر حالت روشن / تاریک', 'theme', {}, 'ghost', 'moon')}</div>`)}
-    ${card('دسترسی‌های جایگاه من', perms.length ? `<div class="row">${perms.map(p => pill(p[1], 'ok')).join('')}</div>` : empty('فقط دسترسی‌های پایه'))}
-  </div>
-  ${card('تاریخچه ورود من', table([['زمان', l => jdt(l.ts)], ['نتیجه', l => pill(l.ok ? 'موفق' : 'ناموفق', l.ok ? 'ok' : 'bad')], ['شرح', l => esc(l.reason)], ['مرورگر', l => `<span class="code">${esc(l.agent || '')}</span>`]], mine), '<small>اگر ورودی را نمی‌شناسید، رمز خود را تغییر دهید</small>', { flush: true })}`;
-};
 A.myPass = () => formModal('تغییر رمز عبور', [{ k: 'cur', l: 'رمز فعلی', t: 'password', req: true }, { k: 'p1', l: 'رمز جدید', t: 'password', req: true, hint: 'دست‌کم ' + fa(DB.settings.security.minLen) + ' نویسه' }, { k: 'p2', l: 'تکرار رمز جدید', t: 'password', req: true }], {}, v => {
   if (v.p1 !== v.p2) return fail('رمز جدید و تکرار آن یکسان نیست.');
   return run('changeOwnPassword', v.cur, v.p1);
 }, { submit: 'تغییر رمز', done: 'رمز عبور شما تغییر کرد.', noDraft: true });
 A.myPhone = () => formModal('تلفن همراه', [{ k: 'phone', l: 'شماره همراه', t: 'tel', req: true }], ME.user, v => run('changeOwnPhone', v.phone));
+
+/* =====================================================================
+   جایگاه‌ها و متصدیان، نظارت مدیر بر دفتر خودش، مدیریت دسترسی‌های دفتر و حساب متصدی
+   ===================================================================== */
+const ceilingOf = (p, k) => permOf({ ...p, mgrDeny: {} }, k);
+const canManageOffice = u => isImam() || (myRole() === 'manager' && inUnit(u));
+const canOversee = u => canManageOffice(u) || isAll();
+const officePermsFor = u => OFFICE_PERMS.filter(k => k !== 'library.manage' || u === U_LIB);
+
+/* کارت جایگاه: نام پنل ثابت است؛ نام فرد فقط به‌عنوان «متصدی فعلی» */
+function positionCard(p) {
+  const h = accountOf(p.id);
+  const admin = can('admin.users') && !(isSensitivePos(p) && !isImam());
+  const contact = admin || canHR() || canManageOffice(p.unitId) || (h && h.id === ME.user.id);
+  return `<div class="poscard">
+    <div class="pc-h"><div class="k">${ic(p.role === 'manager' ? 'shield' : p.role === 'office' ? 'file' : p.role === 'secretary' ? 'mail' : 'user')}</div><div><b>${esc(panelName(p))}</b><small>${esc(ROLES[p.role])}${h ? ` · <span class="code">${esc(h.username)}</span>` : ''}</small></div></div>
+    <dl class="kv">
+      <dt>متصدی فعلی</dt><dd>${h ? `<b>${esc(h.name)}</b>` : pill('بدون متصدی', 'warn')}</dd>
+      ${h && contact ? `<dt>شماره تماس</dt><dd><span class="code">${fa(h.phone || '—')}</span></dd>` : ''}
+      ${h ? `<dt>شروع مسئولیت</dt><dd>${jd(holderSince(p.id) || h.start || h.hired)}</dd>` : ''}
+    </dl>
+    <div class="row">${h && (admin || h.id === ME.user.id) ? btn('ویرایش مشخصات', 'holderEdit', { id: h.id }, 'sm ghost', 'edit') : ''}${admin && p.id !== ME.pos.id ? btn('تغییر متصدی و تحویل مسئولیت', 'handover', { id: p.id }, 'sm soft', 'users') : ''}${btn('سوابق متصدیان', 'posHist', { id: p.id }, 'sm ghost', 'history')}</div>
+  </div>`;
+}
+const positionsGrid = u => `<div class="posgrid">${unitPositions(u).map(positionCard).join('')}</div>`;
+
+/* ---------- نظارت مدیر بر مسئول دفتر و منشی ---------- */
+function staffStats(p, days = 30) {
+  const from = addDays(todayISO(), -days);
+  const ts = DB.tasks.filter(t => t.assignee === p.id);
+  const open = ts.filter(t => t.status !== 'تکمیل‌شده');
+  const done = ts.filter(t => t.status === 'تکمیل‌شده');
+  const doneP = done.filter(t => t.doneAt && isoOfStamp(t.doneAt) >= from);
+  const durs = done.filter(t => t.doneAt).map(t => daysBetween(t.start, isoOfStamp(t.doneAt)));
+  const acts = DB.audit.filter(a => a.pos === p.id && isoOfStamp(a.ts) >= from);
+  return {
+    total: ts.length, open: open.length, late: open.filter(t => taskStatus(t) === 'معوق').length, done: done.length, doneP: doneP.length,
+    avg: durs.length ? sum(durs) / durs.length : null, onTime: done.filter(t => t.doneAt && (!t.due || isoOfStamp(t.doneAt) <= t.due)).length,
+    letters: acts.filter(a => a.act === 'ثبت نامه').length, refers: acts.filter(a => a.act === 'ارجاع نامه').length,
+    reqs: DB.requests.filter(r => r.byPos === p.id && isoOfStamp(r.created) >= from).length, acts, openList: open
+  };
+}
+function oversightView(u) {
+  if (!canOversee(u)) return denied('نظارت بر دفتر فقط برای مدیر همین مدیریت است.');
+  const office = unitPositions(u).filter(p => ['office', 'secretary'].includes(p.role));
+  const v = vs('ovs' + u, { days: '30' });
+  const days = +v.days || 30;
+  return `<div class="notice">نظارت فقط بر مسئول دفتر و منشی همین مدیریت است؛ مدیر هیچ بخشی، صرفاً به دلیل مدیر بودن، به کارکنان یا اطلاعات بخش‌های دیگر دسترسی ندارد.</div>
+  <div class="chips">${[['7', 'هفت روز اخیر'], ['30', 'سی روز اخیر'], ['90', 'سه ماه اخیر']].map(([d, l]) => `<button class="chip ${String(days) === d ? 'on' : ''}" data-a="ovsDays" data-u="${u}" data-v="${d}">${l}</button>`).join('')}</div>
+  ${office.map(p => {
+    const h = accountOf(p.id); const s = staffStats(p, days);
+    return card(esc(panelName(p)), `<div class="muted">متصدی فعلی: <b>${esc(h ? h.name : 'بدون متصدی')}</b></div>
+      <div class="tiles mt">${tile('وظایف ارجاع‌شده', s.total)}${tile('باقی‌مانده', s.open, '', s.open ? 'warn' : 'ok')}${tile('معوق', s.late, '', s.late ? 'bad' : 'ok')}${tile('انجام‌شده در بازه', s.doneP, s.done ? `${fa(Math.round((s.onTime / s.done) * 100))}٪ به‌موقع` : '', 'ok')}${tile('میانگین زمان انجام', s.avg == null ? '—' : fa(s.avg.toFixed(1)) + ' روز')}${tile('نامه ثبت‌شده', s.letters, fa(s.refers) + ' ارجاع')}${tile('درخواست ثبت‌شده', s.reqs)}${tile('اقدامات ثبت‌شده', s.acts.length)}</div>
+      <div class="grid g2 mt"><div><h3>کارهای باقی‌مانده</h3>${s.openList.length ? `<div class="list">${s.openList.sort((a, b) => (a.due > b.due ? 1 : -1)).slice(0, 6).map(t => `<a class="li" data-a="task" data-id="${t.id}"><div class="t"><b>${esc(t.title)}</b><small class="code">${esc(t.no)}</small></div><div style="font-size:.78rem;text-align:left">${dueTxt(t.due)}</div></a>`).join('')}</div>` : empty('کار باقی‌مانده‌ای ندارد.')}</div>
+      <div><h3>آخرین اقدامات</h3>${s.acts.length ? `<div class="list">${s.acts.slice(-6).reverse().map(a => `<div class="li"><div class="t"><b>${esc(a.act)}</b><small>${esc(who(a.uid, a.nm))} · ${esc(a.note || '')} · ${jdt(a.ts)}</small></div></div>`).join('')}</div>` : empty('در این بازه اقدامی ثبت نشده است.')}</div></div>`,
+      canManageOffice(u) ? btn('ارجاع کار', 'newTask', { u, to: p.id }, 'sm', 'plus') + ' ' + btn('گزارش عملکرد', 'staffReport', { id: p.id, days }, 'sm ghost', 'chart') : '');
+  }).join('')}`;
+}
+A.ovsDays = d => { vs('ovs' + d.u).days = d.v; route(); };
+A.staffReport = d => {
+  const p = posById(d.id); const s = staffStats(p, +d.days || 30); const h = accountOf(p.id);
+  modal({ title: 'گزارش عملکرد ' + panelName(p), wide: true, body: `${kv([['متصدی فعلی', esc(h ? h.name : '—')], ['بازه', fa(d.days) + ' روز اخیر'], ['وظایف ارجاع‌شده (کل)', fa(s.total)], ['انجام‌شده در بازه', fa(s.doneP)], ['به‌موقع از کل انجام‌شده', s.done ? fa(Math.round((s.onTime / s.done) * 100)) + '٪' : '—'], ['باقی‌مانده / معوق', `${fa(s.open)} / ${fa(s.late)}`], ['میانگین زمان انجام', s.avg == null ? '—' : fa(s.avg.toFixed(1)) + ' روز'], ['نامه ثبت‌شده / ارجاع', `${fa(s.letters)} / ${fa(s.refers)}`], ['درخواست ثبت‌شده', fa(s.reqs)]])}
+    <h3>همه اقدامات بازه</h3>${table([['زمان', a => jdt(a.ts)], ['اقدام', a => esc(a.act)], ['انجام‌دهنده', a => esc(who(a.uid, a.nm))], ['شرح', a => esc(a.note || '')]], s.acts.slice().reverse().map((a, i) => ({ ...a, id: i })), { empty: 'اقدامی ثبت نشده است.' })}` });
+};
+
+/* ---------- مدیریت دسترسی‌های دفتر (مدیر همان بخش) ---------- */
+function officePermsView(u) {
+  if (!canManageOffice(u)) return denied('تنظیم دسترسی‌های دفتر فقط با مدیر همین مدیریت است.');
+  const office = unitPositions(u).filter(p => ['office', 'secretary'].includes(p.role));
+  const log = DB.audit.filter(a => a.ent === 'perm' && office.some(p => p.id === a.id) && /دسترسی دفتر/.test(a.act)).slice(-30).reverse();
+  return `<div class="notice">در این بخش فقط می‌توانید دسترسی‌های مسئول دفتر و منشی همین مدیریت را <b>محدود</b> یا دوباره <b>فعال</b> کنید. دسترسی‌ای که در سقف تعیین‌شده مدیریت عالی نیست قابل اعطا نیست، و اختیارات مدیریت سامانه، جایگاه امام جماعت و دسترسی خودتان از اینجا قابل تغییر نیست. هر تغییر با نام شما و زمان ثبت می‌شود و روی سرور هم هنگام مشاهده و اجرا بررسی می‌شود.</div>
+  ${office.map(p => card(esc(panelName(p)), `<div class="muted">متصدی فعلی: <b>${esc((accountOf(p.id) || {}).name || 'بدون متصدی')}</b></div>
+    <div class="permlist mt">${officePermsFor(u).map(k => { const ceil = ceilingOf(p, k); const denied_ = !!(p.mgrDeny || {})[k]; const eff = permOf(p, k);
+      return `<div class="perm"><div><b>${esc(permLabel(k))}</b><small>${eff ? pill('فعال', 'ok') : denied_ ? pill('محدودشده توسط مدیر', 'warn') : pill('خارج از سقف مدیریت عالی', 'mute')}</small></div>
+      ${denied_ ? btn('فعال‌سازی دوباره', 'offPerm', { p: p.id, k, r: 0 }, 'sm soft') : ceil ? btn('محدود کن', 'offPerm', { p: p.id, k, r: 1 }, 'sm ghost') : '<span class="hint">قابل اعطا نیست</span>'}</div>`; }).join('')}</div>`, '', {})).join('')}
+  ${card('سابقه تغییر دسترسی‌های دفتر', table([['زمان', a => jdt(a.ts)], ['تغییردهنده', a => esc(who(a.uid, a.nm))], ['تغییر', a => esc(a.act)], ['شرح', a => esc(a.note)]], log.map((a, i) => ({ ...a, id: i })), { empty: 'هنوز تغییری ثبت نشده است.' }), '', { flush: true })}`;
+}
+A.offPerm = async d => { const r = await run('setOfficeRestriction', d.p, d.k, !!+d.r); if (r.error) return toast(r.error); refresh(); toast(+d.r ? 'دسترسی محدود شد.' : 'دسترسی دوباره فعال شد.'); };
+
+/* ---------- ویرایش مشخصات متصدی و تحویل رسمی مسئولیت ---------- */
+const holderFields = () => [{ k: 'first', l: 'نام', req: true }, { k: 'last', l: 'نام خانوادگی', req: true }, { k: 'phone', l: 'شماره تماس', t: 'tel' }, { k: 'nid', l: 'کد ملی' }];
+A.holderEdit = d => {
+  const u = userById(d.id); if (!u) return;
+  const self = u.id === ME.user.id;
+  formModal('ویرایش مشخصات متصدی', holderFields(), u, v => run(self ? 'updateOwnHolder' : 'updateHolder', ...(self ? [v] : [u.id, v])), { pre: `<div class="notice">این فرم فقط نام و اطلاعات تماس <b>متصدی فعلی</b> را اصلاح می‌کند؛ نام پنل، نام کاربری، رمز و سوابق تغییر نمی‌کند. برای سپردن جایگاه به فرد دیگر از «تغییر متصدی و تحویل مسئولیت» استفاده کنید.</div>`, done: 'مشخصات ذخیره شد.' });
+};
+A.handover = d => {
+  const p = posById(d.id); if (!p) return;
+  const cur = accountOf(p.id);
+  formModal('تغییر متصدی و تحویل مسئولیت', [...holderFields(), { k: 'start', l: 'تاریخ شروع مسئولیت', t: 'date', req: true }, { k: 'note', l: 'شرح تحویل مسئولیت', t: 'textarea', ph: 'مثلاً: تحویل پرونده‌ها و کارهای در جریان طبق صورت‌جلسه …' }], { start: todayISO() }, async v => {
+    const r = await run('handover', p.id, v); if (r.error) return r;
+    setTimeout(() => modal({ title: 'تحویل مسئولیت ثبت شد', body: `<p>${esc(panelName(p))} به <b>${esc(v.first + ' ' + v.last)}</b> سپرده شد. نشست‌های متصدی قبلی بسته شد و رمز قبلی دیگر کار نمی‌کند. کارهای در انتظار این جایگاه به متصدی جدید منتقل شده است.</p>${kv([['نام کاربری (ثابت)', `<span class="code">${esc(r.username)}</span>`], ['رمز اولیه', `<span class="secret code">${esc(r.tempPass || '')}</span>`]])}<div class="notice warn mt">این رمز فقط همین یک بار نمایش داده می‌شود؛ آن را حضوری به متصدی جدید تحویل دهید. تغییر رمز در اولین ورود الزامی است.</div>`, foot: btn('کپی رمز', 'copyTxt', { t: r.tempPass || '' }, '', 'file') }), 60);
+    return r;
+  }, { pre: `<div class="notice">${esc(panelName(p))} · متصدی فعلی: <b>${esc(cur ? cur.name : 'بدون متصدی')}</b>. با ثبت این فرم، پنل و نام کاربری <span class="code">${esc(cur ? cur.username : posUsername(p))}</span> ثابت می‌ماند، سوابق حفظ می‌شود و فقط متصدی، رمز و نشست‌ها عوض می‌شود.</div>`, submit: 'ثبت تحویل مسئولیت', done: 'تحویل مسئولیت ثبت شد.' });
+};
+
+/* ---------- حساب و مشخصات متصدی فعلی (پنل خود کاربر) ---------- */
+PAGES.profile = () => {
+  const u = ME.user, p = ME.pos;
+  const mine = DB.logins.filter(l => l.uid === u.id).slice().reverse().slice(0, 15);
+  const perms = PERMS.filter(x => can(x[0]));
+  const restricted = Object.keys(p.mgrDeny || {}).filter(k => p.mgrDeny[k]);
+  const hist = DB.posHistory.filter(h => h.posId === p.id).slice().reverse();
+  return `${head(esc(panelName(p)), 'حساب سازمانی این جایگاه و مشخصات متصدی فعلی')}
+  <div class="grid g-main">
+    ${card('مشخصات متصدی فعلی', `<div class="who2 big">${av(u.name)}<div><b>${esc(u.name)}</b><span class="sub">${esc(posLabel(p.id))}</span></div></div>
+      ${kv([['نام', esc(u.first || '—')], ['نام خانوادگی', esc(u.last || '—')], ['شماره تماس', `<span class="code">${fa(u.phone || '—')}</span>`], ['عنوان جایگاه سازمانی', esc(posLabel(p.id))], ['تاریخ شروع مسئولیت', jd(holderSince(p.id) || u.start || u.hired)], ['نام کاربری جایگاه (ثابت)', `<span class="code">${esc(u.username)}</span>`], ['آخرین تغییر رمز', u.passChanged ? jdt(u.passChanged) : '—']])}
+      <div class="row mt">${btn('ویرایش مشخصات', 'holderEdit', { id: u.id }, '', 'edit')}${btn('تغییر رمز عبور', 'myPass', {}, 'ghost', 'key')}${btn('حالت روشن / تاریک', 'theme', {}, 'ghost', 'moon')}</div>
+      <div class="hint mt">تحویل رسمی این جایگاه به فرد دیگر فقط از مسیر «تغییر متصدی و تحویل مسئولیت» توسط مدیر سامانه یا امام جماعت انجام می‌شود.</div>`)}
+    ${card('دسترسی‌های این جایگاه', (perms.length ? `<div class="row">${perms.map(x => pill(x[1], 'ok')).join('')}</div>` : empty('فقط دسترسی‌های پایه')) + (restricted.length ? `<h3 class="mt">محدودشده توسط مدیر بخش</h3><div class="row">${restricted.map(k => pill(permLabel(k), 'warn')).join('')}</div>` : ''))}
+  </div>
+  ${card('سوابق متصدیان این جایگاه', table([['متصدی', h => esc(h.name || '—')], ['از', h => jd(h.from)], ['تا', h => (h.to ? jd(h.to) : 'اکنون')], ['ثبت‌کننده تحویل', h => esc(h.by || '—')]], hist.map((h, i) => ({ ...h, id: i }))), '', { flush: true })}
+  ${card('تاریخچه ورود به این حساب', table([['زمان', l => jdt(l.ts)], ['متصدی', l => esc(who(l.uid, l.nm))], ['نتیجه', l => pill(l.ok ? 'موفق' : 'ناموفق', l.ok ? 'ok' : 'bad')], ['شرح', l => esc(l.reason)]], mine), '<small>اگر ورودی را نمی‌شناسید، رمز خود را تغییر دهید</small>', { flush: true })}`;
+};
+
+/* =====================================================================
+   کتابخانه و رزرو کتاب: بخش عمومی برای مردم (جدا از کارتابل اداری) و بخش خدمات عمومی کتابدار
+   ===================================================================== */
+const LIB_STEPS = ['انتخاب کتاب', 'ورود یا عضویت', 'ثبت درخواست', 'بررسی کتابدار', 'تأیید و اعلام مراجعه', 'تحویل و موعد بازگشت', 'بازگشت کتاب'];
+const loanTone = s => (s === LOAN.ready ? 'ok' : s === LOAN.out ? 'info' : s === LOAN.pending ? 'warn' : s === LOAN.returned ? 'mute' : 'bad');
+
+/* لایه داده عضو: سرور (نسخه عملیاتی) یا همین مرورگر (نسخه نمایشی) */
+const Lib = {
+  mem: null, loans: [], books: [], csrf: '',
+  apply(r) { this.books = r.books || []; this.mem = r.member || null; this.loans = r.loans || []; if (r.csrf) this.csrf = r.csrf; },
+  localMember() { let id = null; try { id = sessionStorage.getItem('shabab-member'); } catch (e) {} const m = id && DB.members.find(x => x.id === id); return m && m.active ? m : null; },
+  localApply() { this.books = publicBooks(); const m = this.localMember(); if (m) { const v = memberView(m); this.mem = v.member; this.loans = v.loans; } else { this.mem = null; this.loans = []; } },
+  async load() {
+    if (!SERVER) return this.localApply();
+    try { const r = await fetch('/api/lib/me', { credentials: 'same-origin' }).then(x => x.json()); this.apply(r); } catch (e) { this.books = []; }
+  },
+  async post(path, body) {
+    if (SERVER) {
+      let r; try { r = await fetch(path, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Kartabl': '1', 'X-CSRF': this.csrf }, body: JSON.stringify(body || {}) }).then(x => x.json()); } catch (e) { return { error: 'ارتباط با سرور برقرار نشد.' }; }
+      if (!r.error && (r.books || r.member !== undefined)) this.apply(r);
+      return r;
+    }
+    /* نسخه نمایشی: همان قواعد، در مرورگر؛ خطا هیچ تغییر ناقصی باقی نمی‌گذارد */
+    const snap = JSON.stringify(DB); let r;
+    try {
+      const m = this.localMember();
+      if (path.endsWith('/signup')) { r = libSignup(body); if (!r.error) r = { ok: true, no: r.no }; }
+      else if (path.endsWith('/login')) { const x = DB.members.find(y => y.username === String(body.username || '').trim().toLowerCase()); if (!x || !pwCheck(x.pass, body.pass)) r = fail('نام کاربری یا رمز عبور درست نیست.'); else if (!x.active) r = fail('عضویت شما غیرفعال شده است.'); else { try { sessionStorage.setItem('shabab-member', x.id); } catch (e) {} r = {}; } }
+      else if (path.endsWith('/logout')) { try { sessionStorage.removeItem('shabab-member'); } catch (e) {} r = {}; }
+      else if (!m) r = fail('برای ادامه وارد حساب عضویت شوید.');
+      else if (path.endsWith('/request')) r = libRequest(m, body.bookId, body.type, body.note);
+      else if (path.endsWith('/cancel')) r = libCancel(m, body.loanId);
+    } catch (e) { r = fail('خطای پیش‌بینی‌نشده.'); }
+    if (r && r.error) { DB = JSON.parse(snap); return r; }
+    Store.save(); this.localApply();
+    return r || {};
+  }
+};
+
+/* ---------- صفحه عمومی ---------- */
+function renderLibrary() {
+  const act = document.activeElement && document.activeElement.id, caret = act && document.activeElement.selectionStart;
+  closeModal(true);
+  const v = vs('lib', { tab: 'catalog', q: '', cat: '' });
+  const m = Lib.mem;
+  const cats = [...new Set(Lib.books.map(b => b.category))];
+  const list = Lib.books.filter(b => textMatch(v.q, b.title, b.author, b.publisher, b.code, b.category) && (!v.cat || b.category === v.cat) && (!v.avail || b.available > 0));
+  const myActive = Lib.loans.filter(l => [LOAN.pending, LOAN.ready, LOAN.out].includes(l.status));
+  $('#root').innerHTML = `<div class="lib">
+    <header class="lib-top">
+      <a class="lib-brand" href="#library" data-a="libTab" data-v="catalog"><span class="mark">${ic('book')}</span><span><b>کتابخانه و رزرو کتاب</b><small>${esc(DB.settings.orgName)}</small></span></a>
+      <nav class="row">${m ? `${btn(`درخواست‌های من${myActive.length ? ' (' + fa(myActive.length) + ')' : ''}`, 'libTab', { v: 'mine' }, v.tab === 'mine' ? 'sm' : 'sm ghost', 'inbox')}${btn('خروج', 'libLogout', {}, 'sm ghost', 'logout')}` : `${btn('ورود اعضا', 'libAuth', { m: 'login' }, 'sm', 'user')}${btn('عضویت', 'libAuth', { m: 'signup' }, 'sm ghost', 'plus')}`}<a class="btn sm ghost staff-link" href="#dashboard">${ic('lock')}ورود کارکنان</a></nav>
+    </header>
+    <main class="lib-main">
+      ${v.tab === 'mine' && m ? libMine() : `
+      <section class="lib-hero">
+        <div><h1>کتاب دلخواهتان را پیدا و رزرو کنید</h1><p>فهرست کتاب‌ها برای همه باز است. برای رزرو یا امانت، عضو شوید؛ پس از بررسی کتابدار، زمان مراجعه برای دریافت کتاب به شما اعلام می‌شود.</p>
+        <div class="search lib-search">${ic('search')}<input type="search" id="flt-lib-q" data-f="lib:q" value="${esc(v.q)}" placeholder="جست‌وجوی عنوان، نویسنده یا ناشر…" aria-label="جست‌وجوی کتاب"></div></div>
+        <ol class="lib-steps" aria-label="مراحل رزرو و امانت">${LIB_STEPS.map((s, i) => `<li><i>${fa(i + 1)}</i><span>${s}</span></li>`).join('')}</ol>
+      </section>
+      <div class="chips">${['', ...cats].map(c => `<button class="chip ${(v.cat || '') === c ? 'on' : ''}" data-a="libCat" data-v="${esc(c)}">${esc(c || 'همه موضوع‌ها')}</button>`).join('')}<button class="chip ${v.avail ? 'on' : ''}" data-a="libAvail">فقط کتاب‌های موجود</button></div>
+      <div class="books">${list.length ? list.map(b => `<article class="bookcard">
+        <div class="cover" aria-hidden="true">${ic('book')}<span>${esc(b.category)}</span></div>
+        <div class="bk-b"><h3>${esc(b.title)}</h3><p>${esc(b.author)}</p>
+          <div class="bk-st">${b.available ? pill(`${fa(b.available)} نسخه از ${fa(b.total)} موجود`, 'ok') : b.total ? pill('همه نسخه‌ها در امانت؛ قابل رزرو', 'warn') : pill('خارج از دسترس', 'mute')}</div>
+          <div class="row">${b.total ? btn(b.available ? 'درخواست امانت' : 'رزرو', 'libReq', { id: b.id }, 'sm') : ''}${btn('جزئیات', 'libBook', { id: b.id }, 'sm ghost')}</div></div>
+      </article>`).join('') : empty('کتابی با این مشخصات یافت نشد.')}</div>`}
+    </main>
+    <footer class="lib-foot">حساب عضویت کتابخانه از حساب کارکنان مجموعه جداست و به هیچ اطلاعات اداری دسترسی ندارد.</footer>
+  </div>`;
+  if (act && act.startsWith('flt-')) { const el = document.getElementById(act); if (el) { el.focus(); try { el.setSelectionRange(caret, caret); } catch (e) {} } }
+}
+function libMine() {
+  const m = Lib.mem;
+  const late = Lib.loans.filter(l => l.late);
+  return `<section class="card"><div class="cb"><div class="who2 big">${av(m.name)}<div><b>${esc(m.name)}</b><span class="sub">شماره عضویت <span class="code">${esc(m.no)}</span> · ${fa(m.phone)}</span></div></div>
+    ${late.length ? `<div class="notice warn">${fa(late.length)} کتاب از موعد بازگشت گذشته است؛ لطفاً هرچه زودتر بازگردانید.</div>` : ''}</div></section>
+  ${['active', 'past'].map(g => { const rows = Lib.loans.filter(l => (g === 'active') === [LOAN.pending, LOAN.ready, LOAN.out].includes(l.status)).slice().reverse();
+    return card(g === 'active' ? 'درخواست‌ها و امانت‌های جاری' : 'سابقه امانت‌ها', rows.length ? `<div class="list">${rows.map(l => `<div class="li loanrow"><div class="k">${ic('book')}</div><div class="t">
+      <b>${esc(l.book.title)}</b><small>${esc(l.type)} · <span class="code">${esc(l.no)}</span> · ثبت ${jd(isoOfStamp(l.requested))}${l.copy ? ' · نسخه ' + esc(l.copy) : ''}</small>
+      ${l.status === LOAN.ready ? `<div class="notice ok-n">برای دریافت تا ${jd(l.readyUntil)} به کتابخانه مراجعه کنید.</div>` : ''}
+      ${l.status === LOAN.out ? `<div class="hint">موعد بازگشت: ${dueTxt(l.due)}</div>` : ''}
+      ${l.reply ? `<div class="box mt-s"><b>پاسخ کتابدار:</b> ${esc(l.reply)}</div>` : ''}</div>
+      <div class="lr">${pill(l.late ? 'تأخیر در بازگشت' : l.status, l.late ? 'bad' : loanTone(l.status))}${[LOAN.pending, LOAN.ready].includes(l.status) ? btn('لغو', 'libCancel', { id: l.id }, 'sm ghost') : ''}</div></div>`).join('')}</div>` : empty(g === 'active' ? 'درخواست فعالی ندارید. از فهرست کتاب‌ها یک کتاب انتخاب کنید.' : 'هنوز سابقه‌ای ندارید.'), '', { flush: true }); }).join('')}`;
+}
+A.libTab = d => { vs('lib').tab = d.v; renderLibrary(); };
+A.libCat = d => { vs('lib').cat = d.v; renderLibrary(); };
+A.libAvail = () => { const v = vs('lib'); v.avail = !v.avail; renderLibrary(); };
+A.libBook = d => { const b = Lib.books.find(x => x.id === d.id); if (!b) return; modal({ title: b.title, body: `${kv([['نویسنده', esc(b.author)], ['ناشر', esc(b.publisher || '—')], ['سال انتشار', fa(b.year || '—')], ['موضوع', esc(b.category)], ['شماره ثبت', `<span class="code">${esc(b.code)}</span>`], ['موجودی', `${fa(b.available)} نسخه آزاد از ${fa(b.total)}`]])}${b.desc ? `<div class="box">${esc(b.desc)}</div>` : ''}`, foot: b.total ? btn(b.available ? 'درخواست امانت' : 'رزرو', 'libReq', { id: b.id }, '', 'book') : '' }); };
+A.libAuth = d => {
+  const signup = d.m === 'signup';
+  formModal(signup ? 'عضویت در کتابخانه' : 'ورود اعضای کتابخانه', signup ? [{ k: 'name', l: 'نام و نام خانوادگی', req: true }, { k: 'phone', l: 'شماره همراه', t: 'tel', req: true }, { k: 'username', l: 'نام کاربری', req: true, hint: 'حروف انگلیسی، عدد، نقطه یا خط تیره' }, { k: 'pass', l: 'رمز عبور', t: 'password', req: true, hint: 'دست‌کم ۸ نویسه' }] : [{ k: 'username', l: 'نام کاربری', req: true }, { k: 'pass', l: 'رمز عبور', t: 'password', req: true }], {}, async v => {
+    if (signup) { const r = await Lib.post('/api/lib/signup', v); if (r.error) return r; const l = await Lib.post('/api/lib/login', { username: v.username, pass: v.pass }); if (l.error) return l; }
+    else { const r = await Lib.post('/api/lib/login', v); if (r.error) return r; }
+    if (SERVER) await Lib.load();
+    return {};
+  }, { submit: signup ? 'عضویت و ورود' : 'ورود', done: signup ? 'عضویت انجام شد؛ خوش آمدید.' : 'وارد شدید.', reopen: () => { renderLibrary(); if (Lib.pendingBook) { const id = Lib.pendingBook; Lib.pendingBook = null; A.libReq({ id }); } }, pre: signup ? '' : `<div class="hint">حساب ندارید؟ <button type="button" class="linkbtn" data-a="libAuth" data-m="signup">عضو شوید</button></div>` });
+};
+A.libReq = d => {
+  const b = Lib.books.find(x => x.id === d.id); if (!b) return;
+  if (!Lib.mem) { Lib.pendingBook = b.id; return A.libAuth({ m: 'login' }); }
+  formModal('درخواست: ' + b.title, [{ k: 'type', l: 'نوع درخواست', t: 'select', o: b.available ? LOAN_TYPES : ['رزرو'], blank: false }, { k: 'note', l: 'توضیح برای کتابدار', t: 'textarea' }], { type: b.available ? 'امانت' : 'رزرو' }, async v => {
+    const r = await Lib.post('/api/lib/request', { bookId: b.id, type: v.type, note: v.note }); return r.error ? r : {};
+  }, { submit: 'ثبت درخواست', done: 'درخواست ثبت شد؛ نتیجه بررسی کتابدار در «درخواست‌های من» نمایش داده می‌شود.', reopen: () => { vs('lib').tab = 'mine'; renderLibrary(); }, pre: '<div class="notice">ثبت درخواست به معنای تحویل کتاب نیست. پس از تأیید کتابدار، یک نسخه برای شما کنار گذاشته و زمان مراجعه اعلام می‌شود.</div>' });
+};
+A.libCancel = async d => { const r = await Lib.post('/api/lib/cancel', { loanId: d.id }); if (r.error) return toast(r.error); renderLibrary(); toast('درخواست لغو شد.'); };
+A.libLogout = async () => { await Lib.post('/api/lib/logout', {}); Lib.mem = null; Lib.loans = []; vs('lib').tab = 'catalog'; await Lib.load(); renderLibrary(); };
+
+/* ---------- خدمات عمومی کتابخانه (کتابدار) ---------- */
+PAGES['library-admin'] = () => {
+  if (!canSeeLib()) return denied('خدمات عمومی کتابخانه فقط برای کتابداران مدیریت کتابخانه است.');
+  const v = vs('libadm', { tab: 'requests' });
+  const L = DB.loans, edit = canLib();
+  const bookT = id => (DB.books.find(b => b.id === id) || {}).title || '—';
+  const mem = id => DB.members.find(m => m.id === id) || {};
+  const copyC = l => { const b = DB.books.find(x => x.id === l.bookId); const c = b && b.copies.find(x => x.id === l.copyId); return c ? c.code : '—'; };
+  const pend = L.filter(l => l.status === LOAN.pending), ready = L.filter(l => l.status === LOAN.ready), out = L.filter(l => l.status === LOAN.out), late = out.filter(loanLate);
+  const memCell = l => { const m = mem(l.memberId); return `${esc(m.name || '—')}<span class="sub"><span class="code">${esc(m.no || '')}</span> · ${fa(m.phone || '')}</span>`; };
+  let body = '';
+  if (v.tab === 'requests') body = card('درخواست‌های رزرو و امانت', table([['شماره', l => `<span class="code">${esc(l.no)}</span>`], ['کتاب', l => `<b>${esc(bookT(l.bookId))}</b><span class="sub">${esc(l.type)}${l.note ? ' · ' + esc(l.note) : ''}</span>`], ['عضو', memCell], ['ثبت', l => jd(isoOfStamp(l.requested))], ['وضعیت', l => pill(l.status, loanTone(l.status)) + (l.status === LOAN.ready ? `<span class="sub">نسخه ${esc(copyC(l))} · تا ${jd(l.readyUntil)}</span>` : '')],
+    ['', l => !edit ? '' : l.status === LOAN.pending ? btn('تأیید', 'lbDecide', { id: l.id, ok: 1 }, 'sm') + ' ' + btn('رد', 'lbDecide', { id: l.id, ok: 0 }, 'sm danger') : btn('ثبت تحویل', 'lbDeliver', { id: l.id }, 'sm') + ' ' + btn('عدم مراجعه', 'lbExpire', { id: l.id }, 'sm ghost')]], [...pend, ...ready].sort(by('requested')), { empty: 'درخواست در انتظاری نیست.' }), '', { flush: true });
+  if (v.tab === 'loans') body = card('امانت‌های جاری', table([['شماره', l => `<span class="code">${esc(l.no)}</span>`], ['کتاب', l => `<b>${esc(bookT(l.bookId))}</b><span class="sub code">${esc(copyC(l))}</span>`], ['عضو', memCell], ['تحویل', l => jd(isoOfStamp(l.deliveredAt))], ['موعد بازگشت', l => dueTxt(l.due)], ['', l => (edit ? btn('ثبت بازگشت', 'lbReturn', { id: l.id }, 'sm') + ' ' + btn('پیام', 'lbReply', { id: l.id }, 'sm ghost') : '')]], out.sort((a, b) => (a.due > b.due ? 1 : -1)), { empty: 'کتابی در امانت نیست.' }), '', { flush: true });
+  if (v.tab === 'books') {
+    const rows = DB.books.filter(b => textMatch(v.q, b.title, b.author, b.code));
+    body = `<section class="card"><div class="ch"><h2>کتاب‌ها <small>${fa(DB.books.length)} عنوان · ${fa(sum(DB.books, b => b.copies.length))} نسخه</small></h2>${edit ? btn('ثبت کتاب', 'lbBook', {}, 'sm', 'plus') : ''}</div>${filterBar('libadm', [{ k: 'q', t: 'search', l: 'جست‌وجوی عنوان، نویسنده یا شماره ثبت…' }])}<div class="cb flush">${table([['شماره ثبت', b => `<span class="code">${esc(b.code)}</span>`], ['عنوان', b => `<b>${esc(b.title)}</b><span class="sub">${esc(b.author)}</span>`], ['موضوع', b => esc(b.category)], ['موجودی', b => { const f = freeCopies(b).length, t = b.copies.filter(c => c.status !== COPY_ST.off).length; return pill(`${fa(f)} از ${fa(t)} آزاد`, f ? 'ok' : 'warn'); }], ['', b => (edit ? btn('ویرایش', 'lbBook', { id: b.id }, 'sm ghost', 'edit') + ' ' + btn('نسخه‌ها', 'lbCopies', { id: b.id }, 'sm ghost', 'book') : '')]], rows)}</div></section>`;
+  }
+  if (v.tab === 'members') body = card('اعضای کتابخانه', table([['شماره عضویت', m => `<span class="code">${esc(m.no)}</span>`], ['نام', m => `<b>${esc(m.name)}</b><span class="sub code">${esc(m.username)}</span>`], ['تلفن', m => `<span class="code">${fa(m.phone)}</span>`], ['عضویت', m => jd(isoOfStamp(m.created))], ['امانت فعال', m => fa(L.filter(l => l.memberId === m.id && activeLoan(l)).length)], ['وضعیت', m => pill(m.active ? 'فعال' : 'غیرفعال')], ['', m => (edit ? btn(m.active ? 'غیرفعال‌سازی' : 'فعال‌سازی', 'lbMember', { id: m.id }, 'sm ghost') : '')]], DB.members.slice().reverse()), '', { flush: true });
+  if (v.tab === 'history') body = card('سوابق', table([['شماره', l => `<span class="code">${esc(l.no)}</span>`], ['کتاب', l => esc(bookT(l.bookId))], ['عضو', memCell], ['وضعیت', l => pill(l.status, loanTone(l.status)) + (l.lateDays ? `<span class="sub">${fa(l.lateDays)} روز تأخیر</span>` : '')], ['پاسخ', l => esc(l.reply || '—')]], L.filter(l => !activeLoan(l)).slice().reverse(), { empty: 'سابقه‌ای نیست.' }), '', { flush: true });
+  return `${head('خدمات عمومی کتابخانه', 'کتاب‌ها، رزرو و امانت مردم؛ کارتابل اداری کتابخانه در بخش جداگانه است', `<a class="btn ghost" href="#unit-${U_LIB}">${ic('inbox')}کارتابل اداری کتابخانه</a><a class="btn ghost" href="#library">${ic('book')}مشاهده سایت عمومی</a>`)}
+  <div class="tiles">${tile('در انتظار بررسی', pend.length, '', pend.length ? 'warn' : 'ok')}${tile('آماده تحویل', ready.length)}${tile('در امانت', out.length)}${tile('تأخیر در بازگشت', late.length, '', late.length ? 'bad' : 'ok')}${tile('عنوان کتاب', DB.books.length)}${tile('اعضا', DB.members.length)}</div>
+  ${tabs('libadm', [['requests', `درخواست‌ها (${fa(pend.length + ready.length)})`], ['loans', `امانت‌های جاری (${fa(out.length)})`], ['books', 'کتاب‌ها و نسخه‌ها'], ['members', 'اعضا'], ['history', 'سوابق']], v.tab)}${body}`;
+};
+A.lbDecide = d => actModal(+d.ok ? 'تأیید و اختصاص نسخه' : 'رد درخواست', v => run('loanDecide', d.id, !!+d.ok, v.note, v.days), { fields: +d.ok ? [{ k: 'days', l: 'مهلت مراجعه برای دریافت (روز)', t: 'number', req: true }] : [], init: { days: 3 }, noteReq: !+d.ok, noteLabel: +d.ok ? 'پیام به عضو (اختیاری)' : 'علت رد (برای عضو نمایش داده می‌شود)', submit: +d.ok ? 'تأیید' : 'رد', done: +d.ok ? 'یک نسخه آزاد کنار گذاشته شد و به عضو اعلام شد.' : 'درخواست رد شد.' });
+A.lbDeliver = d => formModal('ثبت تحویل کتاب', [{ k: 'days', l: 'مدت امانت (روز)', t: 'number', req: true }], { days: 14 }, v => run('loanDeliver', d.id, v.days), { submit: 'ثبت تحویل', done: 'تحویل و موعد بازگشت ثبت شد.' });
+A.lbReturn = d => confirmBox('ثبت بازگشت کتاب', 'بازگشت کتاب ثبت و نسخه آزاد شود؟', 'ثبت بازگشت', () => run('loanReturn', d.id), 'بازگشت ثبت شد و نسخه آزاد شد.');
+A.lbExpire = d => actModal('لغو به دلیل عدم مراجعه', v => run('loanExpire', d.id, v.note), { init: { note: 'عضو در مهلت تعیین‌شده مراجعه نکرد.' }, done: 'نسخه آزاد شد.' });
+A.lbReply = d => actModal('پیام به عضو', v => run('loanReply', d.id, v.note), { noteReq: true, noteLabel: 'متن پیام', done: 'پیام ثبت شد.' });
+A.lbMember = async d => toastRes(await run('memberToggle', d.id), r => (r.active ? 'عضو فعال شد.' : 'عضو غیرفعال شد.'));
+A.lbBook = d => { const b = d.id ? DB.books.find(x => x.id === d.id) : {}; formModal(d.id ? 'ویرایش کتاب' : 'ثبت کتاب', [{ k: 'title', l: 'عنوان', req: true, full: true }, { k: 'author', l: 'نویسنده', req: true }, { k: 'publisher', l: 'ناشر' }, { k: 'year', l: 'سال انتشار' }, { k: 'category', l: 'موضوع', t: 'select', o: BOOK_CATS, req: true }, ...(d.id ? [] : [{ k: 'copies', l: 'تعداد نسخه', t: 'number', req: true }]), { k: 'desc', l: 'معرفی کوتاه', t: 'textarea' }], d.id ? b : { copies: 1 }, v => run('saveBook', d.id || '', v), { done: d.id ? 'کتاب ویرایش شد.' : 'کتاب و نسخه‌ها ثبت شد.' }); };
+A.lbCopies = d => {
+  const b = DB.books.find(x => x.id === d.id); if (!b) return;
+  modal({ title: 'نسخه‌های ' + b.title, wide: true, body: table([['شماره نسخه', c => `<span class="code">${esc(c.code)}</span>`], ['وضعیت', c => pill(c.status, c.status === COPY_ST.free ? 'ok' : c.status === COPY_ST.off ? 'mute' : 'info')], ['', c => (c.status === COPY_ST.free ? btn('خارج از دسترس', 'lbCopy', { b: b.id, c: c.id, v: 0 }, 'sm ghost') : c.status === COPY_ST.off ? btn('در دسترس', 'lbCopy', { b: b.id, c: c.id, v: 1 }, 'sm soft') : '<span class="hint">در رزرو یا امانت</span>')]], b.copies) + '<div class="hint mt">هر نسخه در هر لحظه فقط به یک عضو اختصاص می‌یابد.</div>', foot: btn('افزودن نسخه', 'lbAddCopies', { id: b.id }, '', 'plus') });
+};
+A.lbCopy = async d => { const r = await run('setCopyStatus', d.b, d.c, !!+d.v); if (r.error) return toast(r.error); refresh(); A.lbCopies({ id: d.b }); };
+A.lbAddCopies = d => formModal('افزودن نسخه', [{ k: 'n', l: 'تعداد نسخه جدید', t: 'number', req: true }], { n: 1 }, v => run('addCopies', d.id, v.n), { done: 'نسخه‌ها افزوده شد.', reopen: () => A.lbCopies({ id: d.id }) });
 
 /* =====================================================================
    همگام‌سازی با پایگاه داده مشترک
@@ -4221,7 +4869,7 @@ const Sync = {
     try { snap = await this.col.get(); } catch (e) { return this.fail(e); }
     const remote = this.assemble(snap.docs);
     this.mode = 'shared';
-    if (!Object.keys(remote).length) await this.pushAll();
+    if (!Object.keys(remote).length || remote.demoRev !== JSON.stringify(DEMO_REV)) await this.pushAll(); /* داده نمایشی با ساختار قدیمی جایگزین می‌شود */
     else this.apply(remote);
     this.col.onSnapshot(s => { const r = this.assemble(s.docs); if ($('.modal-bg')) this.pending = r; else this.apply(r); }, e => this.fail(e));
     showSync();
@@ -4394,7 +5042,8 @@ function boot() {
   const [sid, ses] = (sess.get() || '').split('|');
   const u = sid && userById(sid);
   const s = DB.sessions.find(x => x.id === ses);
-  if (u && u.active && !u.deleted && u.posId && s && s.active) { setMe(u); renderShell(); } else { sess.set(null); renderLogin(); }
+  if (u && u.active && !u.deleted && u.posId && s && s.active) setMe(u); else sess.set(null);
+  if (location.hash === '#library') route(); else if (ME) renderShell(); else renderLogin();
   Sync.init();
 }
 boot();

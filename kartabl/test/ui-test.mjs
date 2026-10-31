@@ -21,7 +21,7 @@ let pass = 0, failN = 0;
 const ok = (c, n, x = '') => { if (c) { pass++; console.log('  ✓ ' + n); } else { failN++; console.log('  ✗ ' + n + (x ? ' — ' + x : '')); } };
 
 execFileSync(NODE[0], [NODE[1], join(ROOT, 'server.js'), 'init', '--demo'], { env: { ...process.env, DATA_DIR: DATA } });
-const srv = spawn(NODE[0], [NODE[1], join(ROOT, 'server.js')], { env: { ...process.env, DATA_DIR: DATA, PORT: String(PORT) }, stdio: ['ignore', 'pipe', 'pipe'] });
+const srv = spawn(NODE[0], [NODE[1], join(ROOT, 'server.js')], { env: { ...process.env, LOGIN_RATE_PER_MIN: '500', DATA_DIR: DATA, PORT: String(PORT) }, stdio: ['ignore', 'pipe', 'pipe'] });
 let srvErr = ''; srv.stderr.on('data', d => (srvErr += d));
 await new Promise((res, rej) => { srv.stdout.on('data', d => { if (String(d).includes('در حال اجراست')) res(); }); setTimeout(() => rej(new Error(srvErr)), 15000); });
 
@@ -46,17 +46,18 @@ try {
     ['createOrder', [{ title: 'دستور ' + XSS, desc: XSS, units: ['4'], respPos: 'P4-m', priority: 'فوری', issued: day, due: day, needReport: false }]],
     ['saveSettings', ['announcement', { on: true, tone: 'info', text: 'اطلاعیه ' + XSS }]]
   ]);
-  const r2 = await apiCall('s3', [
+  const r2 = await apiCall('pr.secretary', [
     ['createLetter', [{ type: 'internal', subject: 'نامه ' + XSS, toUnit: 4, unitId: 3, sender: XSS, receiver: XSS, body: XSS, date: day }]],
     ['createRequest', [{ title: 'درخواست ' + XSS, toUnit: 4, cat: XSS, desc: XSS, priority: 'عادی' }]],
     ['createMeeting', [{ title: 'جلسه ' + XSS, date: day, start: '10:00', end: '11:00', place: XSS, invitees: ['P4-m', 'P16-m'], agenda: XSS }]],
     ['createReservation', [{ program: 'general', space: 'amphi', kind: 'برنامه ' + XSS, applicant: XSS, phone: '09120000000', date: day, start: '10:00', end: '11:00', people: 10, equip: XSS, desc: XSS }]]
   ]);
-  const r3 = await apiCall('m4', [['createTask', [{ unitId: 4, title: 'وظیفه ' + XSS, desc: XSS, assignee: 'P4-o', start: day, due: day, priority: 'فوری' }]], ['addRecord', [4, 'media', { title: XSS, kind: 'عکس', date: day, event: XSS, place: XSS }]]]);
+  const r4 = await apiCall('library.office', [['saveBook', ['', { title: 'کتاب ' + XSS, author: XSS, category: 'سایر', copies: 2, desc: XSS }]]]);
+  const r3 = await apiCall('media.manager', [['createTask', [{ unitId: 4, title: 'وظیفه ' + XSS, desc: XSS, assignee: 'P4-o', start: day, due: day, priority: 'فوری' }]], ['addRecord', [4, 'media', { title: XSS, kind: 'عکس', date: day, event: XSS, place: XSS }]]]);
   const su1 = await api.evaluate(x => fetch('/api/signup', { method: 'POST', headers: { 'X-Kartabl': '1', 'Content-Type': 'application/json' }, body: JSON.stringify({ v: { name: 'متقاضی ' + x, username: 'xss.user', phone: '09121234567', unitId: 4, title: 'منشی', pass: 'abcdef1234', note: x } }) }).then(r => r.status), XSS);
   const su2 = await api.evaluate(x => fetch('/api/signup', { method: 'POST', headers: { 'X-Kartabl': '1', 'Content-Type': 'application/json' }, body: JSON.stringify({ v: { name: 'متقاضی آزمون', username: 'xss.user2', phone: '09121234567', unitId: 4, title: 'منشی', pass: 'abcdef1234', note: x } }) }).then(r => r.status), XSS);
   ok(r1[0] !== 'ok' && r1[1] !== 'ok' && su1 === 400, 'نشانه‌گذاری HTML در نام جایگاه، نام مدیریت و نام متقاضی پذیرفته نمی‌شود', JSON.stringify([r1[0], r1[1], su1]));
-  ok([r1[2], r1[3], ...r2, ...r3].every(x => x === 'ok') && su2 === 200, 'متن مخرب در ۱۵ فیلد متنی آزاد (عنوان، شرح، یادداشت، متقاضی، اطلاعیه…) ذخیره شد تا نمایش امن آن آزموده شود', JSON.stringify([...r1, ...r2, ...r3, su2]));
+  ok([r1[2], r1[3], ...r2, ...r3, ...r4].every(x => x === 'ok') && su2 === 200, 'متن مخرب در ۱۵ فیلد متنی آزاد (عنوان، شرح، یادداشت، متقاضی، اطلاعیه…) ذخیره شد تا نمایش امن آن آزموده شود', JSON.stringify([...r1, ...r2, ...r3, su2]));
 
   /* پیمایش کامل با چند نقش روی سرور */
   const crawl = async (label, ctxOpts, users) => {
@@ -72,7 +73,7 @@ try {
     };
     for (const u of users) {
       await p.evaluate(u => doLogin(u, '1234'), u); await p.waitForTimeout(250);
-      const pages = await p.evaluate(() => navItems().filter(n => n[0] !== 'grp' && n[3]).map(n => n[0]).concat(['units', 'unit-4', 'unit-17', 'profile']));
+      const pages = await p.evaluate(() => navItems().filter(n => n[0] !== 'grp' && n[3]).map(n => n[0]).concat(['units', 'unit-4', 'unit-11', 'unit-17', 'unit-18', 'unit-19', 'profile']));
       for (const pg of pages) {
         await p.evaluate(h => { closeModal(); location.hash = h; route(); }, pg);
         const tabs = await p.$$eval('main [data-a="tab"]', els => els.map(e => [e.dataset.key, e.dataset.v]));
@@ -101,14 +102,35 @@ try {
     await ctx.close();
   };
   console.log('\nپیمایش رایانه');
-  await crawl('رایانه', { viewport: { width: 1360, height: 900 } }, ['m16', 'imam', 's3', 'm4', 'k4-3']);
+  await crawl('رایانه', { viewport: { width: 1360, height: 900 } }, ['it.manager', 'imam', 'pr.secretary', 'media.manager', 'library.manager', 'media.staff3']);
   console.log('\nپیمایش گوشی');
-  await crawl('گوشی', { ...devices['iPhone 13'] }, ['m16', 'o4']);
+  await crawl('گوشی', { ...devices['iPhone 13'] }, ['it.manager', 'library.office']);
+
+  /* کتابخانه عمومی در گوشی، آیپد و رایانه، با داده آلوده */
+  console.log('\nکتابخانه عمومی');
+  for (const [name, dev] of [['laptop', { viewport: { width: 1366, height: 860 } }], ['iphone', devices['iPhone 13']], ['ipad', devices['iPad (gen 7)']]]) {
+    const c = await b.newContext({ ...dev }); const q = await c.newPage(); const errs = [];
+    q.on('pageerror', e => errs.push(e.message));
+    await q.goto(BASE + '/library'); await q.waitForTimeout(400);
+    const books = await q.$$eval('.bookcard', e => e.length);
+    await q.screenshot({ path: join(SHOTS, `library-${name}.png`) });
+    await q.click('.bookcard [data-a=libReq]'); await q.waitForTimeout(150);
+    await q.click('.modal [data-a=libAuth][data-m=signup]'); await q.waitForTimeout(150);
+    await q.fill('#f_name', 'عضو ' + name); await q.fill('#f_phone', '09121112233'); await q.fill('#f_username', 'u.' + name); await q.fill('#f_pass', 'pass12345');
+    await q.click('button[form=mform]'); await q.waitForTimeout(500);
+    await q.click('button[form=mform]'); await q.waitForTimeout(500);
+    const mine = await q.$$eval('.loanrow', e => e.length);
+    await q.screenshot({ path: join(SHOTS, `library-mine-${name}.png`) });
+    const inj = await q.evaluate(() => !!window.__xss || !!document.querySelector('img[src="x"], #xssb, [onerror]'));
+    const sw = await q.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    ok(books > 10 && mine === 1 && !errs.length && !inj && sw <= 1, `کتابخانه عمومی (${name}): مشاهده، عضویت، درخواست و پیگیری بدون خطا و بدون بیرون‌زدگی`, JSON.stringify({ books, mine, errs, inj, sw }));
+    await c.close();
+  }
 
   /* فوکوس و صفحه‌کلید */
   console.log('\nفوکوس و صفحه‌کلید');
   const ctx = await b.newContext({ viewport: { width: 1280, height: 860 } }); const p = await ctx.newPage();
-  await p.goto(BASE); await p.evaluate(() => doLogin('m4', '1234')); await p.waitForTimeout(300);
+  await p.goto(BASE); await p.evaluate(() => doLogin('media.manager', '1234')); await p.waitForTimeout(300);
   await p.evaluate(() => { location.hash = 'tasks'; route(); });
   const row = await p.$('tr.click');
   await row.focus();
@@ -138,14 +160,14 @@ try {
   console.log('\nگوشی و آیپد');
   for (const [name, dev] of [['iphone', devices['iPhone 13']], ['ipad', devices['iPad (gen 7)']], ['ipad-land', devices['iPad (gen 7) landscape']]]) {
     const c = await b.newContext({ ...dev }); const q = await c.newPage();
-    await q.goto(BASE); await q.evaluate(() => doLogin('m16', '1234')); await q.waitForTimeout(300);
+    await q.goto(BASE); await q.evaluate(() => doLogin('it.manager', '1234')); await q.waitForTimeout(300);
     let over = [];
-    for (const [h, tab] of [['dashboard'], ['tasks'], ['letters'], ['reservations'], ['finance'], ['admin', 'perms'], ['admin', 'users'], ['admin', 'sms'], ['calendar'], ['reports']]) {
+    for (const [h, tab] of [['dashboard'], ['tasks'], ['letters'], ['reservations'], ['finance'], ['admin', 'perms'], ['admin', 'users'], ['admin', 'sms'], ['calendar'], ['reports'], ['unit-11'], ['library-admin'], ['profile']]) {
       await q.evaluate(([h, tab]) => { if (tab) vs('adm').tab = tab; location.hash = h; route(); }, [h, tab]);
       await q.waitForTimeout(60);
       const sw = await q.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       if (sw > 1) over.push(h + (tab ? '/' + tab : '') + ':' + sw);
-      if (['dashboard', 'tasks'].includes(h) || tab === 'perms') await q.screenshot({ path: join(SHOTS, `${name}-${h}${tab ? '-' + tab : ''}.png`) });
+      if (['dashboard', 'tasks', 'library-admin', 'profile'].includes(h) || tab === 'perms') await q.screenshot({ path: join(SHOTS, `${name}-${h}${tab ? '-' + tab : ''}.png`) });
     }
     ok(!over.length, `${name}: هیچ صفحه‌ای از عرض صفحه‌نمایش بیرون نمی‌زند`, over.join(' '));
     if (name === 'iphone') {

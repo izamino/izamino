@@ -20,7 +20,7 @@ function viewFor() {
     else if (hr) Object.assign(b, pickKeys(u, ['username', 'phone', 'hired']));
     return b;
   });
-  V.positions = DB.positions.map(p => (adminP || adminU || p.id === ME.pos.id ? clone(p) : pickKeys(p, ['id', 'unitId', 'role', 'title'])));
+  V.positions = DB.positions.map(p => (adminP || adminU || p.id === ME.pos.id ? clone(p) : { ...pickKeys(p, ['id', 'unitId', 'role', 'title']), ...(myRole() === 'manager' && p.unitId === mu ? pickKeys(p, ['mgrDeny']) : {}) }));
   V.posHistory = adminU || hr ? clone(DB.posHistory) : DB.posHistory.filter(h => h.userId === me.id).map(clone);
 
   V.letters = DB.letters.filter(canSeeLetter).map(clone);
@@ -51,6 +51,13 @@ function viewFor() {
   V.sessions = (adminL || adminU ? DB.sessions : DB.sessions.filter(s => s.uid === me.id)).slice(-300).map(s => { const c = clone(s); delete c.th; delete c.csrf; return c; });
   V.audit = (all || adminL ? DB.audit : DB.audit.filter(a => a.unit === mu)).slice(-3000).map(clone);
 
+  /* کتابخانه: کتابداران همه چیز؛ دیگران فقط فهرست عمومی کتاب‌ها. رمز اعضا و نشست‌هایشان هرگز فرستاده نمی‌شود */
+  if (canSeeLib()) {
+    V.books = clone(DB.books);
+    V.loans = clone(DB.loans);
+    V.members = DB.members.map(m => { const c = clone(m); delete c.pass; delete c.fails; return c; });
+  } else { V.books = DB.books.map(b => ({ ...bookPublic(b), copies: [] })); V.loans = []; V.members = []; }
+  V.msessions = [];
   V.settings = clone(DB.settings);
   if (V.settings.sms) { const k = V.settings.sms.apiKey || ''; V.settings.sms.apiKey = ''; V.settings.sms.apiKeySet = !!k; V.settings.sms.apiKeyHint = k ? '••••' + k.slice(-4) : ''; }
   if (!can('admin.backup')) V.settings.backups = [];
@@ -74,6 +81,7 @@ const FILE_SEE = {
 };
 function fileVisible(f) {
   if (!f.ref) return f.owner === ME.user.id;
+  if (f.owner !== ME.user.id && !isAll() && !can('files.view')) return false;
   const see = FILE_SEE[f.ref.col]; if (!see) return isAll();
   const r = (DB[f.ref.col] || []).find(x => x.id === f.ref.id);
   return !!r && see(r);
@@ -88,6 +96,6 @@ function fileRefsIn(col, rec) {
 globalThis.__srv = {
   getDB: () => DB, setDB: d => { DB = d; }, getME: () => ME, setME: m => { ME = m; },
   setHash: fn => { hash = fn; }, setPw: (h, c) => { pwHash = h; pwCheck = c; },
-  OPS, PUBLIC_OPS, OpError, viewFor, publicView, fileVisible, fileRefsIn, migrate, applySettings, baseDB, seed, validateBackup, verifyAudit, sweepDeadlines,
+  OPS, PUBLIC_OPS, OpError, publicBooks, libSignup, libRequest, libCancel, memberView, provisionAccounts, posUsername, panelName, viewFor, publicView, fileVisible, fileRefsIn, migrate, applySettings, baseDB, seed, validateBackup, verifyAudit, sweepDeadlines,
   posById, userById, permOf, can, isSensitivePos, COLS, todayISO, stamp, uid, audit, notify, fa, unitShort
 };

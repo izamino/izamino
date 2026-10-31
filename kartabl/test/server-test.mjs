@@ -1,7 +1,7 @@
 // آزمون امنیت و درستی سرور: هر بند از گزارش بازبینی به یک آزمون تبدیل شده است.
 // اجرا: node test/server-test.mjs
 import { spawn, execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -31,7 +31,7 @@ const mock = http.createServer((req, res) => {
 await new Promise(r => mock.listen(PORT + 1, '127.0.0.1', r));
 
 execFileSync(NODE[0], [NODE[1], join(ROOT, 'server.js'), 'init', '--demo'], { env: { ...process.env, DATA_DIR: DATA } });
-const srv = spawn(NODE[0], [NODE[1], join(ROOT, 'server.js')], { env: { ...process.env, DATA_DIR: DATA, PORT: String(PORT), SMS_KAVENEGAR_BASE: `http://127.0.0.1:${PORT + 1}` }, stdio: ['ignore', 'pipe', 'pipe'] });
+const srv = spawn(NODE[0], [NODE[1], join(ROOT, 'server.js')], { env: { ...process.env, LOGIN_RATE_PER_MIN: '500', DATA_DIR: DATA, PORT: String(PORT), SMS_KAVENEGAR_BASE: `http://127.0.0.1:${PORT + 1}` }, stdio: ['ignore', 'pipe', 'pipe'] });
 let srvErr = ''; srv.stderr.on('data', d => (srvErr += d));
 await new Promise((res, rej) => { srv.stdout.on('data', d => { if (String(d).includes('در حال اجراست')) res(); }); setTimeout(() => rej(new Error('server did not start: ' + srvErr)), 15000); });
 
@@ -43,7 +43,9 @@ async function call(method, path, body, sess, extra = {}) {
   const text = await r.text(); let json = {}; try { json = JSON.parse(text); } catch (e) { json = { raw: text }; }
   return { status: r.status, json, headers: r.headers, raw: text };
 }
+const LEGACY = { m16: 'it.manager', s3: 'pr.secretary', o15: 'finance.office', m14: 'admin.manager', 'k1-1': 'internal.staff1', m3: 'pr.manager', m2: 'ceremony.manager', o3: 'pr.office', m15: 'finance.manager', o4: 'media.office', s9: 'clinic.secretary', m4: 'media.manager' };
 async function login(username, password = '1234') {
+  username = LEGACY[username] || username;
   const r = await fetch(BASE + '/api/login', { method: 'POST', headers: { 'X-Kartabl': '1', 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
   const json = await r.json();
   const cookie = (r.headers.get('set-cookie') || '').split(';')[0];
@@ -77,12 +79,15 @@ try {
   ok(pub.public && pub.public.users.length === 0 && !pub.state, 'پیش از ورود هیچ داده‌ای جز تنظیمات عمومی تحویل نمی‌شود');
 
   section('۲ — جلوگیری از ارتقای دسترسی');
-  let r = await cmd(m14, 'assignHolder', 'P0', m14.me);
-  ok(r.status === 400 && /خودتان|حساس/.test(r.json.error), 'مدیر امور اداری نمی‌تواند خودش را امام جماعت کند', r.json.error);
-  r = await cmd(m14, 'assignHolder', 'P0', s3.me);
-  ok(r.status === 400 && /حساس/.test(r.json.error), 'مدیر امور اداری نمی‌تواند دیگری را به جایگاه امام منصوب کند', r.json.error);
-  r = await cmd(it, 'assignHolder', 'P16-m', k.me);
-  ok(r.status === 400, 'مدیر فناوری نمی‌تواند متصدی جایگاه خودش را عوض کند', r.json.error);
+  const hv = { first: 'آزمون', last: 'ارتقا', phone: '09120001122', start: '2026-10-31' };
+  let r = await cmd(m14, 'handover', 'P0', hv);
+  ok(r.status === 400, 'مدیر امور اداری (صرفاً به دلیل مدیر بودن) نمی‌تواند متصدی جایگاه امام را تغییر دهد', r.json.error);
+  r = await cmd(m14, 'handover', 'P3-s', hv);
+  ok(r.status === 400, 'مدیر امور اداری اختیار مدیریت کارکنان بخش‌های دیگر را ندارد', r.json.error);
+  r = await cmd(it, 'handover', 'P0', hv);
+  ok(r.status === 400 && /حساس/.test(r.json.error), 'مدیر فناوری نمی‌تواند متصدی جایگاه امام جماعت را تغییر دهد', r.json.error);
+  r = await cmd(it, 'handover', 'P16-m', hv);
+  ok(r.status === 400, 'مدیر فناوری نمی‌تواند جایگاه خودش را تحویل دهد', r.json.error);
   r = await cmd(it, 'setPosPerm', 'P16-m', 'admin.data', 'deny');
   ok(r.status === 400 && /خودتان/.test(r.json.error), 'تغییر دسترسی جایگاه خود مجاز نیست', r.json.error);
   r = await cmd(it, 'setPosPerm', 'P14-s', 'view.all', 'allow');
@@ -127,7 +132,7 @@ try {
   }
   const resA = await cmd(m3, 'createReservation', { program: 'religious', space: 'hosseinieh', kind: 'مراسم مذهبی آزمون', applicant: 'الف', phone: '09120000000', date: day, start: '18:00', end: '20:00', people: 100 });
   const resB = await cmd(m3, 'createReservation', { program: 'fateheh', space: 'hosseinieh', kind: 'فاتحه آزمون', applicant: 'ب', phone: '09120000000', date: day, start: '19:00', end: '21:00', people: 100 });
-  const m2 = await login('m2');
+  const m2 = await login('ceremony.manager');
   r = await cmd(m2, 'resDecide', resA.json.result.id, 'تأییدشده', '');
   ok(r.status === 200, 'تأیید مراسم مذهبی در حسینیه');
   r = await cmd(m2, 'resDecide', resB.json.result.id, 'تأییدشده', '');
@@ -149,9 +154,9 @@ try {
   r = await call('POST', '/api/cmd', { name: 'editRecord', args: ['task', tid, { title: 'ویرایش مسئول دفتر', desc: '', priority: 'عادی', due: day }], ver: { col: 'tasks', id: tid, v: v0 } }, o3);
   ok(r.status === 409 && r.json.conflict, 'ویرایش هم‌زمان: تغییر نفر دوم با نسخه قدیمی رد می‌شود و بازنویسی رخ نمی‌دهد', r.status);
   ok((await state(m3)).tasks.find(t => t.id === tid).title === 'ویرایش مدیر', 'تغییر نفر اول حفظ شده است');
-  const nUsers = (await state(it)).users.length;
-  r = await cmd(it, 'createUser', { name: 'کاربر ناتمام', username: 'half.user', pass: 'abcdef1234', posId: 'P0' });
-  ok(r.status === 400 && (await state(it)).users.length === nUsers, 'عملیات ناموفق هیچ تغییر ناقصی باقی نمی‌گذارد (کاربر نیمه‌ساخته ثبت نمی‌شود)', r.json.error);
+  const nHist = (await state(it)).posHistory.length;
+  r = await cmd(it, 'handover', 'P5-o', { first: 'ناقص', last: 'آزمون', phone: '123', start: '2026-10-31' });
+  ok(r.status === 400 && (await state(it)).posHistory.length === nHist, 'عملیات ناموفق هیچ تغییر ناقصی باقی نمی‌گذارد', r.json.error);
   const pay = (await state(o15)).payreqs.find(p => p.status === 'جاری' && !p.needImam && p.stage === 2);
   const m15 = await login('m15');
   const txBefore = (await state(m15)).tx.length;
@@ -226,6 +231,95 @@ try {
   const va = execFileSync(NODE[0], [NODE[1], join(ROOT, 'server.js'), 'verify-audit'], { env: { ...process.env, DATA_DIR: DATA } }).toString();
   ok(/سالم/.test(va), 'زنجیره رویدادها پس از همه آزمون‌ها سالم است', va.trim());
 
+  section('۳ و ۶ — نام پنل، مشخصات متصدی و تحویل رسمی مسئولیت');
+  const ps = await login('pr.secretary');
+  const oldUser = ps.state.users.find(u => u.id === ps.me);
+  r = await cmd(ps, 'updateOwnHolder', { first: 'نرگس', last: 'رحیمی‌نژاد', phone: '09125550000' });
+  let st2 = await state(ps);
+  ok(r.status === 200 && st2.users.find(u => u.id === ps.me).name === 'نرگس رحیمی‌نژاد' && st2.users.find(u => u.id === ps.me).username === 'pr.secretary', 'متصدی نام و تماس خود را ویرایش می‌کند؛ نام کاربری و پنل ثابت می‌ماند');
+  ok(st2.audit.some(a => a.act === 'ویرایش مشخصات متصدی'), 'ویرایش مشخصات در رویدادها ثبت می‌شود');
+  const taskOpen = (await cmd(m3, 'createTask', { unitId: 3, title: 'کار در انتظار پیش از تحویل', assignee: 'P3-s', start: day, due: day, priority: 'عادی' })).json.result.id;
+  r = await cmd(it, 'handover', 'P3-s', { first: 'محدثه', last: 'یزدانی', phone: '09124443322', start: '2026-10-31', note: 'تحویل پرونده‌ها' });
+  ok(r.status === 200 && r.json.result.username === 'pr.secretary' && r.json.result.tempPass, 'تحویل مسئولیت: نام کاربری جایگاه ثابت می‌ماند و رمز موقت تازه ساخته می‌شود');
+  const tp = r.json.result.tempPass;
+  ok(!(await call('GET', '/api/state', undefined, ps)).json.state, 'نشست متصدی قبلی بسته می‌شود');
+  ok((await login('pr.secretary', '1234')).status === 401, 'رمز قبلی دیگر کار نمی‌کند');
+  const nw = await login('pr.secretary', tp);
+  ok(nw.status === 200 && nw.state.users.find(u => u.id === nw.me).mustChange, 'متصدی جدید با رمز موقت وارد می‌شود و تغییر رمز برایش الزامی است');
+  ok(nw.state.tasks.some(t => t.id === taskOpen && t.assignee === 'P3-s') && nw.state.users.find(u => u.id === nw.me).id === ps.me, 'کارهای در انتظار جایگاه به متصدی جدید منتقل شده است');
+  const ph = (await state(it)).posHistory.filter(h => h.posId === 'P3-s');
+  ok(ph.some(h => h.name === 'نرگس رحیمی‌نژاد' && h.to === '2026-10-31') && ph.some(h => h.name === 'محدثه یزدانی' && !h.to), 'تاریخ تغییر متصدی و نام متصدی قبلی در سابقه جایگاه ثبت است');
+  const oldAct = (await state(it)).audit.find(a => a.uid === ps.me && a.act === 'ویرایش مشخصات متصدی');
+  ok(oldAct && oldAct.nm === 'نرگس رحیمی‌نژاد', 'اقدامات قبلی همچنان با نام انجام‌دهنده قبلی شناسایی می‌شود');
+
+  section('۴ و ۵ — نظارت مدیر و مدیریت دسترسی‌های دفتر');
+  const lm = await login('library.manager'), ls2 = await login('library.secretary'), lo = await login('library.office');
+  ok(lm.state.tasks.every(t => t.unitId === 11) && !lm.state.tasks.some(t => t.unitId === 3), 'مدیر کتابخانه فقط کارهای واحد خودش را می‌بیند');
+  r = await cmd(lm, 'setOfficeRestriction', 'P3-s', 'letters.view', true);
+  ok(r.status === 400, 'مدیر نمی‌تواند دسترسی دفتر مدیریت دیگری را تغییر دهد');
+  r = await cmd(lm, 'setOfficeRestriction', 'P11-m', 'letters.view', true);
+  ok(r.status === 400, 'از این بخش فقط مسئول دفتر و منشی قابل تنظیم‌اند (نه خود مدیر)');
+  r = await cmd(lm, 'setOfficeRestriction', 'P11-s', 'admin.users', false);
+  ok(r.status === 400, 'اعطای اختیار مدیریت سامانه از این بخش ممکن نیست');
+  const lsBefore = (await state(ls2)).letters.length;
+  await cmd(lm, 'createLetter', { type: 'in', subject: 'نامه کتابخانه', unitId: 11, sender: 'x', receiver: 'y', date: day });
+  ok((await state(ls2)).letters.length > lsBefore, 'منشی پیش از محدودسازی مکاتبات واحد را می‌بیند');
+  r = await cmd(lm, 'setOfficeRestriction', 'P11-s', 'letters.view', true);
+  ok(r.status === 200, 'مدیر مشاهده مکاتبات را برای منشی خودش محدود می‌کند');
+  ok((await state(ls2)).letters.length === 0, 'پس از محدودسازی، سرور هیچ نامه‌ای به منشی تحویل نمی‌دهد');
+  const anyL = (await state(lm)).letters.find(l => l.unitId === 11);
+  r = await cmd(ls2, 'referLetter', anyL.id, 4, '');
+  ok(r.status === 400, 'اجرای عملیات روی نامه هم برای منشی محدودشده رد می‌شود (نه فقط پنهان‌کردن دکمه)');
+  r = await cmd(lm, 'setOfficeRestriction', 'P11-o', 'tasks.create', true);
+  r = await cmd(lo, 'createTask', { unitId: 11, title: 'x', assignee: 'P11-s', start: day, due: day, priority: 'عادی' });
+  ok(r.status === 400, 'مسئول دفتری که ثبت وظیفه‌اش محدود شده نمی‌تواند وظیفه تعریف کند');
+  await cmd(lm, 'setOfficeRestriction', 'P11-s', 'letters.view', false);
+  ok((await state(ls2)).letters.length > 0, 'فعال‌سازی دوباره دسترسی، مشاهده را برمی‌گرداند');
+  await cmd(lm, 'setOfficeRestriction', 'P11-s', 'tasks.create', false);
+  ok(!(await state(ls2)).positions.find(p => p.id === 'P11-s').perms?.['tasks.create'] && (await cmd(ls2, 'createTask', { unitId: 11, title: 'x', assignee: 'P11-s', start: day, due: day })).status === 400, 'فعال‌سازی دوباره، بیش از سقف مدیریت عالی دسترسی نمی‌دهد (منشی همچنان وظیفه تعریف نمی‌کند)');
+  const plog = (await state(lm)).audit.filter(a => /دسترسی دفتر/.test(a.act));
+  ok(plog.length >= 3 && plog.every(a => a.nm && a.ts), 'هر تغییر دسترسی دفتر با نام تغییردهنده و زمان ثبت می‌شود');
+
+  section('۷ تا ۹ — کتابخانه عمومی');
+  const lib = async (method, path, body, mc) => { const r2 = await fetch(BASE + path, { method, headers: { 'X-Kartabl': '1', 'Content-Type': 'application/json', ...(mc ? { Cookie: mc.cookie, 'X-CSRF': mc.csrf } : {}) }, body: body ? JSON.stringify(body) : undefined }); const j = await r2.json(); return { status: r2.status, json: j, cookie: (r2.headers.get('set-cookie') || '').split(';')[0] }; };
+  const lbk = await lib('GET', '/api/lib/books');
+  ok(lbk.status === 200 && lbk.json.books.length > 0 && lbk.json.books.every(b => b.available !== undefined && !b.copies), 'فهرست کتاب‌ها و موجودی بدون ورود قابل مشاهده است (بدون جزئیات نسخه‌ها و امانت‌گیرندگان)');
+  r = await lib('POST', '/api/lib/signup', { name: 'عضو آزمون', username: 'member.test', phone: '09121234567', pass: 'member1234' });
+  ok(r.status === 200, 'ساخت حساب عضو کتابخانه');
+  const ml = await lib('POST', '/api/lib/login', { username: 'member.test', pass: 'member1234' });
+  const mc = { cookie: ml.cookie, csrf: ml.json.csrf };
+  ok(ml.status === 200 && ml.cookie.startsWith('km='), 'ورود عضو با کوکی جداگانه');
+  r = await call('GET', '/api/state', undefined, { cookie: mc.cookie, csrf: mc.csrf });
+  ok(!r.json.state, 'حساب عضو به کارتابل اداری دسترسی ندارد');
+  r = await call('POST', '/api/cmd', { name: 'readAllNotifs', args: [] }, { cookie: mc.cookie, csrf: mc.csrf });
+  ok(r.status === 401, 'حساب عضو نمی‌تواند هیچ عملیات اداری اجرا کند');
+  ok((await login('member.test', 'member1234')).status === 401, 'با حساب عضو نمی‌توان وارد کارتابل اداری شد');
+  const one = (await state(lm)).books.find(b => b.copies.length === 1 && b.copies[0].status === 'موجود');
+  r = await lib('POST', '/api/lib/request', { bookId: one.id, type: 'امانت', note: '' }, mc);
+  ok(r.status === 200 && r.json.loans.length === 1 && r.json.loans[0].status === 'در انتظار بررسی', 'عضو درخواست امانت ثبت می‌کند و وضعیت را می‌بیند');
+  ok(r.json.loans.every(l => l.book && !l.memberId), 'عضو فقط درخواست‌های خودش را می‌بیند');
+  ok((await state(lm)).books.find(b => b.id === one.id).copies[0].status === 'موجود', 'ثبت درخواست به‌تنهایی به معنای تحویل نیست (نسخه هنوز آزاد است)');
+  await lib('POST', '/api/lib/signup', { name: 'عضو دوم', username: 'member.two', phone: '09121234568', pass: 'member1234' });
+  const ml2 = await lib('POST', '/api/lib/login', { username: 'member.two', pass: 'member1234' });
+  const mc2 = { cookie: ml2.cookie, csrf: ml2.json.csrf };
+  r = await lib('POST', '/api/lib/request', { bookId: one.id, type: 'رزرو', note: '' }, mc2);
+  const lsx = (await state(lm)).loans.filter(l => l.bookId === one.id && l.status === 'در انتظار بررسی');
+  r = await cmd(lm, 'loanDecide', lsx[0].id, true, '', 3);
+  ok(r.status === 200, 'کتابدار درخواست اول را تأیید و نسخه را اختصاص می‌دهد');
+  r = await cmd(lm, 'loanDecide', lsx[1].id, true, '', 3);
+  ok(r.status === 400 && /نسخه آزاد/.test(r.json.error), 'یک نسخه هم‌زمان به دو نفر اختصاص نمی‌یابد', r.json.error);
+  r = await cmd(lm, 'loanDeliver', lsx[0].id, 14);
+  const after1 = (await state(lm)).books.find(b => b.id === one.id).copies[0].status;
+  ok(r.status === 200 && after1 === 'در امانت', 'ثبت تحویل و موعد بازگشت');
+  const myl = (await lib('GET', '/api/lib/me', undefined, mc)).json.loans[0];
+  ok(myl.status === 'در امانت' && myl.due, 'عضو موعد بازگشت را در پنل خود می‌بیند');
+  await cmd(lm, 'loanReturn', lsx[0].id);
+  ok((await state(lm)).books.find(b => b.id === one.id).copies[0].status === 'موجود', 'ثبت بازگشت، نسخه را آزاد می‌کند');
+  r = await cmd(m3, 'saveBook', '', { title: 'x', author: 'y', category: 'سایر', copies: 1 });
+  ok(r.status === 400, 'کارکنان غیرکتابدار کتاب ثبت نمی‌کنند');
+  ok(!JSON.stringify((await state(lm)).members).includes('scrypt$'), 'رمز اعضا حتی به کتابدار فرستاده نمی‌شود');
+  ok((await state(m3)).members.length === 0 && (await state(m3)).loans.length === 0, 'کارکنان دیگر واحدها اطلاعات اعضا و امانت‌ها را نمی‌بینند');
+
   section('نشست‌ها، قفل حساب و حالت به‌روزرسانی');
   r = await cmd(it, 'kickUser', k.me);
   r = await call('GET', '/api/state', undefined, k);
@@ -244,10 +338,25 @@ try {
   execFileSync(NODE[0], [NODE[1], join(ROOT, 'server.js'), 'init'], { env: { ...process.env, DATA_DIR: D2 } });
   const pdb = new DatabaseSync(join(D2, 'kartabl.db'));
   const get = k2 => JSON.parse(pdb.prepare('SELECT v FROM kv WHERE k=?').get(k2).v);
-  ok(get('users').length === 0 && get('letters').length === 0 && get('payreqs').length === 0 && get('positions').length === 52, 'پایگاه عملیاتی: ۵۲ جایگاه، بدون کاربر و بدون داده نمونه');
+  ok(get('users').length === 0 && get('letters').length === 0 && get('payreqs').length === 0 && get('books').length === 0 && get('positions').length === 58, 'پایگاه عملیاتی: ۵۸ جایگاه (امام + ۱۹ × ۳)، بدون حساب و بدون داده نمونه');
   ok(get('settings').clock.city === 'آبادان', 'شهر پیش‌فرض اوقات شرعی آبادان است');
-  const cu = execFileSync(NODE[0], [NODE[1], join(ROOT, 'server.js'), 'create-user', '--pos', 'P0', '--username', 'imam', '--name', 'امام جماعت'], { env: { ...process.env, DATA_DIR: D2 } }).toString();
-  ok(/رمز موقت/.test(cu) && get('users')[0].mustChange === true && get('users')[0].pass.startsWith('scrypt$'), 'نخستین کاربر با رمز موقت اختصاصی و الزام تغییر رمز ساخته می‌شود');
+  const units = JSON.parse(pdb.prepare("SELECT v FROM kv WHERE k='settings'").get().v);
+  section('۱ و ۲ — ساختار ۱۹ مدیریت و ۵۷ جایگاه سه‌گانه');
+  const pos = get('positions');
+  ok([...Array(19)].every((_, i) => ['m', 'o', 's'].every(c => pos.some(p => p.id === `P${i + 1}-${c}`))) && pos.filter(p => p.role !== 'imam').length === 57 && pos.filter(p => p.role === 'imam').length === 1, 'برای هر ۱۹ مدیریت سه جایگاه مستقل و یک جایگاه امام جماعت');
+  const pv = execFileSync(NODE[0], [NODE[1], join(ROOT, 'server.js'), 'provision'], { env: { ...process.env, DATA_DIR: D2 } }).toString();
+  const accs = get('users');
+  const credFile = readdirSync(D2).find(f => f.startsWith('credentials-'));
+  const cred = credFile ? readFileSync(join(D2, credFile), 'utf8') : '';
+  const passes = cred.trim().split('\n').slice(1).map(l => l.split('","')[3]);
+  ok(accs.length === 58 && new Set(accs.map(u => u.username)).size === 58, 'provision برای هر ۵۸ جایگاه یک حساب مستقل با نام کاربری یکتا می‌سازد');
+  ok(accs.some(u => u.username === 'library.manager') && accs.some(u => u.username === 'library.office') && accs.some(u => u.username === 'library.secretary') && accs.some(u => u.username === 'restaurant.manager'), 'نام‌های کاربری بر پایه مدیریت و جایگاه است (library.manager، library.office، …)');
+  ok(accs.every(u => u.mustChange && u.pass.startsWith('scrypt$')), 'همه حساب‌ها با scrypt و الزام تغییر رمز در اولین ورود');
+  ok(passes.length === 58 && new Set(passes).size === 58 && passes.every(x => x.replace('"', '').length >= 12), 'رمز اولیه هر حساب مستقل و تصادفی است');
+  ok((statSync(join(D2, credFile)).mode & 0o777) === 0o600, 'فهرست رمزها در فایل خصوصی جداگانه (دسترسی فقط مالک) نوشته می‌شود');
+  ok(!passes.some(x => pv.includes(x.replace('"', ''))), 'رمزها در خروجی فرمان چاپ نمی‌شوند');
+  const pub2 = readdirSync(join(ROOT, 'public')).map(f => readFileSync(join(ROOT, 'public', f), 'utf8')).join('');
+  ok(!passes.some(x => pub2.includes(x.replace('"', ''))), 'هیچ رمزی در فایل‌های عمومی سایت یا کد مرورگر نیست');
 } catch (e) { failN++; console.error('خطای آزمون:', e); }
 finally {
   srv.kill(); mock.close();

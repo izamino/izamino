@@ -27,7 +27,8 @@ const Remote = {
   async boot() {
     const r = await this.req('GET', '/api/state');
     this.apply(r);
-    if (r.state && ME) { renderShell(); if (ME.user.mustChange) forcePassChange(); } else renderLogin(r.message || '');
+    if (location.hash === '#library') route();
+    else if (r.state && ME) { renderShell(); if (ME.user.mustChange) forcePassChange(); } else renderLogin(r.message || '');
     this.listen();
   },
   async login(username, password) {

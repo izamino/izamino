@@ -21,7 +21,8 @@ const CFG = {
   secureCookie: process.env.COOKIE_SECURE === '1',
   trustProxy: process.env.TRUST_PROXY === '1',
   kavenegarBase: process.env.SMS_KAVENEGAR_BASE || 'https://api.kavenegar.com/v1',
-  maxUpload: 20 * 1024 * 1024
+  maxUpload: 20 * 1024 * 1024,
+  loginRate: +(process.env.LOGIN_RATE_PER_MIN || 20)
 };
 const PUBLIC = path.join(__dirname, 'public');
 fs.mkdirSync(path.join(CFG.dataDir, 'files'), { recursive: true });
@@ -138,7 +139,7 @@ function exec(actor, fn) {
   if (changed.length) broadcast();
   return { result: res, changed };
 }
-const plain = r => (r && typeof r === 'object' ? { id: r.id, no: r.no, n: r.n, active: r.active, error: r.error } : {});
+const plain = r => (r && typeof r === 'object' ? { id: r.id, no: r.no, n: r.n, active: r.active, username: r.username, tempPass: r.tempPass, error: r.error } : {});
 
 /* ---------- نشست‌ها ---------- */
 const cookies = req => Object.fromEntries((req.headers.cookie || '').split(';').map(c => c.trim().split('=')).filter(x => x[0]).map(([k, ...v]) => [k, decodeURIComponent(v.join('='))]));
@@ -303,6 +304,7 @@ async function handle(req, res) {
   const ip = ipOf(req);
   /* فایل‌های ایستا */
   if (req.method === 'GET' && !p.startsWith('/api/')) {
+    if (p === '/library') { res.writeHead(302, { Location: '/#library' }); return res.end(); }
     const map = { '/': 'index.html', '/index.html': 'index.html', '/app.js': 'app.js', '/app.css': 'app.css', '/qrcode.min.js': '../vendor/qrcode-generator.js' };
     const f = map[p];
     if (!f) return send(res, 404, 'یافت نشد');
@@ -323,6 +325,7 @@ async function handle(req, res) {
     const r = exec(null, () => S.PUBLIC_OPS.createSignup(b.v || {}));
     return r.error ? send(res, 400, { error: r.error }) : send(res, 200, { result: plain(r.result) });
   }
+  if (p.startsWith('/api/lib/')) return libApi(req, res, p, ip);
   const a = auth(req);
   if (p === '/api/state' && req.method === 'GET') {
     if (!a || a.ended) return send(res, 200, { public: S.publicView(), message: a && a.ended ? a.ended : '' }, a && a.ended ? { 'Set-Cookie': sessionCookie('', 0) } : {});
@@ -417,13 +420,13 @@ async function handle(req, res) {
 }
 
 async function login(req, res, ip) {
-  if (limited('login:' + ip, 20, 60000)) return send(res, 429, { error: 'تعداد تلاش‌ها زیاد است؛ یک دقیقه صبر کنید.' });
+  if (limited('login:' + ip, CFG.loginRate, 60000)) return send(res, 429, { error: 'تعداد تلاش‌ها زیاد است؛ یک دقیقه صبر کنید.' });
   const b = await readJSON(req);
   const username = String(b.username || '').trim().slice(0, 64), pass = String(b.password || '').slice(0, 256);
   const D = S.getDB(); const sec = D.settings.security;
   const u = D.users.find(x => x.username === username && !x.deleted);
   const pub = S.publicView();
-  const log = (ok, reason) => exec(null, () => { S.getDB().logins.push({ id: S.uid(), ts: S.stamp(), username, uid: u ? u.id : '', ok, reason, agent: agentOf(req), ip }); if (S.getDB().logins.length > 5000) S.getDB().logins = S.getDB().logins.slice(-4000); return {}; });
+  const log = (ok, reason) => exec(null, () => { S.getDB().logins.push({ id: S.uid(), ts: S.stamp(), username, uid: u ? u.id : '', nm: u ? u.name : '', ok, reason, agent: agentOf(req), ip }); if (S.getDB().logins.length > 5000) S.getDB().logins = S.getDB().logins.slice(-4000); return {}; });
   if (!u) { pwCheckSrv(DUMMY_HASH, pass); log(false, 'نام کاربری ناموجود'); return send(res, 401, { error: 'نام کاربری یا رمز عبور درست نیست.', public: pub }); }
   if (u.lockedUntil && new Date(u.lockedUntil) > new Date()) { log(false, 'حساب قفل'); return send(res, 401, { error: 'حساب به دلیل تلاش‌های ناموفق موقتاً قفل است. مدیر فناوری اطلاعات می‌تواند آن را باز کند.', public: pub }); }
   if (!pwCheckSrv(u.pass, pass)) {
@@ -439,6 +442,61 @@ async function login(req, res, ip) {
   exec({ user: u, pos: S.posById(u.posId) }, () => { u.fails = 0; u.lockedUntil = ''; u.lastLogin = S.stamp(); S.getDB().sessions.push(s); S.audit('ورود به سامانه', 'session', u.id, ip); return {}; });
   log(true, 'ورود موفق');
   return send(res, 200, stateOf({ s, user: u, pos: S.posById(u.posId) }), { 'Set-Cookie': sessionCookie(token, 12 * 3600) });
+}
+
+/* ---------- کتابخانه عمومی: حساب اعضا کاملاً جدا از کارکنان (کوکی و نشست جداگانه) ---------- */
+function memberAuth(req) {
+  const tok = cookies(req).km; if (!tok || tok.length > 100) return null;
+  const th = sha(tok); const D = S.getDB();
+  const s = D.msessions.find(x => x.th === th && x.active); if (!s) return null;
+  const m = D.members.find(x => x.id === s.mid);
+  if (!m || !m.active || Date.now() - new Date(s.last).getTime() > 120 * 60000) { exec(null, () => { s.active = false; return {}; }); return null; }
+  return { s, m };
+}
+const memberCookie = (token, maxAge) => `km=${token}; HttpOnly; SameSite=Strict; Path=/;${CFG.secureCookie ? ' Secure;' : ''} Max-Age=${maxAge}`;
+async function libApi(req, res, p, ip) {
+  const pubBooks = () => S.publicBooks();
+  if (p === '/api/lib/books' && req.method === 'GET') return send(res, 200, { books: pubBooks(), org: S.getDB().settings.orgName });
+  if (p === '/api/lib/signup' && req.method === 'POST') {
+    if (limited('libsignup:' + ip, 5, 3600000)) return send(res, 429, { error: 'تعداد درخواست‌ها زیاد است؛ بعداً تلاش کنید.' });
+    const b = await readJSON(req);
+    const r = exec(null, () => S.libSignup(b || {}));
+    return r.error ? send(res, 400, { error: r.error }) : send(res, 200, { ok: true, no: r.result.no });
+  }
+  if (p === '/api/lib/login' && req.method === 'POST') {
+    if (limited('liblogin:' + ip, 20, 60000)) return send(res, 429, { error: 'تعداد تلاش‌ها زیاد است؛ یک دقیقه صبر کنید.' });
+    const b = await readJSON(req);
+    const m = S.getDB().members.find(x => x.username === String(b.username || '').trim().toLowerCase());
+    if (m && m.lockedUntil && new Date(m.lockedUntil) > new Date()) return send(res, 401, { error: 'حساب به دلیل تلاش‌های ناموفق موقتاً قفل است؛ بعداً تلاش کنید.' });
+    if (!m || !pwCheckSrv(m.pass, String(b.pass || ''))) {
+      if (!m) pwCheckSrv(DUMMY_HASH, String(b.pass || ''));
+      else exec(null, () => { m.fails = (m.fails || 0) + 1; if (m.fails >= 5) { m.lockedUntil = new Date(Date.now() + 15 * 60000).toISOString(); m.fails = 0; } return {}; });
+      return send(res, 401, { error: 'نام کاربری یا رمز عبور درست نیست.' });
+    }
+    if (!m.active) return send(res, 401, { error: 'عضویت شما غیرفعال شده است؛ با کتابخانه تماس بگیرید.' });
+    const token = crypto.randomBytes(32).toString('base64url');
+    const s = { id: S.uid(), mid: m.id, th: sha(token), csrf: crypto.randomBytes(18).toString('base64url'), start: S.stamp(), last: S.stamp(), active: true };
+    exec(null, () => { m.fails = 0; m.lockedUntil = ''; S.getDB().msessions.push(s); if (S.getDB().msessions.length > 2000) S.getDB().msessions = S.getDB().msessions.filter(x => x.active).slice(-1500); return {}; });
+    return send(res, 200, { ...S.memberView(m), books: pubBooks(), csrf: s.csrf }, { 'Set-Cookie': memberCookie(token, 12 * 3600) });
+  }
+  const ma = memberAuth(req);
+  if (p === '/api/lib/me' && req.method === 'GET') return ma ? send(res, 200, { ...S.memberView(ma.m), books: pubBooks(), csrf: ma.s.csrf }) : send(res, 200, { member: null, books: pubBooks() });
+  if (!ma) return send(res, 401, { error: 'برای ادامه وارد حساب عضویت کتابخانه شوید.' }, { 'Set-Cookie': memberCookie('', 0) });
+  if (req.method === 'POST' && req.headers['x-csrf'] !== ma.s.csrf) return send(res, 403, { error: 'نشانه امنیتی نامعتبر است؛ صفحه را دوباره بارگذاری کنید.' });
+  if (limited('m:' + ma.m.id, 60, 60000)) return send(res, 429, { error: 'تعداد درخواست‌ها زیاد است.' });
+  exec(null, () => { ma.s.last = S.stamp(); return {}; });
+  if (p === '/api/lib/logout' && req.method === 'POST') { exec(null, () => { ma.s.active = false; return {}; }); return send(res, 200, { ok: true }, { 'Set-Cookie': memberCookie('', 0) }); }
+  if (p === '/api/lib/request' && req.method === 'POST') {
+    const b = await readJSON(req);
+    const r = exec(null, () => S.libRequest(ma.m, String(b.bookId || ''), b.type, b.note));
+    return r.error ? send(res, 400, { error: r.error }) : send(res, 200, { ...S.memberView(ma.m), books: pubBooks() });
+  }
+  if (p === '/api/lib/cancel' && req.method === 'POST') {
+    const b = await readJSON(req);
+    const r = exec(null, () => S.libCancel(ma.m, String(b.loanId || '')));
+    return r.error ? send(res, 400, { error: r.error }) : send(res, 200, { ...S.memberView(ma.m), books: pubBooks() });
+  }
+  return send(res, 404, { error: 'یافت نشد.' });
 }
 
 function restore(a, d, res) {
@@ -477,28 +535,41 @@ function cli(cmd) {
   if (cmd === 'init') {
     if (exists) { console.error('پایگاه داده از قبل وجود دارد: ' + CFG.dataDir); process.exit(1); }
     initState(!!flag('demo'));
-    console.log(flag('demo') ? 'پایگاه داده آزمایشی با داده نمونه ساخته شد (رمز همه حساب‌ها ۱۲۳۴). برای بهره‌برداری واقعی از آن استفاده نکنید.' : 'پایگاه داده خالی ساخته شد. اکنون با create-user متصدی جایگاه‌های امام جماعت و مدیر فناوری اطلاعات را تعریف کنید.');
+    console.log(flag('demo') ? 'پایگاه داده آزمایشی با داده نمونه ساخته شد (رمز همه حساب‌ها ۱۲۳۴). برای بهره‌برداری واقعی از آن استفاده نکنید.' : 'پایگاه داده خالی ساخته شد (۵۸ جایگاه، بدون حساب). برای ساخت حساب همه جایگاه‌ها «provision» و برای ثبت متصدی هر جایگاه «set-holder» را اجرا کنید.');
     return;
   }
   if (!exists) { console.error('ابتدا «node server.js init» را اجرا کنید.'); process.exit(1); }
-  if (cmd === 'create-user') {
-    const pos = flag('pos'), username = flag('username'), name = flag('name'), phone = flag('phone') || '';
-    if (!pos || !username || !name) { console.error('نمونه: node server.js create-user --pos P16-m --username it.admin --name "نام و نام خانوادگی" [--phone 0912...]'); process.exit(1); }
-    const D = S.getDB();
-    if (!S.posById(pos)) { console.error('جایگاه ناموجود است. شناسه‌ها: ' + D.positions.map(p => p.id).join(' ')); process.exit(1); }
-    if (D.users.some(u => u.username === username && !u.deleted)) { console.error('این نام کاربری وجود دارد.'); process.exit(1); }
-    const pw = tempPass();
+  if (cmd === 'provision') {
+    /* حساب همه جایگاه‌های بدون حساب با رمز اولیه مستقل؛ فهرست فقط در فایل خصوصی روی سرور */
+    let list = [];
+    const r = exec(null, () => { list = S.provisionAccounts(() => tempPass()); return {}; });
+    if (r.error) { console.error(r.error); process.exit(1); }
+    if (!list.length) { console.log('همه جایگاه‌ها حساب دارند؛ حسابی ساخته نشد.'); return; }
+    const out = path.join(CFG.dataDir, `credentials-${new Date().toISOString().replace(/[:.]/g, '-')}.csv`);
+    const csv = '\ufeffپنل,جایگاه,نام کاربری,رمز اولیه\n' + list.map(x => [x.panel, x.pos, x.username, x.pass].map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n') + '\n';
+    fs.writeFileSync(out, csv, { mode: 0o600 });
+    console.log(`${list.length} حساب ساخته شد. فهرست نام‌های کاربری و رمزهای اولیه فقط در این فایل خصوصی است (دسترسی فقط برای مالک فایل):\n  ${out}\nپس از تحویل رمزها به متصدیان، این فایل را حذف کنید. تغییر رمز در اولین ورود الزامی است.`);
+    return;
+  }
+  if (cmd === 'set-holder' || cmd === 'create-user') {
+    const pos = flag('pos'), first = flag('first') || String(flag('name') || '').split(' ')[0], last = flag('last') || String(flag('name') || '').split(' ').slice(1).join(' '), phone = flag('phone') || '';
+    if (!pos || !first || !last) { console.error('نمونه: node server.js set-holder --pos P16-m --first "نام" --last "نام خانوادگی" [--phone 0912...]'); process.exit(1); }
+    if (!S.posById(pos)) { console.error('جایگاه ناموجود است. شناسه‌ها: ' + S.getDB().positions.map(p => p.id).join(' ')); process.exit(1); }
+    const pw = tempPass(); let username = '';
     const r = exec(null, () => {
-      const u = { id: 'u' + S.uid(), name, username, pass: pwHashSrv(pw), posId: '', active: true, phone, hired: S.todayISO(), mustChange: true, created: S.stamp() };
-      D.users.push(u);
-      const prev = D.users.find(x => x.posId === pos && x.active && x !== u); if (prev) prev.posId = '';
-      const h = D.posHistory.find(x => x.posId === pos && !x.to); if (h) h.to = S.todayISO();
-      u.posId = pos; D.posHistory.push({ posId: pos, userId: u.id, from: S.todayISO(), to: '' });
-      S.audit('ایجاد کاربر از خط فرمان سرور', 'user', u.id, username + ' ← ' + pos);
-      return u;
+      const D = S.getDB(); const p = S.posById(pos);
+      let acc = D.users.find(u => u.posId === pos && !u.deleted);
+      const prev = acc ? acc.name : '';
+      if (!acc) { acc = { id: 'u' + S.uid(), username: S.posUsername(p), posId: pos, created: S.stamp() }; D.users.push(acc); }
+      D.posHistory.filter(h => h.posId === pos && !h.to).forEach(h => { h.to = S.todayISO(); h.name = h.name || prev; });
+      Object.assign(acc, { first, last, name: first + ' ' + last, phone, active: true, deleted: false, pass: pwHashSrv(pw), mustChange: true, fails: 0, lockedUntil: '', start: S.todayISO(), hired: S.todayISO() });
+      D.posHistory.push({ posId: pos, userId: acc.id, name: acc.name, phone, from: S.todayISO(), to: '', by: 'خط فرمان سرور' });
+      D.sessions.forEach(s => { if (s.uid === acc.id) s.active = false; });
+      S.audit('تعیین متصدی از خط فرمان سرور', 'position', pos, `${prev || 'بدون متصدی'} ← ${acc.name}`);
+      username = acc.username; return {};
     });
     if (r.error) { console.error(r.error); process.exit(1); }
-    console.log(`کاربر ساخته شد.\n  نام کاربری: ${username}\n  رمز موقت:   ${pw}\nدر اولین ورود، تعیین رمز جدید الزامی است.`);
+    console.log(`متصدی ثبت شد.\n  پنل:        ${S.panelName(S.posById(pos))}\n  نام کاربری: ${username}\n  رمز موقت:   ${pw}\nدر اولین ورود، تعیین رمز جدید الزامی است.`);
     return;
   }
   if (cmd === 'reset-password') {
@@ -511,7 +582,7 @@ function cli(cmd) {
   }
   if (cmd === 'backup') { console.log('نسخه پشتیبان: ' + createBackup('cli', 'خط فرمان')); return; }
   if (cmd === 'verify-audit') { const bad = S.verifyAudit(); console.log(bad < 0 ? `زنجیره ${S.getDB().audit.length} رویداد سالم است.` : `زنجیره از ردیف ${bad + 1} آسیب دیده است.`); process.exit(bad < 0 ? 0 : 2); }
-  console.error('فرمان ناشناخته. فرمان‌ها: init [--demo] | create-user | reset-password | backup | verify-audit');
+  console.error('فرمان ناشناخته. فرمان‌ها: init [--demo] | provision | set-holder | reset-password | backup | verify-audit');
   process.exit(1);
 }
 
@@ -519,8 +590,8 @@ function cli(cmd) {
 const cmd = ARGS[0] && !ARGS[0].startsWith('--') ? ARGS[0] : null;
 if (cmd) { cli(cmd); }
 else {
-  if (!loadState()) { initState(false); console.log('پایگاه داده خالی ساخته شد. با «node server.js create-user --pos P16-m ...» نخستین کاربر را تعریف کنید.'); }
-  if (!S.getDB().users.some(u => u.active && !u.deleted)) console.log('هشدار: هیچ کاربر فعالی وجود ندارد. با فرمان create-user کاربر تعریف کنید.');
+  if (!loadState()) { initState(false); console.log('پایگاه داده خالی ساخته شد. با «node server.js provision» حساب جایگاه‌ها را بسازید.'); }
+  if (!S.getDB().users.some(u => u.active && !u.deleted)) console.log('هشدار: هیچ حساب فعالی وجود ندارد. با «provision» یا «set-holder» حساب بسازید.');
   const server = http.createServer((req, res) => {
     handle(req, res).catch(e => { if (!res.headersSent) send(res, e.code && e.code < 600 ? e.code : 500, { error: e.code ? e.message : 'خطای داخلی سرور.' }); if (!e.code) console.error(e); });
   });

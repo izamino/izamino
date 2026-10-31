@@ -4,7 +4,7 @@
 //   server/public/     نسخه عملیاتی که سرور ارائه می‌دهد (بدون داده نمونه در مرورگر)
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 const src = f => readFileSync(new URL('./src/' + f, import.meta.url), 'utf8');
-const ORDER = ['core.js', 'domain.js', 'seed.js', 'domain-admin.js', 'ops.js', 'ui.js', 'remote.js', 'pages1.js', 'pages2.js', 'pages3.js', 'admin.js', 'sync.js', 'boot.js'];
+const ORDER = ['core.js', 'domain.js', 'seed.js', 'domain-admin.js', 'domain-library.js', 'ops.js', 'ui.js', 'remote.js', 'pages1.js', 'pages2.js', 'pages3.js', 'admin.js', 'office.js', 'library-ui.js', 'sync.js', 'boot.js'];
 const css = src('styles.css');
 const js = ORDER.map(src).join('\n');
 const fonts = `<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,5 +49,5 @@ ${fonts}
 <script src="/app.js" defer></script>`));
 
 /* فایل‌های مشترک قواعد کسب‌وکار برای اجرا روی سرور */
-writeFileSync(new URL('./server/shared.js', import.meta.url), ['core.js', 'domain.js', 'seed.js', 'domain-admin.js', 'ops.js'].map(src).join('\n'));
+writeFileSync(new URL('./server/shared.js', import.meta.url), ['core.js', 'domain.js', 'seed.js', 'domain-admin.js', 'domain-library.js', 'ops.js'].map(src).join('\n'));
 console.log('built', (js.length / 1024).toFixed(0) + 'KB js');

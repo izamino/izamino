@@ -7,9 +7,9 @@ function heroHTML() {
   const role = myRole();
   return `<section class="hero">
     <div class="hero-main">
-      <div class="eyebrow">${esc(posLabel(ME.pos.id))}</div>
-      <h1>سلام، ${esc(ME.user.name)}</h1>
-      <p>${esc(DB.settings.orgName)}</p>
+      <div class="eyebrow">${esc(DB.settings.orgName)}</div>
+      <h1>${esc(panelName(ME.pos))}</h1>
+      <p>متصدی فعلی: ${esc(ME.user.name)}</p>
       ${a.on && a.text ? `<div class="hero-note ${a.tone}">${ic('megaphone')}<span>${esc(a.text)}</span></div>` : ''}
       <div class="row">${role !== 'staff' ? btn('ثبت درخواست', 'newReq', {}, 'light', 'plus') : ''}${can('letters.create') ? btn('ثبت نامه', 'newLetter', {}, 'glass', 'mail') : ''}${isImam() || can('orders.issue') ? btn('صدور دستور', 'newOrder', {}, 'glass', 'flag') : ''}${canAdminPanel() ? `<a class="btn glass" href="#admin">${ic('shield')}پنل مدیریت</a>` : ''}</div>
     </div>
@@ -51,7 +51,7 @@ PAGES.admin = () => {
   const pend = can('admin.approve') ? pendingAll().length : 0;
   const nav = `<nav class="admnav" aria-label="بخش‌های پنل مدیریت">${tabsOk.map(t => `<button data-a="tab" data-key="adm" data-v="${t[0]}" class="${v.tab === t[0] ? 'on' : ''}">${ic(t[2])}<span>${t[1]}</span>${t[0] === 'signups' && sg ? `<i>${fa(sg)}</i>` : t[0] === 'approvals' && pend ? `<i>${fa(pend)}</i>` : t[0] === 'users' && lockedUsers().length ? `<i>${fa(lockedUsers().length)}</i>` : ''}</button>`).join('')}</nav>`;
   const body = (ADMIN_VIEWS[v.tab] || ADMIN_VIEWS.overview)();
-  return `${head('پنل مدیریت سامانه', 'کنترل کامل کاربران، رمزها، ورودها، دسترسی‌ها، تأییدها، ظاهر و داده‌های سامانه', v.tab === 'users' ? '' : btn('کاربر جدید', 'admNewUser', {}, '', 'plus'))}
+  return `${head('پنل مدیریت سامانه', 'کنترل کامل کاربران، رمزها، ورودها، دسترسی‌ها، تأییدها، ظاهر و داده‌های سامانه', v.tab === 'users' ? '' : btn('تعیین متصدی جایگاه', 'admNewUser', {}, '', 'plus'))}
   <div class="admin-wrap">${nav}<div class="admin-body">${body}</div></div>`;
 };
 PAGES.users = () => { vs('adm').tab = 'users'; return PAGES.admin(); };
@@ -78,7 +78,7 @@ const ADMIN_VIEWS = {
       ${tile('سلامت رویدادها', bad < 0 ? 'سالم' : 'آسیب‌دیده', fa(DB.audit.length) + ' رویداد', bad < 0 ? 'ok' : 'bad')}
     </div>
     <div class="grid g2">
-      ${card('اقدامات سریع', `<div class="quick">${[['admNewUser', 'افزودن کاربر', 'plus'], ['go', 'درخواست‌های عضویت', 'user', 'signups'], ['go', 'سطوح دسترسی', 'key', 'perms'], ['go', 'تأیید موارد معلق', 'check', 'approvals'], ['go', 'ظاهر سامانه', 'palette', 'site'], ['go', 'ساختار سازمانی', 'building', 'org'], ['admMaint', DB.settings.maintenance ? 'خروج از حالت به‌روزرسانی' : 'حالت به‌روزرسانی', 'alert'], ['backup', 'تهیه نسخه پشتیبان', 'archive']].map(([a, l, i, t]) => `<button class="qa" data-a="${a === 'go' ? 'admTab' : a}" ${t ? `data-v="${t}"` : ''}>${ic(i)}<span>${l}</span></button>`).join('')}</div>`)}
+      ${card('اقدامات سریع', `<div class="quick">${[['admNewUser', 'تعیین متصدی جایگاه', 'plus'], ['go', 'درخواست‌های عضویت', 'user', 'signups'], ['go', 'سطوح دسترسی', 'key', 'perms'], ['go', 'تأیید موارد معلق', 'check', 'approvals'], ['go', 'ظاهر سامانه', 'palette', 'site'], ['go', 'ساختار سازمانی', 'building', 'org'], ['admMaint', DB.settings.maintenance ? 'خروج از حالت به‌روزرسانی' : 'حالت به‌روزرسانی', 'alert'], ['backup', 'تهیه نسخه پشتیبان', 'archive']].map(([a, l, i, t]) => `<button class="qa" data-a="${a === 'go' ? 'admTab' : a}" ${t ? `data-v="${t}"` : ''}>${ic(i)}<span>${l}</span></button>`).join('')}</div>`)}
       ${card('آخرین ورودهای ناموفق', fails.length ? `<div class="list">${fails.map(l => `<div class="li"><div class="k bad">${ic('alert')}</div><div class="t"><b class="code">${esc(l.username || '—')}</b><small>${esc(l.reason)} · ${jdt(l.ts)}</small></div></div>`).join('')}</div>` : empty('ورود ناموفقی ثبت نشده است.'), btn('همه ورودها', 'admTab', { v: 'logins' }, 'sm ghost'), { flush: true })}
     </div>
     ${card('وضعیت سامانه', kv([['نام مجموعه', esc(DB.settings.orgName)], ['حالت به‌روزرسانی', DB.settings.maintenance ? pill('فعال', 'warn') : pill('غیرفعال', 'ok')], ['پیامک', DB.settings.sms.enabled ? pill('فعال', 'ok') : pill('غیرفعال', 'mute')], ['حجم داده', fa(Math.round(size / 1024)) + ' کیلوبایت'], ['ذخیره‌سازی', MEMORY_ONLY ? pill('فقط حافظه موقت', 'bad') : 'مرورگر (نسخه آزمایشی)'], ['آخرین پشتیبان', DB.settings.backups.length ? jdt(DB.settings.backups[DB.settings.backups.length - 1].ts) : pill('تهیه نشده', 'warn')], ['منطقه زمانی', 'Asia/Tehran']]))}`;
@@ -89,21 +89,21 @@ const ADMIN_VIEWS = {
       && (!v.u || (posById(u.posId) || {}).unitId === +v.u) && (!v.r || (posById(u.posId) || {}).role === v.r)
       && (!v.s || (v.s === 'active' ? u.active && !u.deleted : v.s === 'inactive' ? !u.active : v.s === 'locked' ? lockedUsers().includes(u) : !u.posId)));
     const ib = (a, i, l, id, cls = '') => `<button class="ibtn sm ${cls}" data-a="${a}" data-id="${id}" title="${l}" aria-label="${l}">${ic(i)}</button>`;
-    return `<section class="card"><div class="ch"><h2>کاربران سامانه <small>${fa(rows.length)} نفر</small></h2><div class="row">${btn('کاربر جدید', 'admNewUser', {}, 'sm', 'plus')}</div></div>
+    return `<section class="card"><div class="ch"><h2>حساب‌های جایگاه‌ها <small>${fa(rows.length)} حساب</small></h2><div class="row">${btn('تعیین متصدی جایگاه', 'admNewUser', {}, 'sm', 'plus')}</div></div>
     ${filterBar('admu', [{ k: 'q', t: 'search', l: 'جست‌وجوی نام، نام کاربری، تلفن، سمت…' }, { k: 'u', l: 'همه مدیریت‌ها', o: unitOpts(true) }, { k: 'r', l: 'همه نقش‌ها', o: Object.entries(ROLES) }, { k: 's', l: 'همه وضعیت‌ها', o: [['active', 'فعال'], ['inactive', 'غیرفعال'], ['locked', 'قفل'], ['nopos', 'بدون جایگاه']] }, { k: 'del', l: 'بدون حذف‌شده‌ها', o: [['1', 'با نمایش حذف‌شده‌ها']] }])}
     <div class="cb flush">${table([
-      ['کاربر', u => `<a href="#" class="who2 ulink" data-a="admUserCard" data-id="${u.id}">${av(u.name)}<div><b>${esc(u.name)}</b><span class="sub code">${esc(u.username)}</span></div></a>`],
-      ['جایگاه سازمانی', u => (u.posId ? esc(posLabel(u.posId)) : pill('بدون جایگاه', 'warn'))],
+      ['پنل / حساب', u => `<a href="#" class="who2 ulink" data-a="admUserCard" data-id="${u.id}">${av(u.name)}<div><b>${esc(u.posId ? panelName(posById(u.posId)) : 'بدون جایگاه')}</b><span class="sub code">${esc(u.username)}</span></div></a>`],
+      ['متصدی فعلی', u => esc(u.name) + (u.posId ? `<span class="sub">از ${jd(holderSince(u.posId) || u.start || u.hired)}</span>` : '')],
       ['تلفن', u => `<span class="code">${fa(u.phone || '—')}</span>`],
       ['آخرین ورود', u => (u.lastLogin ? jdt(u.lastLogin) : '<span class="sub">هرگز</span>')],
       ['وضعیت', userStatus],
       ['عملیات', u => u.deleted ? '' : `<div class="acts">${ib('admEditUser', 'edit', 'ویرایش', u.id)}${can('admin.passwords') ? ib('admPass', 'key', 'تعیین رمز', u.id) : ''}${u.posId && can('admin.perms') ? ib('admPosPerm', 'shield', 'دسترسی‌های جایگاه', u.posId) : ''}${lockedUsers().includes(u) ? ib('admUnlock', 'unlock', 'بازکردن قفل', u.id) : ''}${u.id !== ME.user.id ? ib('admKick', 'logout', 'خروج اجباری از همه نشست‌ها', u.id) + ib('admToggle', u.active ? 'lock' : 'check', u.active ? 'غیرفعال‌سازی' : 'فعال‌سازی', u.id, u.active ? '' : 'ok') + ib('admDel', 'trash', 'حذف کاربر', u.id, 'bad') : ''}</div>`]
     ], rows)}</div></section>
     ${card('جایگاه‌های سازمانی', `<div class="notice">دسترسی‌ها به جایگاه متصل است، نه به شخص. با تغییر متصدی، همه سوابق جایگاه حفظ می‌شود.</div>` + table([
-      ['مدیریت', p => esc(unitShort(p.unitId))], ['جایگاه', p => `<b>${esc(p.title)}</b>`], ['نقش', p => pill(ROLES[p.role], 'mute')],
+      ['مدیریت', p => esc(unitShort(p.unitId))], ['پنل', p => `<b>${esc(panelName(p))}</b><span class="sub code">${esc((accountOf(p.id) || {}).username || posUsername(p))}</span>`], ['نقش', p => pill(ROLES[p.role], 'mute')],
       ['متصدی', p => { const h = holderOf(p.id); return h ? esc(h.name) : pill('بدون متصدی', 'warn'); }],
       ['استثنای دسترسی', p => (Object.keys(p.perms || {}).length ? pill(fa(Object.keys(p.perms).length) + ' مورد', 'info') : '—')],
-      ['', p => btn('تغییر متصدی', 'assign', { id: p.id }, 'sm ghost') + ' ' + btn('سوابق', 'posHist', { id: p.id }, 'sm ghost') + (can('admin.perms') ? ' ' + btn('دسترسی', 'admPosPerm', { id: p.id }, 'sm soft') : '') + (p.role === 'staff' ? ' ' + btn('حذف', 'admDelPos', { id: p.id }, 'sm danger') : '')]
+      ['', p => btn('تغییر متصدی و تحویل', 'handover', { id: p.id }, 'sm ghost') + ' ' + btn('سوابق', 'posHist', { id: p.id }, 'sm ghost') + (can('admin.perms') ? ' ' + btn('دسترسی', 'admPosPerm', { id: p.id }, 'sm soft') : '') + (p.role === 'staff' ? ' ' + btn('حذف', 'admDelPos', { id: p.id }, 'sm danger') : '')]
     ], DB.positions.filter(p => !vs('admu').u || p.unitId === +vs('admu').u)), [0, ...UNITS.map(u => u.id)].includes(+vs('admu').u) && vs('admu').u ? btn('افزودن جایگاه', 'addPos', { u: vs('admu').u }, 'sm soft', 'plus') : '<small>برای افزودن جایگاه، ابتدا مدیریت را از فیلتر بالا انتخاب کنید</small>', { flush: true })}`;
   },
   signups() {
@@ -145,11 +145,11 @@ const ADMIN_VIEWS = {
   audit() {
     const v = vs('adma');
     const bad = verifyAudit();
-    const rows = DB.audit.map((a, i) => ({ ...a, id: i })).filter(a => textMatch(v.q, a.act, a.note, (userById(a.uid) || {}).name || '') && (!v.u || a.unit === +v.u) && (!v.e || a.ent === v.e) && inRange(isoOfStamp(a.ts), v.f, v.t)).reverse().slice(0, 400);
+    const rows = DB.audit.map((a, i) => ({ ...a, id: i })).filter(a => textMatch(v.q, a.act, a.note, who(a.uid, a.nm)) && (!v.u || a.unit === +v.u) && (!v.e || a.ent === v.e) && inRange(isoOfStamp(a.ts), v.f, v.t)).reverse().slice(0, 400);
     const ents = [...new Set(DB.audit.map(a => a.ent))];
     return `<div class="notice ${bad >= 0 ? 'warn' : ''}">${bad >= 0 ? `زنجیره رویدادها از ردیف ${fa(bad + 1)} دست‌کاری شده است.` : `زنجیره ${fa(DB.audit.length)} رویداد سالم است. رویدادها حتی توسط مدیر سامانه قابل حذف یا ویرایش نیستند.`}</div>
     <section class="card">${filterBar('adma', [{ k: 'q', t: 'search', l: 'جست‌وجو در اقدام، کاربر یا شرح…' }, { k: 'u', l: 'همه مدیریت‌ها', o: unitOpts(true) }, { k: 'e', l: 'همه موجودیت‌ها', o: ents }, { k: 'f', t: 'date', l: 'از تاریخ' }, { k: 't', t: 'date', l: 'تا تاریخ' }])}
-    <div class="cb flush">${table([['زمان', a => jdt(a.ts)], ['کاربر', a => esc((userById(a.uid) || {}).name || 'سامانه') + `<span class="sub">${esc(a.pos ? posLabel(a.pos) : '')}</span>`], ['اقدام', a => esc(a.act)], ['موجودیت', a => `<span class="code">${esc(a.ent)}</span>`], ['شرح', a => esc(a.note)], ['اثر انگشت', a => `<span class="code">${a.h}</span>`]], rows)}</div></section>`;
+    <div class="cb flush">${table([['زمان', a => jdt(a.ts)], ['کاربر', a => esc(who(a.uid, a.nm)) + `<span class="sub">${esc(a.pos ? posLabel(a.pos) : '')}</span>`], ['اقدام', a => esc(a.act)], ['موجودیت', a => `<span class="code">${esc(a.ent)}</span>`], ['شرح', a => esc(a.note)], ['اثر انگشت', a => `<span class="code">${a.h}</span>`]], rows)}</div></section>`;
   },
   site() {
     const s = DB.settings;
@@ -251,14 +251,11 @@ A.admUserCard = d => {
     foot: u.deleted ? '' : `${b2('admEditUser', 'ویرایش اطلاعات', 'edit', '')}${can('admin.passwords') ? b2('admPass', 'تعیین رمز جدید', 'key') : ''}${u.posId && can('admin.perms') ? btn('دسترسی‌ها', 'admPosPerm', { id: u.posId }, 'ghost', 'shield') : ''}${lockedUsers().includes(u) ? b2('admUnlock', 'بازکردن قفل', 'unlock') : ''}${self ? '' : b2('admKick', 'خروج اجباری', 'logout') + b2('admToggle', u.active ? 'غیرفعال‌سازی' : 'فعال‌سازی', u.active ? 'lock' : 'check') + b2('admDel', 'حذف کاربر', 'trash', 'danger')}` });
 };
 A.admTab = d => { vs('adm').tab = d.v; route(); };
-const userForm = () => [
-  { k: 'name', l: 'نام و نام خانوادگی', req: true }, { k: 'username', l: 'نام کاربری', req: true, hint: 'انگلیسی، ۳ تا ۲۴ نویسه' },
-  { k: 'phone', l: 'تلفن همراه', t: 'tel' }, { k: 'nid', l: 'کد ملی' },
-  { k: 'posId', l: 'جایگاه سازمانی', t: 'select', o: allPosOpts(), blank: 'بدون جایگاه' }
-];
-const toastRes = (r, okMsg) => { if (r && r.error) toast(r.error); else { refresh(); if (okMsg) toast(typeof okMsg === 'function' ? okMsg(r) : okMsg); } };
-A.admNewUser = () => formModal('افزودن کاربر', [...userForm(), { k: 'pass', l: 'رمز اولیه', req: true, hint: 'دست‌کم ' + fa(DB.settings.security.minLen) + ' نویسه؛ رمز تصادفی پیشنهاد شده است' }, { k: 'mustChange', l: 'امنیت', t: 'check', cl: 'کاربر در اولین ورود رمز را تغییر دهد' }], { pass: genPass(), mustChange: true }, v => run('createUser', v), { done: 'کاربر ساخته شد.', submit: 'ایجاد کاربر' });
-A.admEditUser = d => { const u = userById(d.id); formModal('ویرایش کاربر', userForm(), u, v => run('updateUser', u.id, v), { done: 'اطلاعات کاربر ذخیره شد.' }); };
+A.admNewUser = () => {
+  const free = DB.positions.filter(p => !accountOf(p.id));
+  formModal('تعیین متصدی جایگاه', [{ k: 'pos', l: 'جایگاه سازمانی', t: 'select', req: true, o: [...(free.length ? [{ group: 'جایگاه‌های بدون متصدی', items: free.map(p => [p.id, panelName(p)]) }] : []), ...[{ id: 0, name: 'امام جماعت' }, ...UNITS].map(u => ({ group: u.name, items: unitPositions(u.id).filter(p => accountOf(p.id) && p.id !== ME.pos.id).map(p => [p.id, panelName(p) + ' — ' + accountOf(p.id).name]) })).filter(g => g.items.length)] }], {}, v => { setTimeout(() => A.handover({ id: v.pos }), 60); return {}; }, { submit: 'ادامه', done: 'جایگاه انتخاب شد.', pre: '<div class="notice">در این سامانه هر جایگاه یک حساب ثابت با نام کاربری سازمانی دارد (مثلاً <span class="code">library.office</span>). برای افزودن نیروی جدید، ابتدا در «ساختار سازمانی» یا جدول جایگاه‌ها، جایگاه بسازید و سپس متصدی آن را تعیین کنید.</div>' });
+};
+A.admEditUser = d => A.holderEdit(d);
 A.admPass = d => {
   const u = userById(d.id);
   formModal('تعیین رمز', [{ k: 'pass', l: 'رمز جدید', req: true, hint: 'یک رمز تصادفی پیشنهاد شده؛ می‌توانید آن را تغییر دهید' }, { k: 'mustChange', l: 'امنیت', t: 'check', cl: 'کاربر در ورود بعدی رمز را تغییر دهد' }], { pass: genPass(), mustChange: true }, async v => {
@@ -342,18 +339,6 @@ const EDIT_BACK = { task: id => showTask(id), letter: id => showLetter(id), orde
 const editBtn = (k, r) => (canEditRec(k, r) ? btn('ویرایش', 'editRec', { k, id: r.id }, 'ghost', 'edit') : '');
 A.editRec = d => { const r = DB[EDIT_RULES[d.k].col].find(x => x.id === d.id); formModal('ویرایش', EDIT_FORMS[d.k], r, v => run('editRecord', d.k, d.id, v), { submit: 'ذخیره تغییرات', done: 'تغییرات ذخیره شد.', reopen: () => EDIT_BACK[d.k](d.id) }); };
 
-/* ---------- حساب کاربری من ---------- */
-PAGES.profile = () => {
-  const u = ME.user;
-  const mine = DB.logins.filter(l => l.uid === u.id).slice().reverse().slice(0, 15);
-  const perms = PERMS.filter(p => can(p[0]));
-  return `${head('حساب کاربری من', esc(posLabel(ME.pos.id)))}
-  <div class="grid g-main">
-    ${card('مشخصات', `<div class="who2 big">${av(u.name)}<div><b>${esc(u.name)}</b><span class="sub code">${esc(u.username)}</span></div></div>${kv([['جایگاه', esc(posLabel(ME.pos.id))], ['مدیریت', esc(unitName(ME.pos.unitId))], ['تلفن همراه', `<span class="code">${fa(u.phone || '—')}</span>`], ['آخرین تغییر رمز', u.passChanged ? jdt(u.passChanged) : '—'], ['ورود فعلی', jdt((mySession() || {}).start)]])}<div class="row mt">${btn('تغییر رمز عبور', 'myPass', {}, '', 'key')}${btn('ویرایش تلفن', 'myPhone', {}, 'ghost', 'edit')}${btn('تغییر حالت روشن / تاریک', 'theme', {}, 'ghost', 'moon')}</div>`)}
-    ${card('دسترسی‌های جایگاه من', perms.length ? `<div class="row">${perms.map(p => pill(p[1], 'ok')).join('')}</div>` : empty('فقط دسترسی‌های پایه'))}
-  </div>
-  ${card('تاریخچه ورود من', table([['زمان', l => jdt(l.ts)], ['نتیجه', l => pill(l.ok ? 'موفق' : 'ناموفق', l.ok ? 'ok' : 'bad')], ['شرح', l => esc(l.reason)], ['مرورگر', l => `<span class="code">${esc(l.agent || '')}</span>`]], mine), '<small>اگر ورودی را نمی‌شناسید، رمز خود را تغییر دهید</small>', { flush: true })}`;
-};
 A.myPass = () => formModal('تغییر رمز عبور', [{ k: 'cur', l: 'رمز فعلی', t: 'password', req: true }, { k: 'p1', l: 'رمز جدید', t: 'password', req: true, hint: 'دست‌کم ' + fa(DB.settings.security.minLen) + ' نویسه' }, { k: 'p2', l: 'تکرار رمز جدید', t: 'password', req: true }], {}, v => {
   if (v.p1 !== v.p2) return fail('رمز جدید و تکرار آن یکسان نیست.');
   return run('changeOwnPassword', v.cur, v.p1);

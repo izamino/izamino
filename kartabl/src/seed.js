@@ -26,6 +26,7 @@ function seed() {
   const T = todayISO();
   const D = baseDB();
   D.budgets = [];
+  D.demoRev = DEMO_REV;
   D.settings.sms.enabled = true; /* نسخه نمایشی: پیامک‌ها فقط در صف نمایش داده می‌شوند */
   DB = D;
   const prevME = ME;
@@ -40,34 +41,36 @@ function seed() {
   const FN = ['علی', 'محمدرضا', 'حسین', 'مهدی', 'سعید', 'جواد', 'امیرحسین', 'حمید', 'مصطفی', 'محسن', 'یاسر', 'زهرا', 'فاطمه', 'مریم', 'معصومه', 'سمیه', 'نرگس', 'الهام', 'زینب', 'رضا', 'مجتبی', 'ابوالفضل', 'صادق', 'هادی', 'طاهره', 'سارا'];
   const LN = ['کریمی', 'حسینی', 'رحیمی', 'موسوی', 'جعفری', 'صادقی', 'نوری', 'احمدی', 'رضایی', 'کاظمی', 'باقری', 'اکبری', 'قاسمی', 'شریفی', 'عباسی', 'یوسفی', 'نجفی', 'طاهری', 'سلیمانی', 'مرادی', 'فلاحی', 'امینی', 'زارعی', 'حیدری', 'میرزایی'];
   let k = 0;
-  const mk = (pid, name, user) => {
-    const u = { id: 'u' + (D.users.length + 1), name, username: user, pass: pwHash('1234'), posId: pid, active: true, phone: '0912' + pad(1000000 + D.users.length * 7919 % 8999999, 7).slice(-7), nid: '', hired: addDays(T, -400 - D.users.length * 11) };
-    D.users.push(u); D.posHistory.push({ posId: pid, userId: u.id, from: u.hired, to: '' });
+  /* هر جایگاه یک حساب ثابت با نام کاربری سازمانی دارد (مثلاً library.manager)؛ رمز همه حساب‌های نسخه نمایشی ۱۲۳۴ */
+  const mk = (pid, first, last) => {
+    const p = D.positions.find(x => x.id === pid);
+    const start = addDays(T, -400 - D.users.length * 11);
+    const u = { id: 'u' + (D.users.length + 1), first, last, name: first + ' ' + last, username: posUsername(p), pass: pwHash('1234'), posId: pid, active: true, phone: '0912' + pad(1000000 + D.users.length * 7919 % 8999999, 7).slice(-7), nid: '', hired: start, start };
+    D.users.push(u); D.posHistory.push({ posId: pid, userId: u.id, name: u.name, phone: u.phone, from: start, to: '' });
   };
-  mk('P0', 'حجت‌الاسلام سید محمد هاشمی', 'imam');
+  mk('P0', 'حجت‌الاسلام سید محمد', 'هاشمی');
   UNITS.forEach(u => {
-    ['m', 'o', 's'].forEach(r => { mk(`P${u.id}-${r}`, `${FN[(k * 7 + 3) % FN.length]} ${LN[(k * 5 + 1) % LN.length]}`, r + u.id); k++; });
+    ['m', 'o', 's'].forEach(r => { mk(`P${u.id}-${r}`, FN[(k * 7 + 3) % FN.length], LN[(k * 5 + 1) % LN.length]); k++; });
   });
-  D.positions.filter(p => p.role === 'staff').forEach(p => { mk(p.id, `${FN[(k * 7 + 3) % FN.length]} ${LN[(k * 5 + 1) % LN.length]}`, 'k' + p.unitId + '-' + p.id.split('-k')[1]); k++; });
-  /* نمونه تغییر متصدی: سوابق جایگاه پس از تغییر فرد حفظ می‌شود */
-  const former = { id: 'u0', name: 'غلامرضا فرهادی', username: 'former4', pass: pwHash('1234'), posId: '', active: false, phone: '', hired: addDays(T, -1200) };
-  D.users.push(former);
-  D.posHistory.unshift({ posId: 'P4-m', userId: 'u0', from: addDays(T, -1200), to: addDays(T, -420) });
+  D.positions.filter(p => p.role === 'staff').forEach(p => { mk(p.id, FN[(k * 7 + 3) % FN.length], LN[(k * 5 + 1) % LN.length]); k++; });
+  /* نمونه تحویل جایگاه: پنل «مدیریت رسانه» و سوابقش ثابت است و نام متصدی قبلی در سابقه می‌ماند */
+  const mediaHist = D.posHistory.find(h => h.posId === 'P4-m');
+  D.posHistory.unshift({ posId: 'P4-m', userId: mediaHist.userId, name: 'غلامرضا فرهادی', phone: '09121110000', from: addDays(T, -1200), to: mediaHist.from, handedTo: mediaHist.name });
 
   /* انبارها */
-  D.warehouses.push({ id: 'w1', name: 'انبار مرکزی', unitId: 1 }, { id: 'w2', name: 'انبار تجهیزات صوت و تصویر', unitId: 4 }, { id: 'w3', name: 'انبار آشپزخانه', unitId: 1 }, { id: 'w4', name: 'انبار کالای خیریه', unitId: 12 }, { id: 'w5', name: 'انبار تجهیزات پزشکی', unitId: 9 });
+  D.warehouses.push({ id: 'w1', name: 'انبار مرکزی', unitId: 1 }, { id: 'w2', name: 'انبار تجهیزات صوت و تصویر', unitId: 4 }, { id: 'w3', name: 'انبار آشپزخانه', unitId: 1 }, { id: 'w4', name: 'انبار کالای خیریه', unitId: 12 }, { id: 'w6', name: 'انبار رستوران', unitId: 19 }, { id: 'w5', name: 'انبار تجهیزات پزشکی', unitId: 9 });
 
   /* بودجه سالانه */
   const y = jYearNow();
-  const B = [42, 65, 18, 22, 12, 30, 28, 26, 34, 20, 9, 40, 11, 14, 8, 16, 120];
+  const B = [42, 30, 18, 22, 12, 30, 28, 26, 34, 20, 9, 40, 11, 14, 8, 16, 120, 45, 38];
   UNITS.forEach((u, i) => D.budgets.push({ unitId: u.id, year: y, amount: B[i] * 100000000 }));
 
   /* نامه‌ها */
   as('P1-s'); at(-12, '09:10');
   const L1 = createLetter({ type: 'in', subject: 'اعلام قطعی برنامه‌ریزی‌شده آب در محدوده مجتمع', cat: 'خدماتی', sender: 'شرکت آب و فاضلاب منطقه', receiver: 'مدیریت داخلی مجتمع', unitId: 1, priority: 'فوری', date: addDays(T, -12), body: 'به اطلاع می‌رساند به دلیل تعویض خط انتقال، آب محدوده در تاریخ اعلام‌شده از ساعت ۸ تا ۱۴ قطع خواهد بود.', needReply: false });
   as('P1-o'); at(-12, '11:00'); referLetter(L1, 2, 'جهت هماهنگی برنامه نماز و وضوخانه');
-  as('P2-s'); at(-9, '10:00');
-  createLetter({ type: 'out', subject: 'دعوت از سخنران مراسم دهه فاطمیه', cat: 'فرهنگی', sender: 'مدیریت امور فرهنگی و مراسمات مسجد', receiver: 'دفتر حجت‌الاسلام والمسلمین رضوانی', unitId: 2, date: addDays(T, -9), signer: 'P2-m',
+  as('P18-s'); at(-9, '10:00');
+  createLetter({ type: 'out', subject: 'دعوت از سخنران مراسم دهه فاطمیه', cat: 'فرهنگی', sender: 'مدیریت مراسمات و مناسبت‌ها', receiver: 'دفتر حجت‌الاسلام والمسلمین رضوانی', unitId: 18, date: addDays(T, -9), signer: 'P18-m',
     body: 'سلام علیکم\nبا احترام، به استحضار می‌رساند مراسم دهه فاطمیه در حسینیه مجتمع برگزار می‌شود. خواهشمند است در صورت امکان، سخنرانی شب‌های دوم تا پنجم را بپذیرید.\nپیشاپیش از حسن همکاری سپاسگزاریم.' });
   as('P15-s'); at(-7, '08:40');
   const L3 = createLetter({ type: 'in', subject: 'اعلام مانده حساب نذورات ماه گذشته', cat: 'مالی', sender: 'بانک قرض‌الحسنه', receiver: 'مدیریت امور مالی', unitId: 15, conf: 'محرمانه', date: addDays(T, -7), body: 'صورت‌حساب ماه گذشته پیوست است.', needReply: true });
@@ -88,7 +91,7 @@ function seed() {
 
   /* دستورات امام جماعت */
   as('P0'); at(-14, '18:00');
-  const O1 = createOrder({ title: 'برگزاری مراسم دهه فاطمیه با محوریت خانواده', desc: 'برنامه ده‌شبه شامل سخنرانی، مداحی، پذیرایی و ویژه‌برنامه کودک و نوجوان تدوین و اجرا شود. گزارش نهایی با آمار حضور ارائه گردد.', units: [2, 1, 4], respPos: 'P2-m', priority: 'فوری', issued: addDays(T, -14), due: addDays(T, 9), needReport: true });
+  const O1 = createOrder({ title: 'برگزاری مراسم دهه فاطمیه با محوریت خانواده', desc: 'برنامه ده‌شبه شامل سخنرانی، مداحی، پذیرایی و ویژه‌برنامه کودک و نوجوان تدوین و اجرا شود. گزارش نهایی با آمار حضور ارائه گردد.', units: [18, 19, 4], respPos: 'P18-m', priority: 'فوری', issued: addDays(T, -14), due: addDays(T, 9), needReport: true });
   at(-20, '17:00');
   const O2 = createOrder({ title: 'تکمیل مستندسازی اموال مجتمع و الصاق برچسب کد', desc: 'تمامی اموال کدگذاری و برچسب QR الصاق شود.', units: [1], respPos: 'P1-o', priority: 'عادی', issued: addDays(T, -20), due: addDays(T, -2), needReport: true });
   at(-30, '19:00');
@@ -97,7 +100,7 @@ function seed() {
   const O4 = createOrder({ title: 'گزارش پیشرفت سالن چندمنظوره', desc: 'گزارش مصور پیشرفت فیزیکی و مالی پروژه ارائه شود.', units: [17], respPos: 'P17-m', priority: 'خیلی فوری', issued: addDays(T, -25), due: addDays(T, -5), needReport: true });
   at(-3, '21:00');
   createOrder({ title: 'ساماندهی طرح اکرام ایتام در آستانه زمستان', desc: 'شناسایی خانواده‌ها و تأمین پوشاک زمستانی با حفظ کامل محرمانگی.', units: [12], respPos: 'P12-m', priority: 'فوری', issued: addDays(T, -3), due: addDays(T, 20), needReport: true });
-  as('P2-o'); at(-10, '10:00'); orderReport(O1, { status: 'در حال انجام', progress: 45, note: 'سخنرانان شب‌های اول تا پنجم قطعی شدند؛ هماهنگی پذیرایی با مدیریت داخلی انجام شد.' });
+  as('P18-o'); at(-10, '10:00'); orderReport(O1, { status: 'در حال انجام', progress: 45, note: 'سخنرانان شب‌های اول تا پنجم قطعی شدند؛ هماهنگی پذیرایی با مدیریت رستوران انجام شد.' });
   as('P1-o'); at(-8); orderReport(O2, { status: 'در حال انجام', progress: 70, note: 'اموال طبقه همکف و حسینیه برچسب‌گذاری شد.' });
   as('P16-m'); at(-6); orderReport(O3, { status: 'در حال انجام', progress: 35, note: 'نیازسنجی با درمانگاه انجام و نسخه آزمایشی آماده شد.' });
   as('P17-o'); at(-6); orderReport(O4, { status: 'منتظر تأیید', progress: 100, note: 'گزارش مصور پیشرفت ۶۲٪ فیزیکی و ۵۸٪ مالی پیوست شد.' });
@@ -106,9 +109,10 @@ function seed() {
   const tasks = [
     [1, 'P1-k1', 'سرویس دوره‌ای موتورخانه و دیگ‌های بخار', -10, -1, 'فوری', 'در حال انجام'],
     [1, 'P1-k2', 'انبارگردانی فصلی انبار مرکزی', -6, 4, 'عادی', 'جدید'],
-    [1, 'P1-o', 'هماهنگی پذیرایی مراسم دهه فاطمیه', -9, 8, 'فوری', 'در حال انجام'],
+    [19, 'P19-o', 'هماهنگی پذیرایی مراسم دهه فاطمیه', -9, 8, 'فوری', 'در حال انجام'],
     [1, 'P1-s', 'تنظیم برنامه نظافت محوطه', -15, -6, 'عادی', 'تکمیل‌شده'],
-    [2, 'P2-o', 'تدوین برنامه شب‌های دهه فاطمیه', -12, 1, 'خیلی فوری', 'منتظر تأیید'],
+    [18, 'P18-o', 'تدوین برنامه شب‌های دهه فاطمیه', -12, 1, 'خیلی فوری', 'منتظر تأیید'],
+    [2, 'P2-o', 'برگزاری کارگاه خوشنویسی نوجوانان', -10, 5, 'عادی', 'در حال انجام'],
     [2, 'P2-s', 'ثبت‌نام کاروان راهیان نور', -8, 12, 'عادی', 'در حال انجام'],
     [3, 'P3-o', 'تهیه فهرست مهمانان همایش خانواده', -5, 2, 'فوری', 'در حال انجام'],
     [3, 'P3-s', 'به‌روزرسانی تابلو اعلانات', -20, -12, 'عادی', 'تکمیل‌شده'],
@@ -139,11 +143,11 @@ function seed() {
   /* درخواست‌های داخلی */
   const reqs = [
     [3, 4, 'پوشش تصویری همایش خانواده', 'پوشش مراسم', -3, 2, false],
-    [2, 1, 'تأمین پذیرایی ۱۰ شب دهه فاطمیه', 'پذیرایی', -11, 4, false],
+    [18, 19, 'تأمین پذیرایی ۱۰ شب دهه فاطمیه', 'پذیرایی مراسم', -11, 4, false],
     [6, 16, 'راه‌اندازی رایانه‌های کارگاه رایانه دبستان', 'پشتیبانی رایانه', -9, 5, false],
     [12, 15, 'تخصیص اعتبار طرح پوشاک زمستانی', 'تخصیص بودجه', -2, 3, true],
     [9, 1, 'تعمیر سیستم سرمایش اتاق تزریقات', 'تعمیرات و نگهداری', -6, 4, false],
-    [5, 2, 'هماهنگی برنامه شب شهدا در حسینیه', 'مراسم مذهبی', -15, 6, false],
+    [5, 18, 'هماهنگی برنامه شب شهدا در حسینیه', 'مراسم مذهبی', -15, 6, false],
     [13, 4, 'طراحی پوستر جشن تکلیف کودکان', 'طراحی پوستر', -1, 1, false],
     [11, 3, 'اطلاع‌رسانی مسابقه کتابخوانی', 'اطلاع‌رسانی عمومی', -4, 3, false]
   ];
@@ -154,7 +158,7 @@ function seed() {
     for (let i = 0; i < Math.min(steps, 5); i++) {
       const a = seq[i];
       as(a === 'approve' ? (imam ? 'P0' : `P${to}-m`) : `P${to}-o`); at(s + i + 1, '12:00');
-      if (a === 'review' && to === 1 && from === 2) { reqAct(r, 'review', ''); as(`P${to}-o`); reqAct(r, 'coop', 'تأمین ظروف یک‌بار مصرف و هماهنگی بودجه', 15); as('P15-o'); reqAct(r, 'coopnote', 'اعتبار پذیرایی از بودجه مراسمات قابل تأمین است.'); continue; }
+      if (a === 'review' && to === 19 && from === 18) { reqAct(r, 'review', ''); as(`P${to}-o`); reqAct(r, 'coop', 'تأمین ظروف یک‌بار مصرف و هماهنگی بودجه', 15); as('P15-o'); reqAct(r, 'coopnote', 'اعتبار پذیرایی از بودجه مراسمات قابل تأمین است.'); continue; }
       reqAct(r, a, a === 'exec' ? 'اقدام انجام شد.' : a === 'final' ? 'درخواست به‌طور کامل انجام شد و گزارش به درخواست‌کننده ارسال شد.' : '');
     }
   });
@@ -169,7 +173,7 @@ function seed() {
     ['lodging', 'zaersara', 'کاروان زائران مشهد', 'اسکان زائرین', 7, '14:00', '23:59', 32, 'pending'],
     ['general', 'farhangsara', 'کتابخانه مجتمع', 'نشست کتابخوانی', 4, '17:00', '19:00', 40, 'approve'],
     ['general', 'amphi', 'متوسطه دوم', 'جشن فارغ‌التحصیلی', 3, '17:30', '20:00', 130, 'pending'],
-    ['religious', 'hosseinieh', 'مدیریت امور فرهنگی', 'مراسم دهه فاطمیه — شب اول', 9, '19:00', '22:30', 550, 'approve'],
+    ['religious', 'hosseinieh', 'مدیریت مراسمات و مناسبت‌ها', 'مراسم دهه فاطمیه؛ شب اول', 9, '19:00', '22:30', 550, 'approve'],
     ['rahian', '', 'مدیریت امور فرهنگی', 'کاروان راهیان نور دانش‌آموزی', 20, '06:00', '22:00', 110, 'pending']
   ];
   res.forEach(([prog, sp, ap, kind, d, s, e, n, st]) => {
@@ -188,8 +192,8 @@ function seed() {
   addResolution(M1, { text: 'ارائه گزارش مالی پروژه سالن چندمنظوره تا پایان هفته', owner: 'P15-m', due: addDays(T, -1) });
   addResolution(M1, { text: 'تهیه دستورالعمل استفاده از سالن آمفی‌تئاتر', owner: 'P3-m', due: addDays(T, 10) });
   as('P15-m'); at(-2); resolutionUpdate(M1, M1.resolutions[1], 'انجام‌شده', 'گزارش ارسال شد.');
-  as('P2-s'); at(-2);
-  createMeeting({ title: 'جلسه ستاد برگزاری دهه فاطمیه', date: T, start: '17:00', end: '18:30', place: 'دفتر مدیریت فرهنگی', invitees: ['P0', 'P2-m', 'P1-m', 'P4-m', 'P3-m'], agenda: 'نهایی‌سازی برنامه شب‌ها و تقسیم کار' });
+  as('P18-s'); at(-2);
+  createMeeting({ title: 'جلسه ستاد برگزاری دهه فاطمیه', date: T, start: '17:00', end: '18:30', place: 'دفتر مدیریت مراسمات', invitees: ['P0', 'P18-m', 'P19-m', 'P4-m', 'P3-m'], agenda: 'نهایی‌سازی برنامه شب‌ها و تقسیم کار' });
   as('P17-s'); at(-1);
   createMeeting({ title: 'جلسه پیشرفت پروژه با پیمانکار', date: addDays(T, 1), start: '10:00', end: '12:00', place: 'سالن جلسات', invitees: ['P17-m', 'P17-k5', 'P15-o'], agenda: 'بررسی صورت‌وضعیت شماره ۳' });
   as('P0'); at(-1);
@@ -250,7 +254,7 @@ function seed() {
   addHR('decrees', { uid: D.users.find(u => u.posId === 'P4-m').id, pos: 'P4-m', title: 'حکم انتصاب مدیر رسانه', no: 'ح/' + fa(y) + '/۰۱۲', date: addDays(T, -420) });
   addHR('contracts', { uid: D.users.find(u => u.posId === 'P1-k1').id, type: 'قرارداد کار معین', from: addDays(T, -300), to: addDays(T, 65), title: 'کارشناس تأسیسات' });
   addHR('contracts', { uid: D.users.find(u => u.posId === 'P1-k2').id, type: 'قرارداد کار معین', from: addDays(T, -200), to: addDays(T, 165), title: 'انباردار' });
-  addHR('missions', { uid: D.users.find(u => u.posId === 'P2-m').id, dest: 'قم', from: addDays(T, 6), to: addDays(T, 7), title: 'هماهنگی سخنرانان', status: 'تأییدشده' });
+  addHR('missions', { uid: D.users.find(u => u.posId === 'P18-m').id, dest: 'قم', from: addDays(T, 6), to: addDays(T, 7), title: 'هماهنگی سخنرانان', status: 'تأییدشده' });
   as('P4-k3'); at(-2); const lv1 = createLeave({ type: 'استحقاقی', from: addDays(T, 4), to: addDays(T, 5), reason: 'امور شخصی' });
   as('P10-o'); at(-4); const lv2 = createLeave({ type: 'استعلاجی', from: addDays(T, -3), to: addDays(T, -2), reason: 'بیماری' });
   as('P10-m'); at(-3); leaveAct(lv2, true, '');
@@ -266,8 +270,11 @@ function seed() {
   R(8, 'edu', [{ title: 'کارگاه مدیریت زمان کنکور', grade: 'دوازدهم', kind: 'تربیتی', date: addDays(T, -2), note: '' }]);
   R(9, 'equip', [{ title: 'دستگاه الکتروکاردیوگرافی', state: 'نیازمند سرویس', date: addDays(T, -20), note: '' }, { title: 'دستگاه استریل', state: 'فعال', date: addDays(T, -5), note: '' }]);
   R(10, 'stock', [{ title: 'آموکسی‌سیلین ۵۰۰', qty: 40, min: 100, supplier: 'پخش البرز', date: addDays(T, 300) }, { title: 'استامینوفن ۳۲۵', qty: 600, min: 200, supplier: 'پخش رازی', date: addDays(T, 420) }, { title: 'سرم نمکی', qty: 18, min: 30, supplier: 'پخش البرز', date: addDays(T, 200) }]);
-  R(11, 'books', [{ title: 'مفاتیح‌الجنان', author: 'شیخ عباس قمی', code: '۱۰۲۴', state: 'موجود', member: '' }, { title: 'سلام بر ابراهیم', author: 'گروه فرهنگی ابراهیم هادی', code: '۲۳۱۸', state: 'امانت', member: 'عضو شماره ۴۴۱' }]);
   R(11, 'events', [{ title: 'مسابقه کتابخوانی نوجوانان', date: addDays(T, -10), count: 62, note: '' }]);
+  R(12, 'jihadi', [{ title: 'اردوی جهادی ساخت مدرسه', place: 'روستای کهنک', date: addDays(T, -20), count: 28, note: '' }]);
+  R(18, 'events', [{ title: 'مراسم دهه فاطمیه', kind: 'مراسم مذهبی', date: addDays(T, 9), place: 'حسینیه', count: 500 }, { title: 'جشن میلاد حضرت زینب', kind: 'جشن و اعیاد', date: addDays(T, 30), place: 'حسینیه', count: 300 }]);
+  R(19, 'orders', [{ title: 'شام شب اول دهه فاطمیه', unit: 'مراسمات و مناسبت‌ها', date: addDays(T, 9), count: 450, note: '' }]);
+  R(13, 'kinder', [{ title: 'نیایش رضایی', age: 4, parent: 'محمد رضایی', phone: '09123334455', date: addDays(T, -12) }]);
   R(12, 'aid', [{ donor: 'خیّر ناشناس', kind: 'نقدی', amount: 250000000, date: addDays(T, -6), use: 'طرح پوشاک زمستانی' }, { donor: 'فروشگاه محله', kind: 'غیرنقدی', amount: 90000000, date: addDays(T, -2), use: '۳۰ سبد غذایی' }]);
   R(13, 'admit', [{ date: T, session: 'صبح', count: 22, cap: 30, coach: 'خانم امینی', note: 'بدون حادثه' }, { date: addDays(T, -1), session: 'عصر', count: 29, cap: 30, coach: 'خانم زارعی', note: 'بدون حادثه' }]);
   R(16, 'systems', [{ title: 'پشتیبان‌گیری شبانه سرور', kind: 'پشتیبان‌گیری', date: addDays(T, -1), state: 'سالم', note: '' }, { title: 'فایروال اصلی', kind: 'امنیت', date: addDays(T, -7), state: 'هشدار', note: 'به‌روزرسانی میان‌افزار لازم است' }]);
@@ -276,15 +283,30 @@ function seed() {
     { title: 'عایق‌کاری بام حسینیه', contractor: '—', start: addDays(T, 15), end: addDays(T, 45), progress: 0, budget: 900000000, spent: 0 }]);
 
   /* نمونه ورودها و درخواست عضویت */
-  [['imam', 'u1', true, 'ورود موفق', -1, '07:42'], ['m16', null, false, 'رمز نادرست', -1, '08:03'], ['m16', null, true, 'ورود موفق', -1, '08:04'], ['o3', null, true, 'ورود موفق', 0, '08:12'], ['admin', null, false, 'نام کاربری ناموجود', 0, '02:17'], ['admin', null, false, 'نام کاربری ناموجود', 0, '02:18'], ['s9', null, false, 'رمز نادرست', 0, '09:31'], ['s9', null, true, 'ورود موفق', 0, '09:32']].forEach(([un, id, ok, reason, d, hm]) => {
+  [['imam', 'u1', true, 'ورود موفق', -1, '07:42'], ['it.manager', null, false, 'رمز نادرست', -1, '08:03'], ['it.manager', null, true, 'ورود موفق', -1, '08:04'], ['pr.office', null, true, 'ورود موفق', 0, '08:12'], ['admin', null, false, 'نام کاربری ناموجود', 0, '02:17'], ['root', null, false, 'نام کاربری ناموجود', 0, '02:18'], ['clinic.secretary', null, false, 'رمز نادرست', 0, '09:31'], ['clinic.secretary', null, true, 'ورود موفق', 0, '09:32']].forEach(([un, id, ok, reason, d, hm]) => {
     at(d, hm); const u = D.users.find(x => x.username === un);
-    D.logins.push({ id: uid(), ts: SEED_TS, username: un, uid: u ? u.id : '', ok, reason, agent: 'Chrome' });
+    D.logins.push({ id: uid(), ts: SEED_TS, username: un, uid: u ? u.id : '', nm: u ? u.name : '', ok, reason, agent: 'Chrome' });
     if (ok && u) u.lastLogin = SEED_TS;
   });
   ME = null; at(-1, '21:40');
   createSignup({ name: 'محمدحسین اکبری', username: 'mh.akbari', phone: '09127654321', unitId: 4, title: 'تدوینگر', pass: 'akbari123', note: 'نیروی داوطلب واحد رسانه از ماه گذشته' });
   at(0, '07:55');
   createSignup({ name: 'ریحانه موسوی', username: 'r.mousavi', phone: '09351112233', unitId: 11, title: 'کتابدار', pass: 'mousavi99', note: '' });
+  /* کتابخانه عمومی: فهرست کتاب، اعضای نمونه و درخواست‌ها */
+  as('P11-o'); at(-30);
+  [['مفاتیح‌الجنان', 'شیخ عباس قمی', 'قرآن و معارف', 4], ['سلام بر ابراهیم', 'گروه فرهنگی شهید ابراهیم هادی', 'دفاع مقدس', 3], ['دا', 'سیده زهرا حسینی', 'دفاع مقدس', 2],
+   ['شهید گمنام', 'گروه نویسندگان', 'دفاع مقدس', 1], ['داستان راستان', 'شهید مرتضی مطهری', 'قرآن و معارف', 3], ['نهج‌البلاغه', 'سید رضی؛ ترجمه محمد دشتی', 'قرآن و معارف', 2],
+   ['قصه‌های قرآنی برای کودکان', 'مهدی آذریزدی', 'کودک و نوجوان', 3], ['مربای شیرین', 'هوشنگ مرادی کرمانی', 'کودک و نوجوان', 2], ['کلیله و دمنه', 'نصرالله منشی', 'ادبیات و داستان', 1],
+   ['آیین همسرداری', 'ابراهیم امینی', 'خانواده و تربیت', 2], ['تاریخ اسلام', 'رسول جعفریان', 'تاریخ و سیره', 1], ['ریاضیات به زبان ساده', 'گروه مؤلفان', 'علمی و آموزشی', 2]
+  ].forEach(([title, author, category, copies]) => saveBook('', { title, author, category, copies, publisher: '', year: '' }));
+  ME = null;
+  const mem = [['زهرا محمدی', 'z.mohammadi'], ['علی رضوانی', 'a.rezvani'], ['حسین کاظمی', 'h.kazemi']].map(([name, username]) => libSignup({ name, username, phone: '09121112233', pass: 'library1234' }));
+  at(-6); const lA = libRequest(mem[0], D.books[1].id, 'امانت', '');
+  at(-5); const lB = libRequest(mem[1], D.books[3].id, 'امانت', '');
+  at(-2); libRequest(mem[2], D.books[0].id, 'رزرو', 'برای جلسه قرآن');
+  at(-1); libRequest(mem[0], D.books[6].id, 'امانت', 'برای فرزندم');
+  as('P11-o'); at(-5); loanDecide(lA.id, true, '', 3); at(-4); loanDeliver(lA.id, 14);
+  at(-4); loanDecide(lB.id, true, '', 3); at(-3); loanDeliver(lB.id, 2);
   SEED_TS = null;
   ME = prevME;
   D.notifs.forEach((n, i) => { if (i % 3 === 0) n.read = true; });

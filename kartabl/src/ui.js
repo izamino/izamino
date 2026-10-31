@@ -266,8 +266,9 @@ function renderLogin(err = '', mode = 'login') {
       <div class="fld"><label for="lp">رمز عبور</label><div class="pw"><input id="lp" name="p" type="password" autocomplete="current-password" dir="ltr"><button type="button" class="ibtn sm" data-a="pwShow" data-t="lp" aria-label="نمایش رمز">${ic('eye')}</button></div></div>
       ${err ? `<div class="notice warn" role="alert">${err}</div>` : ''}
       <button class="btn lg" type="submit">${ic('lock')}ورود امن</button>
-      <button class="btn ghost" type="button" data-a="loginMode" data-m="signup">${ic('user')}درخواست ایجاد حساب کاربری</button>
-      ${!SERVER && st.showDemo ? `<details class="demo-wrap"><summary>حساب‌های نسخه نمایشی (رمز همه <b class="code">1234</b>؛ در نسخه سروری وجود ندارد)</summary><div class="demo">${groups.flat().map(pid => { const u = holderOf(pid); if (!u) return ''; return `<button type="button" data-a="quick" data-u="${esc(u.username)}"><span>${esc(u.name)}</span><small>${esc(posLabel(pid))} · <span class="code">${esc(u.username)}</span></small></button>`; }).join('')}</div></details>` : ''}
+      <button class="btn ghost" type="button" data-a="loginMode" data-m="signup">${ic('user')}درخواست ایجاد حساب کارکنان</button>
+      <a class="libentry" href="#library">${ic('book')}<span><b>کتابخانه و رزرو کتاب</b><small>برای عموم مردم؛ مشاهده و جست‌وجوی کتاب‌ها، عضویت و رزرو</small></span></a>
+      ${!SERVER && st.showDemo ? `<details class="demo-wrap"><summary>حساب‌های نسخه نمایشی (رمز همه <b class="code">1234</b>؛ در نسخه سروری وجود ندارد)</summary><div class="demo">${groups.flat().map(pid => { const u = holderOf(pid); if (!u) return ''; return `<button type="button" data-a="quick" data-u="${esc(u.username)}"><span>${esc(panelName(posById(pid)))}</span><small>${esc(u.name)} · <span class="code">${esc(u.username)}</span></small></button>`; }).join('')}</div></details>` : ''}
     </form>`;
   $('#root').innerHTML = `
   <div class="login">
@@ -381,7 +382,8 @@ function navItems() {
     ['dashboard', 'داشبورد', 'home', true],
     ['inbox', 'کارتابل من', 'inbox', true, q],
     ['imam', 'کارتابل امام جماعت', 'dome', isAll()],
-    ['units', 'فهرست ۱۷ مدیریت', 'building', true],
+    ['units', `فهرست ${fa(UNITS.filter(u => !u.off).length)} مدیریت`, 'building', true],
+    ['library-admin', 'خدمات عمومی کتابخانه', 'book', canSeeLib(), canLib() ? DB.loans.filter(l => l.status === LOAN.pending).length : 0],
     [`unit-${u}`, 'کارتابل ' + unitShort(u), UNITS.find(x => x.id === u)?.ic || 'building', u > 0],
     ['grp', 'مکاتبات و گردش کار'],
     ['letters', 'دبیرخانه و مکاتبات', 'mail', true],
@@ -398,7 +400,7 @@ function navItems() {
     ['reports', 'گزارش‌گیری و نظارت', 'chart', can('reports.view')],
     ['notifications', 'اعلان‌ها', 'bell', true, unread],
     ['admin', 'پنل مدیریت سامانه', 'shield', canAdminPanel(), adminAlerts()],
-    ['profile', 'حساب کاربری من', 'user', true],
+    ['profile', 'حساب و مشخصات متصدی', 'user', true],
     ['system', 'تنظیمات و آرشیو', 'gear', true]
   ];
 }
@@ -419,7 +421,7 @@ function renderShell() {
         <div class="clock" id="clock" aria-live="off"></div>
         <button class="ibtn" data-a="theme" aria-label="تغییر حالت روشن و تاریک" id="themebtn"></button>
         <a class="ibtn" href="#notifications" aria-label="اعلان‌ها" id="bell">${ic('bell')}</a>
-        <a class="who" href="#profile" title="حساب کاربری من">${av(ME.user.name)}<div><b>${esc(ME.user.name)}</b><small>${esc(posLabel(ME.pos.id))}</small></div></a>
+        <a class="who" href="#profile" title="حساب و مشخصات متصدی">${av(ME.user.name)}<div><b>${esc(panelName(ME.pos))}</b><small>متصدی فعلی: ${esc(ME.user.name)}</small></div></a>
         <button class="ibtn" data-a="logout" aria-label="خروج">${ic('logout')}</button>
       </header>
       ${SERVER ? '' : `<div class="demobar" role="note">${ic('alert')}<span>نسخه نمایشی: داده‌ها نمونه‌اند و در همین مرورگر ${typeof Sync !== 'undefined' && Sync.mode === 'shared' ? 'و پایگاه پیش‌نمایش' : ''} نگهداری می‌شوند. برای اطلاعات واقعی از نسخه سروری استفاده کنید.</span></div>`}
@@ -479,7 +481,9 @@ A.tab = d => { vs(d.key).tab = d.v; refresh(); };
 A.go = d => { location.hash = d.h; };
 
 function route() {
-  if (!ME) return;
+  if (location.hash === '#library') { Lib.load().then(renderLibrary); return; }
+  if (!ME) { if (!$('#loginf') && !$('#signf')) renderLogin(); return; }
+  if (!$('#main')) return renderShell();
   const h = location.hash.slice(1) || 'dashboard';
   const m = h.match(/^unit-(\d+)$/);
   const fn = m ? () => pgUnit(+m[1]) : PAGES[h] || PAGES.dashboard;

@@ -24,7 +24,8 @@ function boot() {
   const [sid, ses] = (sess.get() || '').split('|');
   const u = sid && userById(sid);
   const s = DB.sessions.find(x => x.id === ses);
-  if (u && u.active && !u.deleted && u.posId && s && s.active) { setMe(u); renderShell(); } else { sess.set(null); renderLogin(); }
+  if (u && u.active && !u.deleted && u.posId && s && s.active) setMe(u); else sess.set(null);
+  if (location.hash === '#library') route(); else if (ME) renderShell(); else renderLogin();
   Sync.init();
 }
 boot();
