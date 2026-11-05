@@ -1,0 +1,894 @@
+<title>سامانه حضور خادم‌الشهدا</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&family=Noto+Nastaliq+Urdu:wght@500;700&display=swap">
+<style>
+/* Layout: right-hand rail of sections (RTL), working pane on the left; paper documents (letters, reports) sit on a fixed white sheet in both themes. */
+:root{
+  --bg:#e9ece5; --surface:#f8f9f5; --surface-2:#eef1ea; --ink:#18231d; --muted:#58665d; --line:#d0d6cb;
+  --accent:#1d5640; --accent-soft:#d6e6dc; --accent-ink:#ffffff;
+  --seal:#7f2a26;
+  --ok:#23704a; --ok-soft:#d5ecdd; --bad:#a8322b; --bad-soft:#f5dcd8; --warn:#93600f; --warn-soft:#f4e6c9;
+  --paper:#ffffff; --paper-ink:#1a1a1a; --paper-line:#7f2a26; --paper-muted:#555555;
+  --f-body:"Vazirmatn",Tahoma,"Segoe UI",sans-serif;
+  --f-display:"Noto Nastaliq Urdu","Vazirmatn",serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101613; --surface:#18201c; --surface-2:#1f2924; --ink:#e3e9e2; --muted:#98a59c; --line:#2d3832;
+  --accent:#62b58c; --accent-soft:#1f3a2d; --accent-ink:#0b1711;
+  --seal:#da7a70;
+  --ok:#6cc690; --ok-soft:#1d3a29; --bad:#ef7d72; --bad-soft:#40211e; --warn:#e2aa52; --warn-soft:#3b2e17;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101613; --surface:#18201c; --surface-2:#1f2924; --ink:#e3e9e2; --muted:#98a59c; --line:#2d3832;
+  --accent:#62b58c; --accent-soft:#1f3a2d; --accent-ink:#0b1711;
+  --seal:#da7a70;
+  --ok:#6cc690; --ok-soft:#1d3a29; --bad:#ef7d72; --bad-soft:#40211e; --warn:#e2aa52; --warn-soft:#3b2e17;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.7;direction:rtl}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.4}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------- login ---------- */
+#login{min-height:100%;display:grid;place-items:center;padding-block:32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.login-card{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:28px 24px;display:grid;gap:18px}
+.login-head{display:grid;justify-items:center;gap:4px;text-align:center}
+.login-head svg{width:68px;height:68px;color:var(--seal)}
+.brand-name{font-family:var(--f-display);font-weight:700;font-size:19px;line-height:2.2;color:var(--seal)}
+.brand-sub{color:var(--muted);font-size:13px}
+.field{display:grid;gap:4px}
+.field label{font-size:13px;color:var(--muted);font-weight:500}
+.field input,.field select,.field textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%}
+.field textarea{min-height:180px;line-height:2;resize:vertical}
+.demo{border-top:1px dashed var(--line);padding-top:12px;font-size:13px;color:var(--muted);display:grid;gap:6px}
+.demo-list{display:flex;flex-wrap:wrap;gap:6px}
+.err{color:var(--bad);font-size:13px;min-height:1em}
+
+/* ---------- shell ---------- */
+#app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100%}
+.rail{background:var(--surface);border-left:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;gap:18px;position:sticky;top:0;height:100vh;height:100dvh;overflow:auto}
+.rail-brand{display:flex;gap:10px;align-items:center}
+.rail-brand svg{width:42px;height:42px;flex:none;color:var(--seal)}
+.rail-brand .t{font-family:var(--f-display);font-weight:700;font-size:13px;line-height:2.1;color:var(--seal)}
+.rail-brand .s{font-size:11.5px;color:var(--muted)}
+nav{display:grid;gap:2px}
+nav a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;color:var(--ink);text-decoration:none;font-weight:500}
+nav a svg{width:18px;height:18px;flex:none;color:var(--muted)}
+nav a:hover{background:var(--surface-2)}
+nav a[aria-current="page"]{background:var(--accent);color:var(--accent-ink)}
+nav a[aria-current="page"] svg{color:var(--accent-ink)}
+.me{margin-top:auto;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:6px;font-size:13px}
+.me b{font-size:14px}
+main{padding-block:24px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));min-width:0;display:grid;gap:18px;align-content:start}
+.page-head{display:flex;flex-wrap:wrap;gap:12px;align-items:end;justify-content:space-between}
+.page-head h1{font-size:22px;font-weight:800}
+.page-head p{margin:2px 0 0;color:var(--muted);font-size:13.5px}
+.sample-note{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:8px 12px;font-size:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* ---------- controls ---------- */
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 13px;cursor:pointer;font-weight:500;white-space:nowrap;text-decoration:none}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{color:var(--bad)}
+.btn.sm{padding:3px 9px;font-size:13px}
+.btn.link{border:0;background:none;padding:0;color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.btn svg{width:16px;height:16px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.toolbar input[type=search],.toolbar input[type=text],.toolbar select{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 11px;min-width:0}
+.toolbar input[type=search]{flex:1 1 220px}
+.chips{display:flex;gap:4px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 12px;cursor:pointer;font-size:13px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.pill{display:inline-block;border-radius:999px;padding:1px 10px;font-size:12.5px;font-weight:500;white-space:nowrap}
+.pill.active,.pill.p{background:var(--ok-soft);color:var(--ok)}
+.pill.normal,.pill.e{background:var(--warn-soft);color:var(--warn)}
+.pill.inactive,.pill.a{background:var(--bad-soft);color:var(--bad)}
+.pill.none{background:var(--surface-2);color:var(--muted)}
+.pill.draft{background:var(--surface-2);color:var(--muted)}
+.pill.sent{background:var(--accent-soft);color:var(--accent)}
+.pill.seen{background:var(--ok-soft);color:var(--ok)}
+.type{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:0 7px}
+
+/* ---------- panels, tables ---------- */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);min-width:0}
+.panel > h2{font-size:15px;font-weight:700;padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.panel-body{padding:14px 16px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:right;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:12.5px;color:var(--muted);font-weight:500;background:var(--surface-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--surface-2)}
+td.actions{white-space:nowrap;text-align:left}
+td.actions .btn{margin-inline-start:4px}
+.who{display:flex;align-items:center;gap:10px}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.avatar.lg{width:72px;height:72px;font-size:24px}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:grid;gap:2px}
+.stat .k{font-size:12.5px;color:var(--muted)}
+.stat .v{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.3}
+.stat .h{font-size:12.5px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:18px;align-items:start}
+
+.bar{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden;display:flex;min-width:90px}
+.bar i{display:block;height:100%}
+.bar .p{background:var(--ok)} .bar .e{background:var(--warn)} .bar .a{background:var(--bad)}
+.legend{display:flex;gap:14px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.legend span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:2px;margin-left:5px;background:var(--c)}
+
+/* ---------- attendance sheet ---------- */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:5px 12px;cursor:pointer;font-size:13.5px;border-inline-start:1px solid var(--line)}
+.seg button:first-child{border-inline-start:0}
+.seg button[aria-pressed="true"].p{background:var(--ok);color:var(--paper)}
+.seg button[aria-pressed="true"].a{background:var(--bad);color:var(--paper)}
+.seg button[aria-pressed="true"].e{background:var(--warn);color:var(--paper)}
+.prog-head{display:grid;gap:6px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted);font-size:13.5px}
+.meta b{color:var(--ink);font-weight:500}
+
+/* ---------- profile ---------- */
+.profile{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.profile h2{font-size:21px;font-weight:800}
+.info{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px 18px}
+.info div{display:grid}
+.info dt{font-size:12px;color:var(--muted)}
+.info dd{margin:0;font-weight:500}
+
+/* ---------- modal ---------- */
+.overlay{position:fixed;inset:0;background:rgb(10 16 13 / .55);display:grid;place-items:center;z-index:50;padding-block:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-bottom,0px));padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+.modal{background:var(--surface);border-radius:14px;width:100%;max-width:640px;max-height:100%;display:flex;flex-direction:column;border:1px solid var(--line)}
+.modal.wide{max-width:900px}
+.modal header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);gap:8px}
+.modal header h3{font-size:16px}
+.modal .mbody{padding:16px;overflow:auto;display:grid;gap:12px}
+.modal footer{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;align-items:center}
+.modal footer .hint{margin-inline-end:auto;font-size:12.5px;color:var(--muted)}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.form-grid .full{grid-column:1/-1}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 18px;border-radius:999px;font-size:14px;z-index:60;box-shadow:0 6px 20px rgb(0 0 0 / .2)}
+
+/* ---------- paper (letters & printable reports) ---------- */
+.paper-wrap{overflow-x:auto;background:var(--surface-2);border-radius:8px;padding:16px}
+.paper{width:794px;min-height:1080px;margin:0 auto;background:var(--paper);color:var(--paper-ink);padding:40px 48px 36px;font-size:14px;line-height:2;display:flex;flex-direction:column;box-shadow:0 2px 14px rgb(0 0 0 / .12)}
+.lh{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:12px}
+.lh-id{display:flex;gap:12px;align-items:center}
+.lh-id svg{width:74px;height:74px;flex:none;color:var(--paper-line)}
+.lh-name{font-family:var(--f-display);font-weight:700;font-size:17px;line-height:2.2;color:var(--paper-line)}
+.lh-sub{font-family:var(--f-display);font-size:13.5px;line-height:2.2;color:var(--paper-ink)}
+.lh-bism{font-family:var(--f-display);font-size:15px;text-align:center;padding-top:4px}
+.lh-meta{justify-self:end;font-size:13px;display:grid;gap:0;min-width:170px}
+.lh-meta div{display:flex;gap:6px;border-bottom:1px dotted var(--paper-muted)}
+.lh-meta span{color:var(--paper-muted);min-width:44px}
+.lh-rule{border:0;border-top:2.5px solid var(--paper-line);margin:14px 0 2px}
+.lh-rule2{border:0;border-top:.8px solid var(--paper-line);margin:0 0 22px}
+.letter-to{font-weight:700}
+.letter-subj{margin:6px 0 14px}
+.letter-subj b{font-weight:700}
+.letter-body{white-space:pre-wrap;text-align:justify;flex:1}
+.sign{margin-top:28px;display:flex;justify-content:flex-end}
+.sign div{text-align:center;min-width:220px}
+.sign .n{font-weight:700}
+.order{margin-top:18px;border:1px solid var(--paper-line);padding:10px 14px;border-radius:4px}
+.order h4{margin:0 0 4px;color:var(--paper-line);font-size:13px}
+.paper-foot{margin-top:24px;border-top:.8px solid var(--paper-line);padding-top:6px;font-size:11.5px;color:var(--paper-muted);display:flex;justify-content:space-between;gap:12px}
+.paper h3.doc-title{text-align:center;font-size:17px;margin-bottom:12px}
+.paper table{font-size:13px}
+.paper th{background:#f1ece4;color:var(--paper-ink)}
+.paper th,.paper td{border:1px solid #c9c2b8;padding:5px 9px}
+.paper tbody tr:hover td{background:transparent}
+.paper .kv{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 18px;margin-bottom:14px;font-size:13.5px}
+.paper .kv span{color:var(--paper-muted)}
+.paper .sum{display:flex;gap:22px;margin:10px 0 14px;font-size:13.5px;flex-wrap:wrap}
+.paper .signs{display:flex;justify-content:space-between;margin-top:36px;text-align:center}
+.paper .st-p{color:#1f6b42;font-weight:700} .paper .st-a{color:#a8322b;font-weight:700} .paper .st-e{color:#8a5a0e;font-weight:700}
+
+#print-area{display:none}
+
+@media (max-width:860px){
+  #app{grid-template-columns:minmax(0,1fr)}
+  .rail{position:sticky;top:env(safe-area-inset-top,0px);height:auto;z-index:20;flex-direction:column;gap:10px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-left:0;border-bottom:1px solid var(--line)}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+  nav{display:flex;overflow-x:auto;gap:4px}
+  nav a{white-space:nowrap;padding:6px 10px}
+  .me{margin:0;border:0;padding:0;display:flex;align-items:center;justify-content:space-between;position:absolute;top:10px;left:max(16px,env(safe-area-inset-left,0px))}
+  .me .who-txt{display:none}
+  main{padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .grid2{grid-template-columns:minmax(0,1fr)}
+  .form-grid{grid-template-columns:minmax(0,1fr)}
+}
+@media print{
+  @page{size:A4;margin:0}
+  body{background:#fff}
+  body > *:not(#print-area){display:none !important}
+  #print-area{display:block}
+  #print-area .paper{box-shadow:none;width:210mm;min-height:297mm;margin:0;padding:14mm 16mm}
+}
+@media (prefers-reduced-motion:no-preference){.btn,.chip,nav a{transition:background .15s,border-color .15s}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="emblem" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="3"/>
+    <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="1"/>
+    <path d="M50 20 C59 33 60 47 50 60 C40 47 41 33 50 20Z" fill="currentColor"/>
+    <path d="M50 61 C36 59 28 47 30 31 C38 37 45 46 50 61Z" fill="currentColor" opacity=".8"/>
+    <path d="M50 61 C64 59 72 47 70 31 C62 37 55 46 50 61Z" fill="currentColor" opacity=".8"/>
+    <path d="M50 60 L50 82" stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    <path d="M50 76 C43 71 36 71 31 66 C39 65 46 68 50 76Z" fill="currentColor"/>
+    <path d="M50 72 C57 67 63 67 68 62 C61 61 54 64 50 72Z" fill="currentColor"/>
+  </symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16.5 14.6c2.6.1 4.4 1.7 5 4.4"/></g></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14.5l2.5 2.3L16 12.5" stroke-linecap="round" stroke-linejoin="round"/></g></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20h16"/><path d="M7 16v-5M12 16V6M17 16v-8"/></g></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3.5h9l4 4V20.5H6z"/><path d="M15 3.5v4h4M9 12h7M9 15.5h7M9 8.5h3"/></g></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l2.5 2.5M14 9l2 2"/></g></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4.5h12l-2.5 4 2.5 4H5"/></g></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="1.5"/><path d="M7 14h10v6.5H7z"/></g></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+</svg>
+
+<div id="login" hidden>
+  <form class="login-card" id="login-form" autocomplete="off">
+    <div class="login-head">
+      <svg><use href="#emblem"/></svg>
+      <div class="brand-name" data-bind="baseName"></div>
+      <div class="brand-sub" data-bind="subtitle"></div>
+      <div class="brand-sub">سامانه حضور و غیاب و امور نیروی انسانی</div>
+    </div>
+    <div class="field"><label for="lg-user">شناسه کاربری</label><input id="lg-user" required dir="ltr"></div>
+    <div class="field"><label for="lg-pass">رمز عبور</label><input id="lg-pass" type="password" required dir="ltr"></div>
+    <div class="err" id="lg-err"></div>
+    <button class="btn primary" type="submit" style="justify-content:center">ورود به سامانه</button>
+    <div class="demo">
+      <div>حساب‌های آزمایشی پیش‌نمایش (برای پر شدن فرم روی هر کدام بزنید):</div>
+      <div class="demo-list" id="demo-list"></div>
+    </div>
+  </form>
+</div>
+
+<div id="app" hidden>
+  <aside class="rail">
+    <div class="rail-brand">
+      <svg><use href="#emblem"/></svg>
+      <div><div class="t" data-bind="baseName"></div><div class="s" data-bind="subtitle"></div></div>
+    </div>
+    <nav id="nav"></nav>
+    <div class="me">
+      <div class="who-txt"><b id="me-name"></b><div id="me-role" style="color:var(--muted)"></div></div>
+      <button class="btn sm" data-act="logout">خروج</button>
+    </div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<div id="modal-root"></div>
+<div id="print-area"></div>
+
+<script>
+(() => {
+'use strict';
+/* ================= helpers ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const FA = '۰۱۲۳۴۵۶۷۸۹';
+const fa = v => String(v ?? '').replace(/[0-9]/g, d => FA[d]);
+const en = v => String(v ?? '').replace(/[۰-۹]/g, d => FA.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = p => p + Math.random().toString(36).slice(2, 9);
+const MONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+function todayJ(){
+  try{
+    const parts = new Intl.DateTimeFormat('en-US-u-ca-persian-nu-latn',{year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+    const g = t => (parts.find(p => p.type === t) || {}).value || '';
+    return `${g('year').replace(/\D/g,'')}/${g('month')}/${g('day')}`;
+  }catch(e){ return '1405/08/14'; }
+}
+function normDate(s){
+  const m = en(s).trim().match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/);
+  if(!m) return null;
+  const y=+m[1], mo=+m[2], d=+m[3];
+  if(y<1300||y>1500||mo<1||mo>12||d<1||d>31||(mo>6&&d>30)) return null;
+  return `${y}/${String(mo).padStart(2,'0')}/${String(d).padStart(2,'0')}`;
+}
+function fmtDate(s){
+  if(!s) return '—';
+  const [y,m,d] = s.split('/');
+  return `${fa(+d)} ${MONTHS[+m-1]||''} ${fa(y)}`;
+}
+const pct = (a,b) => b ? Math.round(a*100/b) : 0;
+const initials = m => (m.first||' ')[0] + '‌' + (m.last||' ')[0];
+const fullName = m => `${m.first} ${m.last}`;
+function toast(msg){
+  const t = document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(), 2200);
+}
+const icon = id => `<svg aria-hidden="true"><use href="#${id}"/></svg>`;
+const inFrame = (()=>{ try{ return window.self !== window.top; }catch(e){ return true; } })();
+
+/* ================= data ================= */
+const DB_KEY = 'basij-hozour-v1';
+const STATUS = {active:'فعال', normal:'عادی', inactive:'غیرفعال'};
+const ATT = {p:'حاضر', a:'غایب', e:'موجه'};
+const TYPES = ['رزمایش','صبحگاه','جلسه','اردو','مراسم','آموزش','کار جهادی','سایر'];
+const ROLES = {
+  admin:     {label:'مدیر سامانه',     can:['members','programs','attendance','letters','users','setup']},
+  commander: {label:'فرمانده پایگاه',  can:['members','programs','attendance','letters','review']},
+  hr:        {label:'نیروی انسانی',    can:['members','programs','attendance','letters']},
+  cyber:     {label:'فضای مجازی',      can:['programs','attendance']},
+};
+const LSTAT = {draft:'پیش‌نویس', sent:'ارسال به فرماندهی', seen:'رؤیت فرمانده'};
+
+function seed(){
+  const names = [['محمدحسین','رضایی','علی'],['علی','کریمی','حسن'],['مهدی','احمدی','رضا'],['امیرحسین','موسوی','سیدمحمد'],['سجاد','نوری','قاسم'],['حسین','صادقی','محمود'],['رضا','جعفری','اکبر'],['محمدرضا','قاسمی','عباس'],['ابوالفضل','حیدری','مجید'],['مصطفی','رحیمی','ناصر'],['یاسین','کاظمی','جواد'],['محمدامین','باقری','حمید']];
+  const st = ['active','active','active','normal','active','normal','active','inactive','active','normal','active','normal'];
+  const groups = ['جوان','جوان','بزرگسال','نوجوان','جوان','بزرگسال','جوان','بزرگسال','نوجوان','جوان','نوجوان','جوان'];
+  const members = names.map((n,i)=>({
+    id:'m'+(i+1), first:n[0], last:n[1], father:n[2],
+    nationalId:'000'+String(1234560+i*37).padStart(7,'0'), birth:`${1370+(i*3)%17}/${String(1+i%12).padStart(2,'0')}/${String(5+i*2%23).padStart(2,'0')}`,
+    phone:'0912000'+String(1000+i*113).slice(0,4), memberNo:'۱۴۰'+(i%5)+'-'+(101+i), status:st[i], group:groups[i],
+    joinDate:`${1398+i%6}/0${1+i%9}/1${i%9}`, education:['دیپلم','کارشناسی','دانش‌آموز','کاردانی','کارشناسی ارشد'][i%5],
+    address:'محله شباب، کوچه شهید '+['همت','باکری','خرازی','کاظمی'][i%4], notes:''
+  }));
+  const programs = [
+    {id:'p1', title:'صبحگاه مشترک پایگاه', type:'صبحگاه', date:'1405/07/15', time:'06:30', place:'حیاط مسجد شباب اهل جنت', desc:''},
+    {id:'p2', title:'رزمایش اقتدار عاشورایی', type:'رزمایش', date:'1405/07/29', time:'08:00', place:'پارک محله', desc:'رزمایش منطقه‌ای با حضور گردان‌های محلات'},
+    {id:'p3', title:'اردوی جهادی روستای کلاته', type:'کار جهادی', date:'1405/08/01', time:'07:00', place:'روستای کلاته', desc:'سه روزه؛ تعمیر مدرسه روستا'},
+    {id:'p4', title:'جلسه هفتگی حلقه صالحین', type:'جلسه', date:'1405/08/06', time:'19:30', place:'کتابخانه مسجد', desc:''},
+    {id:'p5', title:'غبارروبی گلزار شهدا', type:'مراسم', date:'1405/08/10', time:'16:00', place:'گلزار شهدای شهر', desc:''},
+    {id:'p6', title:'رزمایش پدافند غیرعامل', type:'رزمایش', date:'1405/08/20', time:'08:00', place:'حیاط مسجد', desc:'برنامه آینده'},
+  ];
+  const attendance = {};
+  const pattern = {p1:'ppapppaepppa', p2:'pppepppapppe', p3:'ppappeppaapp', p4:'pppppaapppep', p5:'pepppaappppa'};
+  for(const [pid, pat] of Object.entries(pattern)){
+    attendance[pid] = {};
+    members.forEach((m,i)=>{ if(m.status==='inactive' && pat[i]!=='p') return; attendance[pid][m.id] = pat[i]; });
+  }
+  return {
+    sample:true,
+    settings:{ baseName:'پایگاه مقاومت بسیج خادم‌الشهدا حاج احمد یلالی', subtitle:'مسجد شباب اهل جنت', address:'', phone:'', letterSeq:3 },
+    users:[
+      {id:'u1', username:'admin',     password:'admin123', name:'مدیر سامانه',          role:'admin'},
+      {id:'u2', username:'farmandeh', password:'1234',     name:'فرمانده پایگاه',        role:'commander'},
+      {id:'u3', username:'niroo',     password:'1234',     name:'مسئول نیروی انسانی',    role:'hr'},
+      {id:'u4', username:'majazi',    password:'1234',     name:'مسئول فضای مجازی',      role:'cyber'},
+    ],
+    members, programs, attendance,
+    letters:[
+      {id:'l1', no:'1405/1', date:'1405/07/30', to:'فرمانده محترم پایگاه', subject:'گزارش برگزاری رزمایش اقتدار عاشورایی', attach:'فهرست حاضرین', body:'سلام علیکم\nبا احترام، به استحضار می‌رساند رزمایش اقتدار عاشورایی در تاریخ ۲۹ مهرماه با حضور ۹ نفر از نیروهای پایگاه برگزار شد. فهرست حاضرین پیوست است.\nخواهشمند است دستور فرمایید از نیروهای فعال تقدیر شود.', signer:'مسئول نیروی انسانی', by:'u3', status:'seen', order:'اقدام شود؛ لوح تقدیر برای نفرات حاضر تهیه گردد.'},
+      {id:'l2', no:'1405/2', date:'1405/08/11', to:'فرمانده محترم پایگاه', subject:'درخواست تجهیزات اردوی جهادی', attach:'ندارد', body:'سلام علیکم\nاحتراماً جهت برگزاری اردوی جهادی آتی، تأمین وسایل زیر درخواست می‌شود:\n۱. ده عدد بیل و کلنگ\n۲. رنگ و قلم‌مو برای بازسازی مدرسه\n۳. هماهنگی وسیله نقلیه\nخواهشمند است دستور مقتضی صادر فرمایید.', signer:'مسئول نیروی انسانی', by:'u3', status:'sent', order:''},
+    ],
+  };
+}
+let db;
+function load(){
+  try{ const s = localStorage.getItem(DB_KEY); if(s){ db = JSON.parse(s); return; } }catch(e){}
+  db = seed();
+}
+function save(){ try{ localStorage.setItem(DB_KEY, JSON.stringify(db)); }catch(e){} }
+
+let me = null;
+function restoreSession(){
+  try{ const id = sessionStorage.getItem('basij-hozour-user'); me = db.users.find(u => u.id === id) || null; }catch(e){ me = null; }
+}
+const can = p => !!me && ROLES[me.role].can.includes(p);
+
+/* ---------- stats ---------- */
+const memberById = id => db.members.find(m => m.id === id);
+const progById = id => db.programs.find(p => p.id === id);
+function memberStats(mid, programs = db.programs){
+  const s = {p:0,a:0,e:0,total:0, rows:[]};
+  for(const p of programs){
+    const v = (db.attendance[p.id]||{})[mid];
+    if(!v) continue;
+    s[v]++; s.total++; s.rows.push({p, v});
+  }
+  s.rows.sort((x,y)=> x.p.date < y.p.date ? 1 : -1);
+  return s;
+}
+function progStats(pid){
+  const r = db.attendance[pid] || {}; const s = {p:0,a:0,e:0,total:0};
+  for(const v of Object.values(r)){ if(s[v]!==undefined){ s[v]++; s.total++; } }
+  return s;
+}
+const barHTML = s => s.total ? `<div class="bar" title="حاضر ${fa(s.p)} · موجه ${fa(s.e)} · غایب ${fa(s.a)}"><i class="p" style="width:${s.p*100/s.total}%"></i><i class="e" style="width:${s.e*100/s.total}%"></i><i class="a" style="width:${s.a*100/s.total}%"></i></div>` : '<span class="pill none">ثبت نشده</span>';
+
+/* ================= routing & shell ================= */
+const VIEWS = [
+  {id:'dashboard', label:'پیشخوان',          icon:'i-home'},
+  {id:'members',   label:'نیروی انسانی',      icon:'i-users'},
+  {id:'programs',  label:'برنامه‌ها و حضور',   icon:'i-cal'},
+  {id:'reports',   label:'گزارش‌ها',           icon:'i-chart'},
+  {id:'letters',   label:'گزارش به فرماندهی', icon:'i-mail'},
+  {id:'accounts',  label:'کاربران سامانه',    icon:'i-key',  need:'users'},
+  {id:'base-info', label:'مشخصات پایگاه',     icon:'i-flag', need:'setup'},
+];
+let state = { view:'dashboard', member:null, program:null, mFilter:'all', mSearch:'', sheetSearch:'', showInactive:false, rFrom:'', rTo:'', rType:'' };
+
+function route(){
+  const h = location.hash.slice(1);
+  const v = VIEWS.find(x => x.id === h && (!x.need || can(x.need)));
+  state.view = v ? v.id : 'dashboard';
+  state.member = null; state.program = null;
+  render();
+}
+function go(view){ if(location.hash.slice(1) === view){ route(); } else { location.hash = view; } }
+
+function bindBrand(){
+  document.querySelectorAll('[data-bind]').forEach(el => { el.textContent = db.settings[el.dataset.bind] || ''; });
+}
+function showLogin(){
+  $('#app').hidden = true; $('#login').hidden = false;
+  bindBrand();
+  $('#demo-list').innerHTML = db.users.slice(0,4).map(u => `<button type="button" class="chip" data-act="fill" data-id="${u.id}">${esc(ROLES[u.role].label)} · <span dir="ltr">${esc(u.username)}</span></button>`).join('');
+}
+function render(){
+  if(!me){ showLogin(); return; }
+  $('#login').hidden = true; $('#app').hidden = false;
+  bindBrand();
+  $('#me-name').textContent = me.name; $('#me-role').textContent = ROLES[me.role].label;
+  $('#nav').innerHTML = VIEWS.filter(v => !v.need || can(v.need)).map(v =>
+    `<a href="#${v.id}" ${v.id===state.view?'aria-current="page"':''}>${icon(v.icon)}<span>${v.label}</span></a>`).join('');
+  const main = $('#main');
+  let html = '';
+  if(state.member) html = viewMember();
+  else if(state.program) html = viewSheet();
+  else html = ({dashboard:viewDashboard, members:viewMembers, programs:viewPrograms, reports:viewReports, letters:viewLetters, accounts:viewAccounts, 'base-info':viewBaseInfo}[state.view])();
+  const note = db.sample ? `<div class="sample-note">اطلاعات فعلی نمونه است تا کار سامانه دیده شود.${can('setup') ? ' <button class="btn sm" data-act="clear-sample">پاک کردن نمونه‌ها و شروع کار واقعی</button>' : ''}</div>` : '';
+  main.innerHTML = note + html;
+}
+
+/* ================= views ================= */
+function viewDashboard(){
+  const ms = db.members, cnt = k => ms.filter(m => m.status===k).length;
+  const today = todayJ();
+  const past = db.programs.filter(p => p.date <= today).sort((a,b)=> a.date<b.date?1:-1);
+  const upcoming = db.programs.filter(p => p.date > today).sort((a,b)=> a.date>b.date?1:-1);
+  let P=0,T=0; past.forEach(p=>{ const s=progStats(p.id); P+=s.p; T+=s.total; });
+  const ranked = ms.map(m => ({m, s:memberStats(m.id)})).filter(x=>x.s.total).sort((a,b)=> b.s.p - a.s.p || pct(b.s.p,b.s.total)-pct(a.s.p,a.s.total)).slice(0,6);
+  const pending = db.letters.filter(l => l.status==='sent');
+  return `
+  <div class="page-head"><div><h1>پیشخوان</h1><p>امروز ${fmtDate(today)} · خوش آمدید ${esc(me.name)}</p></div>
+    <div class="toolbar">${can('attendance') && past[0] ? `<button class="btn primary" data-act="open-sheet" data-id="${past[0].id}">${icon('i-cal')}حضور و غیاب آخرین برنامه</button>`:''}</div></div>
+  <div class="stats">
+    <div class="stat"><span class="k">کل نیروها</span><span class="v">${fa(ms.length)}</span><span class="h">${fa(cnt('active'))} فعال · ${fa(cnt('normal'))} عادی · ${fa(cnt('inactive'))} غیرفعال</span></div>
+    <div class="stat"><span class="k">برنامه‌های برگزارشده</span><span class="v">${fa(past.length)}</span><span class="h">${fa(upcoming.length)} برنامه پیش رو</span></div>
+    <div class="stat"><span class="k">میانگین حضور</span><span class="v">${fa(pct(P,T))}٪</span><span class="h">${fa(P)} حضور از ${fa(T)} ثبت</span></div>
+    <div class="stat"><span class="k">نامه‌های منتظر فرمانده</span><span class="v">${fa(pending.length)}</span><span class="h">${pending.length?'در انتظار رؤیت':'همه رؤیت شده'}</span></div>
+  </div>
+  <div class="grid2">
+    <section class="panel"><h2>آخرین برنامه‌ها <span class="legend"><span style="--c:var(--ok)">حاضر</span><span style="--c:var(--warn)">موجه</span><span style="--c:var(--bad)">غایب</span></span></h2>
+      <div class="scroll"><table><thead><tr><th>تاریخ</th><th>برنامه</th><th>حضور</th><th style="width:30%">ترکیب</th></tr></thead><tbody>
+      ${[...upcoming.slice(0,2).reverse(), ...past.slice(0,5)].map(p => { const s=progStats(p.id); return `<tr><td class="num">${fmtDate(p.date)}</td><td><button class="btn link" data-act="open-sheet" data-id="${p.id}">${esc(p.title)}</button> <span class="type">${esc(p.type)}</span></td><td class="num">${p.date>today?'<span class="pill sent">پیش رو</span>':fa(s.p)+' نفر'}</td><td>${p.date>today?'':barHTML(s)}</td></tr>`; }).join('')}
+      </tbody></table></div></section>
+    <section class="panel"><h2>بیشترین حضور</h2>
+      <div class="scroll"><table><tbody>
+      ${ranked.map(({m,s}) => `<tr><td><div class="who"><span class="avatar">${esc(initials(m))}</span><button class="btn link" data-act="open-member" data-id="${m.id}">${esc(fullName(m))}</button></div></td><td class="num">${fa(s.p)} از ${fa(s.total)}</td><td><span class="pill ${m.status}">${STATUS[m.status]}</span></td></tr>`).join('') || '<tr><td class="empty">هنوز حضوری ثبت نشده</td></tr>'}
+      </tbody></table></div></section>
+  </div>`;
+}
+
+function viewMembers(){
+  const q = state.mSearch.trim();
+  const list = db.members.filter(m => (state.mFilter==='all' || m.status===state.mFilter) &&
+      (!q || [m.first,m.last,m.father,m.nationalId,m.phone,m.memberNo].some(x => en(x||'').includes(en(q)))));
+  const chip = (k,l) => `<button class="chip" data-act="m-filter" data-id="${k}" aria-pressed="${state.mFilter===k}">${l} <span class="num">${fa(k==='all'?db.members.length:db.members.filter(m=>m.status===k).length)}</span></button>`;
+  return `
+  <div class="page-head"><div><h1>نیروی انسانی</h1><p>پرونده نیروهای پایگاه؛ ورود، ویرایش، تعیین وضعیت و گرفتن کارنامه حضور</p></div>
+    ${can('members') ? `<button class="btn primary" data-act="member-new">${icon('i-plus')}افزودن نیرو</button>` : ''}</div>
+  <div class="toolbar">
+    <input type="search" id="m-search" placeholder="جستجو با نام، کد ملی، تلفن یا شماره عضویت" value="${esc(state.mSearch)}">
+    <div class="chips">${chip('all','همه')}${chip('active','فعال')}${chip('normal','عادی')}${chip('inactive','غیرفعال')}</div>
+  </div>
+  <section class="panel"><div class="scroll"><table>
+    <thead><tr><th>نام و نام خانوادگی</th><th>نام پدر</th><th>شماره عضویت</th><th>تلفن</th><th>رده</th><th>وضعیت</th><th>حضور</th><th></th></tr></thead>
+    <tbody>${list.map(m => { const s = memberStats(m.id); return `<tr>
+      <td><div class="who"><span class="avatar">${esc(initials(m))}</span><button class="btn link" data-act="open-member" data-id="${m.id}">${esc(fullName(m))}</button></div></td>
+      <td>${esc(m.father)}</td><td class="num">${esc(fa(m.memberNo))}</td><td class="num" dir="ltr" style="text-align:right">${esc(fa(m.phone))}</td><td>${esc(m.group)}</td>
+      <td><span class="pill ${m.status}">${STATUS[m.status]}</span></td>
+      <td class="num">${s.total ? `${fa(s.p)} از ${fa(s.total)} <span style="color:var(--muted)">(${fa(pct(s.p,s.total))}٪)</span>` : '—'}</td>
+      <td class="actions"><button class="btn sm" data-act="print-member" data-id="${m.id}">${icon('i-print')}کارنامه</button>${can('members')?`<button class="btn sm" data-act="member-edit" data-id="${m.id}">ویرایش</button><button class="btn sm danger" data-act="member-del" data-id="${m.id}">حذف</button>`:''}</td>
+    </tr>`; }).join('') || `<tr><td colspan="8" class="empty">نیرویی با این مشخصات پیدا نشد</td></tr>`}</tbody>
+  </table></div></section>`;
+}
+
+function viewMember(){
+  const m = memberById(state.member); if(!m) return '<div class="empty">این نیرو پیدا نشد</div>';
+  const s = memberStats(m.id);
+  const f = (k,v) => `<div><dt>${k}</dt><dd>${esc(v)||'—'}</dd></div>`;
+  return `
+  <div class="page-head"><div><button class="btn link" data-act="back" data-id="members">بازگشت به فهرست نیروها</button></div>
+    <div class="toolbar"><button class="btn primary" data-act="print-member" data-id="${m.id}">${icon('i-print')}کارنامه حضور (PDF)</button>${can('members')?`<button class="btn" data-act="member-edit" data-id="${m.id}">ویرایش مشخصات</button>`:''}</div></div>
+  <section class="panel"><div class="panel-body" style="display:grid;gap:18px">
+    <div class="profile"><span class="avatar lg">${esc(initials(m))}</span>
+      <div><h2>${esc(fullName(m))}</h2><div class="meta"><span>فرزند <b>${esc(m.father)}</b></span><span>شماره عضویت <b class="num">${esc(fa(m.memberNo))}</b></span><span class="pill ${m.status}">${STATUS[m.status]}</span></div></div></div>
+    <dl class="info" style="margin:0">
+      ${f('کد ملی', fa(m.nationalId))}${f('تاریخ تولد', m.birth?fmtDate(m.birth):'')}${f('تلفن همراه', fa(m.phone))}${f('رده سنی', m.group)}
+      ${f('تحصیلات', m.education)}${f('تاریخ عضویت', m.joinDate?fmtDate(m.joinDate):'')}${f('نشانی', m.address)}${f('توضیحات', m.notes)}
+    </dl></div></section>
+  <div class="stats">
+    <div class="stat"><span class="k">حاضر</span><span class="v" style="color:var(--ok)">${fa(s.p)}</span></div>
+    <div class="stat"><span class="k">غیبت موجه</span><span class="v" style="color:var(--warn)">${fa(s.e)}</span></div>
+    <div class="stat"><span class="k">غایب</span><span class="v" style="color:var(--bad)">${fa(s.a)}</span></div>
+    <div class="stat"><span class="k">درصد حضور</span><span class="v">${fa(pct(s.p,s.total))}٪</span><span class="h">از ${fa(s.total)} برنامه ثبت‌شده</span></div>
+  </div>
+  <section class="panel"><h2>سوابق حضور در برنامه‌ها</h2><div class="scroll"><table>
+    <thead><tr><th>تاریخ</th><th>برنامه</th><th>نوع</th><th>محل</th><th>وضعیت</th></tr></thead>
+    <tbody>${s.rows.map(({p,v}) => `<tr><td class="num">${fmtDate(p.date)}</td><td>${esc(p.title)}</td><td><span class="type">${esc(p.type)}</span></td><td>${esc(p.place)}</td><td><span class="pill ${v}">${ATT[v]}</span></td></tr>`).join('') || '<tr><td colspan="5" class="empty">هنوز در برنامه‌ای ثبت نشده</td></tr>'}</tbody>
+  </table></div></section>`;
+}
+
+function viewPrograms(){
+  const today = todayJ();
+  const list = [...db.programs].sort((a,b)=> a.date<b.date?1:-1);
+  return `
+  <div class="page-head"><div><h1>برنامه‌ها و حضور و غیاب</h1><p>برای هر برنامه، حضور نیروها توسط مسئولین ثبت می‌شود؛ نیروها خودشان چیزی ثبت نمی‌کنند</p></div>
+    ${can('programs') ? `<button class="btn primary" data-act="prog-new">${icon('i-plus')}برنامه جدید</button>` : ''}</div>
+  <section class="panel"><div class="scroll"><table>
+    <thead><tr><th>تاریخ</th><th>عنوان برنامه</th><th>نوع</th><th>ساعت و محل</th><th>حاضر</th><th>غایب</th><th>موجه</th><th></th></tr></thead>
+    <tbody>${list.map(p => { const s = progStats(p.id), fut = p.date > today; return `<tr>
+      <td class="num">${fmtDate(p.date)}</td>
+      <td><b style="font-weight:500">${esc(p.title)}</b>${fut?' <span class="pill sent">پیش رو</span>':''}</td>
+      <td><span class="type">${esc(p.type)}</span></td>
+      <td>${p.time?`<span class="num">${fa(p.time)}</span> · `:''}${esc(p.place)}</td>
+      <td class="num" style="color:var(--ok)">${fa(s.p)}</td><td class="num" style="color:var(--bad)">${fa(s.a)}</td><td class="num" style="color:var(--warn)">${fa(s.e)}</td>
+      <td class="actions">${can('attendance')?`<button class="btn sm primary" data-act="open-sheet" data-id="${p.id}">حضور و غیاب</button>`:`<button class="btn sm" data-act="open-sheet" data-id="${p.id}">مشاهده</button>`}${can('programs')?`<button class="btn sm" data-act="prog-edit" data-id="${p.id}">ویرایش</button><button class="btn sm danger" data-act="prog-del" data-id="${p.id}">حذف</button>`:''}</td>
+    </tr>`; }).join('') || '<tr><td colspan="8" class="empty">هنوز برنامه‌ای تعریف نشده</td></tr>'}</tbody>
+  </table></div></section>`;
+}
+
+function sheetMembers(p){
+  const rec = db.attendance[p.id] || {};
+  const q = en(state.sheetSearch.trim());
+  return db.members.filter(m => (state.showInactive || m.status!=='inactive' || rec[m.id]) && (!q || en(fullName(m)).includes(q)));
+}
+function viewSheet(){
+  const p = progById(state.program); if(!p) return '<div class="empty">این برنامه پیدا نشد</div>';
+  const rec = db.attendance[p.id] || {}; const s = progStats(p.id); const edit = can('attendance');
+  const list = sheetMembers(p);
+  return `
+  <div class="page-head"><div class="prog-head"><button class="btn link" data-act="back" data-id="programs" style="justify-self:start">بازگشت به برنامه‌ها</button>
+      <h1>${esc(p.title)} <span class="type">${esc(p.type)}</span></h1>
+      <div class="meta"><span>تاریخ <b>${fmtDate(p.date)}</b></span>${p.time?`<span>ساعت <b class="num">${fa(p.time)}</b></span>`:''}<span>محل <b>${esc(p.place)||'—'}</b></span></div></div>
+    <div class="toolbar"><button class="btn" data-act="print-program" data-id="${p.id}">${icon('i-print')}فهرست حاضرین (PDF)</button></div></div>
+  <div class="stats">
+    <div class="stat"><span class="k">حاضر</span><span class="v" style="color:var(--ok)">${fa(s.p)}</span></div>
+    <div class="stat"><span class="k">غایب</span><span class="v" style="color:var(--bad)">${fa(s.a)}</span></div>
+    <div class="stat"><span class="k">موجه</span><span class="v" style="color:var(--warn)">${fa(s.e)}</span></div>
+    <div class="stat"><span class="k">ثبت نشده</span><span class="v">${fa(list.filter(m=>!rec[m.id]).length)}</span></div>
+  </div>
+  <div class="toolbar">
+    <input type="search" id="sheet-search" placeholder="جستجوی نام" value="${esc(state.sheetSearch)}">
+    <label class="chip" style="display:inline-flex;gap:6px;align-items:center"><input type="checkbox" id="show-inactive" ${state.showInactive?'checked':''}> نمایش غیرفعال‌ها</label>
+    ${edit?`<button class="btn" data-act="all-present" data-id="${p.id}">همه حاضر</button><button class="btn" data-act="rest-absent" data-id="${p.id}">بقیه غایب</button>`:''}
+  </div>
+  <section class="panel"><div class="scroll"><table>
+    <thead><tr><th>نیرو</th><th>وضعیت عضویت</th><th>حضور در این برنامه</th></tr></thead>
+    <tbody>${list.map(m => { const v = rec[m.id]; return `<tr>
+      <td><div class="who"><span class="avatar">${esc(initials(m))}</span><span>${esc(fullName(m))}</span></div></td>
+      <td><span class="pill ${m.status}">${STATUS[m.status]}</span></td>
+      <td>${edit ? `<div class="seg" role="group" aria-label="حضور ${esc(fullName(m))}">${['p','a','e'].map(k=>`<button class="${k}" aria-pressed="${v===k}" data-act="mark" data-id="${m.id}" data-v="${k}">${ATT[k]}</button>`).join('')}</div>` : `<span class="pill ${v||'none'}">${v?ATT[v]:'ثبت نشده'}</span>`}</td>
+    </tr>`; }).join('') || '<tr><td colspan="3" class="empty">نیرویی برای نمایش نیست</td></tr>'}</tbody>
+  </table></div></section>`;
+}
+
+function filteredPrograms(){
+  return db.programs.filter(p => (!state.rFrom || p.date >= state.rFrom) && (!state.rTo || p.date <= state.rTo) && (!state.rType || p.type===state.rType));
+}
+function viewReports(){
+  const progs = filteredPrograms();
+  const rows = db.members.map(m => ({m, s:memberStats(m.id, progs)})).sort((a,b)=> b.s.p-a.s.p);
+  return `
+  <div class="page-head"><div><h1>گزارش‌ها</h1><p>جمع حضور هر نیرو در بازه و نوع برنامهٔ انتخابی؛ برای هر نفر کارنامه قابل چاپ بگیرید</p></div>
+    <button class="btn primary" data-act="print-summary">${icon('i-print')}گزارش کلی (PDF)</button></div>
+  <div class="toolbar">
+    <label>از</label><input type="text" id="r-from" placeholder="۱۴۰۵/۰۷/۰۱" value="${esc(fa(state.rFrom))}" size="10" inputmode="numeric">
+    <label>تا</label><input type="text" id="r-to" placeholder="۱۴۰۵/۰۸/۳۰" value="${esc(fa(state.rTo))}" size="10" inputmode="numeric">
+    <select id="r-type"><option value="">همه انواع برنامه</option>${TYPES.map(t=>`<option ${t===state.rType?'selected':''}>${t}</option>`).join('')}</select>
+    <button class="btn" data-act="apply-report">اعمال</button>
+    <span style="color:var(--muted);font-size:13px">${fa(progs.length)} برنامه در این بازه</span>
+  </div>
+  <section class="panel"><div class="scroll"><table>
+    <thead><tr><th>نیرو</th><th>وضعیت</th><th>حاضر</th><th>موجه</th><th>غایب</th><th>درصد حضور</th><th style="width:18%"></th><th></th></tr></thead>
+    <tbody>${rows.map(({m,s}) => `<tr>
+      <td><button class="btn link" data-act="open-member" data-id="${m.id}">${esc(fullName(m))}</button></td><td><span class="pill ${m.status}">${STATUS[m.status]}</span></td>
+      <td class="num">${fa(s.p)}</td><td class="num">${fa(s.e)}</td><td class="num">${fa(s.a)}</td><td class="num">${s.total?fa(pct(s.p,s.total))+'٪':'—'}</td><td>${barHTML(s)}</td>
+      <td class="actions"><button class="btn sm" data-act="print-member" data-id="${m.id}" data-range="1">${icon('i-print')}کارنامه</button></td></tr>`).join('')}</tbody>
+  </table></div></section>`;
+}
+
+function viewLetters(){
+  const list = [...db.letters].sort((a,b)=> a.date<b.date?1:-1);
+  return `
+  <div class="page-head"><div><h1>گزارش به فرماندهی</h1><p>نامه‌ها روی سربرگ رسمی پایگاه نوشته می‌شوند و فرمانده می‌تواند آن‌ها را رؤیت کند و دستور بنویسد</p></div>
+    ${can('letters') ? `<button class="btn primary" data-act="letter-new">${icon('i-plus')}نامه جدید</button>` : ''}</div>
+  <section class="panel"><div class="scroll"><table>
+    <thead><tr><th>شماره</th><th>تاریخ</th><th>موضوع</th><th>نویسنده</th><th>وضعیت</th><th></th></tr></thead>
+    <tbody>${list.map(l => { const u = db.users.find(x=>x.id===l.by); return `<tr>
+      <td class="num">${fa(l.no)}</td><td class="num">${fmtDate(l.date)}</td>
+      <td><button class="btn link" data-act="letter-view" data-id="${l.id}">${esc(l.subject)}</button></td>
+      <td>${esc(u?u.name:'—')}</td><td><span class="pill ${l.status}">${LSTAT[l.status]}</span></td>
+      <td class="actions"><button class="btn sm" data-act="letter-view" data-id="${l.id}">${icon('i-print')}نمایش</button>${can('letters') && l.status!=='seen' ? `<button class="btn sm" data-act="letter-edit" data-id="${l.id}">ویرایش</button>`:''}${can('review') && l.status==='sent' ? `<button class="btn sm primary" data-act="letter-review" data-id="${l.id}">رؤیت و دستور</button>`:''}${can('letters')?`<button class="btn sm danger" data-act="letter-del" data-id="${l.id}">حذف</button>`:''}</td>
+    </tr>`; }).join('') || '<tr><td colspan="6" class="empty">هنوز نامه‌ای نوشته نشده</td></tr>'}</tbody>
+  </table></div></section>`;
+}
+
+function viewAccounts(){
+  return `
+  <div class="page-head"><div><h1>کاربران سامانه</h1><p>فقط این افراد با شناسه و رمز وارد سامانه می‌شوند</p></div>
+    <button class="btn primary" data-act="user-new">${icon('i-plus')}کاربر جدید</button></div>
+  <section class="panel"><div class="scroll"><table>
+    <thead><tr><th>نام</th><th>نقش</th><th>شناسه</th><th>دسترسی‌ها</th><th></th></tr></thead>
+    <tbody>${db.users.map(u => `<tr><td>${esc(u.name)}</td><td>${ROLES[u.role].label}</td><td dir="ltr" style="text-align:right">${esc(u.username)}</td>
+      <td style="color:var(--muted);font-size:13px">${ROLES[u.role].can.map(c=>({members:'نیروها',programs:'برنامه‌ها',attendance:'حضور و غیاب',letters:'نامه‌ها',users:'کاربران',setup:'تنظیمات',review:'رؤیت نامه'}[c])).join('، ')}</td>
+      <td class="actions"><button class="btn sm" data-act="user-edit" data-id="${u.id}">ویرایش</button>${u.id!==me.id?`<button class="btn sm danger" data-act="user-del" data-id="${u.id}">حذف</button>`:''}</td></tr>`).join('')}</tbody>
+  </table></div></section>`;
+}
+
+function viewBaseInfo(){
+  const s = db.settings;
+  return `
+  <div class="page-head"><div><h1>مشخصات پایگاه</h1><p>این مشخصات روی سربرگ نامه‌ها و گزارش‌های چاپی می‌آید</p></div></div>
+  <div class="grid2">
+  <section class="panel"><form class="panel-body form-grid" id="base-form">
+    <div class="field full"><label for="s-name">نام پایگاه</label><input id="s-name" value="${esc(s.baseName)}"></div>
+    <div class="field full"><label for="s-sub">خط زیر نام (مسجد)</label><input id="s-sub" value="${esc(s.subtitle)}"></div>
+    <div class="field"><label for="s-addr">نشانی</label><input id="s-addr" value="${esc(s.address)}"></div>
+    <div class="field"><label for="s-phone">تلفن</label><input id="s-phone" value="${esc(s.phone)}"></div>
+    <div class="full toolbar"><button class="btn primary" type="submit">ذخیره مشخصات</button><button class="btn" type="button" data-act="preview-lh">پیش‌نمایش سربرگ</button></div>
+  </form></section>
+  <section class="panel"><h2>داده‌ها</h2><div class="panel-body" style="display:grid;gap:10px;font-size:14px">
+    <p style="margin:0;color:var(--muted)">داده‌ها در همین مرورگر ذخیره می‌شوند. برای استفاده مشترک چند نفر، نسخهٔ سرور‌دار لازم است.</p>
+    <div class="toolbar">${db.sample?'<button class="btn" data-act="clear-sample">پاک کردن داده‌های نمونه</button>':''}<button class="btn danger" data-act="reset-all">بازگرداندن نمونه‌ها</button></div>
+  </div></section></div>`;
+}
+
+/* ================= paper documents ================= */
+function letterhead(meta){
+  const s = db.settings;
+  return `<div class="lh">
+    <div class="lh-id"><svg><use href="#emblem"/></svg><div><div class="lh-name">${esc(s.baseName)}</div><div class="lh-sub">${esc(s.subtitle)}</div></div></div>
+    <div class="lh-bism">بسمه تعالی</div>
+    <div class="lh-meta">${meta.map(([k,v])=>`<div><span>${k}:</span><b class="num">${esc(v)}</b></div>`).join('')}</div>
+  </div><hr class="lh-rule"><hr class="lh-rule2">`;
+}
+function paperFoot(){
+  const s = db.settings;
+  return `<div class="paper-foot"><span>${esc(s.subtitle)}${s.address?' · '+esc(s.address):''}</span><span>${s.phone?'تلفن: '+esc(fa(s.phone)):''}</span></div>`;
+}
+function letterPaper(l){
+  return `<div class="paper">${letterhead([['شماره',fa(l.no)],['تاریخ',fa(l.date)],['پیوست',l.attach||'ندارد']])}
+    <div class="letter-to">${esc(l.to)}</div>
+    <div class="letter-subj"><b>موضوع: </b>${esc(l.subject)}</div>
+    <div class="letter-body">${esc(l.body)}</div>
+    <div class="sign"><div><div class="n">${esc(l.signer)}</div><div>${esc(db.settings.baseName)}</div></div></div>
+    ${l.status==='seen' && l.order ? `<div class="order"><h4>دستور فرمانده پایگاه</h4>${esc(l.order)}</div>`:''}
+    ${paperFoot()}</div>`;
+}
+function memberPaper(m, progs){
+  const s = memberStats(m.id, progs);
+  const range = (state.rFrom||state.rTo) && progs !== db.programs ? `از ${state.rFrom?fmtDate(state.rFrom):'ابتدا'} تا ${state.rTo?fmtDate(state.rTo):'امروز'}` : 'همه برنامه‌ها';
+  return `<div class="paper">${letterhead([['تاریخ',fa(todayJ())],['شماره عضویت',fa(m.memberNo)]])}
+    <h3 class="doc-title">کارنامه حضور و فعالیت</h3>
+    <div class="kv">
+      <div><span>نام و نام خانوادگی: </span><b>${esc(fullName(m))}</b></div><div><span>نام پدر: </span>${esc(m.father)}</div><div><span>کد ملی: </span>${esc(fa(m.nationalId))}</div>
+      <div><span>وضعیت عضویت: </span>${STATUS[m.status]}</div><div><span>رده: </span>${esc(m.group)}</div><div><span>بازه گزارش: </span>${range}</div>
+    </div>
+    <table><thead><tr><th style="width:36px">ردیف</th><th>تاریخ</th><th>برنامه</th><th>نوع</th><th>محل</th><th>وضعیت</th></tr></thead>
+    <tbody>${s.rows.map(({p,v},i)=>`<tr><td class="num">${fa(i+1)}</td><td class="num">${fmtDate(p.date)}</td><td>${esc(p.title)}</td><td>${esc(p.type)}</td><td>${esc(p.place)}</td><td class="st-${v}">${ATT[v]}</td></tr>`).join('') || '<tr><td colspan="6" style="text-align:center">موردی ثبت نشده</td></tr>'}</tbody></table>
+    <div class="sum"><span>حاضر: <b>${fa(s.p)}</b></span><span>غیبت موجه: <b>${fa(s.e)}</b></span><span>غایب: <b>${fa(s.a)}</b></span><span>درصد حضور: <b>${fa(pct(s.p,s.total))}٪</b></span></div>
+    <p style="margin:0">بدین‌وسیله گواهی می‌شود نامبرده در برنامه‌های فوق با وضعیت ذکرشده شرکت داشته است.</p>
+    <div class="signs"><div>مسئول نیروی انسانی<br><br>امضا</div><div>فرمانده پایگاه<br><br>امضا و مهر</div></div>
+    <div style="flex:1"></div>${paperFoot()}</div>`;
+}
+function programPaper(p){
+  const rec = db.attendance[p.id] || {}; const s = progStats(p.id);
+  const ids = Object.keys(rec).map(memberById).filter(Boolean).sort((a,b)=> 'pea'.indexOf(rec[a.id])-'pea'.indexOf(rec[b.id]));
+  return `<div class="paper">${letterhead([['تاریخ',fa(todayJ())],['تاریخ برنامه',fa(p.date)]])}
+    <h3 class="doc-title">صورت‌جلسه حضور و غیاب: ${esc(p.title)}</h3>
+    <div class="kv"><div><span>نوع: </span>${esc(p.type)}</div><div><span>تاریخ: </span>${fmtDate(p.date)}${p.time?' ساعت '+fa(p.time):''}</div><div><span>محل: </span>${esc(p.place)}</div></div>
+    <table><thead><tr><th style="width:36px">ردیف</th><th>نام و نام خانوادگی</th><th>نام پدر</th><th>شماره عضویت</th><th>وضعیت</th></tr></thead>
+    <tbody>${ids.map((m,i)=>`<tr><td class="num">${fa(i+1)}</td><td>${esc(fullName(m))}</td><td>${esc(m.father)}</td><td class="num">${esc(fa(m.memberNo))}</td><td class="st-${rec[m.id]}">${ATT[rec[m.id]]}</td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center">حضوری ثبت نشده</td></tr>'}</tbody></table>
+    <div class="sum"><span>حاضر: <b>${fa(s.p)}</b></span><span>موجه: <b>${fa(s.e)}</b></span><span>غایب: <b>${fa(s.a)}</b></span></div>
+    <div class="signs"><div>مسئول برنامه<br><br>امضا</div><div>فرمانده پایگاه<br><br>امضا و مهر</div></div>
+    <div style="flex:1"></div>${paperFoot()}</div>`;
+}
+function summaryPaper(){
+  const progs = filteredPrograms();
+  const rows = db.members.map(m => ({m, s:memberStats(m.id, progs)})).sort((a,b)=> b.s.p-a.s.p);
+  return `<div class="paper">${letterhead([['تاریخ',fa(todayJ())],['تعداد برنامه',fa(progs.length)]])}
+    <h3 class="doc-title">گزارش جمعی حضور نیروها${state.rType?' — '+esc(state.rType):''}</h3>
+    <table><thead><tr><th style="width:36px">ردیف</th><th>نام و نام خانوادگی</th><th>وضعیت</th><th>حاضر</th><th>موجه</th><th>غایب</th><th>درصد</th></tr></thead>
+    <tbody>${rows.map(({m,s},i)=>`<tr><td class="num">${fa(i+1)}</td><td>${esc(fullName(m))}</td><td>${STATUS[m.status]}</td><td class="num">${fa(s.p)}</td><td class="num">${fa(s.e)}</td><td class="num">${fa(s.a)}</td><td class="num">${s.total?fa(pct(s.p,s.total))+'٪':'—'}</td></tr>`).join('')}</tbody></table>
+    <div class="signs"><div>مسئول نیروی انسانی<br><br>امضا</div><div>فرمانده پایگاه<br><br>امضا و مهر</div></div>
+    <div style="flex:1"></div>${paperFoot()}</div>`;
+}
+
+/* ================= modals ================= */
+function modal({title, body, foot, wide, onSubmit}){
+  const root = $('#modal-root');
+  root.innerHTML = `<div class="overlay" data-act="overlay"><form class="modal ${wide?'wide':''}" id="modal-form" novalidate>
+    <header><h3>${title}</h3><button type="button" class="btn sm" data-act="close">بستن</button></header>
+    <div class="mbody">${body}</div>${foot!==false?`<footer>${foot||'<button type="button" class="btn" data-act="close">انصراف</button><button class="btn primary" type="submit">ذخیره</button>'}</footer>`:''}
+  </form></div>`;
+  const f = $('#modal-form');
+  f.addEventListener('submit', e => { e.preventDefault(); if(onSubmit && onSubmit(f, e.submitter) !== false) closeModal(); });
+  const first = f.querySelector('.mbody input, .mbody textarea, .mbody select'); if(first) first.focus();
+}
+function closeModal(){ $('#modal-root').innerHTML = ''; }
+function confirmBox(text, onYes){
+  modal({title:'تأیید', body:`<p style="margin:0">${text}</p>`, foot:'<button type="button" class="btn" data-act="close">انصراف</button><button class="btn primary" type="submit" style="background:var(--bad);border-color:var(--bad)">بله، حذف شود</button>', onSubmit:()=>{ onYes(); }});
+}
+function showPaper(title, html){
+  modal({title, wide:true, body:`<div class="paper-wrap">${html}</div>`,
+    foot:`<span class="hint">${inFrame?'در پیش‌نمایش، چاپ مسدود است؛ در نسخهٔ نصب‌شده این دکمه برگه را چاپ یا با گزینهٔ «Save as PDF» ذخیره می‌کند.':'در پنجرهٔ چاپ، مقصد را «Save as PDF» بگذارید تا فایل PDF ساخته شود.'}</span><button type="button" class="btn" data-act="close">بستن</button><button type="button" class="btn primary" data-act="do-print">${icon('i-print')}چاپ / ذخیره PDF</button>`});
+  $('#print-area').innerHTML = html;
+}
+const fld = (id,label,val='',opt={}) => `<div class="field ${opt.full?'full':''}"><label for="${id}">${label}</label>${
+  opt.select ? `<select id="${id}">${opt.select.map(([v,l])=>`<option value="${esc(v)}" ${v===val?'selected':''}>${esc(l)}</option>`).join('')}</select>`
+  : opt.area ? `<textarea id="${id}">${esc(val)}</textarea>`
+  : `<input id="${id}" value="${esc(val)}" ${opt.ph?`placeholder="${opt.ph}"`:''} ${opt.ltr?'dir="ltr"':''} ${opt.req?'required':''}>`}</div>`;
+const val = id => ($('#'+id)?.value || '').trim();
+function badDate(id){ const v = val(id); if(!v) return ''; const d = normDate(v); if(!d){ toast('تاریخ را به شکل ۱۴۰۵/۰۷/۲۹ وارد کنید'); $('#'+id).focus(); return null; } return d; }
+
+function memberForm(m){
+  const isNew = !m; m = m || {status:'active', group:'جوان'};
+  modal({title: isNew?'افزودن نیروی جدید':'ویرایش مشخصات '+esc(fullName(m)), body:`<div class="form-grid">
+    ${fld('f-first','نام',m.first,{req:1})}${fld('f-last','نام خانوادگی',m.last,{req:1})}
+    ${fld('f-father','نام پدر',m.father)}${fld('f-nid','کد ملی',fa(m.nationalId||''))}
+    ${fld('f-birth','تاریخ تولد',fa(m.birth||''),{ph:'۱۳۸۰/۰۱/۱۵'})}${fld('f-phone','تلفن همراه',fa(m.phone||''))}
+    ${fld('f-no','شماره عضویت',m.memberNo)}${fld('f-join','تاریخ عضویت',fa(m.joinDate||''),{ph:'۱۴۰۵/۰۱/۰۱'})}
+    ${fld('f-status','وضعیت',m.status,{select:Object.entries(STATUS)})}${fld('f-group','رده سنی',m.group,{select:['نوجوان','جوان','بزرگسال','پیشکسوت'].map(x=>[x,x])})}
+    ${fld('f-edu','تحصیلات',m.education)}${fld('f-addr','نشانی',m.address)}
+    ${fld('f-notes','توضیحات',m.notes,{full:1})}</div>`,
+    onSubmit:()=>{
+      if(!val('f-first')||!val('f-last')){ toast('نام و نام خانوادگی لازم است'); return false; }
+      const birth = badDate('f-birth'), join = badDate('f-join'); if(birth===null||join===null) return false;
+      const o = {first:val('f-first'), last:val('f-last'), father:val('f-father'), nationalId:en(val('f-nid')), birth, phone:en(val('f-phone')), memberNo:val('f-no'), joinDate:join, status:val('f-status'), group:val('f-group'), education:val('f-edu'), address:val('f-addr'), notes:val('f-notes')};
+      if(isNew){ db.members.push({id:uid('m'), ...o}); } else Object.assign(m, o);
+      save(); render(); toast(isNew?'نیرو اضافه شد':'مشخصات ذخیره شد');
+    }});
+}
+function programForm(p){
+  const isNew = !p; p = p || {type:'رزمایش', date:todayJ()};
+  modal({title: isNew?'برنامه جدید':'ویرایش برنامه', body:`<div class="form-grid">
+    ${fld('g-title','عنوان برنامه',p.title,{full:1,req:1,ph:'مثلاً رزمایش اقتدار عاشورایی'})}
+    ${fld('g-type','نوع برنامه',p.type,{select:TYPES.map(t=>[t,t])})}${fld('g-date','تاریخ',fa(p.date),{ph:'۱۴۰۵/۰۷/۲۹'})}
+    ${fld('g-time','ساعت',fa(p.time||''),{ph:'۰۸:۰۰'})}${fld('g-place','محل',p.place)}
+    ${fld('g-desc','توضیحات',p.desc,{full:1})}</div>`,
+    onSubmit:()=>{
+      if(!val('g-title')){ toast('عنوان برنامه لازم است'); return false; }
+      const date = normDate(val('g-date')); if(!date){ toast('تاریخ را به شکل ۱۴۰۵/۰۷/۲۹ وارد کنید'); return false; }
+      const o = {title:val('g-title'), type:val('g-type'), date, time:en(val('g-time')), place:val('g-place'), desc:val('g-desc')};
+      if(isNew){ const id = uid('p'); db.programs.push({id, ...o}); db.attendance[id] = {}; } else Object.assign(p, o);
+      save(); render(); toast(isNew?'برنامه ثبت شد':'برنامه ذخیره شد');
+    }});
+}
+function letterForm(l){
+  const isNew = !l;
+  if(isNew){ const y = todayJ().slice(0,4); l = {no:`${y}/${db.settings.letterSeq}`, date:todayJ(), to:'فرمانده محترم پایگاه', attach:'ندارد', signer:me.name, body:'سلام علیکم\nبا احترام، '}; }
+  modal({title: isNew?'نامه جدید به فرماندهی':'ویرایش نامه', wide:true, body:`<div class="form-grid">
+    ${fld('n-no','شماره نامه',fa(l.no))}${fld('n-date','تاریخ',fa(l.date))}
+    ${fld('n-to','گیرنده',l.to)}${fld('n-attach','پیوست',l.attach)}
+    ${fld('n-subj','موضوع',l.subject,{full:1,req:1})}
+    ${fld('n-body','متن نامه',l.body,{full:1,area:1})}
+    ${fld('n-signer','امضاکننده',l.signer,{full:1})}</div>`,
+    foot:`<button type="button" class="btn" data-act="close">انصراف</button><button type="submit" class="btn" name="st" value="draft">ذخیره پیش‌نویس</button><button type="submit" class="btn primary" name="st" value="sent">ارسال به فرماندهی</button>`,
+    onSubmit:(f, sub)=>{
+      if(!val('n-subj')){ toast('موضوع نامه لازم است'); return false; }
+      const date = normDate(val('n-date')); if(!date){ toast('تاریخ را به شکل ۱۴۰۵/۰۸/۱۴ وارد کنید'); return false; }
+      const st = sub && sub.name==='st' ? sub.value : 'draft';
+      const o = {no:en(val('n-no')), date, to:val('n-to'), attach:val('n-attach'), subject:val('n-subj'), body:$('#n-body').value, signer:val('n-signer'), status:st};
+      if(isNew){ db.letters.push({id:uid('l'), by:me.id, order:'', ...o}); db.settings.letterSeq++; } else Object.assign(l, o);
+      save(); render(); toast(st==='sent'?'نامه برای فرمانده ارسال شد':'پیش‌نویس ذخیره شد');
+    }});
+}
+function userForm(u){
+  const isNew = !u; u = u || {role:'hr'};
+  modal({title: isNew?'کاربر جدید':'ویرایش کاربر', body:`<div class="form-grid">
+    ${fld('u-name','نام و سمت',u.name,{full:1})}
+    ${fld('u-user','شناسه کاربری',u.username,{ltr:1})}${fld('u-pass','رمز عبور'+(isNew?'':' (خالی = بدون تغییر)'),'',{ltr:1})}
+    ${fld('u-role','نقش',u.role,{select:Object.entries(ROLES).map(([k,r])=>[k,r.label]),full:1})}</div>`,
+    onSubmit:()=>{
+      const username = val('u-user'), pass = val('u-pass');
+      if(!val('u-name')||!username){ toast('نام و شناسه لازم است'); return false; }
+      if(db.users.some(x=>x.username===username && x!==u)){ toast('این شناسه قبلاً ثبت شده'); return false; }
+      if(isNew && pass.length<4){ toast('رمز عبور حداقل ۴ کاراکتر باشد'); return false; }
+      if(u.id===me.id && val('u-role')!=='admin'){ toast('نقش مدیر را از حساب خودتان نمی‌توانید بردارید'); return false; }
+      const o = {name:val('u-name'), username, role:val('u-role')}; if(pass) o.password = pass;
+      if(isNew) db.users.push({id:uid('u'), ...o}); else Object.assign(u, o);
+      save(); render(); toast('کاربر ذخیره شد');
+    }});
+}
+
+/* ================= actions ================= */
+const A = {
+  fill(id){ const u = db.users.find(x=>x.id===id); $('#lg-user').value = u.username; $('#lg-pass').value = u.password; },
+  logout(){ me = null; try{ sessionStorage.removeItem('basij-hozour-user'); }catch(e){} render(); },
+  close: closeModal,
+  overlay(_, el, e){ if(e.target === el) closeModal(); },
+  back(id){ state.member=null; state.program=null; go(id); },
+  'open-member'(id){ state.member=id; state.program=null; render(); window.scrollTo(0,0); },
+  'open-sheet'(id){ state.program=id; state.member=null; state.sheetSearch=''; render(); window.scrollTo(0,0); },
+  'm-filter'(id){ state.mFilter=id; render(); },
+  'member-new'(){ memberForm(); },
+  'member-edit'(id){ memberForm(memberById(id)); },
+  'member-del'(id){ const m = memberById(id); confirmBox(`پرونده <b>${esc(fullName(m))}</b> و همه سوابق حضورش حذف شود؟`, ()=>{ db.members = db.members.filter(x=>x!==m); for(const r of Object.values(db.attendance)) delete r[id]; if(state.member===id) state.member=null; save(); render(); toast('حذف شد'); }); },
+  'prog-new'(){ programForm(); },
+  'prog-edit'(id){ programForm(progById(id)); },
+  'prog-del'(id){ const p = progById(id); confirmBox(`برنامه <b>${esc(p.title)}</b> و حضور و غیاب آن حذف شود؟`, ()=>{ db.programs = db.programs.filter(x=>x!==p); delete db.attendance[id]; save(); render(); toast('حذف شد'); }); },
+  mark(id, el){ const pid = state.program; const r = db.attendance[pid] = db.attendance[pid] || {}; const v = el.dataset.v; if(r[id]===v) delete r[id]; else r[id]=v; save(); render(); },
+  'all-present'(pid){ const r = db.attendance[pid] = db.attendance[pid]||{}; sheetMembers(progById(pid)).forEach(m=>{ r[m.id]='p'; }); save(); render(); toast('همه حاضر ثبت شدند'); },
+  'rest-absent'(pid){ const r = db.attendance[pid] = db.attendance[pid]||{}; sheetMembers(progById(pid)).forEach(m=>{ if(!r[m.id]) r[m.id]='a'; }); save(); render(); toast('ثبت‌نشده‌ها غایب شدند'); },
+  'apply-report'(){
+    const f = $('#r-from').value.trim(), t = $('#r-to').value.trim();
+    const nf = f ? normDate(f) : '', nt = t ? normDate(t) : '';
+    if(nf===null || nt===null){ toast('تاریخ را به شکل ۱۴۰۵/۰۷/۰۱ وارد کنید'); return; }
+    state.rFrom = nf; state.rTo = nt; state.rType = $('#r-type').value; render();
+  },
+  'print-member'(id, el){ const m = memberById(id); showPaper('کارنامه حضور '+esc(fullName(m)), memberPaper(m, el.dataset.range ? filteredPrograms() : db.programs)); },
+  'print-program'(id){ const p = progById(id); showPaper('صورت‌جلسه حضور '+esc(p.title), programPaper(p)); },
+  'print-summary'(){ showPaper('گزارش جمعی حضور', summaryPaper()); },
+  'do-print'(){ try{ window.print(); }catch(e){} },
+  'letter-new'(){ letterForm(); },
+  'letter-edit'(id){ letterForm(db.letters.find(l=>l.id===id)); },
+  'letter-view'(id){ const l = db.letters.find(x=>x.id===id); showPaper(esc(l.subject), letterPaper(l)); },
+  'letter-del'(id){ const l = db.letters.find(x=>x.id===id); confirmBox(`نامه «${esc(l.subject)}» حذف شود؟`, ()=>{ db.letters = db.letters.filter(x=>x!==l); save(); render(); toast('حذف شد'); }); },
+  'letter-review'(id){ const l = db.letters.find(x=>x.id===id);
+    modal({title:'رؤیت نامه و ثبت دستور', wide:true, body:`<div class="paper-wrap">${letterPaper(l)}</div>${fld('o-text','دستور یا پی‌نوشت فرمانده',l.order,{area:1})}`,
+      foot:'<button type="button" class="btn" data-act="close">انصراف</button><button class="btn primary" type="submit">ثبت رؤیت</button>',
+      onSubmit:()=>{ l.order = $('#o-text').value.trim(); l.status='seen'; save(); render(); toast('رؤیت ثبت شد'); }}); },
+  'user-new'(){ userForm(); },
+  'user-edit'(id){ userForm(db.users.find(u=>u.id===id)); },
+  'user-del'(id){ const u = db.users.find(x=>x.id===id); confirmBox(`کاربر <b>${esc(u.name)}</b> حذف شود؟`, ()=>{ db.users = db.users.filter(x=>x!==u); save(); render(); toast('حذف شد'); }); },
+  'preview-lh'(){ showPaper('پیش‌نمایش سربرگ', letterPaper({no:todayJ().slice(0,4)+'/…', date:todayJ(), attach:'ندارد', to:'فرمانده محترم پایگاه', subject:'نمونه', body:'متن نامه در این قسمت نوشته می‌شود.', signer:me.name, status:'draft'})); },
+  'clear-sample'(){ confirmBox('همه نیروها، برنامه‌ها و نامه‌های نمونه پاک شوند؟ کاربران و مشخصات پایگاه می‌مانند.', ()=>{ db.members=[]; db.programs=[]; db.attendance={}; db.letters=[]; db.sample=false; db.settings.letterSeq=1; save(); render(); toast('آماده ورود اطلاعات واقعی'); }); },
+  'reset-all'(){ confirmBox('همه داده‌ها پاک و نمونه‌ها برگردانده شوند؟', ()=>{ db = seed(); save(); me = db.users.find(u=>u.username===me.username) || db.users[0]; render(); toast('نمونه‌ها برگشت'); }); },
+};
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if(!el) return;
+  const fn = A[el.dataset.act]; if(!fn) return;
+  if(el.dataset.act==='overlay'){ fn(null, el, e); return; }
+  if(el.tagName==='A') e.preventDefault();
+  fn(el.dataset.id, el, e);
+});
+document.addEventListener('keydown', e => { if(e.key==='Escape' && $('#modal-root').innerHTML) closeModal(); });
+document.addEventListener('input', e => {
+  if(e.target.id==='m-search'){ state.mSearch = e.target.value; const pos = e.target.selectionStart; render(); const i = $('#m-search'); i.focus(); i.setSelectionRange(pos,pos); }
+  if(e.target.id==='sheet-search'){ state.sheetSearch = e.target.value; const pos = e.target.selectionStart; render(); const i = $('#sheet-search'); i.focus(); i.setSelectionRange(pos,pos); }
+});
+document.addEventListener('change', e => { if(e.target.id==='show-inactive'){ state.showInactive = e.target.checked; render(); } });
+document.addEventListener('submit', e => {
+  if(e.target.id==='login-form'){
+    e.preventDefault();
+    const u = db.users.find(x => x.username === $('#lg-user').value.trim() && x.password === $('#lg-pass').value);
+    if(!u){ $('#lg-err').textContent = 'شناسه یا رمز عبور درست نیست.'; return; }
+    me = u; $('#lg-err').textContent = ''; try{ sessionStorage.setItem('basij-hozour-user', u.id); }catch(err){}
+    route();
+  }
+  if(e.target.id==='base-form'){
+    e.preventDefault();
+    Object.assign(db.settings, {baseName:val('s-name'), subtitle:val('s-sub'), address:val('s-addr'), phone:val('s-phone')});
+    save(); render(); toast('مشخصات پایگاه ذخیره شد');
+  }
+});
+window.addEventListener('hashchange', route);
+
+load(); restoreSession();
+/* Preview convenience: inside the preview frame, open straight into the admin desk so the system is visible at once. */
+if(!me && db.sample && inFrame){ me = db.users.find(u => u.role==='admin'); }
+route();
+})();
+</script>
