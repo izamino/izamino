@@ -71,6 +71,29 @@ img.logo{object-fit:contain}
 .done h4{margin:0;font-size:17px}
 .done p{margin:0;color:var(--muted)}
 .code{font-size:20px;font-weight:800;letter-spacing:.08em;font-variant-numeric:tabular-nums;color:var(--accent)}
+.bell{position:relative}
+.bell .cnt{position:absolute;top:-7px;left:-7px;background:var(--bad);color:var(--paper);border-radius:999px;font-size:11px;min-width:18px;height:18px;display:grid;place-items:center;padding:0 4px;font-variant-numeric:tabular-nums}
+.me-actions{display:flex;gap:6px}
+.notif-list{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.notif-list li{border-bottom:1px solid var(--line)}
+.notif-list li:last-child{border-bottom:0}
+.notif-list button{all:unset;box-sizing:border-box;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 12px;align-items:center;width:100%;padding:10px 6px;cursor:pointer;border-radius:8px}
+.notif-list button:hover{background:var(--surface-2)}
+.notif-list button:focus-visible{outline:2px solid var(--accent)}
+.notif-ico{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);grid-row:span 2}
+.notif-ico svg{width:18px;height:18px}
+.notif-ico.letter{background:var(--warn-soft);color:var(--warn)}
+.notif-ico.order{background:var(--ok-soft);color:var(--ok)}
+.notif-t{font-weight:500}
+.notif-s{font-size:12.5px;color:var(--muted);grid-column:2}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--bad);grid-row:span 2}
+.phone-box{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--accent-soft);border-radius:10px;padding:12px 14px}
+.phone-box .ph{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent);margin-inline-end:auto;user-select:all}
+.calls{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.calls li{border-inline-start:3px solid var(--line);padding-inline-start:10px;font-size:13.5px}
+.calls li b{font-weight:500}
+.calls .when{color:var(--muted);font-size:12.5px}
+.sec-t{font-size:13.5px;font-weight:700;margin:0}
 .nav-badge{margin-inline-start:auto;background:var(--bad);color:var(--paper);border-radius:999px;font-size:11.5px;padding:0 7px;line-height:1.7}
 .logo-box{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 .logo-box .prev{width:84px;height:84px;border:1px dashed var(--line);border-radius:10px;display:grid;place-items:center;color:var(--seal);background:var(--bg)}
@@ -100,6 +123,8 @@ main{padding-block:24px 48px;padding-left:max(16px,env(safe-area-inset-left,0px)
 /* ---------- controls ---------- */
 .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 13px;cursor:pointer;font-weight:500;white-space:nowrap;text-decoration:none}
 .btn:hover{border-color:var(--accent)}
+a.btn{color:var(--ink)}
+a.btn.primary{color:var(--accent-ink)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .btn.danger{color:var(--bad)}
 .btn.sm{padding:3px 9px;font-size:13px}
@@ -269,6 +294,8 @@ td.actions .btn{margin-inline-start:4px}
   <symbol id="i-print" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="1.5"/><path d="M7 14h10v6.5H7z"/></g></symbol>
   <symbol id="i-inbox" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 13l2.5-8h11L20 13v6.5H4z"/><path d="M4 13h4.5l1 2.5h5l1-2.5H20"/></g></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0" stroke-linecap="round"/></g></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.5 3.5h3l1.5 4.5-2 1.5a11 11 0 0 0 5.5 5.5l1.5-2 4.5 1.5v3a2 2 0 0 1-2 2A16.5 16.5 0 0 1 4.5 5.5a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
 </svg>
 
@@ -306,7 +333,7 @@ td.actions .btn{margin-inline-start:4px}
     <nav id="nav"></nav>
     <div class="me">
       <div class="who-txt"><b id="me-name"></b><div id="me-role" style="color:var(--muted)"></div></div>
-      <button class="btn sm" data-act="logout">خروج</button>
+      <div class="me-actions"><button class="btn sm bell" data-act="notifs" id="bell" aria-label="اعلان‌ها"></button><button class="btn sm" data-act="logout">خروج</button></div>
     </div>
   </aside>
   <main id="main"></main>
@@ -398,8 +425,8 @@ function seed(){
     sample:true,
     settings:{ baseName:'پایگاه مقاومت بسیج خادم‌الشهدا حاج احمد یلالی', subtitle:'مسجد شباب اهل جنت', address:'', phone:'', letterSeq:3, logo:'' },
     requests:[
-      {id:'r1', code:'۴۷۲۱۰۵', date:'1405/08/12', first:'امیرعلی', last:'نظری', father:'محسن', nationalId:'0013542871', shenasname:'۲۴۵۱', birth:'1388/04/02', phone:'09120004417', education:'دانش‌آموز', address:'محله شباب، کوچه شهید چمران', notes:'علاقه‌مند به فعالیت در گروه فرهنگی', status:'new'},
-      {id:'r2', code:'۴۷۲۰۹۸', date:'1405/08/09', first:'سیدمهدی', last:'حسینی', father:'سیدجواد', nationalId:'0021874593', shenasname:'۱۱۸۷۳', birth:'1381/11/20', phone:'09350006652', education:'کارشناسی', address:'خیابان شهید بهشتی', notes:'', status:'called'},
+      {id:'r1', code:'۴۷۲۱۰۵', date:'1405/08/12', first:'امیرعلی', last:'نظری', father:'محسن', nationalId:'0013542871', shenasname:'۲۴۵۱', birth:'1388/04/02', phone:'09120004417', education:'دانش‌آموز', address:'محله شباب، کوچه شهید چمران', notes:'علاقه‌مند به فعالیت در گروه فرهنگی', status:'new', calls:[]},
+      {id:'r2', code:'۴۷۲۰۹۸', date:'1405/08/09', first:'سیدمهدی', last:'حسینی', father:'سیدجواد', nationalId:'0021874593', shenasname:'۱۱۸۷۳', birth:'1381/11/20', phone:'09350006652', education:'کارشناسی', address:'خیابان شهید بهشتی', notes:'', status:'called', followUp:'1405/08/15', calls:[{at:'1405/08/10 18:20', by:'مسئول نیروی انسانی', result:'پاسخ داد؛ هماهنگ شد', note:'قرار مراجعه حضوری پنجشنبه بعد از نماز مغرب با مدارک شناسایی'}]},
     ],
     users:[
       {id:'u1', username:'admin',     password:'admin123', name:'مدیر سامانه',          role:'admin'},
@@ -418,7 +445,7 @@ let db;
 function load(){
   try{ const s = localStorage.getItem(DB_KEY); if(s){ db = JSON.parse(s); } }catch(e){}
   if(!db) db = seed();
-  db.requests = db.requests || []; if(db.settings.logo === undefined) db.settings.logo = '';
+  db.requests = db.requests || []; db.requests.forEach(r => { r.calls = r.calls || []; }); db.seen = db.seen || {}; if(db.settings.logo === undefined) db.settings.logo = '';
 }
 function save(){ try{ localStorage.setItem(DB_KEY, JSON.stringify(db)); }catch(e){} }
 
@@ -427,6 +454,19 @@ function restoreSession(){
   try{ const id = sessionStorage.getItem('basij-hozour-user'); me = db.users.find(u => u.id === id) || null; }catch(e){ me = null; }
 }
 const newReqs = () => db.requests.filter(r => r.status==='new').length;
+const nowHM = () => { const d = new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
+function notifications(){
+  const out = [], today = todayJ();
+  if(can('members')){
+    db.requests.filter(r=>r.status==='new').forEach(r=>out.push({key:'req-'+r.id, kind:'req', ico:'i-inbox', title:`درخواست عضویت جدید: ${r.first} ${r.last}`, sub:`${fmtDate(r.date)} · ${fa(r.phone)} · منتظر تماس`, act:'req-call', id:r.id}));
+    db.requests.filter(r=>r.status==='called' && r.followUp && r.followUp<=today).forEach(r=>out.push({key:'fu-'+r.id+'-'+r.followUp, kind:'req', ico:'i-phone', title:`پیگیری ${r.first} ${r.last}`, sub:`موعد پیگیری: ${fmtDate(r.followUp)}`, act:'req-call', id:r.id}));
+  }
+  if(can('review')) db.letters.filter(l=>l.status==='sent').forEach(l=>out.push({key:'let-'+l.id, kind:'letter', ico:'i-mail', title:'نامه منتظر رؤیت شما: '+l.subject, sub:fmtDate(l.date), act:'letter-review', id:l.id}));
+  db.letters.filter(l=>l.status==='seen' && l.by===me.id).forEach(l=>out.push({key:'ord-'+l.id, kind:'order', ico:'i-check', title:'فرمانده نامه را رؤیت کرد: '+l.subject, sub:l.order?('دستور: '+l.order):'بدون دستور', act:'letter-view', id:l.id}));
+  return out;
+}
+const seenSet = () => new Set(db.seen[me.id] || []);
+const unreadCount = () => { const s = seenSet(); return notifications().filter(n=>!s.has(n.key)).length; };
 const can = p => !!me && ROLES[me.role].can.includes(p);
 
 /* ---------- stats ---------- */
@@ -460,7 +500,7 @@ const VIEWS = [
   {id:'accounts',  label:'کاربران سامانه',    icon:'i-key',  need:'users'},
   {id:'base-info', label:'مشخصات پایگاه',     icon:'i-flag', need:'setup'},
 ];
-let state = { view:'dashboard', member:null, program:null, mFilter:'all', mSearch:'', sheetSearch:'', showInactive:false, rFrom:'', rTo:'', rType:'' };
+let state = { rqFilter:'open', view:'dashboard', member:null, program:null, mFilter:'all', mSearch:'', sheetSearch:'', showInactive:false, rFrom:'', rTo:'', rType:'' };
 
 function route(){
   const h = location.hash.slice(1);
@@ -484,6 +524,7 @@ function render(){
   if(!me){ showLogin(); return; }
   $('#login').hidden = true; $('#app').hidden = false;
   bindBrand();
+  const uc = unreadCount(); $('#bell').innerHTML = icon('i-bell') + (uc?`<span class="cnt">${fa(uc)}</span>`:''); $('#bell').setAttribute('aria-label', `اعلان‌ها${uc?' ('+fa(uc)+' جدید)':''}`);
   $('#me-name').textContent = me.name; $('#me-role').textContent = ROLES[me.role].label;
   $('#nav').innerHTML = VIEWS.filter(v => !v.need || can(v.need)).map(v =>
     `<a href="#${v.id}" ${v.id===state.view?'aria-current="page"':''}>${icon(v.icon)}<span>${v.label}</span>${v.id==='requests'&&newReqs()?`<span class="nav-badge num">${fa(newReqs())}</span>`:''}</a>`).join('');
@@ -524,7 +565,14 @@ function viewDashboard(){
       <div class="scroll"><table><tbody>
       ${ranked.map(({m,s}) => `<tr><td><div class="who"><span class="avatar">${esc(initials(m))}</span><button class="btn link" data-act="open-member" data-id="${m.id}">${esc(fullName(m))}</button></div></td><td class="num">${fa(s.p)} از ${fa(s.total)}</td><td><span class="pill ${m.status}">${STATUS[m.status]}</span></td></tr>`).join('') || '<tr><td class="empty">هنوز حضوری ثبت نشده</td></tr>'}
       </tbody></table></div></section>
-  </div>`;
+  </div>
+  ${can('members') ? (() => { const open = db.requests.filter(r=>r.status==='new'||r.status==='called').sort((a,b)=> (a.status==='new'?0:1)-(b.status==='new'?0:1) || (a.date<b.date?-1:1)); return `
+  <section class="panel"><h2>متقاضیان عضویت در انتظار تماس <a class="btn sm" href="#requests">همه درخواست‌ها</a></h2>
+    <div class="scroll"><table><tbody>${open.slice(0,6).map(r => `<tr>
+      <td><div class="who"><span class="avatar">${esc(r.first[0]+'‌'+r.last[0])}</span><div><div>${esc(r.first+' '+r.last)}</div><div style="font-size:12.5px;color:var(--muted)">درخواست ${fmtDate(r.date)}</div></div></div></td>
+      <td class="num" dir="ltr" style="text-align:right">${esc(fa(r.phone))}</td>
+      <td><span class="pill ${r.status}">${RSTAT[r.status]}</span>${r.followUp&&r.status==='called'?` <span style="font-size:12.5px;color:var(--warn)">پیگیری ${fmtDate(r.followUp)}</span>`:''}</td>
+      <td class="actions"><button class="btn sm primary" data-act="req-call" data-id="${r.id}">${icon('i-phone')}تماس و ثبت نتیجه</button></td></tr>`).join('') || '<tr><td class="empty">متقاضی منتظر تماسی نیست</td></tr>'}</tbody></table></div></section>`; })() : ''}`;
 }
 
 function viewMembers(){
@@ -656,21 +704,28 @@ function viewReports(){
   </table></div></section>`;
 }
 
-const RSTAT = {new:'جدید', called:'تماس گرفته شد', accepted:'پذیرفته شد', rejected:'رد شد'};
+const RSTAT = {new:'جدید، منتظر تماس', called:'در حال پیگیری', accepted:'پذیرفته شد', rejected:'رد شد'};
+const CALL_RESULTS = ['پاسخ داد؛ هماهنگ شد','پاسخ داد؛ قرار مراجعه گذاشته شد','پاسخ نداد','خاموش یا در دسترس نبود','شماره اشتباه است','متقاضی انصراف داد'];
 function viewRequests(){
   const order = {new:0, called:1, accepted:2, rejected:3};
-  const list = [...db.requests].sort((a,b)=> order[a.status]-order[b.status] || (a.date<b.date?1:-1));
+  const f = state.rqFilter || 'open';
+  const list = [...db.requests].filter(r => f==='all' || (f==='open' ? (r.status==='new'||r.status==='called') : r.status===f))
+    .sort((a,b)=> order[a.status]-order[b.status] || (a.date<b.date?1:-1));
+  const n = k => db.requests.filter(r => k==='all' || (k==='open' ? (r.status==='new'||r.status==='called') : r.status===k)).length;
+  const chip = (k,l) => `<button class="chip" data-act="rq-filter" data-id="${k}" aria-pressed="${f===k}">${l} <span class="num">${fa(n(k))}</span></button>`;
   return `
-  <div class="page-head"><div><h1>درخواست‌های عضویت</h1><p>درخواست‌هایی که از صفحهٔ ورود ثبت شده‌اند؛ پس از تماس، متقاضی را بپذیرید تا به فهرست نیروها اضافه شود</p></div></div>
+  <div class="page-head"><div><h1>درخواست‌های عضویت</h1><p>متقاضیانی که از صفحهٔ ورود فرم عضویت پر کرده‌اند. با هر نفر تماس بگیرید، نتیجه را ثبت کنید و در پایان عضویت را بپذیرید یا رد کنید.</p></div></div>
+  <div class="chips">${chip('open','در انتظار اقدام')}${chip('new','منتظر تماس')}${chip('called','در حال پیگیری')}${chip('accepted','پذیرفته')}${chip('rejected','رد شده')}${chip('all','همه')}</div>
   <section class="panel"><div class="scroll"><table>
-    <thead><tr><th>تاریخ</th><th>کد پیگیری</th><th>نام و نام خانوادگی</th><th>نام پدر</th><th>کد ملی</th><th>شماره شناسنامه</th><th>شماره تماس</th><th>وضعیت</th><th></th></tr></thead>
-    <tbody>${list.map(r => `<tr>
-      <td class="num">${fmtDate(r.date)}</td><td class="num">${esc(fa(r.code))}</td>
-      <td><button class="btn link" data-act="req-view" data-id="${r.id}">${esc(r.first+' '+r.last)}</button></td><td>${esc(r.father)}</td>
-      <td class="num">${esc(fa(r.nationalId))}</td><td class="num">${esc(fa(r.shenasname))}</td><td class="num" dir="ltr" style="text-align:right">${esc(fa(r.phone))}</td>
+    <thead><tr><th>تاریخ درخواست</th><th>نام و نام خانوادگی</th><th>نام پدر</th><th>کد ملی</th><th>شماره تماس</th><th>آخرین تماس</th><th>وضعیت</th><th></th></tr></thead>
+    <tbody>${list.map(r => { const last = r.calls[r.calls.length-1]; return `<tr>
+      <td class="num">${fmtDate(r.date)}</td>
+      <td><button class="btn link" data-act="req-call" data-id="${r.id}">${esc(r.first+' '+r.last)}</button></td><td>${esc(r.father)}</td>
+      <td class="num">${esc(fa(r.nationalId))}</td><td class="num" dir="ltr" style="text-align:right">${esc(fa(r.phone))}</td>
+      <td style="font-size:13px">${last?`${esc(last.result)}<div style="color:var(--muted)" class="num">${esc(fa(last.at))} · ${esc(last.by)}</div>`:'<span style="color:var(--muted)">هنوز تماسی ثبت نشده</span>'}${r.followUp&&r.status==='called'?`<div style="color:var(--warn)">پیگیری: ${fmtDate(r.followUp)}</div>`:''}</td>
       <td><span class="pill ${r.status}">${RSTAT[r.status]}</span></td>
-      <td class="actions">${r.status==='new'?`<button class="btn sm" data-act="req-called" data-id="${r.id}">تماس گرفته شد</button>`:''}${r.status==='new'||r.status==='called'?`<button class="btn sm primary" data-act="req-accept" data-id="${r.id}">پذیرش عضویت</button><button class="btn sm" data-act="req-reject" data-id="${r.id}">رد</button>`:''}${r.status==='accepted'&&r.memberId&&memberById(r.memberId)?`<button class="btn sm" data-act="open-member" data-id="${r.memberId}">پرونده</button>`:''}<button class="btn sm danger" data-act="req-del" data-id="${r.id}">حذف</button></td>
-    </tr>`).join('') || '<tr><td colspan="9" class="empty">درخواستی ثبت نشده است. فرم درخواست در صفحهٔ ورود سامانه قرار دارد.</td></tr>'}</tbody>
+      <td class="actions">${r.status==='new'||r.status==='called'?`<button class="btn sm primary" data-act="req-call" data-id="${r.id}">${icon('i-phone')}تماس و ثبت نتیجه</button>`:`<button class="btn sm" data-act="req-call" data-id="${r.id}">پرونده</button>`}${r.status==='accepted'&&r.memberId&&memberById(r.memberId)?`<button class="btn sm" data-act="open-member" data-id="${r.memberId}">پرونده عضو</button>`:''}</td>
+    </tr>`; }).join('') || '<tr><td colspan="8" class="empty">درخواستی در این دسته نیست. فرم درخواست عضویت در صفحهٔ ورود سامانه قرار دارد.</td></tr>'}</tbody>
   </table></div></section>`;
 }
 
@@ -926,6 +981,38 @@ function showJoinDone(code, again){
     <p>کد پیگیری</p><div class="code">${esc(code)}</div></div>`,
     foot:'<button type="button" class="btn primary" data-act="close">متوجه شدم</button>'});
 }
+function callModal(r){
+  const f=(k,v)=>`<div><dt>${k}</dt><dd>${esc(v)||'—'}</dd></div>`;
+  const open = r.status==='new'||r.status==='called';
+  modal({title:'پرونده متقاضی: '+esc(r.first+' '+r.last), wide:true, body:`
+    <div class="phone-box"><span class="ph" id="ph-num" dir="ltr">${esc(fa(r.phone))}</span>
+      <button type="button" class="btn sm" data-act="copy-phone" data-id="${esc(r.phone)}">کپی شماره</button>
+      <a class="btn sm primary" href="tel:${esc(r.phone)}">${icon('i-phone')}تماس</a></div>
+    <dl class="info" style="margin:0">${f('نام و نام خانوادگی',r.first+' '+r.last)}${f('نام پدر',r.father)}${f('کد ملی',fa(r.nationalId))}${f('شماره شناسنامه',fa(r.shenasname))}${f('تاریخ تولد',fmtDate(r.birth))}${f('تحصیلات',r.education)}${f('نشانی',r.address)}${f('زمینه فعالیت / توضیحات',r.notes)}${f('تاریخ درخواست',fmtDate(r.date))}${f('کد پیگیری',fa(r.code))}${f('وضعیت',RSTAT[r.status])}</dl>
+    <h4 class="sec-t">سوابق تماس</h4>
+    ${r.calls.length?`<ul class="calls">${r.calls.slice().reverse().map(c=>`<li><b>${esc(c.result)}</b> <span class="when num">· ${esc(fa(c.at))} · ${esc(c.by)}</span>${c.note?`<div>${esc(c.note)}</div>`:''}</li>`).join('')}</ul>`:'<p style="margin:0;color:var(--muted);font-size:13.5px">هنوز با این متقاضی تماسی ثبت نشده است.</p>'}
+    ${open?`<h4 class="sec-t">ثبت نتیجه تماس</h4><div class="form-grid">
+      ${fld('c-res','نتیجه تماس',CALL_RESULTS[0],{select:CALL_RESULTS.map(x=>[x,x])})}${fld('c-fu','تاریخ پیگیری یا مراجعه (اختیاری)',fa(r.followUp||''),{ph:'۱۴۰۵/۰۸/۲۰'})}
+      ${fld('c-note','یادداشت تماس','',{full:1})}</div>`:''}`,
+    foot: open ? `<button type="button" class="btn danger" data-act="req-reject" data-id="${r.id}">رد درخواست</button><button type="button" class="btn" data-act="req-accept" data-id="${r.id}">پذیرش عضویت</button><button class="btn primary" type="submit">ثبت نتیجه تماس</button>`
+      : `<button type="button" class="btn danger" data-act="req-del" data-id="${r.id}">حذف درخواست</button><button type="button" class="btn" data-act="close">بستن</button>`,
+    onSubmit:()=>{
+      if(!open) return;
+      const fuRaw = val('c-fu'); const fu = fuRaw ? normDate(fuRaw) : '';
+      if(fu===null){ toast('تاریخ پیگیری را به شکل ۱۴۰۵/۰۸/۲۰ وارد کنید'); return false; }
+      r.calls.push({at:`${todayJ()} ${nowHM()}`, by:me.name, result:val('c-res'), note:val('c-note')});
+      r.followUp = fu; if(r.status==='new') r.status='called';
+      save(); render(); toast('نتیجه تماس ثبت شد');
+    }});
+}
+function notifPanel(){
+  const list = notifications(), seen = seenSet();
+  modal({title:'اعلان‌ها', body: list.length ? `<ul class="notif-list">${list.map(n=>`<li><button type="button" data-act="notif-go" data-id="${n.id}" data-to="${n.act}">
+      <span class="notif-ico ${n.kind}">${icon(n.ico)}</span><span class="notif-t">${esc(n.title)}</span>${seen.has(n.key)?'<span></span>':'<span class="dot" aria-label="جدید"></span>'}<span class="notif-s">${esc(n.sub)}</span></button></li>`).join('')}</ul>`
+    : '<div class="empty">اعلان تازه‌ای ندارید.</div>', foot:'<button type="button" class="btn" data-act="close">بستن</button>'});
+  db.seen[me.id] = list.map(n=>n.key); save();
+  $('#bell').innerHTML = icon('i-bell');
+}
 function readLogo(file){
   if(!file) return;
   if(!/^image\//.test(file.type)){ toast('یک فایل تصویری انتخاب کنید'); return; }
@@ -940,18 +1027,25 @@ function readLogo(file){
   fr.readAsDataURL(file);
 }
 
+function selectPhone(){ const el = $('#ph-num'); if(!el) return; const rg = document.createRange(); rg.selectNodeContents(el); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(rg); }
+
 /* ================= actions ================= */
 const A = {
   join(){ joinForm(); },
+  notifs(){ notifPanel(); },
+  'notif-go'(id, el){ closeModal(); A[el.dataset.to](id, el); },
+  'rq-filter'(id){ state.rqFilter = id; render(); },
+  'req-call'(id){ callModal(db.requests.find(x=>x.id===id)); },
+  'copy-phone'(num){ const done = () => toast('شماره کپی شد'); try{ navigator.clipboard.writeText(num).then(done, () => { selectPhone(); toast('شماره انتخاب شد؛ کپی کنید'); }); }catch(e){ selectPhone(); toast('شماره انتخاب شد؛ کپی کنید'); } },
   'req-view'(id){ const r = db.requests.find(x=>x.id===id); const f=(k,v)=>`<div><dt>${k}</dt><dd>${esc(v)||'—'}</dd></div>`;
     modal({title:'درخواست '+esc(r.first+' '+r.last), body:`<dl class="info" style="margin:0">${f('کد پیگیری',fa(r.code))}${f('تاریخ درخواست',fmtDate(r.date))}${f('نام',r.first)}${f('نام خانوادگی',r.last)}${f('نام پدر',r.father)}${f('کد ملی',fa(r.nationalId))}${f('شماره شناسنامه',fa(r.shenasname))}${f('تاریخ تولد',fmtDate(r.birth))}${f('شماره تماس',fa(r.phone))}${f('تحصیلات',r.education)}${f('نشانی',r.address)}${f('توضیحات',r.notes)}${f('وضعیت',RSTAT[r.status])}</dl>`, foot:'<button type="button" class="btn" data-act="close">بستن</button>'}); },
   'req-called'(id){ const r = db.requests.find(x=>x.id===id); r.status='called'; save(); render(); toast('تماس ثبت شد'); },
-  'req-reject'(id){ const r = db.requests.find(x=>x.id===id); r.status='rejected'; save(); render(); toast('درخواست رد شد'); },
+  'req-reject'(id){ const r = db.requests.find(x=>x.id===id); r.status='rejected'; r.calls.push({at:`${todayJ()} ${nowHM()}`, by:me.name, result:'درخواست رد شد', note:''}); closeModal(); save(); render(); toast('درخواست رد شد'); },
   'req-accept'(id){ const r = db.requests.find(x=>x.id===id);
     if(db.members.some(m=>m.nationalId===r.nationalId)){ toast('این کد ملی در فهرست نیروها هست'); return; }
     const m = {id:uid('m'), first:r.first, last:r.last, father:r.father, nationalId:r.nationalId, shenasname:r.shenasname, birth:r.birth, phone:r.phone, memberNo:'', status:'normal', group:'جوان', joinDate:todayJ(), education:r.education, address:r.address, notes:r.notes};
-    db.members.push(m); r.status='accepted'; r.memberId=m.id; save(); render(); toast(fullName(m)+' به فهرست نیروها اضافه شد'); },
-  'req-del'(id){ const r = db.requests.find(x=>x.id===id); confirmBox(`درخواست <b>${esc(r.first+' '+r.last)}</b> حذف شود؟`, ()=>{ db.requests = db.requests.filter(x=>x!==r); save(); render(); toast('حذف شد'); }); },
+    db.members.push(m); r.status='accepted'; r.memberId=m.id; r.calls.push({at:`${todayJ()} ${nowHM()}`, by:me.name, result:'عضویت پذیرفته شد', note:''}); closeModal(); save(); render(); toast(fullName(m)+' به فهرست نیروها اضافه شد'); },
+  'req-del'(id){ const r = db.requests.find(x=>x.id===id); closeModal(); confirmBox(`درخواست <b>${esc(r.first+' '+r.last)}</b> حذف شود؟`, ()=>{ db.requests = db.requests.filter(x=>x!==r); save(); render(); toast('حذف شد'); }); },
   'logo-remove'(){ db.settings.logo=''; save(); render(); toast('نشان پیش‌فرض برگشت'); },
   fill(id){ const u = db.users.find(x=>x.id===id); $('#lg-user').value = u.username; $('#lg-pass').value = u.password; },
   logout(){ me = null; try{ sessionStorage.removeItem('basij-hozour-user'); }catch(e){} render(); },
