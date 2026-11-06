@@ -532,7 +532,7 @@ async function readForm(form, fields) {
     else if (f.t === 'check') out[f.k] = !!(el && el.checked);
     else if (f.t === 'file') { try { out[f.k] = el && el.files.length ? await Promise.all([...el.files].map(x => readFile(x, f.single))) : []; } catch (e) { errs[f.k] = e.message; } }
     else if (f.t === 'date') { const s = (el.value || '').trim(); if (s) { const iso = jToIso(s); if (!iso) errs[f.k] = 'تاریخ شمسی معتبر نیست (نمونه: ۱۴۰۵/۰۸/۰۸).'; out[f.k] = iso || ''; } else out[f.k] = ''; }
-    else if (['number', 'dec', 'money'].includes(f.t)) { const s = en(el.value).replace(/[,٬\s]/g, '').replace('٫', '.'); if (s && isNaN(+s)) errs[f.k] = 'عدد معتبر وارد کنید.'; else if (s && f.t !== 'dec' && !Number.isInteger(+s)) errs[f.k] = 'عدد صحیح وارد کنید.'; out[f.k] = s === '' ? '' : f.t === 'dec' ? s : +s; }
+    else if (['number', 'dec', 'money'].includes(f.t)) { const s = en(el.value).replace(/[,٬\s]/g, '').replace(/[٫/]/, '.'); if (s && isNaN(+s)) errs[f.k] = 'عدد معتبر وارد کنید.'; else if (s && f.t !== 'dec' && !Number.isInteger(+s)) errs[f.k] = 'عدد صحیح وارد کنید.'; out[f.k] = s === '' ? '' : f.t === 'dec' ? s : +s; }
     else out[f.k] = el ? el.value.trim() : '';
     if (f.req && !errs[f.k] && (out[f.k] === '' || out[f.k] == null || (Array.isArray(out[f.k]) && !out[f.k].length))) errs[f.k] = 'این بخش لازم است.';
   }

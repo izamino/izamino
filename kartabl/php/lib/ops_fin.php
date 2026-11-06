@@ -44,6 +44,11 @@ function newVoucher($date, $desc, $lines, $status, $extra = []) {
   audit('ثبت سند حسابداری', 'voucher', $v->id, 'سند ' . $no . ' · ' . $p->title);
   return $v;
 }
+/* جلوگیری از ثبت دوباره همان سند (حتی بدون شماره مرجع): سند هم‌تاریخ با همان شرح و همان ردیف‌ها که همین کاربر در ۱۵ دقیقه اخیر ثبت کرده است */
+function recentDup($col, $match, $what) {
+  $lim = gmdate('Y-m-d\TH:i:s', time() - 900);
+  foreach (D()->$col as $x) if (($x->by ?? '') === meUser()->id && ($x->created ?? '') >= $lim && $match($x)) need(false, $what . ' مشابه (شماره ' . fa($x->no) . ') چند دقیقه پیش ثبت شده است. اگر واقعاً مورد تازه‌ای است، شماره مرجع یا شرح متفاوت بنویسید.');
+}
 function refDup($ref, $periodId, $exceptId = '') {
   if ($ref === '') return null;
   foreach (D()->vouchers as $x) if ($x->id !== $exceptId && $x->periodId === $periodId && ($x->ref ?? '') === $ref && $x->status !== V_REVERSED && empty($x->reverseOf)) return $x;
@@ -57,6 +62,7 @@ $OPS['createPay'] = function ($v) {
   $title = str($v->title ?? '', 300); need($title !== '', 'عنوان درخواست را بنویسید.');
   $a = amt($v->amount ?? '', 'مبلغ'); need($a > 0, 'مبلغ معتبر لازم است.');
   $u = isImam() ? U_FIN : myUnit();
+  recentDup('payreqs', fn($x) => $x->title === $title && $x->amount == $a && $x->status !== 'ردشده', 'درخواست پرداخت');
   $th = (float)(D()->settings->payThreshold ?? 50000000);
   $p = (object)['id' => uid(), 'no' => nextNo('pay'), 'unitId' => $u, 'title' => $title, 'amount' => $a, 'payee' => str($v->payee ?? '', 200), 'desc' => str($v->desc ?? '', 4000), 'files' => files($v->files ?? []),
     'stage' => myRole() === 'manager' ? 1 : 0, 'status' => 'جاری', 'needImam' => $a > $th, 'byPos' => mePos()->id, 'by' => meUser()->id, 'byName' => actorName(), 'created' => stamp()];
@@ -173,6 +179,8 @@ $OPS['voucherSave'] = function ($id, $v) {
   }
   $p = openPeriodFor($date);
   $d = refDup($ref, $p->id); need(!$d, 'شماره مرجع ' . fa($ref) . ' قبلاً در سند ' . fa($d->no ?? '') . ' همین دوره ثبت شده است.');
+  [$ls] = cleanLines($v->lines ?? []);
+  recentDup('vouchers', fn($x) => empty($x->reverseOf) && $x->date === $date && $x->desc === $desc && json_encode($x->lines) === json_encode($ls), 'سند');
   return newVoucher($date, $desc, $v->lines ?? [], V_DRAFT, ['ref' => $ref, 'files' => files($v->files ?? [])]);
 };
 $OPS['voucherPost'] = function ($id) {
@@ -234,6 +242,7 @@ $OPS['invoiceSave'] = function ($id, $v) {
     foreach ($f as $k => $val) $x->$k = $val;
     hist($x, 'ویرایش فاکتور', '', $diff); audit('ویرایش فاکتور', 'invoice', $x->id, $x->no); return $x;
   }
+  recentDup('invoices', fn($x) => $x->status !== INV_VOID && $x->party === $party && $x->date === $date && $x->total == $total, 'فاکتور');
   $x = (object)array_merge(['id' => 'f' . uid(), 'no' => nextNo('inv')], $f, ['status' => INV_DRAFT, 'by' => meUser()->id, 'byName' => actorName(), 'created' => stamp()]);
   hist($x, 'ثبت پیش‌نویس فاکتور ' . $kind, money($total)); D()->invoices[] = $x; audit('ثبت فاکتور', 'invoice', $x->id, $x->no); return $x;
 };

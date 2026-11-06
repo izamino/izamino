@@ -82,6 +82,11 @@ r = await cm.cmd('setOfficePerm', 'P18-o', 'letters.refer', 'deny'); r = await m
 r = await cm.cmd('setOfficePerm', 'P18-o', 'letters.refer', ''); r = await meo.cmd('reopenLetter', L.id, 'نیاز به اقدام'); ok(!r.error, 'بازگشایی با علت');
 r = await meo.cmd('referLetter', L.id, 4, 'هماهنگی'); ok(!r.error, 'مسئول دفتر با مجوز ارجاع (بدون نیاز به مدیر بودن) ارجاع کرد');
 
+r = await meo.cmd('referLetter', L.id, 4, 'هماهنگی', '', 'P4-s'); ok(!r.error, 'ارجاع به منشی یک مدیریت مشخص');
+const mem = new U('ceremony.manager'); await mem.login();
+const L2 = (await mem.cmd('sendLetter', { type: 'in', subject: 'وارده آزمون', sender: 'اداره', body: '<p>x</p>' })).result;
+r = await meo.cmd('referLetter', L2.id, 18, 'برای اقدام منشی', '', 'P18-s'); ok(!r.error, 'مسئول دفتر نامه را به منشی همان مدیریت ارجاع داد (بدون نیاز به مدیر بودن)');
+const msec = new U('ceremony.secretary'); await msec.login(); ok(msec.S.notifs.some(n => n.open && n.open.id === L2.id), 'منشی اعلان ارجاع را گرفت');
 console.log('واگذاری اختیار و سقف مدیر');
 const imam = new U('imam'); await imam.login();
 r = await imam.cmd('setPosPerm', 'P2-m', 'reservations.create', 'deny'); ok(!r.error, 'امام سقف مدیر فرهنگی را محدود کرد');
@@ -126,6 +131,10 @@ const V = { date: today, desc: 'دریافت آزمون', ref: 'REF-77', lines: 
 const a1 = await fo.cmdIdem(idem, 'voucherSave', '', V); const a2 = await fo.cmdIdem(idem, 'voucherSave', '', V);
 ok(!a1.error && a2.repeat && a1.result.id === a2.result.id, 'ارسال تکراری با همان شناسه، فقط یک سند ثبت کرد');
 r = await fo.cmd('voucherSave', '', V); ok(r.error && /مرجع/.test(r.error), 'شماره مرجع تکراری در همان دوره رد شد');
+const V3 = { date: today, desc: 'سند بی‌مرجع', lines: [{ acc: '1101', dr: 700, cr: 0 }, { acc: '4101', dr: 0, cr: 700 }] };
+r = await fo.cmd('voucherSave', '', V3); const r2 = await fo.cmd('voucherSave', '', V3); ok(!r.error && r2.error && /مشابه/.test(r2.error), 'دو سند یکسان بدون شماره مرجع (با دو شناسه متفاوت) دوبار ثبت نشد');
+await fo.cmd('voucherDelete', r.result.id);
+const pr1 = await cmg.cmd('createPay', { title: 'تکراری', amount: 1000, payee: 'x' }); const pr2 = await cmg.cmd('createPay', { title: 'تکراری', amount: 1000, payee: 'x' }); ok(!pr1.error && pr2.error, 'درخواست پرداخت تکراری رد شد');
 r = await fo.cmd('voucherPost', a1.result.id); ok(r.error, 'مسئول دفتر بدون مجوز قطعی‌کردن نمی‌تواند سند را قطعی کند');
 r = await fm.cmd('voucherPost', a1.result.id); ok(!r.error && r.result.status === 'قطعی', 'مدیر مالی سند را قطعی کرد');
 r = await fo.cmd('voucherSave', a1.result.id, V); ok(r.error, 'سند قطعی قابل ویرایش نیست');
@@ -174,6 +183,9 @@ r = await chs.cmd('toolSave', 12, 'needs', '', { title: 'x', need: 'معیشتی
 r = await cs.cmd('toolSave', 17, 'projects', '', { title: 'نفوذ' }); ok(r.error, 'کاربر مدیریت دیگر نمی‌تواند در ابزار این مدیریت ثبت کند');
 
 console.log('پیام، رزرو، اعلان');
+for (let i = 0; i < 112; i++) await cmg.cmd('createTask', { unitId: 2, title: 'انبوه ' + i, assignee: 'P2-s', due: add(9) });
+cs.state = (await cs.req('GET', 'state')).state;
+ok(cs.S.notifs.filter(n => !n.read).length >= 112, 'بیش از ۱۱۰ اعلان خوانده‌نشده همه به کاربر رسید (صفحه‌بندی در رابط)');
 r = await cs.cmd('sendMessage', 'P18-m', 'سلام آزمون'); ok(!r.error, 'ارسال پیام');
 cm.state = (await cm.req('GET', 'state')).state; ok(cm.S.messages.some(m => m.text === 'سلام آزمون' && !m.read), 'گیرنده پیام را دید');
 await cm.cmd('readThread', 'P2-s'); ok(cm.S.messages.filter(m => m.from === 'P2-s').every(m => m.read), 'خواندن گفت‌وگو');
