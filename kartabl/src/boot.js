@@ -10,22 +10,13 @@ document.addEventListener('keydown', e => {
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('[data-a][role="button"]')) { e.preventDefault(); e.target.click(); }
 });
 new MutationObserver(() => a11yClickables()).observe(document.documentElement, { childList: true, subtree: true });
-
 function boot() {
   document.documentElement.lang = 'fa';
   document.documentElement.dir = 'rtl';
   const t = pref.get('theme', ''); if (t) document.documentElement.dataset.theme = t;
+  /* تغییر صفحه: پنجره باز (مثلاً نامه نیمه‌کاره) پیش از بسته‌شدن پیش‌نویس را ذخیره می‌کند */
   window.addEventListener('hashchange', () => { closeModal(); route(); window.scrollTo(0, 0); });
   setInterval(tick, 1000);
-  if (SERVER) { Remote.boot(); return; }
-  Store.load();
-  migrate(DB); applySettings();
-  sweepDeadlines(); Store.save();
-  const [sid, ses] = (sess.get() || '').split('|');
-  const u = sid && userById(sid);
-  const s = DB.sessions.find(x => x.id === ses);
-  if (u && u.active && !u.deleted && u.posId && s && s.active) setMe(u); else sess.set(null);
-  if (location.hash === '#library') route(); else if (ME) renderShell(); else renderLogin();
-  Sync.init();
+  Remote.boot();
 }
 boot();

@@ -1,67 +1,92 @@
 /* =====================================================================
-   اتصال به سرور (نسخه عملیاتی)
-   مرورگر هیچ داده‌ای ذخیره نمی‌کند؛ هر کاربر فقط داده‌های مجاز خود را از سرور می‌گیرد
-   و هر تغییر به‌صورت یک درخواست به سرور فرستاده و آنجا بررسی می‌شود.
+   اتصال به سرور: هر کاربر فقط داده‌های مجاز خود را از سرور می‌گیرد و هر تغییر
+   به‌صورت یک «عملیات» به سرور فرستاده و آنجا بررسی و ثبت می‌شود.
    ===================================================================== */
+const API = r => 'api.php?r=' + r;
 const Remote = {
-  session: null, es: null, stale: false, csrf: '',
-  async req(method, url, body, headers = {}) {
+  session: null, csrf: '', stale: false, timer: null, ver: -1, busy: 0,
+  async req(method, r, body, opts = {}) {
     let res;
-    try {
-      res = await fetch(url, { method, credentials: 'same-origin', headers: { 'X-Kartabl': '1', 'X-CSRF': this.csrf, ...(body instanceof Blob ? {} : { 'Content-Type': 'application/json' }), ...headers }, body: body == null ? undefined : body instanceof Blob ? body : JSON.stringify(body) });
-    } catch (e) { return { error: 'ارتباط با سرور برقرار نشد. اتصال شبکه را بررسی کنید.' }; }
+    const headers = { 'X-Kartabl': '1', 'X-CSRF': this.csrf };
+    if (!(body instanceof Blob) && body !== undefined) headers['Content-Type'] = 'application/json';
+    for (let attempt = 0; attempt < (opts.retry ? 2 : 1); attempt++) {
+      try { res = await fetch(API(r) + (opts.q || ''), { method, credentials: 'same-origin', headers, body: body === undefined ? undefined : body instanceof Blob ? body : JSON.stringify(body), cache: 'no-store' }); break; }
+      catch (e) { if (attempt === (opts.retry ? 1 : 0)) return { error: 'ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کنید؛ اطلاعات واردشده حفظ شده است.', offline: true }; await new Promise(x => setTimeout(x, 1200)); }
+    }
     let data = {};
     try { data = await res.json(); } catch (e) { data = { error: 'پاسخ نامعتبر از سرور (' + res.status + ').' }; }
-    if (res.status === 401 && ME) { ME = null; closeModal(); renderLogin(data.error || 'نشست شما پایان یافته است؛ دوباره وارد شوید.'); return { error: data.error || 'نشست پایان یافته است.' }; }
+    /* پایان نشست (غیرفعال‌شدن حساب، تغییر رمز، بی‌فعالیتی): بازگشت به صفحه ورود، نه پیام قطعی ارتباط */
+    if (res.status === 401 || data.ended) { this.endLocal(data.error || data.ended || 'نشست شما پایان یافته است؛ دوباره وارد شوید.'); return { error: data.error || 'نشست پایان یافته است.', ended: true }; }
+    if (res.status === 403 && data.csrf && !opts.noCsrfRetry) { await this.refresh(true); return this.req(method, r, body, { ...opts, noCsrfRetry: true }); }
     if (!res.ok && !data.error) data.error = 'خطای سرور (' + res.status + ').';
     return data;
   },
   apply(r) {
-    if (r.public) { DB = r.public; DB.users = DB.users || []; applySettings(); return; }
+    if (r.public) { DB = { settings: r.public.settings, positions: [], users: [], notifs: [], counts: r.public.counts, public: true }; applySettings(); return; }
     if (!r.state) return;
-    DB = r.state; this.session = r.session; this.csrf = r.csrf || this.csrf;
+    DB = r.state; this.session = r.session; this.csrf = r.csrf || this.csrf; this.ver = DB.ver;
     applySettings();
-    const u = DB.users.find(x => x.id === r.me);
+    const u = DB.users.find(x => x.id === DB.me);
     if (u) setMe(u);
   },
+  endLocal(msg) {
+    const wasIn = !!ME;
+    ME = null; this.csrf = ''; this.session = null; this.stop();
+    saveOpenDraft();
+    closeModal(true);
+    if (wasIn || !$('#loginf')) this.req('GET', 'state').then(r => { this.apply(r); renderLogin(msg); });
+  },
   async boot() {
-    const r = await this.req('GET', '/api/state');
+    const r = await this.req('GET', 'state');
+    if (r.error && !r.public && !r.state) { $('#root').innerHTML = `<div class="boot">${esc(r.error)}<br><button class="btn mt" onclick="location.reload()">تلاش دوباره</button></div>`; return; }
     this.apply(r);
-    if (location.hash === '#library') route();
-    else if (r.state && ME) { renderShell(); if (ME.user.mustChange) forcePassChange(); } else renderLogin(r.message || '');
-    this.listen();
+    if (r.state && ME) { afterLogin(); } else renderLogin(r.message || '');
   },
   async login(username, password) {
-    const r = await this.req('POST', '/api/login', { username, password });
+    const r = await this.req('POST', 'login', { username, password });
     if (r.error) { if (r.public) this.apply({ public: r.public }); return r; }
-    this.apply(r); this.listen(); return r;
+    this.apply(r); return r;
   },
-  async logout(msg) { await this.req('POST', '/api/logout', { msg: msg || '' }); this.session = null; if (this.es) { this.es.close(); this.es = null; } const r = await this.req('GET', '/api/state'); this.apply(r); },
-  ping() { this.req('POST', '/api/ping', {}); },
-  /* هر عملیات همراه نسخه رکوردی که کاربر دیده فرستاده می‌شود تا تغییر هم‌زمان دیگران بازنویسی نشود */
+  async logout() { this.stop(); const r = await this.req('POST', 'logout', {}); this.session = null; this.csrf = ''; if (r.public) this.apply(r); },
+  ping() { if (ME) this.req('POST', 'ping', {}); },
+  /* هر عملیات همراه نسخه رکوردی که کاربر دیده و یک شناسه یکتا فرستاده می‌شود:
+     - تغییر هم‌زمان دیگران بازنویسی نمی‌شود
+     - تکرار ارسال (دوبار زدن یا قطع و وصل اینترنت) دوباره ثبت نمی‌شود */
   async cmd(name, args) {
     let ver = null;
-    if (typeof args[0] === 'string') for (const c of Object.values(COLS)) { const r = (DB[c] || []).find(x => x.id === args[0]); if (r) { ver = { col: c, id: r.id, v: r._v || 0 }; break; } }
-    const r = await this.req('POST', '/api/cmd', { name, args, ver });
-    if (r.state) this.apply(r);
-    if (r.conflict) { if (!$('.modal-bg')) route(); return { error: r.error }; }
-    if (r.error) return { error: r.error };
-    return r.result || {};
+    if (typeof args[0] === 'string') for (const c of ['letters', 'orders', 'tasks', 'requests', 'reservations', 'meetings', 'assets', 'movements', 'payreqs', 'vouchers', 'invoices', 'findocs', 'toolrecs', 'leaves']) { const r = (DB[c] || []).find(x => x.id === args[0]); if (r) { ver = { col: c, id: r.id, v: r._v || 0 }; break; } }
+    this.busy++;
+    try {
+      const r = await this.req('POST', 'cmd', { name, args, ver, idem: rid() }, { retry: true });
+      if (r.state) this.apply(r);
+      if (r.conflict) { if (!$('.modal-bg')) route(); return { error: r.error }; }
+      if (r.error) return { error: r.error, offline: r.offline };
+      return r.result || {};
+    } finally { this.busy--; }
   },
-  async signup(v) { const r = await this.req('POST', '/api/signup', { v }); return r.error ? { error: r.error } : r.result || {}; },
-  async post(url, body) { const r = await this.req('POST', url, body); if (r.state) this.apply(r); return r; },
-  async refresh() { const r = await this.req('GET', '/api/state'); if (r.state) { this.apply(r); if (!$('.modal-bg')) route(); else this.stale = true; } },
+  async post(r, body, q) { const x = await this.req('POST', r, body, { q }); if (x.state) this.apply(x); return x; },
+  async refresh(force) {
+    /* هنگام تایپ در صفحه (مثلاً پیام یا فرم درون صفحه) نمایش دوباره به بعد موکول می‌شود تا متن از بین نرود */
+    const ae = document.activeElement;
+    if (!force && ae && ae.closest && ae.closest('#main') && (/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) || ae.isContentEditable) && !(ae.id || '').startsWith('flt-')) { this.stale = true; return; }
+    const r = await this.req('GET', 'state');
+    if (r.state) { this.apply(r); if (!$('.modal-bg') || force) { if (ME) route(); } else this.stale = true; }
+  },
   async upload(file) {
-    const r = await this.req('PUT', '/api/files?name=' + encodeURIComponent(file.name), file, { 'Content-Type': file.type || 'application/octet-stream' });
-    return r.error ? r : { id: r.id, name: r.name, size: r.size, type: r.type, url: '/api/files/' + r.id };
+    const r = await this.req('POST', 'upload', file, { q: '&name=' + encodeURIComponent(file.name) });
+    return r.error ? r : { id: r.id, name: r.name, size: r.size, type: r.type, url: r.url };
   },
-  /* تغییرات دیگران: سرور فقط خبر می‌دهد که چیزی تغییر کرده و هر کاربر نسخه مجاز خودش را دوباره می‌گیرد */
+  /* بررسی تغییرات هر چند ثانیه (روی هاست اشتراکی اتصال دائمی ممکن نیست) */
   listen() {
-    if (this.es || typeof EventSource === 'undefined' || !ME) return;
-    this.es = new EventSource('/api/events');
-    this.es.addEventListener('changed', () => { if ($('.modal-bg')) this.stale = true; else this.refresh(); });
-    this.es.addEventListener('ended', e => { const m = (() => { try { return JSON.parse(e.data).msg; } catch (x) { return ''; } })(); if (this.es) { this.es.close(); this.es = null; } ME = null; closeModal(); this.req('GET', '/api/state').then(r => { this.apply(r); renderLogin(m || 'نشست شما پایان یافت.'); }); });
-    this.es.onerror = () => {};
+    this.stop();
+    this.timer = setInterval(async () => {
+      if (!ME || this.busy || document.hidden) return;
+      const r = await this.req('GET', 'ver');
+      if (r.auth === false) return this.endLocal(r.message || 'نشست شما پایان یافت؛ دوباره وارد شوید.');
+      if (r.ver != null && r.ver !== this.ver) { if ($('.modal-bg')) this.stale = true; else this.refresh(); }
+    }, 9000);
   },
+  stop() { if (this.timer) clearInterval(this.timer); this.timer = null; },
   flush() { if (this.stale && !$('.modal-bg')) { this.stale = false; this.refresh(); } }
 };
+document.addEventListener('focusout', () => setTimeout(() => { const ae = document.activeElement; if (Remote.stale && !(ae && ae.closest && ae.closest('#main') && /^(INPUT|TEXTAREA)$/.test(ae.tagName))) Remote.flush(); }, 300));

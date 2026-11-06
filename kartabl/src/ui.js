@@ -5,19 +5,14 @@ const VIEW = {};
 const vs = (k, d = {}) => (VIEW[k] = VIEW[k] || { ...d });
 const A = {}; // اقدام‌ها (data-a)
 const CAN_PRINT = (() => { try { return window.self === window.top; } catch (e) { return false; } })();
-let SESSION_MEM = null;
-const sess = {
-  get() { try { return sessionStorage.getItem('shabab-session') || SESSION_MEM; } catch (e) { return SESSION_MEM; } },
-  set(v) { SESSION_MEM = v; try { v ? sessionStorage.setItem('shabab-session', v) : sessionStorage.removeItem('shabab-session'); } catch (e) {} }
-};
 
 /* ---------- قطعات نمایشی ---------- */
 const TONES = {
-  ok: ['تکمیل‌شده', 'تأییدشده', 'بایگانی', 'پرداخت‌شده', 'انجام‌شده', 'پاسخ داده‌شده', 'سالم', 'فعال', 'موجود', 'جاری‌'],
-  bad: ['معوق', 'ردشده', 'خیلی فوری', 'سری', 'خراب', 'اسقاط', 'غیرفعال', 'از کار افتاده', 'مفقود'],
-  warn: ['منتظر تأیید', 'فوری', 'محرمانه', 'نیازمند تعمیر', 'تأیید', 'نیازمند سرویس', 'هشدار', 'امانت', 'در انتظار ثبت امور اداری'],
+  ok: ['تکمیل‌شده', 'قطعی', 'صادرشده', 'پذیرفته‌شده', 'منتشرشده', 'برگزارشده', 'تحویل‌شده', 'حل‌شده', 'موجود', 'باز', 'تأییدشده', 'بایگانی', 'پرداخت‌شده', 'انجام‌شده', 'پاسخ داده‌شده', 'سالم', 'فعال', 'موجود', 'جاری‌'],
+  bad: ['معوق', 'ردشده', 'باطل‌شده', 'برگشت‌خورده', 'ناموجود', 'لغوشده', 'غیبت', 'بسته', 'خیلی فوری', 'سری', 'خراب', 'اسقاط', 'غیرفعال', 'از کار افتاده', 'مفقود'],
+  warn: ['منتظر تأیید', 'پیش‌نویس', 'رو به اتمام', 'برگشت برای اصلاح', 'در انتظار تأیید مدیر', 'فوری', 'محرمانه', 'نیازمند تعمیر', 'تأیید', 'نیازمند سرویس', 'هشدار', 'امانت', 'در انتظار ثبت امور اداری'],
   new: ['جدید', 'ثبت‌شده', 'ثبت درخواست', 'ارجاع به مدیریت مسئول'],
-  info: ['در حال انجام', 'در حال بررسی', 'ارجاع‌شده', 'اجرا', 'بررسی و هماهنگی', 'گزارش نهایی', 'در حال پیگیری']
+  info: ['در حال انجام', 'در حال بررسی', 'مختومه', 'ارسال‌شده', 'در حال رسیدگی', 'در حال پیگیری', 'در حال بررسی', 'ارجاع‌شده', 'اجرا', 'بررسی و هماهنگی', 'گزارش نهایی', 'در حال پیگیری']
 };
 const tone = s => { for (const k in TONES) if (TONES[k].includes(s)) return k; return String(s).startsWith('در انتظار') ? 'warn' : ''; };
 const pill = (s, t) => `<span class="pill ${t || tone(s)}">${esc(s)}</span>`;
@@ -109,7 +104,11 @@ function modal({ title, body, foot = '', wide = false, locked = false, sheet = f
   if (f) setTimeout(() => f.focus(), 30);
   return bg;
 }
+/* پنجره نوشتن نامه پیش از بسته‌شدن (به هر دلیل: انصراف، تغییر صفحه، پایان نشست) پیش‌نویس را ذخیره می‌کند */
+let MODAL_BEFORE_CLOSE = null;
+function saveOpenDraft() { const f = MODAL_BEFORE_CLOSE; MODAL_BEFORE_CLOSE = null; if (f) try { f(); } catch (e) {} }
 function closeModal(keep) {
+  if (!keep) saveOpenDraft(); else MODAL_BEFORE_CLOSE = null;
   const had = !!$('.modal-bg');
   $$('.modal-bg').forEach(m => m.remove());
   document.querySelector('.app')?.removeAttribute('aria-hidden');
@@ -117,7 +116,7 @@ function closeModal(keep) {
     MODAL_REOPEN = null;
     if (had && MODAL_OPENER && document.contains(MODAL_OPENER)) { try { MODAL_OPENER.focus(); } catch (e) {} }
     MODAL_OPENER = null;
-    setTimeout(() => { if ($('.modal-bg')) return; if (SERVER) Remote.flush(); else if (typeof Sync !== 'undefined') Sync.flushPending(); }, 0);
+    setTimeout(() => { if (!$('.modal-bg')) Remote.flush(); }, 0);
   }
 }
 
@@ -141,24 +140,18 @@ function fieldHTML(f, v) {
     case 'date': inp = `<input type="text" inputmode="numeric" id="${id}" name="${f.k}" ${req} value="${v ? jd(v) : ''}" placeholder="۱۴۰۵/۰۸/۰۸" autocomplete="off">`; break;
     case 'time': inp = `<input type="time" id="${id}" name="${f.k}" ${req} value="${esc(v || '')}">`; break;
     case 'file': inp = `<input type="file" id="${id}" name="${f.k}" ${f.single ? '' : 'multiple'}>`; hint = hint || fileLimitHint(); break;
-    case 'number': inp = `<input type="text" inputmode="numeric" id="${id}" name="${f.k}" ${req} value="${v != null && v !== '' ? esc(v) : ''}" placeholder="${esc(f.ph || '')}">`; break;
+    case 'number': case 'dec': case 'money': inp = `<input type="text" inputmode="${f.t === 'dec' ? 'decimal' : 'numeric'}" id="${id}" name="${f.k}" ${req} value="${v != null && v !== '' ? esc(f.t === 'money' ? numFa(v) : fa(v)) : ''}" placeholder="${esc(f.ph || '')}" ${f.t === 'money' ? 'data-money="1"' : ''}>`; break;
     default: inp = `<input type="${f.t || 'text'}" id="${id}" name="${f.k}" ${req} value="${esc(v ?? '')}" placeholder="${esc(f.ph || '')}" ${f.ro ? 'readonly' : ''}>`;
   }
   return `<div class="fld ${full}">${f.t === 'check' ? `<label>${esc(f.l)}</label>` : lab}${inp}${hint ? `<div class="hint">${esc(hint)}</div>` : ''}<div class="err" data-err="${f.k}" role="alert"></div></div>`;
 }
-/* پیوست‌ها: سرور ← مخزن فایل سرور؛ پیش‌نمایش claude.ai ← مخزن فایل؛ نسخه مستقل ← حداکثر ۱۵۰ کیلوبایت در مرورگر */
-const FILE_MAX = () => (SERVER ? 20 : typeof Sync !== 'undefined' && Sync.assets ? 20 : 0.15) * 1024 * 1024;
-const fileLimitHint = () => (SERVER || (typeof Sync !== 'undefined' && Sync.assets) ? 'هر فایل تا ۲۰ مگابایت در مخزن فایل سامانه ذخیره می‌شود.' : 'در نسخه نمایشی هر فایل حداکثر ۱۵۰ کیلوبایت؛ نسخه سروری تا ۲۰ مگابایت.');
+const FILE_MAX = () => 20 * 1024 * 1024;
+const fileLimitHint = () => 'هر فایل تا ۲۰ مگابایت (PDF، تصویر، ورد، اکسل، …).';
 async function readFile(file, asText) {
   const meta = { name: file.name, size: file.size, type: file.type || 'application/octet-stream' };
   if (asText) return { ...meta, text: await file.text() };
   if (file.size > FILE_MAX()) throw new Error(`حجم «${file.name}» (${fa(Math.ceil(file.size / 1024))} کیلوبایت) بیشتر از حد مجاز است. ${fileLimitHint()}`);
-  if (SERVER) { const r = await Remote.upload(file); if (r.error) throw new Error(`بارگذاری «${file.name}» انجام نشد: ${r.error}`); return r; }
-  if (typeof Sync !== 'undefined' && Sync.assets) {
-    try { const a = await Sync.assets.upload(file); return { ...meta, url: a.url, aid: a.id }; }
-    catch (e) { throw new Error(`بارگذاری «${file.name}» در مخزن فایل انجام نشد (${e && e.code || 'خطا'}). دوباره تلاش کنید.`); }
-  }
-  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res({ ...meta, data: r.result }); r.onerror = () => rej(new Error(`خواندن «${file.name}» ممکن نشد.`)); r.readAsDataURL(file); });
+  const r = await Remote.upload(file); if (r.error) throw new Error(`بارگذاری «${file.name}» انجام نشد: ${r.error}`); return r;
 }
 async function readForm(form, fields) {
   const out = {}; const errs = {};
@@ -168,7 +161,7 @@ async function readForm(form, fields) {
     else if (f.t === 'check') out[f.k] = !!(el && el.checked);
     else if (f.t === 'file') { try { out[f.k] = el && el.files.length ? await Promise.all([...el.files].map(x => readFile(x, f.single))) : []; } catch (e) { errs[f.k] = e.message; } }
     else if (f.t === 'date') { const s = (el.value || '').trim(); if (s) { const iso = jToIso(s); if (!iso) errs[f.k] = 'تاریخ شمسی معتبر نیست (نمونه: ۱۴۰۵/۰۸/۰۸).'; out[f.k] = iso || ''; } else out[f.k] = ''; }
-    else if (f.t === 'number') { const s = en(el.value).replace(/[,٬\s]/g, ''); if (s && isNaN(+s)) errs[f.k] = 'عدد معتبر وارد کنید.'; out[f.k] = s === '' ? '' : +s; }
+    else if (['number', 'dec', 'money'].includes(f.t)) { const s = en(el.value).replace(/[,٬\s]/g, '').replace('٫', '.'); if (s && isNaN(+s)) errs[f.k] = 'عدد معتبر وارد کنید.'; else if (s && f.t !== 'dec' && !Number.isInteger(+s)) errs[f.k] = 'عدد صحیح وارد کنید.'; out[f.k] = s === '' ? '' : f.t === 'dec' ? s : +s; }
     else out[f.k] = el ? el.value.trim() : '';
     if (f.req && !errs[f.k] && (out[f.k] === '' || out[f.k] == null || (Array.isArray(out[f.k]) && !out[f.k].length))) errs[f.k] = 'این بخش لازم است.';
   }
@@ -218,19 +211,9 @@ function actModal(title, cb, opts = {}) {
   formModal(title, fields, opts.init || {}, v => cb(v), { submit: opts.submit || 'ثبت اقدام', done: opts.done || 'اقدام ثبت شد.', reopen: opts.reopen, noDraft: true });
 }
 
-/* ---------- اجرای عملیات: سرور (نسخه عملیاتی) یا موتور داخل مرورگر (نسخه نمایشی) ---------- */
-const SERVER = typeof window !== 'undefined' && !!window.__KARTABL_SERVER__;
-async function run(name, ...args) {
-  if (SERVER) return PUBLIC_OPS[name] && !ME ? Remote.signup(args[0]) : Remote.cmd(name, args);
-  const fn = OPS[name] || PUBLIC_OPS[name];
-  if (!fn) return { error: 'عملیات ناشناخته.' };
-  const snap = JSON.stringify(DB);
-  let res;
-  try { res = fn(...args); } catch (e) { res = { error: e instanceof OpError ? e.message : 'خطای پیش‌بینی‌نشده: ' + e.message }; if (!(e instanceof OpError)) console.error(e); }
-  if (res && res.error) { /* هیچ تغییر ناقصی باقی نمی‌ماند */ const me = ME && ME.user.id; DB = JSON.parse(snap); applySettings(); if (me && userById(me)) setMe(userById(me)); return res; }
-  Store.save();
-  return res || {};
-}
+/* ---------- اجرای عملیات: همه تغییرات روی سرور بررسی و ثبت می‌شوند ---------- */
+const fail = m => ({ error: m });
+async function run(name, ...args) { return Remote.cmd(name, args); }
 
 let TOAST_T;
 function toast(t) {
@@ -241,119 +224,75 @@ function toast(t) {
 /* ---------- گزینه‌های مشترک فرم ---------- */
 const unitOpts = (withImam = false) => [...(withImam ? [[0, 'دفتر امام جماعت']] : []), ...UNITS.filter(u => !u.off).map(u => [u.id, u.name])];
 const posOpts = unitId => DB.positions.filter(p => unitId == null || p.unitId === +unitId).map(p => [p.id, posWho(p.id)]);
-const allPosOpts = () => [{ group: 'امام جماعت', items: [['P0', posWho('P0')]] }, ...UNITS.map(u => ({ group: u.name, items: posOpts(u.id) }))];
+const spaceOpts = () => SPACES.map(s => [s.id, s.name]);
+const allPosOpts = () => [{ group: 'امام جماعت', items: [[imamPos(), posWho(imamPos())]] }, ...UNITS.filter(u => !u.off).map(u => ({ group: u.name, items: posOpts(u.id) }))];
 const allPosChecks = () => DB.positions.map(p => [p.id, posLabel(p.id) + ' — ' + ((holderOf(p.id) || {}).name || 'بدون متصدی')]);
 const serviceOpts = () => UNITS.filter(u => !u.off).map(u => ({ group: u.name, items: [...SERVICES[u.id].map(s => [`${u.id}|${s}`, s]), [`${u.id}|همکاری میان‌بخشی`, 'درخواست همکاری میان‌بخشی']] }));
 
 /* ---------- ورود ---------- */
-const SEC = () => DB.settings.security;
-function renderLogin(err = '', mode = 'login') {
-  const st = DB.settings;
-  const groups = [['P0']].concat(UNITS.map(u => unitPositions(u.id).map(p => p.id)));
-  const pane = mode === 'signup' ? `<form id="signf" novalidate>
-      <div><h1>درخواست ایجاد حساب کاربری</h1><p class="muted">درخواست شما پس از بررسی مدیر فناوری اطلاعات فعال می‌شود.</p></div>
-      <div class="form">${fieldHTML({ k: 'name', l: 'نام و نام خانوادگی', req: true }, '')}${fieldHTML({ k: 'username', l: 'نام کاربری دلخواه', req: true, hint: 'حروف انگلیسی و عدد' }, '')}
-      ${fieldHTML({ k: 'phone', l: 'تلفن همراه', t: 'tel', req: true }, '')}${fieldHTML({ k: 'unitId', l: 'مدیریت محل خدمت', t: 'select', o: unitOpts(), req: true }, '')}
-      ${fieldHTML({ k: 'title', l: 'سمت درخواستی', req: true, ph: 'مثلاً: منشی، کارشناس، معاون' }, '')}${fieldHTML({ k: 'pass', l: 'رمز عبور', t: 'password', req: true, hint: 'دست‌کم ' + fa(SEC().minLen) + ' نویسه' }, '')}
-      ${fieldHTML({ k: 'note', l: 'توضیح', t: 'textarea' }, '')}</div>
-      <div class="err" id="serr" role="alert"></div>
-      <button class="btn lg" type="submit">${ic('send')}ارسال درخواست</button>
-      <button class="btn ghost" type="button" data-a="loginMode" data-m="login">بازگشت به ورود</button>
-    </form>` : `<form id="loginf" novalidate>
-      <div><h1>ورود به سامانه</h1><p class="muted">دسترسی شما بر اساس جایگاه سازمانی تعیین می‌شود.</p></div>
-      ${st.maintenance ? `<div class="notice warn">${ic('alert')} سامانه در حال به‌روزرسانی است؛ فقط مدیران سامانه امکان ورود دارند.</div>` : ''}
-      <div class="fld"><label for="lu">نام کاربری</label><input id="lu" name="u" autocomplete="username" dir="ltr"></div>
-      <div class="fld"><label for="lp">رمز عبور</label><div class="pw"><input id="lp" name="p" type="password" autocomplete="current-password" dir="ltr"><button type="button" class="ibtn sm" data-a="pwShow" data-t="lp" aria-label="نمایش رمز">${ic('eye')}</button></div></div>
-      ${err ? `<div class="notice warn" role="alert">${err}</div>` : ''}
-      <button class="btn lg" type="submit">${ic('lock')}ورود امن</button>
-      <button class="btn ghost" type="button" data-a="loginMode" data-m="signup">${ic('user')}درخواست ایجاد حساب کارکنان</button>
-      <a class="libentry" href="#library">${ic('book')}<span><b>کتابخانه و رزرو کتاب</b><small>برای عموم مردم؛ مشاهده و جست‌وجوی کتاب‌ها، عضویت و رزرو</small></span></a>
-      ${!SERVER && st.showDemo ? `<details class="demo-wrap"><summary>حساب‌های نسخه نمایشی (رمز همه <b class="code">1234</b>؛ در نسخه سروری وجود ندارد)</summary><div class="demo">${groups.flat().map(pid => { const u = holderOf(pid); if (!u) return ''; return `<button type="button" data-a="quick" data-u="${esc(u.username)}"><span>${esc(panelName(posById(pid)))}</span><small>${esc(u.name)} · <span class="code">${esc(u.username)}</span></small></button>`; }).join('')}</div></details>` : ''}
-    </form>`;
+const SEC = () => DB.settings.security || { minLen: 6, sessionMin: 120 };
+function renderLogin(err = '') {
+  closeModal(true);
+  const st = DB.settings || {};
+  const c = DB.counts || {};
   $('#root').innerHTML = `
   <div class="login">
     <div class="art"><canvas id="geo" aria-hidden="true"></canvas>
-      <div><div class="bs">بسم الله الرحمن الرحیم</div><h1>${esc(st.loginTitle)}<br>${esc(st.orgName)}</h1><p>${esc(st.loginText)}</p></div>
+      <div><div class="bs">بسم الله الرحمن الرحیم</div><h1>${esc(st.loginTitle || 'کارتابل اداری')}<br>${esc(st.orgName || '')}</h1><p>${esc(st.loginText || '')}</p></div>
       <div class="login-clock"><b id="lclock">${fa(nowHMS())}</b><span>${jdLong(todayISO())}</span></div>
-      <div class="facts"><div><b>${fa(UNITS.length)}</b><span>مدیریت مستقل</span></div><div><b>${fa(DB.positions.length)}</b><span>جایگاه سازمانی</span></div><div><b>${fa(DB.publicActive ?? DB.users.filter(u => u.active && !u.deleted).length)}</b><span>کاربر فعال</span></div></div>
+      <div class="facts"><div><b>${fa(c.units ?? UNITS.filter(u => !u.off).length)}</b><span>مدیریت مستقل</span></div><div><b>${fa(c.positions ?? 0)}</b><span>پنل سازمانی</span></div><div><b>${fa(c.active ?? 0)}</b><span>حساب فعال</span></div></div>
     </div>
-    <div class="pane">${pane}</div>
+    <div class="pane"><form id="loginf" novalidate>
+      <div><h1>ورود به کارتابل</h1><p class="muted">هر پنل به یک جایگاه سازمانی تعلق دارد؛ نام کاربری و رمز را از مدیریت فناوری اطلاعات دریافت کنید.</p></div>
+      ${st.maintenance ? `<div class="notice warn">${ic('alert')} سامانه در حال به‌روزرسانی است؛ فقط مدیر سامانه امکان ورود دارد.</div>` : ''}
+      <div class="fld"><label for="lu">نام کاربری</label><input id="lu" name="u" autocomplete="username" dir="ltr" autocapitalize="none" spellcheck="false"></div>
+      <div class="fld"><label for="lp">رمز عبور</label><div class="pw"><input id="lp" name="p" type="password" autocomplete="current-password" dir="ltr"><button type="button" class="ibtn sm" data-a="pwShow" data-t="lp" aria-label="نمایش رمز">${ic('eye')}</button></div></div>
+      ${err ? `<div class="notice warn" role="alert">${esc(err)}</div>` : ''}
+      <button class="btn lg" type="submit" id="loginbtn">${ic('lock')}ورود امن</button>
+      <p class="hint">فراموشی رمز یا تغییر نام کاربری: با مدیریت فناوری اطلاعات تماس بگیرید.</p>
+    </form></div>
   </div>`;
-  if (mode === 'login') $('#loginf').addEventListener('submit', e => { e.preventDefault(); doLogin($('#lu').value.trim(), $('#lp').value); });
-  else $('#signf').addEventListener('submit', async e => {
-    e.preventDefault();
-    const F = [{ k: 'name', req: 1 }, { k: 'username', req: 1 }, { k: 'phone', req: 1 }, { k: 'unitId', req: 1 }, { k: 'title', req: 1 }, { k: 'pass', req: 1 }, { k: 'note' }];
-    const { out } = await readForm(e.target, F);
-    const r = await run('createSignup', out);
-    if (r.error) { $('#serr').textContent = r.error; return; }
-    renderLogin('درخواست شما با کد ' + fa(r.no) + ' ثبت شد. پس از تأیید مدیر سامانه، با همان نام کاربری و رمز وارد شوید.');
-  });
+  $('#loginf').addEventListener('submit', e => { e.preventDefault(); doLogin($('#lu').value.trim(), $('#lp').value); });
+  setTimeout(() => { const u = $('#lu'); if (u) u.focus(); }, 30);
   drawGeo();
 }
-A.loginMode = d => renderLogin('', d.m);
 A.pwShow = d => { const i = document.getElementById(d.t); if (i) i.type = i.type === 'password' ? 'text' : 'password'; };
-function logLogin(username, u, ok, reason) {
-  DB.logins.push({ id: uid(), ts: stamp(), username, uid: u ? u.id : '', ok, reason, agent: navigator.userAgent.replace(/\(.*?\)/g, '').slice(0, 60) });
-  if (DB.logins.length > 3000) DB.logins = DB.logins.slice(-3000);
-}
 async function doLogin(username, pass) {
-  username = en(username);
-  if (SERVER) {
-    const r = await Remote.login(username, pass);
-    if (r.error) return renderLogin(r.error);
-    afterLogin(); return;
-  }
-  /* نسخه نمایشی: همان قواعد سرور، در مرورگر */
-  const u = DB.users.find(x => x.username === username && !x.deleted);
-  const deny = (msg, reason) => { logLogin(username, u, false, reason); Store.save(); renderLogin(msg); };
-  if (!u) return deny('نام کاربری یا رمز عبور درست نیست.', 'نام کاربری ناموجود');
-  if (u.lockedUntil && new Date(u.lockedUntil) > new Date()) return deny(`حساب به دلیل تلاش‌های ناموفق تا ساعت ${fa(new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit' }).format(new Date(u.lockedUntil)))} قفل است. مدیر فناوری اطلاعات می‌تواند آن را باز کند.`, 'حساب قفل');
-  if (!pwCheck(u.pass, pass)) {
-    u.fails = (u.fails || 0) + 1;
-    if (u.fails >= SEC().maxFails) { u.lockedUntil = new Date(Date.now() + SEC().lockMin * 60000).toISOString(); u.fails = 0; notify(adminPositions(), 'request', `حساب ${u.name} پس از ${fa(SEC().maxFails)} تلاش ناموفق قفل شد.`, 'admin', u.username); return deny(`به دلیل ${fa(SEC().maxFails)} تلاش ناموفق، حساب برای ${fa(SEC().lockMin)} دقیقه قفل شد. مدیر فناوری اطلاعات می‌تواند قفل را زودتر باز کند.`, 'قفل‌شدن حساب'); }
-    return deny('نام کاربری یا رمز عبور درست نیست.' + (u.fails ? ` (${fa(SEC().maxFails - u.fails)} تلاش دیگر تا قفل‌شدن حساب)` : ''), 'رمز نادرست');
-  }
-  if (!u.active) return deny('این حساب کاربری غیرفعال شده است. با مدیریت فناوری اطلاعات تماس بگیرید.', 'حساب غیرفعال');
-  if (!u.posId) return deny('برای این حساب جایگاه سازمانی تعریف نشده است.', 'بدون جایگاه');
-  if (DB.settings.maintenance && !permOf(posById(u.posId), 'admin.settings')) return deny('سامانه در حالت به‌روزرسانی است و فعلاً فقط مدیران سامانه وارد می‌شوند.', 'حالت به‌روزرسانی');
-  u.fails = 0; u.lockedUntil = ''; u.lastLogin = stamp();
-  logLogin(username, u, true, 'ورود موفق');
-  setMe(u);
-  const ses = { id: uid(), uid: u.id, start: stamp(), last: stamp(), active: true, agent: navigator.userAgent.replace(/\(.*?\)/g, '').slice(0, 60) };
-  DB.sessions.push(ses); if (DB.sessions.length > 500) DB.sessions = DB.sessions.slice(-500);
-  sess.set(u.id + '|' + ses.id);
-  audit('ورود به سامانه', 'session', u.id, '');
-  Store.save();
+  const b = $('#loginbtn'); if (b) { if (b.disabled) return; b.disabled = true; b.setAttribute('aria-busy', 'true'); }
+  const r = await Remote.login(en(username), pass);
+  if (r.error) return renderLogin(r.error);
   afterLogin();
 }
-function afterLogin() { LAST_ACT = Date.now(); renderShell(); if (ME.user.mustChange) forcePassChange(); }
+function afterLogin() {
+  LAST_ACT = Date.now(); LAST_SENT = Date.now();
+  if (!location.hash || location.hash === '#') history.replaceState(null, '', '#dashboard');
+  renderShell();
+  Remote.listen();
+  if (!ME.user.named) askName();
+}
 function setMe(u) { ME = { user: u, pos: posById(u.posId) }; }
-const mySession = () => { if (SERVER) return Remote.session; const s = (sess.get() || '').split('|')[1]; return DB.sessions.find(x => x.id === s); };
-/* فعالیت کاربر: کلیک، تایپ، لمس و پیمایش همه فعالیت حساب می‌شوند */
+/* اولین ورود: متصدی فقط نام و مشخصات خود را ثبت می‌کند و کار را شروع می‌کند (تغییر رمز لازم نیست) */
+function askName() {
+  formModal('خوش آمدید — مشخصات متصدی این پنل', [{ k: 'first', l: 'نام', req: true }, { k: 'last', l: 'نام خانوادگی', req: true }, { k: 'phone', l: 'شماره همراه', t: 'tel', hint: 'برای پیامک اعلان‌ها (اختیاری)' }, { k: 'title', l: 'عنوان یا سمت (اختیاری)', ph: 'مثلاً: حجت‌الاسلام، دکتر، کارشناس' }],
+    { first: ME.user.first || '', last: ME.user.last || '', phone: ME.user.phone || '' }, v => run('updateOwnHolder', v),
+    { locked: true, submit: 'ثبت و شروع کار', done: 'مشخصات ثبت شد؛ خوش آمدید.', noDraft: true, pre: `<div class="notice">شما وارد <b>${esc(panelName(ME.pos))}</b> شده‌اید. نام خود را به‌عنوان «متصدی فعلی» این پنل ثبت کنید؛ نام در همه نامه‌ها، ارجاع‌ها و سوابق با همین عنوان ثبت می‌شود.</div>` });
+}
+/* فعالیت کاربر (کلیک، تایپ، لمس، پیمایش) نشست را روی سرور تمدید می‌کند؛ نوشتن طولانی نامه به پایان نشست نمی‌رسد */
 let LAST_ACT = Date.now(), LAST_SENT = 0;
 function noteActivity() {
   LAST_ACT = Date.now();
   const w = $('#idlewarn'); if (w) w.remove();
-  if (Date.now() - LAST_SENT < 60000 || !ME) return;
-  LAST_SENT = Date.now();
-  if (SERVER) Remote.ping(); else { const s = mySession(); if (s) { s.last = stamp(); Store.save(); } }
+  if (!ME || Date.now() - LAST_SENT < 60000) return;
+  LAST_SENT = Date.now(); Remote.ping();
 }
-function touchSession() { noteActivity(); }
 ['pointerdown', 'keydown', 'input', 'wheel', 'touchstart'].forEach(ev => document.addEventListener(ev, noteActivity, { passive: true, capture: true }));
-A.quick = d => doLogin(d.u, '1234');
 async function endSession(msg) {
-  if (SERVER) await Remote.logout(msg);
-  else { const s = mySession(); if (s) { s.active = false; s.end = stamp(); } if (ME) audit('خروج از سامانه', 'session', ME.user.id, msg || ''); Store.save(); }
-  ME = null; sess.set(null); closeModal(); location.hash = ''; renderLogin(msg || '');
+  saveOpenDraft();
+  await Remote.logout();
+  ME = null; closeModal(true); history.replaceState(null, '', location.pathname + location.search); renderLogin(msg || '');
 }
 A.logout = () => endSession();
-A.stayIn = () => noteActivity();
-function forcePassChange() {
-  formModal('تغییر رمز عبور الزامی است', [{ k: 'p1', l: 'رمز جدید', t: 'password', req: true, hint: 'دست‌کم ' + fa(SEC().minLen) + ' نویسه' }, { k: 'p2', l: 'تکرار رمز جدید', t: 'password', req: true }], {}, v => {
-    if (v.p1 !== v.p2) return fail('رمز و تکرار آن یکسان نیست.');
-    return run('forcedPassChange', v.p1);
-  }, { submit: 'ذخیره رمز', done: 'رمز عبور تغییر کرد.', locked: true, pre: '<div class="notice">مدیر سامانه برای حساب شما تغییر رمز را الزامی کرده است.</div>' });
-}
+A.stayIn = () => { LAST_SENT = 0; noteActivity(); };
 
 /* نقش هندسی گره اسلامی در پس‌زمینه صفحه ورود */
 function drawGeo() {
@@ -373,44 +312,50 @@ function drawGeo() {
 }
 
 /* ---------- پوسته ---------- */
+const unreadMsgs = () => (DB.messages || []).filter(m => m.to === ME.pos.id && !m.read).length;
 function navItems() {
   const q = myQueue().length;
-  const unread = DB.notifs.filter(n => n.pos === ME.pos.id && !n.read).length;
+  const unread = DB.notifs.filter(n => !n.read).length;
   const u = myUnit();
+  const U = UNITS.find(x => x.id === u);
+  const draftN = (DB.drafts || []).length;
+  const unseen = DB.letters.filter(l => !isArchivedMine(l) && isUnseen(l)).length;
   return [
     ['grp', 'کارتابل'],
     ['dashboard', 'داشبورد', 'home', true],
     ['inbox', 'کارتابل من', 'inbox', true, q],
     ['imam', 'کارتابل امام جماعت', 'dome', isAll()],
-    ['units', `فهرست ${fa(UNITS.filter(u => !u.off).length)} مدیریت`, 'building', true],
-    ['library-admin', 'خدمات عمومی کتابخانه', 'book', canSeeLib(), canLib() ? DB.loans.filter(l => l.status === LOAN.pending).length : 0],
-    [`unit-${u}`, 'کارتابل ' + unitShort(u), UNITS.find(x => x.id === u)?.ic || 'building', u > 0],
-    ['grp', 'مکاتبات و گردش کار'],
-    ['letters', 'دبیرخانه و مکاتبات', 'mail', true],
-    ['orders', 'دستورات امام جماعت', 'flag', true, DB.orders.filter(o => canSeeOrder(o) && o.status !== 'تکمیل‌شده').length],
+    [`unit-${u}`, (U ? 'کارتابل ' + U.short : ''), U ? U.ic : 'building', u > 0 && !!U],
+    ['units', `مدیریت‌ها (${fa(UNITS.filter(x => !x.off).length)})`, 'building', true],
+    ['grp', 'مکاتبات و پیام'],
+    ['letters', 'دبیرخانه و مکاتبات', 'mail', can('letters.view') || isImam(), unseen],
+    ['messages', 'پیام‌ها', 'chat', can('messages.use') || isImam(), unreadMsgs()],
+    ['grp', 'گردش کار'],
+    ['orders', 'دستورات امام جماعت', 'flag', true, DB.orders.filter(o => o.status !== 'تکمیل‌شده').length],
     ['tasks', 'ارجاع وظایف', 'check', true],
     ['requests', 'درخواست‌های داخلی', 'inbox', true],
     ['grp', 'منابع و خدمات'],
     ['reservations', 'رزرو فضاها', 'door', true],
     ['calendar', 'تقویم و جلسات', 'cal', true],
     ['assets', 'اموال و انبار', 'box', canAssets()],
-    ['finance', 'امور مالی', 'wallet', canFinance() || myRole() !== 'staff'],
-    ['hr', 'منابع انسانی و امور اداری', 'users', true],
+    ['finance', canFinance() ? 'امور مالی و حسابداری' : 'امور مالی واحد', 'wallet', canFinance() || isImam() || can('finance.request') || can('finance.docs')],
+    ['hr', 'امور اداری و مرخصی', 'users', true],
     ['grp', 'نظارت و سامانه'],
     ['reports', 'گزارش‌گیری و نظارت', 'chart', can('reports.view')],
     ['notifications', 'اعلان‌ها', 'bell', true, unread],
     ['admin', 'پنل مدیریت سامانه', 'shield', canAdminPanel(), adminAlerts()],
     ['profile', 'حساب و مشخصات متصدی', 'user', true],
-    ['system', 'تنظیمات و آرشیو', 'gear', true]
+    ['system', 'آرشیو و رویدادها', 'archive', true]
   ];
 }
+const adminAlerts = () => (can('admin.users') ? DB.users.filter(u => u.lockedUntil && new Date(u.lockedUntil) > new Date()).length : 0);
 function renderShell() {
   $('#root').innerHTML = `
   <div class="app" id="app">
     <aside class="side" id="side" aria-label="منوی اصلی">
-      <div class="brand"><div class="mark">${ic('dome')}</div><div><b>${esc(DB.settings.loginTitle)}</b><small>${esc(DB.settings.subtitle)} · ${esc(DB.settings.orgName.replace(/^مجتمع مسجدمحور\s*/, ''))}</small></div></div>
+      <div class="brand"><div class="mark">${ic('dome')}</div><div><b>${esc(DB.settings.loginTitle || 'کارتابل اداری')}</b><small>${esc(DB.settings.orgName || '')}</small></div></div>
       <nav class="nav" id="nav"></nav>
-      <div class="foot"><span id="syncst" class="syncst"></span><br>نسخه ۲٫۱ · زمان رسمی: تهران</div>
+      <div class="foot">نسخه ۳ · زمان رسمی: تهران</div>
     </aside>
     <div class="scrim" data-a="menu"></div>
     <div class="mainwrap">
@@ -420,11 +365,11 @@ function renderShell() {
         <div class="spacer"></div>
         <div class="clock" id="clock" aria-live="off"></div>
         <button class="ibtn" data-a="theme" aria-label="تغییر حالت روشن و تاریک" id="themebtn"></button>
+        <a class="ibtn" href="#messages" aria-label="پیام‌ها" id="msgbtn">${ic('chat')}</a>
         <a class="ibtn" href="#notifications" aria-label="اعلان‌ها" id="bell">${ic('bell')}</a>
         <a class="who" href="#profile" title="حساب و مشخصات متصدی">${av(ME.user.name)}<div><b>${esc(panelName(ME.pos))}</b><small>متصدی فعلی: ${esc(ME.user.name)}</small></div></a>
         <button class="ibtn" data-a="logout" aria-label="خروج">${ic('logout')}</button>
       </header>
-      ${SERVER ? '' : `<div class="demobar" role="note">${ic('alert')}<span>نسخه نمایشی: داده‌ها نمونه‌اند و در همین مرورگر ${typeof Sync !== 'undefined' && Sync.mode === 'shared' ? 'و پایگاه پیش‌نمایش' : ''} نگهداری می‌شوند. برای اطلاعات واقعی از نسخه سروری استفاده کنید.</span></div>`}
       <main id="main"></main>
     </div>
     <nav class="tabbar" id="tabbar" aria-label="ناوبری پایین صفحه"></nav>
@@ -434,19 +379,21 @@ function renderShell() {
   gs.addEventListener('blur', () => setTimeout(() => ($('#gres').hidden = true), 200));
   tick();
   route();
-  showSync();
 }
 function renderChrome() {
+  if (!$('#nav')) return;
   const h = location.hash.slice(1) || 'dashboard';
-  $('#nav').innerHTML = navItems().map(n => n[0] === 'grp' ? `<div class="grp">${n[1]}</div>` : n[3] ? `<a href="#${n[0]}" class="${h === n[0] ? 'on' : ''}">${ic(n[2])}<span>${n[1]}</span>${n[4] ? `<span class="cnt">${fa(n[4])}</span>` : ''}</a>` : '').join('');
-  const unread = DB.notifs.filter(n => n.pos === ME.pos.id && !n.read).length;
+  $('#nav').innerHTML = navItems().map(n => n[0] === 'grp' ? `<div class="grp">${n[1]}</div>` : n[3] ? `<a href="#${n[0]}" class="${h === n[0] || h.startsWith(n[0] + '/') ? 'on' : ''}">${ic(n[2])}<span>${n[1]}</span>${n[4] ? `<span class="cnt">${fa(n[4] > 99 ? '99+' : n[4])}</span>` : ''}</a>` : '').join('');
+  const unread = DB.notifs.filter(n => !n.read).length; const um = unreadMsgs();
   $('#bell').innerHTML = ic('bell') + (unread ? `<span class="dot">${fa(unread > 99 ? '99+' : unread)}</span>` : '');
+  $('#msgbtn').innerHTML = ic('chat') + (um ? `<span class="dot">${fa(um > 99 ? '99+' : um)}</span>` : '');
+  $('#msgbtn').hidden = !(can('messages.use') || isImam());
   $('#themebtn').innerHTML = ic(curTheme() === 'dark' ? 'sun' : 'moon');
   const q = myQueue().length;
   const tb = (href, icon, label, n) => `<a href="#${href}" class="${h === href ? 'on' : ''}">${ic(icon)}<span>${label}</span>${n ? `<i>${fa(n > 99 ? '99+' : n)}</i>` : ''}</a>`;
   $('#tabbar').innerHTML = tb('dashboard', 'home', 'خانه') + tb('inbox', 'inbox', 'کارتابل', q)
     + `<button class="fab" data-a="quickAdd" aria-label="ثبت سریع">${ic('plus')}</button>`
-    + tb('notifications', 'bell', 'اعلان‌ها', unread) + `<button data-a="menu" class="${$('#app').classList.contains('open') ? 'on' : ''}">${ic('menu')}<span>منو</span></button>`;
+    + tb('messages', 'chat', 'پیام', um) + `<button data-a="menu" class="${$('#app').classList.contains('open') ? 'on' : ''}">${ic('menu')}<span>منو</span>${unread ? `<i>${fa(unread > 99 ? '99+' : unread)}</i>` : ''}</button>`;
 }
 function tick() {
   const lc = $('#lclock'); if (lc) lc.textContent = fa(nowHMS());
@@ -454,18 +401,12 @@ function tick() {
   const c = $('#clock');
   if (c) c.innerHTML = `<b>${fa(nowHMS())}</b>${jdLong(todayISO())}`;
   liveWidgets();
-  if (Date.now() - (tick.sweep || 0) > 60000) { tick.sweep = Date.now(); const n = DB.notifs.length; sweepDeadlines(); if (DB.notifs.length !== n) { Store.save(); renderChrome(); } }
   if (tick.day && tick.day !== todayISO() && !$('.modal-bg')) route();
   tick.day = todayISO();
-  /* کنترل نشست: خروج اجباری توسط مدیر یا پایان مهلت بی‌فعالیتی (با هشدار دو دقیقه پیش از خروج) */
-  if (!SERVER) {
-    const s = mySession();
-    if (s && !s.active) return endSession('نشست شما توسط مدیر سامانه پایان یافت.');
-    if (!ME.user.active || ME.user.deleted) return endSession('حساب شما غیرفعال شد.');
-  }
-  const to = SEC().sessionMin * 60000;
+  /* هشدار دو دقیقه پیش از پایان مهلت بی‌فعالیتی؛ پیش از خروج، متن نیمه‌کاره به‌صورت پیش‌نویس ذخیره می‌شود */
+  const to = (SEC().sessionMin || 120) * 60000;
   const idle = Date.now() - LAST_ACT;
-  if (to && idle > to) return endSession('به دلیل ' + fa(SEC().sessionMin) + ' دقیقه بی‌فعالیتی، از سامانه خارج شدید. متن فرم‌های نیمه‌کاره به‌صورت پیش‌نویس حفظ شده است.');
+  if (to && idle > to - 15000) return endSession('به دلیل ' + fa(SEC().sessionMin) + ' دقیقه بی‌فعالیتی، از سامانه خارج شدید. متن نامه‌های نیمه‌کاره در «پیش‌نویس‌ها» ذخیره شده است.');
   if (to && idle > to - 120000 && !$('#idlewarn')) {
     const w = document.createElement('div'); w.id = 'idlewarn'; w.className = 'idlewarn'; w.setAttribute('role', 'alertdialog'); w.setAttribute('aria-live', 'assertive');
     w.innerHTML = `<span>به دلیل بی‌فعالیتی، کمتر از دو دقیقه دیگر از سامانه خارج می‌شوید.</span><button class="btn sm" data-a="stayIn">ادامه کار</button>`;
@@ -477,42 +418,48 @@ A.theme = () => { const t = curTheme() === 'dark' ? 'light' : 'dark'; document.d
 A.ftog = d => { const v = vs(d.key); v._fopen = !v._fopen; route(); };
 A.menu = () => { $('#app').classList.toggle('open'); renderChrome(); };
 A.close = () => closeModal();
-A.tab = d => { vs(d.key).tab = d.v; refresh(); };
+A.tab = d => { vs(d.key).tab = d.v; vs(d.key).page = 0; refresh(); };
 A.go = d => { location.hash = d.h; };
+/* صفحه‌بندی فهرست‌های بلند (به‌خصوص در گوشی) */
+const PAGE_N = 40;
+function paged(key, rows) { const v = vs(key); const n = (v.page || 0) + 1; return { rows: rows.slice(0, n * PAGE_N), more: rows.length > n * PAGE_N ? `<div class="more">${btn(`نمایش ${fa(Math.min(PAGE_N, rows.length - n * PAGE_N))} مورد بعدی (از ${fa(rows.length)})`, 'more', { key }, 'ghost')}</div>` : '' }; }
+A.more = d => { const v = vs(d.key); v.page = (v.page || 0) + 1; route(); };
 
 function route() {
-  if (location.hash === '#library') { Lib.load().then(renderLibrary); return; }
-  if (!ME) { if (!$('#loginf') && !$('#signf')) renderLogin(); return; }
+  if (!ME) { if (!$('#loginf')) renderLogin(); return; }
   if (!$('#main')) return renderShell();
   const h = location.hash.slice(1) || 'dashboard';
   const m = h.match(/^unit-(\d+)$/);
   const fn = m ? () => pgUnit(+m[1]) : PAGES[h] || PAGES.dashboard;
   const active = document.activeElement && document.activeElement.id;
   const pos = active && document.activeElement.selectionStart;
-  $('#main').innerHTML = fn();
+  let html;
+  try { html = fn(); } catch (e) { console.error(e); html = `${head('خطا در نمایش')}<div class="notice warn">نمایش این صفحه با خطا روبه‌رو شد: ${esc(e.message)}</div>`; }
+  $('#main').innerHTML = html;
   liveWidgets();
-  touchSession();
   $('#app').classList.remove('open');
   renderChrome();
   if (active && active.startsWith('flt-')) { const el = document.getElementById(active); if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch (e) {} } }
 }
 let LAST_HASH = '';
-function refresh() { const ss = ME && mySession(); if (ss) ss.last = stamp(); Store.save(); if (ME) { const h = location.hash; if (h !== LAST_HASH) { LAST_HASH = h; window.scrollTo(0, 0); } route(); } }
+function refresh() { if (ME) { const h = location.hash; if (h !== LAST_HASH) { LAST_HASH = h; window.scrollTo(0, 0); } route(); } }
 
 /* فیلترها */
 let FT;
 document.addEventListener('input', e => {
   const k = e.target.dataset && e.target.dataset.f; if (!k || e.target.tagName === 'SELECT') return;
-  const [p, f] = k.split(':'); vs(p)[f] = e.target.value;
-  clearTimeout(FT); FT = setTimeout(route, e.target.tagName === 'SELECT' ? 0 : 220);
+  const [p, f] = k.split(':'); vs(p)[f] = e.target.value; vs(p).page = 0;
+  clearTimeout(FT); FT = setTimeout(route, 220);
 });
-document.addEventListener('change', e => { const k = e.target.dataset && e.target.dataset.f; if (k && e.target.tagName === 'SELECT') { const [p, f] = k.split(':'); vs(p)[f] = e.target.value; route(); } });
+document.addEventListener('change', e => { const k = e.target.dataset && e.target.dataset.f; if (k && e.target.tagName === 'SELECT') { const [p, f] = k.split(':'); vs(p)[f] = e.target.value; vs(p).page = 0; route(); } });
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-a]'); if (!el) return;
   const fn = A[el.dataset.a]; if (!fn) return;
   e.preventDefault(); fn(el.dataset, el);
 });
 document.addEventListener('keydown', e => { const m = $('.modal-bg'); if (e.key === 'Escape' && m && !m.dataset.locked) closeModal(); });
+/* جداکننده هزارگان هنگام تایپ مبلغ */
+document.addEventListener('input', e => { const t = e.target; if (!t.dataset || !t.dataset.money) return; const raw = en(t.value).replace(/[^\d]/g, ''); t.value = raw ? numFa(+raw) : ''; });
 
 /* جست‌وجوی سراسری در محدوده مجاز کاربر */
 function globalSearch(q) {
@@ -521,19 +468,26 @@ function globalSearch(q) {
   if (q.length < 2) { box.hidden = true; return; }
   const m = (...xs) => textMatch(q, ...xs);
   const res = [
-    ...DB.letters.filter(l => canSeeLetter(l) && m(l.no, fa(l.no), l.subject, l.sender, l.receiver)).map(l => ['letter', l.id, 'نامه ' + LETTER_TYPES[l.type], fa(l.no), l.conf === 'سری' && myRole() !== 'manager' && !isImam() ? 'محرمانه' : l.subject]),
-    ...DB.orders.filter(o => canSeeOrder(o) && m(o.no, o.title)).map(o => ['order', o.id, 'دستور', o.no, o.title]),
-    ...DB.tasks.filter(t => canSeeTask(t) && m(t.no, t.title)).map(t => ['task', t.id, 'وظیفه', t.no, t.title]),
-    ...DB.requests.filter(r => canSeeReq(r) && m(r.no, r.title)).map(r => ['req', r.id, 'درخواست', r.no, r.title]),
-    ...DB.meetings.filter(x => canSeeMeeting(x) && m(x.no, x.title)).map(x => ['meet', x.id, x.kind, x.no, x.title]),
+    ...DB.letters.filter(l => m(l.no, fa(l.no), l.subject, l.sender, l.receiver, htmlToText(l.body))).map(l => ['letter', l.id, 'نامه ' + LETTER_TYPES[l.type], fa(l.no), l.subject]),
+    ...DB.orders.filter(o => m(o.no, o.title)).map(o => ['order', o.id, 'دستور', o.no, o.title]),
+    ...DB.tasks.filter(t => m(t.no, t.title)).map(t => ['task', t.id, 'وظیفه', t.no, t.title]),
+    ...DB.requests.filter(r => m(r.no, r.title)).map(r => ['req', r.id, 'درخواست', r.no, r.title]),
+    ...(DB.toolrecs || []).filter(r => m(r.no, ...Object.values(r.data || {}).map(String))).map(r => ['tool', r.id, (toolOf(r) || {}).t || 'ابزار', r.no, r.data.title || r.data.person || r.data.dish || '']),
+    ...DB.meetings.filter(x => m(x.no, x.title)).map(x => ['meet', x.id, x.kind, x.no, x.title]),
     ...DB.reservations.filter(r => m(r.no, r.applicant || '', r.kind, resPlace(r))).map(r => ['res', r.id, 'رزرو', r.no, resPlace(r) + ' — ' + r.kind]),
-    ...DB.assets.filter(a => canSeeAsset(a) && m(a.code, a.name, a.serial)).map(a => ['asset', a.id, 'اموال', a.code, a.name]),
-    ...(canHR() ? DB.users.filter(u => m(u.name, u.username)).map(u => ['person', u.id, 'پرونده اداری', u.username, u.name]) : [])
-  ].slice(0, 14);
-  box.innerHTML = res.length ? res.map(([k, id, t, no, title]) => `<a href="#" data-a="open" data-k="${k}" data-id="${id}"><small>${t} · <span class="${k === 'letter' ? 'lno' : 'code'}">${esc(no)}</span></small><br>${esc(title)}</a>`).join('') : '<div class="empty">نتیجه‌ای در محدوده دسترسی شما یافت نشد.</div>';
+    ...DB.assets.filter(a => m(a.code, a.name, a.serial)).map(a => ['asset', a.id, 'اموال', a.code, a.name]),
+    ...(DB.invoices || []).filter(x => m(x.no, x.party)).map(x => ['invoice', x.id, 'فاکتور', x.no, x.party]),
+    ...(DB.vouchers || []).filter(x => m(String(x.no), x.desc, x.ref)).map(x => ['voucher', x.id, 'سند حسابداری', fa(x.no), x.desc]),
+    ...DB.payreqs.filter(p => m(p.no, p.title)).map(p => ['pay', p.id, 'درخواست پرداخت', p.no, p.title])
+  ].slice(0, 16);
+  box.innerHTML = res.length ? res.map(([k, id, t, no, title]) => `<a href="#" data-a="open" data-k="${k}" data-id="${id}"><small>${esc(t)} · <span class="${k === 'letter' ? 'lno' : 'code'}">${esc(no)}</span></small><br>${esc(title)}</a>`).join('') : '<div class="empty">نتیجه‌ای در محدوده دسترسی شما یافت نشد.</div>';
   box.hidden = false;
 }
+const htmlToText = h => { if (!h) return ''; const d = document.createElement('div'); d.innerHTML = h; return d.textContent || ''; };
+/* بازکننده عمومی: جست‌وجو، کارتابل، اعلان‌ها */
 A.open = d => {
-  $('#gres').hidden = true;
-  ({ letter: showLetter, order: showOrder, task: showTask, req: showReq, meet: showMeeting, res: showRes, asset: showAsset, person: showPerson, pay: showPay })[d.k](d.id);
+  const g = $('#gres'); if (g) g.hidden = true;
+  const F = { letter: showLetter, order: showOrder, task: showTask, req: showReq, meet: showMeeting, res: showRes, asset: showAsset, move: showMove, person: showPerson, pay: showPay, leave: showLeave,
+    tool: showToolRec, msg: id => { location.hash = 'messages'; vs('msg').with = id; route(); }, findoc: showFindoc, voucher: showVoucher, invoice: showInvoice };
+  (F[d.k] || (() => toast('این مورد در دسترس نیست.')))(d.id);
 };

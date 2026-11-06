@@ -1,24 +1,22 @@
 /* =====================================================================
    جایگاه‌ها و متصدیان، نظارت مدیر بر دفتر خودش، مدیریت دسترسی‌های دفتر و حساب متصدی
    ===================================================================== */
-const ceilingOf = (p, k) => permOf({ ...p, mgrDeny: {} }, k);
-const canManageOffice = u => isImam() || (myRole() === 'manager' && inUnit(u));
+const canManageOffice = u => isImam() || can('admin.perms') || (myRole() === 'manager' && inUnit(u));
 const canOversee = u => canManageOffice(u) || isAll();
-const officePermsFor = u => OFFICE_PERMS.filter(k => k !== 'library.manage' || u === U_LIB);
 
 /* کارت جایگاه: نام پنل ثابت است؛ نام فرد فقط به‌عنوان «متصدی فعلی» */
 function positionCard(p) {
   const h = accountOf(p.id);
-  const admin = can('admin.users') && !(isSensitivePos(p) && !isImam());
+  const admin = can('admin.users') || isImam();
   const contact = admin || canHR() || canManageOffice(p.unitId) || (h && h.id === ME.user.id);
   return `<div class="poscard">
-    <div class="pc-h"><div class="k">${ic(p.role === 'manager' ? 'shield' : p.role === 'office' ? 'file' : p.role === 'secretary' ? 'mail' : 'user')}</div><div><b>${esc(panelName(p))}</b><small>${esc(ROLES[p.role])}${h ? ` · <span class="code">${esc(h.username)}</span>` : ''}</small></div></div>
+    <div class="pc-h"><div class="k">${ic(p.role === 'manager' ? 'shield' : p.role === 'office' ? 'file' : p.role === 'secretary' ? 'mail' : 'user')}</div><div><b>${esc(panelName(p))}</b><small>${esc(ROLES[p.role])}${h && h.username ? ` · <span class="code">${esc(h.username)}</span>` : ''}</small></div></div>
     <dl class="kv">
       <dt>متصدی فعلی</dt><dd>${h ? `<b>${esc(h.name)}</b>` : pill('بدون متصدی', 'warn')}</dd>
       ${h && contact ? `<dt>شماره تماس</dt><dd><span class="code">${fa(h.phone || '—')}</span></dd>` : ''}
-      ${h ? `<dt>شروع مسئولیت</dt><dd>${jd(holderSince(p.id) || h.start || h.hired)}</dd>` : ''}
+      ${h ? `<dt>شروع مسئولیت</dt><dd>${jd(holderSince(p.id) || h.start)}</dd>` : ''}${h && h.title ? `<dt>عنوان</dt><dd>${esc(h.title)}</dd>` : ''}
     </dl>
-    <div class="row">${h && (admin || h.id === ME.user.id) ? btn('ویرایش مشخصات', 'holderEdit', { id: h.id }, 'sm ghost', 'edit') : ''}${admin && p.id !== ME.pos.id ? btn('تغییر متصدی و تحویل مسئولیت', 'handover', { id: p.id }, 'sm soft', 'users') : ''}${btn('سوابق متصدیان', 'posHist', { id: p.id }, 'sm ghost', 'history')}</div>
+    <div class="row">${h && (admin || h.id === ME.user.id) ? btn('ویرایش مشخصات', 'holderEdit', { id: h.id }, 'sm ghost', 'edit') : ''}${admin && p.id !== ME.pos.id && (p.role !== 'imam' || isImam()) && h ? btn('تحویل مسئولیت به فرد جدید', 'handover', { id: p.id }, 'sm soft', 'users') : ''}${btn('سوابق متصدیان', 'posHist', { id: p.id }, 'sm ghost', 'history')}</div>
   </div>`;
 }
 const positionsGrid = u => `<div class="posgrid">${unitPositions(u).map(positionCard).join('')}</div>`;
@@ -62,52 +60,65 @@ A.staffReport = d => {
     <h3>همه اقدامات بازه</h3>${table([['زمان', a => jdt(a.ts)], ['اقدام', a => esc(a.act)], ['انجام‌دهنده', a => esc(who(a.uid, a.nm))], ['شرح', a => esc(a.note || '')]], s.acts.slice().reverse().map((a, i) => ({ ...a, id: i })), { empty: 'اقدامی ثبت نشده است.' })}` });
 };
 
-/* ---------- مدیریت دسترسی‌های دفتر (مدیر همان بخش) ---------- */
+/* ---------- تعیین دسترسی مسئول دفتر و منشی توسط مدیر همان بخش ---------- */
+const DELEG = () => PERMS.filter(p => p.d);
+const TOOL_LV = [['none', 'بدون دسترسی'], ['view', 'فقط مشاهده'], ['own', 'کارهای خود و ارجاع‌شده'], ['all', 'همه کارهای مدیریت']];
 function officePermsView(u) {
-  if (!canManageOffice(u)) return denied('تنظیم دسترسی‌های دفتر فقط با مدیر همین مدیریت است.');
+  if (!canManageOffice(u)) return denied('تعیین دسترسی‌های دفتر فقط با مدیر همین مدیریت است.');
   const office = unitPositions(u).filter(p => ['office', 'secretary'].includes(p.role));
-  const log = DB.audit.filter(a => a.ent === 'perm' && office.some(p => p.id === a.id) && /دسترسی دفتر/.test(a.act)).slice(-30).reverse();
-  return `<div class="notice">در این بخش فقط می‌توانید دسترسی‌های مسئول دفتر و منشی همین مدیریت را <b>محدود</b> یا دوباره <b>فعال</b> کنید. دسترسی‌ای که در سقف تعیین‌شده مدیریت عالی نیست قابل اعطا نیست، و اختیارات مدیریت سامانه، جایگاه امام جماعت و دسترسی خودتان از اینجا قابل تغییر نیست. هر تغییر با نام شما و زمان ثبت می‌شود و روی سرور هم هنگام مشاهده و اجرا بررسی می‌شود.</div>
-  ${office.map(p => card(esc(panelName(p)), `<div class="muted">متصدی فعلی: <b>${esc((accountOf(p.id) || {}).name || 'بدون متصدی')}</b></div>
-    <div class="permlist mt">${officePermsFor(u).map(k => { const ceil = ceilingOf(p, k); const denied_ = !!(p.mgrDeny || {})[k]; const eff = permOf(p, k);
-      return `<div class="perm"><div><b>${esc(permLabel(k))}</b><small>${eff ? pill('فعال', 'ok') : denied_ ? pill('محدودشده توسط مدیر', 'warn') : pill('خارج از سقف مدیریت عالی', 'mute')}</small></div>
-      ${denied_ ? btn('فعال‌سازی دوباره', 'offPerm', { p: p.id, k, r: 0 }, 'sm soft') : ceil ? btn('محدود کن', 'offPerm', { p: p.id, k, r: 1 }, 'sm ghost') : '<span class="hint">قابل اعطا نیست</span>'}</div>`; }).join('')}</div>`, '', {})).join('')}
+  const mgr = unitPos(u, 'manager');
+  const groups = [...new Set(DELEG().map(p => p.g))];
+  const log = DB.audit.filter(a => a.ent === 'perm' && office.some(p => p.id === a.id)).slice(-40).reverse();
+  const tools = TOOLS[u] || [];
+  return `<div class="notice">مدیر هر بخش تعیین می‌کند مسئول دفتر و منشی همین مدیریت چه کارهایی انجام دهند. فقط اختیاراتی که خودتان دارید (سقف تعیین‌شده امام جماعت) قابل واگذاری است. هر مجوز «مجوز پایه» دارد؛ تا مجوز پایه فعال نباشد، زیرمجوز اثری ندارد. هر تغییر با نام شما ثبت و روی سرور هنگام هر اقدام کنترل می‌شود.</div>
+  ${office.map(p => { const h = accountOf(p.id);
+    const rows = groups.map(g => `<tr class="grp"><td colspan="3">${esc(g)}</td></tr>` + DELEG().filter(x => x.g === g).map(P => {
+      const set = (p.mgr || {})[P.k] || ''; const eff = permOf(p, P.k); const ceil = permOf(mgr, P.k); const parentOk = !P.p || permOf(p, P.p);
+      const why = !ceil ? 'خارج از سقف اختیار مدیر' : !parentOk ? 'ابتدا «' + permLabel(P.p) + '» را فعال کنید' : '';
+      return `<tr class="${!parentOk ? 'dep' : ''}"><td>${P.p ? '<span class="sub">↳</span> ' : ''}<b>${esc(P.l)}</b>${why ? `<span class="sub">${esc(why)}</span>` : ''}</td><td>${eff ? pill('فعال', 'ok') : pill('غیرفعال', 'mute')}</td>
+        <td><div class="seg" role="radiogroup" aria-label="${esc(P.l)}">${[['', 'پیش‌فرض'], ['allow', 'مجاز'], ['deny', 'غیرمجاز']].map(([vv, t]) => `<button role="radio" aria-checked="${set === vv}" class="${set === vv ? 'on ' + vv : ''}" data-a="offPerm" data-p="${p.id}" data-k="${P.k}" data-v="${vv}" ${vv === 'allow' && (!ceil || !parentOk) ? 'disabled' : ''}>${t}</button>`).join('')}</div></td></tr>`;
+    }).join('')).join('');
+    const trows = tools.map(t => { const lv = (p.toolLv || {})[t.k] || 'none'; return `<tr><td><b>${esc(t.t)}</b>${t.conf ? ' ' + pill('محرمانه', 'warn') : ''}${t.ap ? '<span class="sub">نهایی‌شدن با تأیید مدیر</span>' : ''}</td><td><select data-toollv="${p.id}|${t.k}" aria-label="${esc(t.t)}">${TOOL_LV.map(([k, l]) => `<option value="${k}" ${k === lv ? 'selected' : ''}>${l}</option>`).join('')}</select></td></tr>`; }).join('');
+    return card(esc(panelName(p)), `<div class="muted">متصدی فعلی: <b>${esc(h ? h.name : 'بدون متصدی')}</b></div>
+      <div class="tbl-wrap mt"><table class="permtbl"><thead><tr><th>اختیار</th><th>وضعیت مؤثر</th><th>تعیین مدیر</th></tr></thead><tbody>${rows}</tbody></table></div>
+      ${tools.length ? `<h3 class="mt">دسترسی به ابزارهای اختصاصی مدیریت</h3><div class="tbl-wrap"><table class="permtbl"><thead><tr><th>ابزار</th><th>سطح دسترسی</th></tr></thead><tbody>${trows}</tbody></table></div>` : ''}`);
+  }).join('')}
   ${card('سابقه تغییر دسترسی‌های دفتر', table([['زمان', a => jdt(a.ts)], ['تغییردهنده', a => esc(who(a.uid, a.nm))], ['تغییر', a => esc(a.act)], ['شرح', a => esc(a.note)]], log.map((a, i) => ({ ...a, id: i })), { empty: 'هنوز تغییری ثبت نشده است.' }), '', { flush: true })}`;
 }
-A.offPerm = async d => { const r = await run('setOfficeRestriction', d.p, d.k, !!+d.r); if (r.error) return toast(r.error); refresh(); toast(+d.r ? 'دسترسی محدود شد.' : 'دسترسی دوباره فعال شد.'); };
+A.offPerm = async d => { const r = await run('setOfficePerm', d.p, d.k, d.v); if (r.error) return toast(r.error); refresh(); toast('دسترسی ذخیره شد.'); };
+document.addEventListener('change', async e => { const t = e.target; if (!t.dataset || !t.dataset.toollv) return; const [p, k] = t.dataset.toollv.split('|'); const r = await run('setToolLevel', p, k, t.value); if (r.error) { toast(r.error); route(); } else { refresh(); toast('سطح دسترسی ابزار ذخیره شد.'); } });
 
 /* ---------- ویرایش مشخصات متصدی و تحویل رسمی مسئولیت ---------- */
-const holderFields = () => [{ k: 'first', l: 'نام', req: true }, { k: 'last', l: 'نام خانوادگی', req: true }, { k: 'phone', l: 'شماره تماس', t: 'tel' }, { k: 'nid', l: 'کد ملی' }];
+const holderFields = () => [{ k: 'first', l: 'نام', req: true }, { k: 'last', l: 'نام خانوادگی', req: true }, { k: 'phone', l: 'شماره تماس', t: 'tel' }, { k: 'title', l: 'عنوان یا سمت (اختیاری)' }];
 A.holderEdit = d => {
   const u = userById(d.id); if (!u) return;
   const self = u.id === ME.user.id;
-  formModal('ویرایش مشخصات متصدی', holderFields(), u, v => run(self ? 'updateOwnHolder' : 'updateHolder', ...(self ? [v] : [u.id, v])), { pre: `<div class="notice">این فرم فقط نام و اطلاعات تماس <b>متصدی فعلی</b> را اصلاح می‌کند؛ نام پنل، نام کاربری، رمز و سوابق تغییر نمی‌کند. برای سپردن جایگاه به فرد دیگر از «تغییر متصدی و تحویل مسئولیت» استفاده کنید.</div>`, done: 'مشخصات ذخیره شد.' });
+  formModal('ویرایش مشخصات متصدی', [...holderFields(), ...(self ? [] : [{ k: 'start', l: 'تاریخ شروع مسئولیت', t: 'date' }])], { ...u, start: holderSince(u.posId) || u.start }, v => run(self ? 'updateOwnHolder' : 'updateHolder', ...(self ? [v] : [u.id, v])), { noDraft: true, pre: `<div class="notice">این فرم فقط نام و اطلاعات <b>متصدی فعلی</b> را اصلاح می‌کند؛ نام پنل، نام کاربری، رمز و سوابق تغییر نمی‌کند. برای سپردن جایگاه به فرد دیگر از «تحویل مسئولیت به فرد جدید» استفاده کنید.</div>`, done: 'مشخصات ذخیره شد.' });
 };
 A.handover = d => {
   const p = posById(d.id); if (!p) return;
   const cur = accountOf(p.id);
-  formModal('تغییر متصدی و تحویل مسئولیت', [...holderFields(), { k: 'start', l: 'تاریخ شروع مسئولیت', t: 'date', req: true }, { k: 'note', l: 'شرح تحویل مسئولیت', t: 'textarea', ph: 'مثلاً: تحویل پرونده‌ها و کارهای در جریان طبق صورت‌جلسه …' }], { start: todayISO() }, async v => {
-    const r = await run('handover', p.id, v); if (r.error) return r;
-    setTimeout(() => modal({ title: 'تحویل مسئولیت ثبت شد', body: `<p>${esc(panelName(p))} به <b>${esc(v.first + ' ' + v.last)}</b> سپرده شد. نشست‌های متصدی قبلی بسته شد و رمز قبلی دیگر کار نمی‌کند. کارهای در انتظار این جایگاه به متصدی جدید منتقل شده است.</p>${kv([['نام کاربری (ثابت)', `<span class="code">${esc(r.username)}</span>`], ['رمز اولیه', `<span class="secret code">${esc(r.tempPass || '')}</span>`]])}<div class="notice warn mt">این رمز فقط همین یک بار نمایش داده می‌شود؛ آن را حضوری به متصدی جدید تحویل دهید. تغییر رمز در اولین ورود الزامی است.</div>`, foot: btn('کپی رمز', 'copyTxt', { t: r.tempPass || '' }, '', 'file') }), 60);
-    return r;
-  }, { pre: `<div class="notice">${esc(panelName(p))} · متصدی فعلی: <b>${esc(cur ? cur.name : 'بدون متصدی')}</b>. با ثبت این فرم، پنل و نام کاربری <span class="code">${esc(cur ? cur.username : posUsername(p))}</span> ثابت می‌ماند، سوابق حفظ می‌شود و فقط متصدی، رمز و نشست‌ها عوض می‌شود.</div>`, submit: 'ثبت تحویل مسئولیت', done: 'تحویل مسئولیت ثبت شد.' });
+  formModal('تحویل مسئولیت به متصدی جدید', [...holderFields(), { k: 'start', l: 'تاریخ شروع مسئولیت', t: 'date', req: true }, { k: 'pass', l: 'رمز جدید حساب (اختیاری)', hint: 'اگر خالی بماند، رمز فعلی حساب تغییر نمی‌کند؛ نشست‌های متصدی قبلی در هر حال بسته می‌شود.' }, { k: 'note', l: 'صورت تحویل مسئولیت', t: 'textarea', ph: 'مثلاً: تحویل پرونده‌ها، اموال و کارهای در جریان طبق صورت‌جلسه …' }],
+    { start: todayISO() }, v => run('handover', p.id, v),
+    { noDraft: true, pre: `<div class="notice">${esc(panelName(p))} · متصدی فعلی: <b>${esc(cur ? cur.name : 'بدون متصدی')}</b>. با ثبت این فرم، پنل و نام کاربری <span class="code">${esc(cur && cur.username ? cur.username : posUsername(p))}</span> ثابت می‌ماند، سابقه متصدی قبلی با تاریخ پایان و صورت تحویل بسته می‌شود و همه کارهای جاری پنل به متصدی جدید می‌رسد.</div>`, submit: 'ثبت تحویل مسئولیت', done: 'تحویل مسئولیت ثبت شد.' });
 };
 
 /* ---------- حساب و مشخصات متصدی فعلی (پنل خود کاربر) ---------- */
 PAGES.profile = () => {
   const u = ME.user, p = ME.pos;
-  const mine = DB.logins.filter(l => l.uid === u.id).slice().reverse().slice(0, 15);
-  const perms = PERMS.filter(x => can(x[0]));
-  const restricted = Object.keys(p.mgrDeny || {}).filter(k => p.mgrDeny[k]);
+  const mine = DB.logins.filter(l => l.uid === u.id).slice(0, 15);
+  const perms = PERMS.filter(x => can(x.k));
+  const restricted = Object.keys(p.mgr || {}).filter(k => p.mgr[k] === 'deny');
+  const tl = Object.entries(p.toolLv || {}).filter(([, l]) => l !== 'none');
   const hist = DB.posHistory.filter(h => h.posId === p.id).slice().reverse();
   return `${head(esc(panelName(p)), 'حساب سازمانی این جایگاه و مشخصات متصدی فعلی')}
   <div class="grid g-main">
     ${card('مشخصات متصدی فعلی', `<div class="who2 big">${av(u.name)}<div><b>${esc(u.name)}</b><span class="sub">${esc(posLabel(p.id))}</span></div></div>
-      ${kv([['نام', esc(u.first || '—')], ['نام خانوادگی', esc(u.last || '—')], ['شماره تماس', `<span class="code">${fa(u.phone || '—')}</span>`], ['عنوان جایگاه سازمانی', esc(posLabel(p.id))], ['تاریخ شروع مسئولیت', jd(holderSince(p.id) || u.start || u.hired)], ['نام کاربری جایگاه (ثابت)', `<span class="code">${esc(u.username)}</span>`], ['آخرین تغییر رمز', u.passChanged ? jdt(u.passChanged) : '—']])}
-      <div class="row mt">${btn('ویرایش مشخصات', 'holderEdit', { id: u.id }, '', 'edit')}${btn('تغییر رمز عبور', 'myPass', {}, 'ghost', 'key')}${btn('حالت روشن / تاریک', 'theme', {}, 'ghost', 'moon')}</div>
-      <div class="hint mt">تحویل رسمی این جایگاه به فرد دیگر فقط از مسیر «تغییر متصدی و تحویل مسئولیت» توسط مدیر سامانه یا امام جماعت انجام می‌شود.</div>`)}
-    ${card('دسترسی‌های این جایگاه', (perms.length ? `<div class="row">${perms.map(x => pill(x[1], 'ok')).join('')}</div>` : empty('فقط دسترسی‌های پایه')) + (restricted.length ? `<h3 class="mt">محدودشده توسط مدیر بخش</h3><div class="row">${restricted.map(k => pill(permLabel(k), 'warn')).join('')}</div>` : ''))}
+      ${kv([['نام', esc(u.first || '—')], ['نام خانوادگی', esc(u.last || '—')], ['عنوان', esc(u.title || '—')], ['شماره تماس', `<span class="code">${fa(u.phone || '—')}</span>`], ['پنل سازمانی', esc(panelName(p))], ['تاریخ شروع مسئولیت', jd(holderSince(p.id) || u.start)], ['نام کاربری', `<span class="code">${esc(u.username || '')}</span>`]])}
+      <div class="row mt">${btn('ویرایش نام و مشخصات', 'holderEdit', { id: u.id }, '', 'edit')}${btn('حالت روشن / تاریک', 'theme', {}, 'ghost', 'moon')}</div>
+      <div class="hint mt">نام کاربری و رمز عبور را فقط مدیریت فناوری اطلاعات تعیین یا تغییر می‌دهد. تحویل این پنل به فرد دیگر هم از همان مسیر انجام می‌شود.</div>`)}
+    ${card('دسترسی‌های این پنل', (isImam() ? '<p>امام جماعت به همه بخش‌ها دسترسی کامل دارد.</p>' : perms.length ? `<div class="row">${perms.map(x => pill(x.l, 'ok')).join('')}</div>` : empty('فقط دسترسی‌های پایه')) + (restricted.length ? `<h3 class="mt">محدودشده توسط مدیر بخش</h3><div class="row">${restricted.map(k => pill(permLabel(k), 'warn')).join('')}</div>` : '') + (tl.length ? `<h3 class="mt">ابزارهای اختصاصی</h3><div class="row">${tl.map(([k, l]) => pill((toolDef(p.unitId, k) || {}).t + ' — ' + (TOOL_LV.find(x => x[0] === l) || [, l])[1], 'info')).join('')}</div>` : ''))}
   </div>
-  ${card('سوابق متصدیان این جایگاه', table([['متصدی', h => esc(h.name || '—')], ['از', h => jd(h.from)], ['تا', h => (h.to ? jd(h.to) : 'اکنون')], ['ثبت‌کننده تحویل', h => esc(h.by || '—')]], hist.map((h, i) => ({ ...h, id: i }))), '', { flush: true })}
-  ${card('تاریخچه ورود به این حساب', table([['زمان', l => jdt(l.ts)], ['متصدی', l => esc(who(l.uid, l.nm))], ['نتیجه', l => pill(l.ok ? 'موفق' : 'ناموفق', l.ok ? 'ok' : 'bad')], ['شرح', l => esc(l.reason)]], mine), '<small>اگر ورودی را نمی‌شناسید، رمز خود را تغییر دهید</small>', { flush: true })}`;
+  ${card('سوابق متصدیان این پنل', table([['متصدی', h => esc(h.name || '—')], ['از', h => jd(h.from)], ['تا', h => (h.to ? jd(h.to) : 'اکنون')], ['ثبت‌کننده تحویل', h => esc(h.by || '—')], ['صورت تحویل', h => esc(h.closeNote || h.note || '—')]], hist.map((h, i) => ({ ...h, id: i }))), '', { flush: true })}
+  ${card('تاریخچه ورود به این حساب', table([['زمان', l => jdt(l.ts)], ['نتیجه', l => pill(l.ok ? 'موفق' : 'ناموفق', l.ok ? 'ok' : 'bad')], ['شرح', l => esc(l.reason)], ['مرورگر', l => `<span class="code">${esc(l.agent || '')}</span>`]], mine.map((l, i) => ({ ...l, id: i }))), '<small>اگر ورودی را نمی‌شناسید، به مدیریت فناوری اطلاعات اطلاع دهید</small>', { flush: true })}`;
 };

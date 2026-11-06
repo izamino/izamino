@@ -1,8 +1,7 @@
-'use strict';
 /* =====================================================================
-   کارتابل اداری مجتمع مسجدمحور شباب اهل‌الجنه — هسته
+   کارتابل اداری — هسته رابط کاربری: ابزارها، تاریخ شمسی، ساختار سازمانی، آیکون‌ها، مجوزها
+   داده‌ها و قواعد اصلی روی سرور است؛ این بخش فقط برای نمایش و پنهان‌کردن دکمه‌های غیرمجاز است.
    ===================================================================== */
-
 /* ---------- ابزارهای عمومی ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -61,8 +60,6 @@ function jToIso(str) {
 const todayISO = () => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 const nowHMS = () => new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(new Date());
 const nowHM = () => new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
-let SEED_TS = null;
-const stamp = () => SEED_TS || new Date().toISOString();
 const jdt = t => { if (!t) return '—'; const d = new Date(t); const iso = new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(d); const hm = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false }).format(d); return `${jd(iso)} ساعت ${fa(hm)}`; };
 const isoOfStamp = t => new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date(t));
 const addDays = (iso, n) => { const d = new Date(iso + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
@@ -70,106 +67,50 @@ const daysBetween = (a, b) => Math.round((new Date(b + 'T12:00:00Z') - new Date(
 const weekday = iso => (new Date(iso + 'T12:00:00Z').getUTCDay() + 1) % 7; // شنبه = ۰
 const jYearNow = () => isoToJ(todayISO())[0];
 const tm = t => (t ? fa(t) : '—');
+const stamp = () => new Date().toISOString();
 
-/* ---------- ساختار سازمانی ---------- */
-const UNITS = [
-  { id: 1, name: 'مدیریت داخلی مجتمع', short: 'داخلی', slug: 'internal', ic: 'building' },
-  { id: 2, name: 'مدیریت امور فرهنگی و هنری', short: 'فرهنگی و هنری', slug: 'culture', ic: 'palette' },
-  { id: 3, name: 'مدیریت روابط عمومی', short: 'روابط عمومی', slug: 'pr', ic: 'megaphone' },
-  { id: 4, name: 'مدیریت رسانه', short: 'رسانه', slug: 'media', ic: 'camera' },
-  { id: 5, name: 'مدیریت پایگاه بسیج خادم‌الشهدا حاج احمد یلالی', short: 'پایگاه بسیج', slug: 'basij', ic: 'shield' },
-  { id: 6, name: 'مدیریت دبستان؛ پایه اول تا ششم', short: 'دبستان', slug: 'primary', ic: 'school' },
-  { id: 7, name: 'مدیریت متوسطه اول؛ پایه هفتم تا نهم', short: 'متوسطه اول', slug: 'middle', ic: 'school' },
-  { id: 8, name: 'مدیریت متوسطه دوم؛ پایه دهم تا دوازدهم', short: 'متوسطه دوم', slug: 'high', ic: 'school' },
-  { id: 9, name: 'مدیریت درمانگاه', short: 'درمانگاه', slug: 'clinic', ic: 'medical' },
-  { id: 10, name: 'مدیریت داروخانه', short: 'داروخانه', slug: 'pharmacy', ic: 'pill' },
-  { id: 11, name: 'مدیریت کتابخانه', short: 'کتابخانه', slug: 'library', ic: 'book' },
-  { id: 12, name: 'مدیریت خیریه و گروه جهادی', short: 'خیریه و گروه جهادی', slug: 'charity', ic: 'heart' },
-  { id: 13, name: 'مدیریت خانه‌بازی کودک و مهدکودک', short: 'خانه‌بازی و مهدکودک', slug: 'kids', ic: 'kid' },
-  { id: 14, name: 'مدیریت امور اداری', short: 'امور اداری', slug: 'admin', ic: 'users' },
-  { id: 15, name: 'مدیریت امور مالی', short: 'امور مالی', slug: 'finance', ic: 'wallet' },
-  { id: 16, name: 'مدیریت فناوری اطلاعات', short: 'فناوری اطلاعات', slug: 'it', ic: 'server' },
-  { id: 17, name: 'مدیریت طرح و برنامه', short: 'طرح و برنامه', slug: 'planning', ic: 'crane' },
-  { id: 18, name: 'مدیریت مراسمات و مناسبت‌ها، فاتحه، جشن و اعیاد', short: 'مراسمات و مناسبت‌ها', slug: 'ceremony', ic: 'dome' },
-  { id: 19, name: 'مدیریت رستوران', short: 'رستوران', slug: 'restaurant', ic: 'cup' }
-];
-const U_INTERNAL = 1, U_CULTURE = 2, U_PR = 3, U_LIB = 11, U_ADMIN = 14, U_FIN = 15, U_IT = 16, U_CIVIL = 17, U_CEREMONY = 18, U_REST = 19;
-const unitName = id => (id === 0 ? 'دفتر امام جماعت' : (UNITS.find(u => u.id === +id) || {}).name || '—');
-const unitShort = id => (id === 0 ? 'دفتر امام جماعت' : (UNITS.find(u => u.id === +id) || {}).short || '—');
-const ROLES = { imam: 'امام جماعت', manager: 'مدیر بخش', office: 'مسئول دفتر', secretary: 'منشی', staff: 'کارشناس' };
-
-/* خدمات قابل درخواست هر مدیریت (حوزه‌های کارتابل اختصاصی) */
-const SERVICES = {
-  1: ['مهمانسرا و زائرسرا', 'آشپزخانه مرکزی', 'پذیرایی', 'انبار مرکزی', 'اموال', 'تأسیسات', 'تعمیرات و نگهداری', 'پارکینگ', 'محوطه و خدمات', 'خرید و تدارکات'],
-  2: ['برنامه فرهنگی', 'برنامه هنری', 'کارگاه و کلاس', 'راهیان نور', 'اردوی زیارتی', 'مسابقات فرهنگی'],
-  3: ['اطلاع‌رسانی عمومی', 'هماهنگی مهمانان', 'فرهنگسرا', 'سالن آمفی‌تئاتر', 'سینما', 'سالن جلسات'],
-  4: ['عکاسی', 'فیلم‌برداری', 'طراحی پوستر', 'تدوین', 'پوشش مراسم', 'پشتیبانی صوت و تصویر', 'آرشیو رسانه'],
-  5: ['برنامه پایگاه', 'فعالیت فرهنگی', 'فعالیت جهادی', 'آموزش', 'نگهبانی و شیفت شب'],
-  6: ['برنامه آموزشی', 'فعالیت تربیتی', 'امور اجرایی', 'ارتباط با خانواده‌ها'],
-  7: ['برنامه آموزشی', 'فعالیت تربیتی', 'امور اجرایی', 'ارتباط با خانواده‌ها'],
-  8: ['برنامه آموزشی', 'فعالیت تربیتی', 'امور اجرایی', 'ارتباط با خانواده‌ها'],
-  9: ['امور اجرایی', 'هماهنگی کارکنان', 'تجهیزات', 'خدمات'],
-  10: ['امور اجرایی', 'تأمین دارو و اقلام', 'گزارش موجودی'],
-  11: ['امانت منابع', 'سالن مطالعه', 'عضویت', 'برنامه کتابخوانی'],
-  12: ['نیازسنجی', 'توزیع کمک', 'ارتباط با خیرین', 'اردوی جهادی', 'فعالیت گروه جهادی'],
-  13: ['پذیرش خانه‌بازی', 'ثبت‌نام مهدکودک', 'برنامه بازی و آموزش', 'ایمنی', 'هماهنگی مربیان'],
-  14: ['صدور حکم و ابلاغ', 'مرخصی', 'مأموریت', 'قرارداد', 'امور اداری عمومی'],
-  15: ['درخواست پرداخت', 'تخصیص بودجه', 'ثبت سند'],
-  16: ['پشتیبانی رایانه', 'ایجاد کاربر', 'شبکه و اینترنت', 'امنیت', 'پشتیبان‌گیری'],
-  17: ['برنامه‌ریزی و طرح‌ها', 'عمران و توسعه: پروژه ساختمانی', 'عمران و توسعه: بازدید فنی', 'عمران و توسعه: تهیه نقشه', 'عمران و توسعه: تعمیرات اساسی'],
-  18: ['مراسم مذهبی', 'مراسم فاتحه و ترحیم', 'جشن و اعیاد', 'مناسبت‌ها'],
-  19: ['پذیرایی مراسم', 'سفارش غذا', 'رزرو سالن رستوران', 'تأمین مواد غذایی']
-};
-
-/* دفاتر ثبت اختصاصی هر مدیریت */
-const REGISTRIES = {
-  4: [{ key: 'media', title: 'آرشیو رسانه', fields: [['title', 'عنوان'], ['kind', 'نوع', ['عکس', 'فیلم', 'پوستر', 'صوت']], ['date', 'تاریخ', 'date'], ['event', 'مراسم / رویداد'], ['place', 'محل نگهداری فایل']] }],
-  5: [{ key: 'guard', title: 'نگهبانی و شیفت شب', fields: [['date', 'تاریخ', 'date'], ['person', 'نام بسیجی'], ['shift', 'شیفت', ['۲۰ تا ۲۴', '۲۴ تا ۴', '۴ تا ۸']], ['post', 'محل پست'], ['note', 'گزارش شیفت']] },
-      { key: 'prog', title: 'برنامه‌ها و آموزش‌ها', fields: [['title', 'عنوان برنامه'], ['kind', 'نوع', ['فرهنگی', 'جهادی', 'آموزشی', 'ورزشی']], ['date', 'تاریخ', 'date'], ['count', 'تعداد شرکت‌کننده', 'number'], ['note', 'توضیح']] }],
-  6: [{ key: 'edu', title: 'برنامه‌های آموزشی و تربیتی', fields: [['title', 'عنوان'], ['grade', 'پایه', ['اول', 'دوم', 'سوم', 'چهارم', 'پنجم', 'ششم']], ['kind', 'نوع', ['آموزشی', 'تربیتی', 'اجرایی', 'جلسه اولیا']], ['date', 'تاریخ', 'date'], ['note', 'گزارش']] }],
-  7: [{ key: 'edu', title: 'برنامه‌های آموزشی و تربیتی', fields: [['title', 'عنوان'], ['grade', 'پایه', ['هفتم', 'هشتم', 'نهم']], ['kind', 'نوع', ['آموزشی', 'تربیتی', 'اجرایی', 'جلسه اولیا']], ['date', 'تاریخ', 'date'], ['note', 'گزارش']] }],
-  8: [{ key: 'edu', title: 'برنامه‌های آموزشی و تربیتی', fields: [['title', 'عنوان'], ['grade', 'پایه', ['دهم', 'یازدهم', 'دوازدهم']], ['kind', 'نوع', ['آموزشی', 'تربیتی', 'اجرایی', 'جلسه اولیا']], ['date', 'تاریخ', 'date'], ['note', 'گزارش']] }],
-  9: [{ key: 'equip', title: 'تجهیزات و خدمات درمانگاه', fields: [['title', 'تجهیز / خدمت'], ['state', 'وضعیت', ['فعال', 'نیازمند سرویس', 'غیرفعال']], ['date', 'آخرین بازدید', 'date'], ['note', 'توضیح (بدون اطلاعات بیمار)']] }],
-  10: [{ key: 'stock', title: 'موجودی اقلام', fields: [['title', 'نام قلم'], ['qty', 'موجودی', 'number'], ['min', 'حداقل مجاز', 'number'], ['supplier', 'تأمین‌کننده'], ['date', 'تاریخ انقضا', 'date']] }],
-  11: [{ key: 'events', title: 'فعالیت‌های کتابخوانی', fields: [['title', 'عنوان'], ['date', 'تاریخ', 'date'], ['count', 'شرکت‌کننده', 'number'], ['note', 'توضیح']] }],
-  12: [{ key: 'jihadi', title: 'فعالیت‌های گروه جهادی', fields: [['title', 'عنوان فعالیت'], ['place', 'محل'], ['date', 'تاریخ', 'date'], ['count', 'تعداد نیروی جهادی', 'number'], ['note', 'گزارش']] },
-       { key: 'aid', title: 'ثبت کمک‌ها (محرمانه)', conf: true, fields: [['donor', 'خیّر / منبع'], ['kind', 'نوع', ['نقدی', 'غیرنقدی', 'خدمات']], ['amount', 'مبلغ / ارزش (ریال)', 'number'], ['date', 'تاریخ', 'date'], ['use', 'مصرف / توزیع']] }],
-  13: [{ key: 'kinder', title: 'ثبت‌نام مهدکودک', fields: [['title', 'نام کودک'], ['age', 'سن', 'number'], ['parent', 'نام ولی'], ['phone', 'تلفن ولی'], ['date', 'تاریخ ثبت‌نام', 'date']] },
-       { key: 'admit', title: 'پذیرش و ظرفیت خانه‌بازی', fields: [['date', 'تاریخ', 'date'], ['session', 'سانس', ['صبح', 'عصر']], ['count', 'تعداد کودک', 'number'], ['cap', 'ظرفیت', 'number'], ['coach', 'مربی'], ['note', 'گزارش ایمنی']] }],
-  16: [{ key: 'systems', title: 'سامانه‌ها و پشتیبان‌گیری', fields: [['title', 'سامانه / تجهیز'], ['kind', 'نوع', ['سامانه', 'شبکه', 'امنیت', 'پشتیبان‌گیری']], ['date', 'تاریخ آخرین بررسی', 'date'], ['state', 'وضعیت', ['سالم', 'هشدار', 'از کار افتاده']], ['note', 'توضیح']] }],
-  18: [{ key: 'events', title: 'تقویم مراسمات و مناسبت‌ها', fields: [['title', 'عنوان مراسم'], ['kind', 'نوع', ['مراسم مذهبی', 'فاتحه و ترحیم', 'جشن و اعیاد', 'مناسبت']], ['date', 'تاریخ', 'date'], ['place', 'محل'], ['count', 'تعداد شرکت‌کننده', 'number']] }],
-  19: [{ key: 'orders', title: 'سفارش‌های پذیرایی', fields: [['title', 'عنوان سفارش'], ['unit', 'سفارش‌دهنده'], ['date', 'تاریخ', 'date'], ['count', 'تعداد پرس', 'number'], ['note', 'توضیح']] }],
-  17: [{ key: 'projects', title: 'عمران و توسعه: پروژه‌های عمرانی', fields: [['title', 'نام پروژه'], ['contractor', 'پیمانکار'], ['start', 'شروع', 'date'], ['end', 'پایان برنامه', 'date'], ['progress', 'پیشرفت فیزیکی (٪)', 'number'], ['budget', 'بودجه (ریال)', 'number'], ['spent', 'هزینه‌شده (ریال)', 'number']] }]
-};
-
-/* فضاهای فیزیکی قابل رزرو و مدیریت تأییدکننده هر فضا (کنترل تداخل بر اساس سالن واقعی) */
-const SPACES = [
-  { id: 'hosseinieh', name: 'حسینیه', unit: 18, cap: 600, excl: true },
-  { id: 'farhangsara', name: 'فرهنگسرا', unit: 3, cap: 80, excl: true },
-  { id: 'amphi', name: 'سالن آمفی‌تئاتر ۱۴۴ نفره', unit: 3, cap: 144, excl: true },
-  { id: 'cinema', name: 'سینما', unit: 3, cap: 60, excl: true },
-  { id: 'meeting', name: 'سالن جلسات', unit: 3, cap: 24, excl: true },
-  { id: 'zaersara', name: 'زائرسرا', unit: 1, cap: 40, excl: true },
-  { id: 'guest', name: 'مهمانسرا و خدمات اسکان', unit: 1, cap: 16, excl: true },
-  { id: 'restaurant', name: 'سالن رستوران', unit: 19, cap: 120, excl: true }
-];
-/* نوع برنامه جدا از فضا: مراسم در یک سالن واقعی برگزار می‌شود؛ برنامه‌های بیرون از مجتمع فضا ندارند */
-const PROGRAMS = [
-  { id: 'general', name: 'برنامه عمومی', unit: 0 },
-  { id: 'religious', name: 'مراسم مذهبی', unit: 18 },
-  { id: 'fateheh', name: 'مراسم فاتحه و ترحیم', unit: 18 },
-  { id: 'jashn', name: 'جشن و اعیاد', unit: 18 },
-  { id: 'monasebat', name: 'مناسبت‌ها', unit: 18 },
-  { id: 'rahian', name: 'راهیان نور', unit: 2, offsite: true, cap: 120 },
-  { id: 'ziarat', name: 'اردوی زیارتی', unit: 2, offsite: true, cap: 90 },
-  { id: 'lodging', name: 'اسکان', unit: 1 }
-];
+/* ---------- ساختار سازمانی (از پیکربندی مشترک، با تغییرات پنل مدیریت) ---------- */
+const UNITS = ORG.UNITS.map(u => ({ ...u }));
+const SERVICES = JSON.parse(JSON.stringify(ORG.SERVICES));
+const SPACES = ORG.SPACES.map(s => ({ ...s }));
+const PROGRAMS = ORG.PROGRAMS;
+const TOOLS = ORG.TOOLS;
+const ROLES = ORG.ROLES;
+const LETTER_CATS = ORG.LETTER_CATS.slice();
+const LEAVE_TYPES = ORG.LEAVE_TYPES.slice();
+const PRIORITIES = ORG.PRIORITIES, CONF = ORG.CONF;
+const PERMS = ORG.PERMS;
+const U_INTERNAL = 1, U_CULTURE = 2, U_PR = 3, U_ADMIN = 14, U_FIN = 15, U_IT = 16, U_CIVIL = 17, U_CEREMONY = 18, U_REST = 19;
+const unitName = id => (+id === 0 ? 'دفتر امام جماعت' : (UNITS.find(u => u.id === +id) || {}).name || '—');
+const unitShort = id => (+id === 0 ? 'دفتر امام جماعت' : (UNITS.find(u => u.id === +id) || {}).short || '—');
 const spaceOf = id => SPACES.find(s => s.id === id) || { id: '', name: 'خارج از مجتمع', unit: 0, cap: 0, excl: false };
 const programOf = id => PROGRAMS.find(p => p.id === id) || PROGRAMS[0];
-/* مدیریت تأییدکننده: مالک سالن؛ برای برنامه بیرون از مجتمع، متولی همان برنامه */
 const resUnit = r => (r.space ? spaceOf(r.space).unit : programOf(r.program).unit || U_CEREMONY);
 const resCap = r => (r.space ? spaceOf(r.space).cap : programOf(r.program).cap || 0);
 const resPlace = r => (r.space ? spaceOf(r.space).name : 'خارج از مجتمع');
+function applySettings() {
+  const s = DB.settings || {};
+  UNITS.splice(0, UNITS.length, ...ORG.UNITS.map(x => ({ ...x })), ...(s.extraUnits || []).map(x => ({ ...x })));
+  UNITS.forEach(u => { Object.assign(u, (s.units || {})[u.id] || {}); u.off = (s.unitsOff || []).includes(u.id); SERVICES[u.id] = (s.services && s.services[u.id]) || ORG.SERVICES[u.id] || ['امور عمومی']; });
+  SPACES.splice(0, SPACES.length, ...(s.spaces || ORG.SPACES).map(x => ({ ...x })));
+  LETTER_CATS.splice(0, LETTER_CATS.length, ...(s.letterCats || ORG.LETTER_CATS));
+  LEAVE_TYPES.splice(0, LEAVE_TYPES.length, ...(s.leaveTypes || ORG.LEAVE_TYPES));
+  applyTheme();
+}
+const PALETTES = {
+  zomorrod: { name: 'زمردی', l: ['#0f4b3a', '#0f4b3a', '#0d3a2e', '#12493a', '#2f8f88', '#e1f1ef', '#8fd9c6'], d: ['#6cc9ad', '#3c9e82', '#07110e', '#10241e', '#62c3ba', '#163532', '#6cc9ad'] },
+  firouzeh: { name: 'فیروزه‌ای', l: ['#0b5e66', '#0b6670', '#0a3f45', '#0f525a', '#1f9aa3', '#dff2f3', '#8fe0e4'], d: ['#6fd0d6', '#3aa9b1', '#061214', '#0d2628', '#5ccad2', '#12333a', '#6fd0d6'] },
+  lajvard: { name: 'لاجوردی', l: ['#1d3f7a', '#1f4688', '#142b55', '#1c3a6e', '#3a78c2', '#e3ecf8', '#a9c6f2'], d: ['#8fb4ee', '#5585cf', '#070d18', '#101d33', '#7aa6e8', '#15243d', '#8fb4ee'] },
+  kahroba: { name: 'کهربایی', l: ['#6b4a12', '#7a5414', '#3d2c10', '#523b16', '#b07d2a', '#f6ecd9', '#f0cf8e'], d: ['#e7c27a', '#c49a4a', '#120d05', '#251b0c', '#d9b067', '#33270f', '#e7c27a'] },
+  anar: { name: 'اناری', l: ['#7a1f2b', '#86222f', '#4a131b', '#621a24', '#b8434f', '#f8e4e6', '#f2a7af'], d: ['#ef9aa3', '#c55a66', '#14070a', '#2a1014', '#e3808b', '#3a171c', '#ef9aa3'] }
+};
+function applyTheme() {
+  const t = (DB.settings && DB.settings.theme) || { palette: 'zomorrod', scale: 14 }; const p = PALETTES[t.palette] || PALETTES.zomorrod;
+  const v = a => `--accent:${a[0]};--btn:${a[1]};--side:${a[2]};--side-2:${a[3]};--teal:${a[4]};--teal-soft:${a[5]};--glow:${a[6]};`;
+  let el = document.getElementById('theme-vars');
+  if (!el) { el = document.createElement('style'); el.id = 'theme-vars'; document.head.appendChild(el); }
+  el.textContent = `:root{${v(p.l)}font-size:${t.scale}px}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){${v(p.d)}}}:root[data-theme="dark"]{${v(p.d)}}`;
+}
 
 /* ---------- آیکون‌ها ---------- */
 const IC = {
@@ -228,223 +169,101 @@ const IC = {
   cup: 'M4 8h13v5a6 6 0 01-6 6H10a6 6 0 01-6-6zM17 9h2a2 2 0 010 4h-2M8 3v2M12 3v2',
   qr: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM18 18h3v3h-3zM6 6h1M17 6h1M6 17h1'
 };
+Object.assign(IC, {
+  chat: 'M4 5h16v11H9l-5 4zM8 9h8M8 12h5', calc: 'M5 3h14v18H5zM8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M8 18h2M12 18h4',
+  receipt: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h4', tool: 'M14 6a4 4 0 01-5 5L4 16l4 4 5-5a4 4 0 015-5l-3-3 2-2-3-1z',
+  bold: 'M7 5h6a3.5 3.5 0 010 7H7zM7 12h7a3.5 3.5 0 010 7H7z', italic: 'M10 5h8M6 19h8M14 5l-4 14', underline: 'M7 4v7a5 5 0 0010 0V4M5 20h14',
+  alr: 'M4 6h16M8 10h12M4 14h16M8 18h12', alc: 'M4 6h16M7 10h10M4 14h16M7 18h10', all: 'M4 6h16M4 10h12M4 14h16M4 18h12', alj: 'M4 6h16M4 10h16M4 14h16M4 18h16',
+  ol: 'M10 6h10M10 12h10M10 18h10M4 5h1v3M4 11h2l-2 3h2M4 17h2v3H4', ul: 'M10 6h10M10 12h10M10 18h10M5 6h.01M5 12h.01M5 18h.01', table: 'M3 4h18v16H3zM3 10h18M3 15h18M9 4v16M15 4v16',
+  undo: 'M9 14L4 9l5-5M4 9h11a5 5 0 010 10h-3', copy: 'M8 8h12v12H8zM4 16V4h12'
+});
 const ic = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[n] || IC.file}"/></svg>`;
 
-/* ---------- ذخیره‌سازی ---------- */
-/* لایه داده: در این نسخه روی حافظه مرورگر؛ برای استقرار، همین رابط به API سرور متصل می‌شود (kartabl/README.md) */
-const STORE_KEY = 'shabab-kartabl-v1';
-const DEMO_REV = 4; /* نسخه ساختار داده نمونه؛ داده نمایشی قدیمی‌تر یک بار با نمونه تازه جایگزین می‌شود */
-let DB = null;
-let MEMORY_ONLY = false;
-const Store = {
-  load() {
-    try { const s = localStorage.getItem(STORE_KEY); if (s) { DB = JSON.parse(s); if (DB && DB.ver === 1 && DB.demoRev === DEMO_REV) return; } } catch (e) { MEMORY_ONLY = true; }
-    DB = seed(); this.save();
-  },
-  save() { if (typeof SERVER !== 'undefined' && SERVER) return; /* نسخه سروری: هیچ داده‌ای در مرورگر نمی‌ماند */ try { localStorage.setItem(STORE_KEY, JSON.stringify(DB)); } catch (e) { MEMORY_ONLY = true; } if (typeof Sync !== 'undefined') Sync.schedule(); },
-  reset() { try { localStorage.removeItem(STORE_KEY); } catch (e) {} DB = seed(); this.save(); }
-};
+/* ---------- داده‌ها ----------
+   DB همان داده‌ای است که سرور برای جایگاه کاربر فرستاده است؛ در مرورگر چیزی ذخیره نمی‌شود */
+let DB = { settings: {}, positions: [], users: [], notifs: [] };
 const pref = {
-  get(k, d) { try { const v = localStorage.getItem('shabab-pref-' + k); return v == null ? d : v; } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem('shabab-pref-' + k, v); } catch (e) {} }
+  get(k, d) { try { const v = localStorage.getItem('kartabl-pref-' + k); return v == null ? d : v; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('kartabl-pref-' + k, v); } catch (e) {} }
 };
-
-/* شماره‌گذاری خودکار */
-function nextNo(kind) {
-  const y = jYearNow();
-  const key = kind + '-' + y;
-  DB.seq[key] = (DB.seq[key] || 0) + 1;
-  const n = DB.seq[key];
-  const P = { in: 'و', out: 'ص', internal: 'د' };
-  if (P[kind]) return `${y}/${P[kind]}/${pad(n, 4)}`;
-  const L = { task: 'T', req: 'R', order: 'D', pay: 'P', res: 'B', meet: 'M', fin: 'F', mov: 'A', leave: 'L' };
-  return `${L[kind] || 'X'}-${y}-${pad(n, 4)}`;
-}
 
 /* ---------- کاربر جاری و دسترسی‌ها ---------- */
 let ME = null; // { user, pos }
 const posById = id => DB.positions.find(p => p.id === id);
 const userById = id => DB.users.find(u => u.id === id);
-const holderOf = posId => DB.users.find(u => u.posId === posId && u.active);
-const posLabel = id => { const p = posById(id); if (!p) return '—'; return p.unitId === 0 ? p.title : `${p.title} ${unitShort(p.unitId)}`; };
-/* هر جایگاه یک حساب ثابت دارد؛ نام کاربری از مدیریت و جایگاه ساخته می‌شود و با تغییر افراد عوض نمی‌شود */
-const ROLE_SLUG = { manager: 'manager', office: 'office', secretary: 'secretary' };
-function posUsername(p) {
-  if (!p) return '';
-  if (p.role === 'imam') return 'imam';
-  const u = UNITS.find(x => x.id === p.unitId);
-  const slug = (u && u.slug) || 'unit' + p.unitId;
-  if (ROLE_SLUG[p.role]) return `${slug}.${ROLE_SLUG[p.role]}`;
-  const m = String(p.id).match(/-k(\d+)/);
-  return `${slug}.staff${m ? m[1] : String(p.id).slice(-4)}`;
-}
-/* نام پنل به نام مدیریت و جایگاه است، نه به نام فرد */
+const accountOf = posId => DB.users.find(u => u.posId === posId && !u.deleted);
+const holderOf = posId => DB.users.find(u => u.posId === posId && u.active && !u.deleted);
+const posLabel = id => { const p = posById(id); if (!p) return '—'; return p.role === 'imam' ? 'امام جماعت' : `${p.title} ${unitShort(p.unitId)}`; };
 function panelName(p) {
   if (!p) return '';
   if (p.role === 'imam') return 'پنل امام جماعت';
-  const un = unitName(p.unitId);
-  if (p.role === 'manager') return 'پنل ' + un;
-  if (p.role === 'office') return 'پنل مسئول دفتر ' + un;
-  if (p.role === 'secretary') return 'پنل منشی ' + un;
-  return `پنل ${p.title} ${un}`;
+  return { manager: 'پنل ', office: 'پنل مسئول دفتر ', secretary: 'پنل منشی ' }[p.role] + unitName(p.unitId);
 }
-const accountOf = posId => DB.users.find(u => u.posId === posId && !u.deleted);
-/* نام انجام‌دهنده در زمان اقدام ثبت می‌شود تا با تغییر متصدی، سوابق قبلی به نام فرد قبلی بماند */
+const posUsername = p => (p.role === 'imam' ? 'imam' : ((UNITS.find(u => u.id === p.unitId) || {}).slug || 'unit' + p.unitId) + '.' + p.role);
 const who = (uid, nm) => nm || (uid === 'system' ? 'سامانه' : (userById(uid) || {}).name || '—');
-const holderSince = posId => { const h = DB.posHistory.filter(x => x.posId === posId && !x.to).slice(-1)[0]; return h ? h.from : ''; };
+const holderSince = posId => { const h = (DB.posHistory || []).filter(x => x.posId === posId && !x.to).slice(-1)[0]; return h ? h.from : ''; };
 const posWho = id => { const h = holderOf(id); return h ? `${h.name} (${posLabel(id)})` : `${posLabel(id)} (بدون متصدی)`; };
-const unitPos = (unitId, role) => DB.positions.find(p => p.unitId === unitId && p.role === role);
-const unitPositions = unitId => DB.positions.filter(p => p.unitId === unitId);
+const unitPos = (unitId, role) => DB.positions.find(p => p.unitId === +unitId && p.role === role);
+const unitPositions = unitId => DB.positions.filter(p => p.unitId === +unitId);
+const unitHeads = u => [unitPos(u, 'manager'), unitPos(u, 'office')].filter(Boolean).map(p => p.id);
+const imamPos = () => (DB.positions.find(p => p.role === 'imam') || {}).id || 'P0';
 
-const isImam = () => ME && ME.pos.role === 'imam';
+const isImam = () => !!ME && ME.pos.role === 'imam';
 const myUnit = () => (ME ? ME.pos.unitId : -1);
 const myRole = () => (ME ? ME.pos.role : '');
 const inUnit = u => myUnit() === +u;
 const isMgr = u => isImam() || (inUnit(u) && myRole() === 'manager');
 const isMgrOrOffice = u => isImam() || (inUnit(u) && ['manager', 'office'].includes(myRole()));
-const isClerk = u => isImam() || (inUnit(u) && ['manager', 'office', 'secretary'].includes(myRole()));
-
-/* ---------- مجوزها: پیش‌فرض نقش ← ماتریس قابل ویرایش نقش‌ها ← استثنای هر جایگاه ---------- */
-const PERMS = [
-  ['view.all', 'مشاهده و بازبینی همه بخش‌ها و همه مدیریت‌ها', 'نظارت'],
-  ['reports.view', 'گزارش‌گیری و داشبورد نظارتی', 'نظارت'],
-  ['orders.issue', 'صدور دستور در بخش دستورات امام جماعت', 'گردش کار'],
-  ['tasks.create', 'تعریف و ارجاع وظیفه در واحد خود', 'گردش کار'],
-  ['letters.create', 'ثبت نامه وارده، صادره و داخلی', 'دبیرخانه'],
-  ['letters.secret', 'مشاهده نامه‌های «سری» واحد خود', 'دبیرخانه'],
-  ['letters.view', 'مشاهده مکاتبات واحد', 'دبیرخانه'],
-  ['letters.refer', 'ارجاع، پاسخ و پیگیری نامه‌ها', 'دبیرخانه'],
-  ['files.view', 'دسترسی به اسناد و پیوست‌های مجاز واحد', 'دبیرخانه'],
-  ['tasks.view', 'مشاهده وظایف واحد', 'گردش کار'],
-  ['requests.view', 'مشاهده درخواست‌های واحد', 'گردش کار'],
-  ['requests.create', 'ثبت درخواست', 'گردش کار'],
-  ['reservations.manage', 'ثبت و بررسی رزروهای مرتبط', 'تقویم'],
-  ['library.manage', 'مدیریت خدمات عمومی کتابخانه (کتاب، رزرو و امانت)', 'کتابخانه'],
-  ['meetings.create', 'ثبت جلسه و ملاقات', 'تقویم'],
-  ['assets.view', 'دسترسی به سامانه اموال و انبار', 'اموال'],
-  ['finance.view', 'مشاهده کامل امور مالی همه واحدها', 'مالی'],
-  ['finance.request', 'ثبت درخواست پرداخت', 'مالی'],
-  ['hr.view', 'مشاهده پرونده‌های پرسنلی و قراردادها', 'منابع انسانی'],
-  ['admin.panel', 'ورود به پنل مدیریت سامانه', 'مدیریت سامانه'],
-  ['admin.users', 'افزودن، حذف و ویرایش کاربران و جایگاه‌ها', 'مدیریت سامانه'],
-  ['admin.passwords', 'تعیین و بازنشانی رمز عبور کاربران', 'مدیریت سامانه'],
-  ['admin.perms', 'دادن و گرفتن سطح دسترسی', 'مدیریت سامانه'],
-  ['admin.signups', 'تأیید یا رد درخواست‌های عضویت', 'مدیریت سامانه'],
-  ['admin.logs', 'مشاهده ورودها، نشست‌ها و رویدادهای سیستمی', 'مدیریت سامانه'],
-  ['admin.approve', 'تأیید یا رد مدیریتی همه موارد معلق', 'مدیریت سامانه'],
-  ['admin.settings', 'تغییر تنظیمات، ظاهر و ساختار سامانه', 'مدیریت سامانه'],
-  ['admin.data', 'ویرایش و حذف مستقیم داده‌ها', 'مدیریت سامانه'],
-  ['admin.backup', 'پشتیبان‌گیری و بازیابی', 'مدیریت سامانه']
-];
-/* مجوزهای حساس: فقط امام جماعت می‌تواند آن‌ها را اعطا کند و هیچ‌کس نمی‌تواند به خودش بدهد */
-const LABEL_BAD = /[<>"'`&]/;
-const SENSITIVE_PERMS = ['view.all', 'orders.issue', 'finance.view', 'hr.view', 'letters.secret', 'admin.panel', 'admin.users', 'admin.passwords', 'admin.perms', 'admin.signups', 'admin.logs', 'admin.approve', 'admin.settings', 'admin.data', 'admin.backup'];
-const isSensitivePerm = k => SENSITIVE_PERMS.includes(k);
-const isSensitivePos = p => !!p && (p.role === 'imam' || ['view.all', 'orders.issue', 'admin.users', 'admin.passwords', 'admin.perms', 'admin.settings', 'admin.data', 'admin.backup', 'admin.approve'].some(k => permOf(p, k)));
-const permLabel = k => (PERMS.find(p => p[0] === k) || [k, k])[1];
-/* پیش‌فرض بر اساس نقش و مدیریت (مدیر فناوری اطلاعات همه اختیارات مدیریت سامانه را دارد) */
-function permDefault(pos, k) {
-  const r = pos.role, u = pos.unitId;
-  const itMgr = u === U_IT && r === 'manager';
-  if (r === 'imam') return true;
-  if (k.startsWith('admin.') || k === 'view.all') return itMgr; /* مدیر بودن به‌تنهایی اختیار کارکنان یا اطلاعات بخش‌های دیگر را نمی‌دهد */
-  switch (k) {
-    case 'reports.view': return ['manager', 'office'].includes(r);
-    case 'orders.issue': return false;
-    case 'tasks.create': return ['manager', 'office'].includes(r);
-    case 'letters.create': return ['manager', 'office', 'secretary'].includes(r);
-    case 'letters.secret': return r === 'manager';
-    case 'letters.view': case 'letters.refer': return r !== 'staff';
-    case 'tasks.view': case 'requests.view': case 'requests.create': case 'reservations.manage': case 'files.view': return true;
-    case 'library.manage': return u === U_LIB && ['manager', 'office', 'secretary'].includes(r);
-    case 'meetings.create': case 'assets.view': case 'finance.request': return r !== 'staff';
-    case 'finance.view': return u === U_FIN;
-    case 'hr.view': return u === U_ADMIN && ['manager', 'office'].includes(r);
-  }
-  return false;
-}
-/* مجوزهایی که مدیر هر بخش می‌تواند برای مسئول دفتر و منشی خودش محدود یا دوباره فعال کند (فقط تا سقف تعیین‌شده) */
-const OFFICE_PERMS = ['letters.view', 'letters.create', 'letters.refer', 'files.view', 'tasks.view', 'tasks.create', 'requests.view', 'requests.create', 'meetings.create', 'reservations.manage', 'reports.view', 'library.manage'];
-function permOf(pos, k) {
-  if (!pos) return false;
-  if (pos.role !== 'imam' && pos.mgrDeny && pos.mgrDeny[k]) return false;
-  const o = (pos.perms || {})[k];
-  if (o === 'allow') return true;
-  if (o === 'deny') return false;
-  const rp = ((DB.settings.rolePerms || {})[pos.role] || {})[k];
-  if (rp === 'allow') return true;
-  if (rp === 'deny') return false;
-  return permDefault(pos, k);
-}
+const isClerk = u => isImam() || inUnit(u);
+/* مجوز مؤثر هر جایگاه را سرور محاسبه می‌کند (پیش‌فرض نقش، استثناها، تعیین مدیر بخش، سقف و وابستگی) */
+const permDef = k => PERMS.find(p => p.k === k);
+const permLabel = k => (permDef(k) || { l: k }).l;
+const permOf = (pos, k) => !!pos && (pos.role === 'imam' || !!(pos.eff && pos.eff[k]));
 const can = k => !!ME && permOf(ME.pos, k);
 const isAll = () => isImam() || can('view.all');
 const canSeeUnit = u => isAll() || inUnit(u);
 const canFinance = () => can('finance.view');
 const canHR = () => can('hr.view');
-const canAdminUsers = () => can('admin.users');
-const canSettings = () => can('admin.settings');
-const canAssets = () => can('assets.view');
-const canAdminPanel = () => can('admin.panel') || can('admin.users') || can('admin.settings') || can('admin.logs');
+const canAssets = () => can('assets.view') || isAll();
+const canAdminPanel = () => ['admin.panel', 'admin.users', 'admin.settings', 'admin.logs', 'admin.perms', 'admin.backup'].some(can);
+const toolLevel = (unit, key) => { if (!ME) return 'none'; if (isImam()) return 'all'; if (+unit !== myUnit()) { const t = toolDef(unit, key); return can('view.all') && t && !t.conf ? 'view' : 'none'; } return (ME.pos.toolLv || {})[key] || 'none'; };
+const toolDef = (unit, key) => (TOOLS[unit] || []).find(t => t.k === key);
+const canApproveTool = unit => isImam() || (inUnit(unit) && myRole() === 'manager');
 
-/* ---------- ثبت رویداد (زنجیره غیرقابل‌ویرایش) ---------- */
-/* رمز عبور: در نسخه نمایشی هش ساده؛ سرور این دو تابع را با scrypt جایگزین می‌کند */
-let pwHash = p => 'demo$' + hash('shabab:' + en(p));
-let pwCheck = (stored, p) => !!stored && (stored === pwHash(p) || stored === hash('shabab:' + en(p)));
+/* ---------- نمایش سابقه با مقدار قبل و بعد ---------- */
+const histHTML = h => (h && h.length ? `<div class="hist">${h.slice().reverse().map(x => `<div><b>${esc(x.action)}</b>${x.note ? ` — ${esc(x.note)}` : ''}${x.diff && x.diff.length ? `<ul class="diff">${x.diff.map(d => `<li><span>${esc(d.l || d.f)}:</span> <del>${esc(d.a || '—')}</del> ← <ins>${esc(d.b || '—')}</ins></li>`).join('')}</ul>` : ''}<small>${jdt(x.ts)} · ${esc(who(x.uid, x.nm))}${x.pos ? ' · ' + esc(posLabel(x.pos)) : ''}</small></div>`).join('')}</div>` : '<div class="empty">سابقه‌ای ثبت نشده است.</div>');
 function hash(s) { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(16).padStart(8, '0'); }
-function audit(act, ent, id, note = '') {
-  const prev = DB.audit.length ? DB.audit[DB.audit.length - 1].h : '00000000';
-  const e = { ts: stamp(), uid: ME ? ME.user.id : 'system', nm: ME ? ME.user.name : 'سامانه', pos: ME ? (ME.realPos || ME.pos.id) : '', unit: ME ? ME.pos.unitId : -1, act: ME && ME.override ? act + ' (مدیریتی)' : act, ent, id, note };
-  e.h = hash(prev + JSON.stringify(e));
-  DB.audit.push(e);
-}
-function verifyAudit() {
-  let prev = '00000000';
-  for (let i = 0; i < DB.audit.length; i++) {
-    const { h, ...rest } = DB.audit[i];
-    if (hash(prev + JSON.stringify(rest)) !== h) return i;
-    prev = h;
-  }
-  return -1;
-}
-function hist(obj, action, note = '') {
-  obj.history = obj.history || [];
-  if (ME && ME.override) note = (note ? note + ' — ' : '') + 'اقدام مدیریتی به‌جای ' + posLabel(ME.pos.id);
-  obj.history.push({ ts: stamp(), uid: ME ? ME.user.id : 'system', nm: ME ? ME.user.name : 'سامانه', pos: ME ? (ME.realPos || ME.pos.id) : '', action, note });
-}
-const histHTML = h => (h && h.length ? `<div class="hist">${h.slice().reverse().map(x => `<div><b>${esc(x.action)}</b>${x.note ? ` — ${esc(x.note)}` : ''}<small>${jdt(x.ts)} · ${esc(who(x.uid, x.nm))}${x.pos ? ' · ' + esc(posLabel(x.pos)) : ''}</small></div>`).join('')}</div>` : '<div class="empty">سابقه‌ای ثبت نشده است.</div>');
+const SMS_EVENTS = { request: 'ثبت درخواست جدید', letter: 'ارجاع نامه', order: 'صدور دستور', decision: 'تأیید یا رد', due: 'نزدیک‌شدن مهلت', overdue: 'معوق‌شدن کار', meeting: 'دعوت به جلسه', reservation: 'تغییر وضعیت رزرو', message: 'پیام جدید' };
+const rid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 
-/* ---------- اعلان و پیامک ---------- */
-const SMS_EVENTS = {
-  request: 'ثبت درخواست جدید', letter: 'ارجاع نامه', order: 'صدور دستور', decision: 'تأیید یا رد درخواست',
-  due: 'نزدیک‌شدن مهلت انجام کار', overdue: 'معوق‌شدن وظیفه', meeting: 'ثبت جلسه', reservation: 'تغییر وضعیت رزرو'
-};
-function notify(posIds, ev, text, link, ref) {
-  const ids = [...new Set(posIds.filter(Boolean))].filter(p => !ME || p !== ME.pos.id);
-  ids.forEach(p => {
-    DB.notifs.push({ id: uid(), pos: p, ev, text, link, ts: stamp(), read: false });
-    const s = DB.settings.sms;
-    const u = holderOf(p);
-    if (s.enabled && s.events[ev] && u && u.phone && s.roles.includes((posById(p) || {}).role)) {
-      /* متن پیامک هرگز شامل جزئیات محرمانه نمی‌شود؛ فقط نوع رویداد و کد پیگیری */
-      DB.sms.push({ id: uid(), to: u.phone, name: u.name, text: `مجتمع شباب اهل‌الجنه: ${SMS_EVENTS[ev]}${ref ? ' — کد پیگیری ' + ref : ''}. جزئیات در کارتابل.`, ts: stamp(), status: 'در صف ارسال' });
-    }
-  });
-}
-const unitHeads = u => [unitPos(+u, 'manager'), unitPos(+u, 'office')].filter(Boolean).map(p => p.id);
-const imamPos = () => DB.positions.find(p => p.role === 'imam').id;
-
-/* بررسی مهلت‌ها و صدور اعلان نزدیک به موعد / معوق (یک‌بار برای هر مورد) */
-function sweepDeadlines() {
-  const t = todayISO();
-  DB.flags = DB.flags || {};
-  const check = (kind, x, due, targets, label) => {
-    if (!due || x.done) return;
-    const d = daysBetween(t, due);
-    if (d < 0 && !DB.flags[kind + x.id + 'o']) { DB.flags[kind + x.id + 'o'] = 1; notify(targets, 'overdue', `${label} «${x.title}» معوق شد.`, x.link, x.no); }
-    else if (d >= 0 && d <= 2 && !DB.flags[kind + x.id + 'd']) { DB.flags[kind + x.id + 'd'] = 1; notify(targets, 'due', `مهلت ${label} «${x.title}» نزدیک است (${jd(due)}).`, x.link, x.no); }
+/* ---------- اوقات شرعی (روش ژئوفیزیک دانشگاه تهران) ---------- */
+function prayerTimes(iso, lat, lng, tz = 3.5) {
+  const rad = d => (d * Math.PI) / 180, deg = r => (r * 180) / Math.PI;
+  const fix = (a, b) => a - b * Math.floor(a / b);
+  let [y, m, d] = iso.split('-').map(Number);
+  if (m <= 2) { y--; m += 12; }
+  const A = Math.floor(y / 100), B = 2 - A + Math.floor(A / 4);
+  const jdate = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524.5 - lng / (15 * 24);
+  const sun = t => {
+    const D = jdate + t - 2451545, g = fix(357.529 + 0.98560028 * D, 360), q = fix(280.459 + 0.98564736 * D, 360);
+    const L = fix(q + 1.915 * Math.sin(rad(g)) + 0.02 * Math.sin(rad(2 * g)), 360), e = 23.439 - 0.00000036 * D;
+    const RA = deg(Math.atan2(Math.cos(rad(e)) * Math.sin(rad(L)), Math.cos(rad(L)))) / 15;
+    return { decl: deg(Math.asin(Math.sin(rad(e)) * Math.sin(rad(L)))), eqt: q / 15 - fix(RA, 24) };
   };
-  const meBefore = ME; ME = null;
-  DB.tasks.forEach(k => check('t', { ...k, done: k.status === 'تکمیل‌شده', link: 'tasks' }, k.due, [k.assignee, ...unitHeads(k.unitId)], 'وظیفه'));
-  DB.orders.forEach(o => check('o', { ...o, done: o.status === 'تکمیل‌شده', link: 'orders' }, o.due, [o.respPos, ...o.units.flatMap(unitHeads), imamPos()], 'دستور'));
-  ME = meBefore;
+  const mid = t => fix(12 - sun(t).eqt, 24);
+  const angT = (ang, t, ccw) => { const dc = sun(t).decl, n = mid(t); const T = deg(Math.acos((-Math.sin(rad(ang)) - Math.sin(rad(dc)) * Math.sin(rad(lat))) / (Math.cos(rad(dc)) * Math.cos(rad(lat))))) / 15; return n + (ccw ? -T : T); };
+  const adj = h => h + tz - lng / 15;
+  const t = { fajr: adj(angT(17.7, 5 / 24, true)), sunrise: adj(angT(0.833, 6 / 24, true)), dhuhr: adj(mid(0.5)), sunset: adj(angT(0.833, 0.75)), maghrib: adj(angT(4.5, 0.75)), isha: adj(angT(14, 0.75)) };
+  t.midnight = t.sunset + (t.fajr + 24 - t.sunset) / 2;
+  return t;
 }
+const PRAYER_NAMES = [['fajr', 'اذان صبح'], ['sunrise', 'طلوع آفتاب'], ['dhuhr', 'اذان ظهر'], ['sunset', 'غروب آفتاب'], ['maghrib', 'اذان مغرب'], ['midnight', 'نیمه‌شب شرعی']];
+const hToHM = h => { h = ((h % 24) + 24) % 24; let H = Math.floor(h), M = Math.round((h - H) * 60); if (M === 60) { H = (H + 1) % 24; M = 0; } return pad(H) + ':' + pad(M); };
+const hmToMin = s => { const [a, b] = s.split(':').map(Number); return a * 60 + b; };
+function todayPrayers() {
+  const c = DB.settings.clock || { lat: 30.3392, lng: 48.3043 };
+  const t = prayerTimes(todayISO(), +c.lat, +c.lng);
+  return PRAYER_NAMES.map(([k, l]) => ({ k, l, t: hToHM(t[k]) }));
+}
+const hijri = () => { try { return new Intl.DateTimeFormat('fa-IR-u-ca-islamic-umalqura', { timeZone: TZ, day: 'numeric', month: 'long', year: 'numeric' }).format(new Date()); } catch (e) { return ''; } };
+const greg = () => new Intl.DateTimeFormat('fa-IR-u-ca-gregory', { timeZone: TZ, day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
