@@ -1,0 +1,5 @@
+php/config.php
+php/data/*
+!php/data/.htaccess
+!php/data/index.php
+node_modules/
